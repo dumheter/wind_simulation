@@ -15,7 +15,7 @@ namespace bs
 	class BS_CORE_EXPORT PhysicsFactory
 	{
 	public:
-		virtual ~PhysicsFactory() { }
+		virtual ~PhysicsFactory() = default;
 
 		/** Initializes the physics system. */
 		virtual void startUp(bool cooking) = 0;
@@ -28,12 +28,12 @@ namespace bs
 	class BS_CORE_EXPORT PhysicsManager : public Module<PhysicsManager>
 	{
 	public:
-		/** 
-		 * Initializes the physics manager and a particular physics implementation. 
+		/**
+		 * Initializes the physics manager and a particular physics implementation.
 		 *
 		 * @param[in]	pluginName	Name of the plugin containing a physics implementation.
-		 * @param[in]	cooking		Should the cooking library be initialized with physics (normally only needed for 
-		 *							editor).
+		 * @param[in]	cooking		Should the physics cooking library be initialized (normally only needed during
+		 *							development).
 		 */
 		PhysicsManager(const String& pluginName, bool cooking);
 		~PhysicsManager();

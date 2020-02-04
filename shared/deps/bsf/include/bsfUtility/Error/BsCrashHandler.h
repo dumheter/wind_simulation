@@ -2,11 +2,37 @@
 //*********** Licensed under the MIT license. See LICENSE.md for full terms. This notice is not to be removed. ***********//
 #pragma once
 
+#include <functional>
+
 #define BS_MAX_STACKTRACE_DEPTH 200
 #define BS_MAX_STACKTRACE_NAME_BYTES 1024
 
 namespace bs
 {
+	/** Struct for holding crash handler settings */
+	struct CrashHandlerSettings
+	{
+		/** Called when reporting a crash begins. Return true to skip default action. */
+		std::function<bool(const String& type,
+			const String& description,
+			const String& function,
+			const String& file,
+			UINT32 line)> onBeforeReportCrash;
+
+#if BS_PLATFORM == BS_PLATFORM_WIN32
+		/** Called when a windows SEH exception is started to be handled. Return true to skip default action */
+		std::function<bool(void* exceptionData)> onBeforeWindowsSEHReportCrash;
+#endif
+		/**
+		* Called after the crash callstack is written to log. Return true to skip writing to file and doing
+		* further other on crash actions
+		*/
+		std::function<bool()> onCrashPrintedToLog;
+
+		/** If true then on UNIX a signal handler is not automatically registered to call the crash handler */
+		bool disableCrashSignalHandler = false;
+	};
+
 	/** @addtogroup Internal-Utility
 	 *  @{
 	 */
@@ -24,14 +50,14 @@ namespace bs
 	class BS_UTILITY_EXPORT CrashHandler
 	{
 	public:
-		CrashHandler();
+		CrashHandler(const CrashHandlerSettings& settings);
 		~CrashHandler();
 
 		/** Constructs and starts the module. */
-		static void startUp()
+		static void startUp(const CrashHandlerSettings& settings = CrashHandlerSettings())
 		{
 			if(_instance() == nullptr)
-				_instance() = bs_new<CrashHandler>();
+				_instance() = bs_new<CrashHandler>(settings);
 		}
 
 		/** Shuts down this module and frees any resources it is using. */
@@ -97,6 +123,9 @@ namespace bs
 
 		/** Returns a singleton instance of this module. */
 		static CrashHandler*& _instance() { static CrashHandler* inst = nullptr; return inst; }
+
+		/** Handling customization callbacks */
+		CrashHandlerSettings mSettings;
 
 		/** The name of the crash reports directory. */
 		static const String sCrashReportFolder;

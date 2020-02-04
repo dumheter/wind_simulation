@@ -50,23 +50,23 @@ namespace bs
 		 * Returns a profiler report for the specified frame, for the specified thread.
 		 *
 		 * @param[in]	thread	Thread for which to retrieve the profiler report.
-		 * @param[in]	idx		Profiler report index, ranging [0, NUM_SAVED_FRAMES]. 0 always returns the latest  report. 
+		 * @param[in]	idx		Profiler report index, ranging [0, NUM_SAVED_FRAMES]. 0 always returns the latest  report.
 		 *						Increasing indexes return reports for older and older frames. Out of range  indexes will be
 		 *						clamped.
 		 *
 		 * @note	
-		 * Profiler reports get updated every frame. Oldest reports that no longer fit in the saved reports buffer are 
+		 * Profiler reports get updated every frame. Oldest reports that no longer fit in the saved reports buffer are
 		 * discarded.
 		 */
 		const ProfilerReport& getReport(ProfiledThread thread, UINT32 idx = 0) const;
 
 	private:
 		static const UINT32 NUM_SAVED_FRAMES;
-		ProfilerReport* mSavedSimReports;
-		UINT32 mNextSimReportIdx;
+		ProfilerReport* mSavedSimReports = nullptr;
+		UINT32 mNextSimReportIdx = 0;
 
-		ProfilerReport* mSavedCoreReports;
-		UINT32 mNextCoreReportIdx;
+		ProfilerReport* mSavedCoreReports = nullptr;
+		UINT32 mNextCoreReportIdx = 0;
 
 		mutable Mutex mSync;
 	};

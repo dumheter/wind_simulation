@@ -42,6 +42,7 @@
 #include <Mesh/BsMesh.h>
 #include <Material/BsMaterial.h>
 #include <BsCameraFlyer.h>
+#include <Debug/BsDebugDraw.h>
 
 // ========================================================================== //
 // Editor Implementation
@@ -50,8 +51,10 @@
 namespace wind
 {
 
-Editor::Editor() : m_app(App::Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
+Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
 {
+    using namespace bs;
+
     registerControls();
     setupCamera();
     setupScene();
@@ -60,9 +63,9 @@ Editor::Editor() : m_app(App::Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
 
 // -------------------------------------------------------------------------- //
 
-void Editor::run()
+void Editor::OnPreUpdate()
 {
-    m_app.run();
+    using namespace bs;
 }
 
 // -------------------------------------------------------------------------- //

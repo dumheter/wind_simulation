@@ -40,7 +40,7 @@ namespace bs
 		 */
 
 		/**
-		 * Change the button "on" state. This state determines whether the button uses normal or "on" fields specified in 
+		 * Change the button "on" state. This state determines whether the button uses normal or "on" fields specified in
 		 * the GUI style.
 		 */
 		void _setOn(bool on);
@@ -66,18 +66,16 @@ namespace bs
 			GUIElementOptions options = GUIElementOption::AcceptsKeyFocus);
 		virtual ~GUIButtonBase();
 
-		/** @copydoc GUIElement::_getNumRenderElements */
-		UINT32 _getNumRenderElements() const override;
-
-		/** @copydoc GUIElement::_getMaterial */
-		const SpriteMaterialInfo& _getMaterial(UINT32 renderElementIdx, SpriteMaterial** material) const override;
-
-		/** @copydoc GUIElement::_getMeshInfo() */
-		void _getMeshInfo(UINT32 renderElementIdx, UINT32& numVertices, UINT32& numIndices, GUIMeshType& type) const override;
-
 		/** @copydoc GUIElement::_fillBuffer */
-		void _fillBuffer(UINT8* vertices, UINT32* indices, UINT32 vertexOffset, UINT32 indexOffset,
-			UINT32 maxNumVerts, UINT32 maxNumIndices, UINT32 renderElementIdx) const override;
+		void _fillBuffer(
+			UINT8* vertices,
+			UINT32* indices,
+			UINT32 vertexOffset,
+			UINT32 indexOffset,
+			const Vector2I& offset,
+			UINT32 maxNumVerts,
+			UINT32 maxNumIndices,
+			UINT32 renderElementIdx) const override;
 
 		/** @copydoc GUIElement::updateRenderElementsInternal */
 		void updateRenderElementsInternal() override;
@@ -88,11 +86,11 @@ namespace bs
 		/** @copydoc GUIElement::_commandEvent */
 		bool _commandEvent(const GUICommandEvent& ev) override;
 
-		/** @copydoc GUIElement::_getRenderElementDepth */
-		UINT32 _getRenderElementDepth(UINT32 renderElementIdx) const override;
-
 		/** @copydoc GUIElement::_getTooltip */
 		String _getTooltip() const override;
+
+		/** @copydoc GUIElement::styleUpdated */
+		void styleUpdated() override;
 
 		/** Creates or destroys the content image sprite depending if there is a content image for the active state. */
 		void refreshContentSprite();
@@ -117,6 +115,7 @@ namespace bs
 		IMAGE_SPRITE_DESC mImageDesc;
 		GUIContent mContent;
 		bool mHasFocus = false;
+		float mContentAnimationStartTime = 0.0f;
 	};
 
 	/** @} */

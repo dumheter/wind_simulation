@@ -6,7 +6,7 @@
 #include "Audio/BsAudioSource.h"
 #include "Scene/BsComponent.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup Components-Core
 	 *  @{
@@ -21,7 +21,7 @@ namespace bs
 	{
 	public:
 		CAudioSource(const HSceneObject& parent);
-		virtual ~CAudioSource() {}
+		virtual ~CAudioSource() = default;
 		
 		/** @copydoc AudioSource::setClip */
 		BS_SCRIPT_EXPORT(n:Clip,pr:setter)
@@ -32,7 +32,7 @@ namespace bs
 		HAudioClip getClip() const { return mAudioClip; }
 
 		/** @copydoc AudioSource::setVolume */
-		BS_SCRIPT_EXPORT(n:Volume,pr:setter)
+		BS_SCRIPT_EXPORT(n:Volume,pr:setter,range:[0,1],slider)
 		void setVolume(float volume);
 
 		/** @copydoc AudioSource::getVolume */
@@ -80,11 +80,11 @@ namespace bs
 		float getAttenuation() const { return mAttenuation; }
 
 		/** @copydoc AudioSource::setTime */
-		BS_SCRIPT_EXPORT(n:Time,pr:setter)
+		BS_SCRIPT_EXPORT(n:Time,pr:setter,hide)
 		void setTime(float time);
 
 		/** @copydoc AudioSource::getTime */
-		BS_SCRIPT_EXPORT(n:Time,pr:getter)
+		BS_SCRIPT_EXPORT(n:Time,pr:getter,hide)
 		float getTime() const;
 
 		/** Sets whether playback should start as soon as the component is enabled. */
@@ -152,7 +152,7 @@ namespace bs
 		/** Destroys the internal AudioSource representation. */
 		void destroyInternal();
 
-		/** 
+		/**
 		 * Updates the transform of the internal AudioSource representation from the transform of the component's scene
 		 * object.
 		 */

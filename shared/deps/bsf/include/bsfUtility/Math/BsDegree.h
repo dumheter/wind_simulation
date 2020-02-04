@@ -2,8 +2,7 @@
 //*********** Licensed under the MIT license. See LICENSE.md for full terms. This notice is not to be removed. ***********//
 #pragma once
 
-#include "Prerequisites/BsPlatformDefines.h"
-#include "Prerequisites/BsRTTIPrerequisites.h"
+#include "Prerequisites/BsPrerequisitesUtil.h"
 
 namespace bs
 {
@@ -75,8 +74,4 @@ namespace bs
 	};
 
 	/** @} */
-
-	/** @cond SPECIALIZATIONS */
-	BS_ALLOW_MEMCPY_SERIALIZATION(Degree);
-	/** @endcond */
 }

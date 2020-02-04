@@ -37,7 +37,7 @@ namespace bs
 
 			double time;
 		private:
-			double startTime;
+			double startTime = 0.0f;
 			std::chrono::high_resolution_clock mHRClock;
 
 			/**	Returns time elapsed since CPU was started in millseconds. */
@@ -112,13 +112,13 @@ namespace bs
 			void beginSample();
 
 			/**
-			 * Records current sample state and creates a new sample based on start and end state. Adds the sample to the 
+			 * Records current sample state and creates a new sample based on start and end state. Adds the sample to the
 			 * sample list.
 			 */
 			void endSample();
 
 			/**
-			 * Removes the last added sample from the sample list and makes it active again. You must call endSample() 
+			 * Removes the last added sample from the sample list and makes it active again. You must call endSample()
 			 * when done as if you called beginSample().
 			 */
 			void resumeLastSample();
@@ -139,13 +139,13 @@ namespace bs
 			void beginSample();
 
 			/**
-			 * Records current sample state and creates a new sample based on start and end state. Adds the sample to the 
+			 * Records current sample state and creates a new sample based on start and end state. Adds the sample to the
 			 * sample list.
 			 */
 			void endSample();
 
 			/**
-			 * Removes the last added sample from the sample list and makes it active again. You must call endSample() 
+			 * Removes the last added sample from the sample list and makes it active again. You must call endSample()
 			 * when done as if you called beginSample.
 			 */
 			void resumeLastSample();
@@ -158,7 +158,7 @@ namespace bs
 		};
 
 		/**
-		 * Contains all sampling information about a single named profiling block. Each block has its own sampling 
+		 * Contains all sampling information about a single named profiling block. Each block has its own sampling
 		 * information and optionally child blocks.
 		 */
 		struct ProfiledBlock
@@ -210,13 +210,13 @@ namespace bs
 			void begin(const char* _name);
 
 			/**
-			 * Ends profiling on the thread. You should end all samples before calling this, but if you don't they will be 
+			 * Ends profiling on the thread. You should end all samples before calling this, but if you don't they will be
 			 * terminated automatically.
 			 */
 			void end();
 
 			/**
-			 * 	Deletes all internal profiling data and makes the object ready for another iteration. Should be called 
+			 * 	Deletes all internal profiling data and makes the object ready for another iteration. Should be called
 			 * after end in order to delete any existing data.
 			 */
 			void reset();
@@ -228,13 +228,13 @@ namespace bs
 			void releaseBlock(ProfiledBlock* block);
 
 			static BS_THREADLOCAL ThreadInfo* activeThread;
-			bool isActive;
+			bool isActive = false;
 
-			ProfiledBlock* rootBlock;
+			ProfiledBlock* rootBlock = nullptr;
 
 			FrameAlloc frameAlloc;
 			ActiveBlock activeBlock;
-			Stack<ActiveBlock, StdFrameAlloc<ActiveBlock>>* activeBlocks;
+			Stack<ActiveBlock, StdFrameAlloc<ActiveBlock>>* activeBlocks = nullptr;
 		};
 
 	public:
@@ -242,7 +242,7 @@ namespace bs
 		~ProfilerCPU();
 
 		/**
-		 * Registers a new thread we will be doing sampling in. This needs to be called before any beginSample* \ endSample* 
+		 * Registers a new thread we will be doing sampling in. This needs to be called before any beginSample* \ endSample*
 		 * calls are made in that thread.
 		 *
 		 * @param[in]	name	Name that will allow you to more easily identify the thread.
@@ -253,7 +253,7 @@ namespace bs
 		void endThread();
 
 		/**
-		 * Begins sample measurement. Must be followed by endSample(). 
+		 * Begins sample measurement. Must be followed by endSample().
 		 *
 		 * @param[in]	name	Unique name for the sample you can later use to find the sampling data.
 		 */
@@ -262,22 +262,22 @@ namespace bs
 		/**
 		 * Ends sample measurement.
 		 *
-		 * @param[in]	name	Unique name for the sample. 
+		 * @param[in]	name	Unique name for the sample.
 		 * 					
 		 * @note	
-		 * Unique name is primarily needed to more easily identify mismatched begin/end sample pairs. Otherwise the name in 
+		 * Unique name is primarily needed to more easily identify mismatched begin/end sample pairs. Otherwise the name in
 		 * beginSample() would be enough.
 		 */
 		void endSample(const char* name);
 
 		/**
-		 * Begins precise sample measurement. Must be followed by endSamplePrecise(). 
+		 * Begins precise sample measurement. Must be followed by endSamplePrecise().
 		 *
 		 * @param[in]	name	Unique name for the sample you can later use to find the sampling data.
 		 * 					
 		 * @note	
-		 * This method uses very precise CPU counters to determine variety of data not provided by standard beginSample(). 
-		 * However due to the way these counters work you should not use this method for larger parts of code. It does not 
+		 * This method uses very precise CPU counters to determine variety of data not provided by standard beginSample().
+		 * However due to the way these counters work you should not use this method for larger parts of code. It does not
 		 * consider context switches so if the OS decides to switch context between measurements you will get invalid data.
 		 */
 		void beginSamplePrecise(const char* name);
@@ -285,10 +285,10 @@ namespace bs
 		/**
 		 * Ends precise sample measurement.
 		 *
-		 * @param[in]	name	Unique name for the sample. 
+		 * @param[in]	name	Unique name for the sample.
 		 * 					
 		 * @note	
-		 * Unique name is primarily needed to more easily identify mismatched begin/end sample pairs. Otherwise the name 
+		 * Unique name is primarily needed to more easily identify mismatched begin/end sample pairs. Otherwise the name
 		 * in beginSamplePrecise() would be enough.
 		 */
 		void endSamplePrecise(const char* name);
@@ -306,19 +306,19 @@ namespace bs
 
 	private:
 		/**
-		 * Calculates overhead that the timing and sampling methods themselves introduce so we might get more accurate 
+		 * Calculates overhead that the timing and sampling methods themselves introduce so we might get more accurate
 		 * measurements when creating reports.
 		 */
 		void estimateTimerOverhead();
 
 	private:
-		double mBasicTimerOverhead;
-		UINT64 mPreciseTimerOverhead;
+		double mBasicTimerOverhead = 0.0;
+		UINT64 mPreciseTimerOverhead = 0;
 
-		double mBasicSamplingOverheadMs;
-		double mPreciseSamplingOverheadMs;
-		UINT64 mBasicSamplingOverheadCycles;
-		UINT64 mPreciseSamplingOverheadCycles;
+		double mBasicSamplingOverheadMs = 0.0;
+		double mPreciseSamplingOverheadMs = 0.0;
+		UINT64 mBasicSamplingOverheadCycles = 0;
+		UINT64 mPreciseSamplingOverheadCycles = 0;
 
 		ProfilerVector<ThreadInfo*> mActiveThreads;
 		Mutex mThreadSync;
@@ -329,57 +329,57 @@ namespace bs
 	{
 		struct BS_CORE_EXPORT Data
 		{
-			Data();
+			Data() = default;
 
 			String name; /**< Name of the profiling block. */
-			UINT32 numCalls; /**< Number of times the block was entered. */
+			UINT32 numCalls = 0; /**< Number of times the block was entered. */
 
 			UINT64 memAllocs; /**< Number of memory allocations that happened within the block. */
 			UINT64 memFrees; /**< Number of memory deallocations that happened within the block. */
 
-			double avgTimeMs; /**< Average time it took to execute the block, per call. In milliseconds. */
-			double maxTimeMs; /**< Maximum time of a single call in the block. In milliseconds. */
-			double totalTimeMs; /**< Total time the block took, across all calls. In milliseconds. */
+			double avgTimeMs = 0.0; /**< Average time it took to execute the block, per call. In milliseconds. */
+			double maxTimeMs = 0.0; /**< Maximum time of a single call in the block. In milliseconds. */
+			double totalTimeMs = 0.0; /**< Total time the block took, across all calls. In milliseconds. */
 
-			double avgSelfTimeMs; /**< Average time it took to execute the block, per call. Ignores time used by child blocks. In milliseconds. */
-			double totalSelfTimeMs; /**< Total time the block took, across all calls. Ignores time used by child blocks. In milliseconds. */
+			double avgSelfTimeMs = 0.0; /**< Average time it took to execute the block, per call. Ignores time used by child blocks. In milliseconds. */
+			double totalSelfTimeMs = 0.0; /**< Total time the block took, across all calls. Ignores time used by child blocks. In milliseconds. */
 
-			double estimatedSelfOverheadMs; /**< Estimated overhead of profiling methods, only for this exact block. In milliseconds. */
-			double estimatedOverheadMs; /**< Estimated overhead of profiling methods for this block and all children. In milliseconds. */
+			double estimatedSelfOverheadMs = 0.0; /**< Estimated overhead of profiling methods, only for this exact block. In milliseconds. */
+			double estimatedOverheadMs = 0.0; /**< Estimated overhead of profiling methods for this block and all children. In milliseconds. */
 
-			float pctOfParent; /**< Percent of parent block time this block took to execute. Ranging [0.0, 1.0]. */
+			float pctOfParent = 1.0f; /**< Percent of parent block time this block took to execute. Ranging [0.0, 1.0]. */
 		} data;
 
 		ProfilerVector<CPUProfilerBasicSamplingEntry> childEntries;
 	};
 
 	/**
-	 * Profiling entry containing information about a single CPU profiling block containing CPU cycle count based 
+	 * Profiling entry containing information about a single CPU profiling block containing CPU cycle count based
 	 * information.
 	 */
 	struct BS_CORE_EXPORT CPUProfilerPreciseSamplingEntry
 	{
 		struct BS_CORE_EXPORT Data
 		{
-			Data();
+			Data() = default;
 
 			String name; /**< Name of the profiling block. */
-			UINT32 numCalls; /**< Number of times the block was entered. */
+			UINT32 numCalls = 0; /**< Number of times the block was entered. */
 
 			UINT64 memAllocs; /**< Number of memory allocations that happened within the block. */
 			UINT64 memFrees; /**< Number of memory deallocations that happened within the block. */
 
-			UINT64 avgCycles; /**< Average number of cycles it took to execute the block, per call. */
-			UINT64 maxCycles; /**< Maximum number of cycles of a single call in the block. */
-			UINT64 totalCycles; /**< Total number of cycles across all calls in the block. */
+			UINT64 avgCycles = 0; /**< Average number of cycles it took to execute the block, per call. */
+			UINT64 maxCycles = 0; /**< Maximum number of cycles of a single call in the block. */
+			UINT64 totalCycles = 0; /**< Total number of cycles across all calls in the block. */
 
-			UINT64 avgSelfCycles; /**< Average number of cycles it took to execute the block, per call. Ignores cycles used by child blocks. */
-			UINT64 totalSelfCycles; /**< Total number of cycles across all calls in the block. Ignores time used by child blocks. */
+			UINT64 avgSelfCycles = 0; /**< Average number of cycles it took to execute the block, per call. Ignores cycles used by child blocks. */
+			UINT64 totalSelfCycles = 0; /**< Total number of cycles across all calls in the block. Ignores time used by child blocks. */
 
-			UINT64 estimatedSelfOverhead; /**< Estimated overhead of profiling methods, only for this exact block. In cycles. */
-			UINT64 estimatedOverhead; /**< Estimated overhead of profiling methods for this block and all children. In cycles. */
+			UINT64 estimatedSelfOverhead = 0; /**< Estimated overhead of profiling methods, only for this exact block. In cycles. */
+			UINT64 estimatedOverhead = 0; /**< Estimated overhead of profiling methods for this block and all children. In cycles. */
 
-			float pctOfParent; /**< Percent of parent block cycles used by this block. Ranging [0.0, 1.0]. */
+			float pctOfParent = 1.0f; /**< Percent of parent block cycles used by this block. Ranging [0.0, 1.0]. */
 		} data;
 
 		ProfilerVector<CPUProfilerPreciseSamplingEntry> childEntries;
@@ -389,16 +389,16 @@ namespace bs
 	class BS_CORE_EXPORT CPUProfilerReport
 	{
 	public:
-		CPUProfilerReport();
+		CPUProfilerReport() = default;
 
 		/**
-		 * Returns root entry for the basic (time based) sampling data. Root entry always contains the profiling block 
+		 * Returns root entry for the basic (time based) sampling data. Root entry always contains the profiling block
 		 * associated with the entire thread.
 		 */
 		const CPUProfilerBasicSamplingEntry& getBasicSamplingData() const { return mBasicSamplingRootEntry; }
 
 		/**
-		 * Returns root entry for the precise (CPU cycle based) sampling data. Root entry always contains the profiling 
+		 * Returns root entry for the precise (CPU cycle based) sampling data. Root entry always contains the profiling
 		 * block associated with the entire thread.
 		 */
 		const CPUProfilerPreciseSamplingEntry& getPreciseSamplingData() const { return mPreciseSamplingRootEntry; }

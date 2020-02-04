@@ -29,7 +29,7 @@ namespace bs
 	{
 	public:
 		FJoint(const JOINT_DESC& desc) { }
-		virtual ~FJoint() { }
+		virtual ~FJoint() = default;
 
 		/** @copydoc setBody() */
 		virtual Rigidbody* getBody(JointBody body) const = 0;
@@ -49,18 +49,18 @@ namespace bs
 		/** @copydoc setBreakForce() */
 		virtual float getBreakForce() const = 0;
 
-		/** 
-		 * Determines the maximum force the joint can apply before breaking. Broken joints no longer participate in physics 
-		 * simulation. 
+		/**
+		 * Determines the maximum force the joint can apply before breaking. Broken joints no longer participate in physics
+		 * simulation.
 		 */
 		virtual void setBreakForce(float force) = 0;
 
 		/** @copydoc setBreakTorque() */
 		virtual float getBreakTorque() const = 0;
 
-		/** 
-		 * Determines the maximum torque the joint can apply before breaking. Broken joints no longer participate in physics 
-		 * simulation. 
+		/**
+		 * Determines the maximum torque the joint can apply before breaking. Broken joints no longer participate in physics
+		 * simulation.
 		 */
 		virtual void setBreakTorque(float torque) = 0;
 

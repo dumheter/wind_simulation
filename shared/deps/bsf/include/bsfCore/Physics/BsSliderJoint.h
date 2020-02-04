@@ -7,6 +7,7 @@
 
 namespace bs
 {
+	class PhysicsScene;
 	/** @addtogroup Physics
 	 *  @{
 	 */
@@ -19,14 +20,14 @@ namespace bs
 		Limit = 0x1 /**< Enables the linear range limit. */
 	};
 
-	/** 
-	 * Joint that removes all but a single translational degree of freedom. Bodies are allowed to move along a single axis. 
+	/**
+	 * Joint that removes all but a single translational degree of freedom. Bodies are allowed to move along a single axis.
 	 */
 	class BS_CORE_EXPORT SliderJoint : public Joint
 	{
 	public:
 		SliderJoint(const SLIDER_JOINT_DESC& desc) { }
-		virtual ~SliderJoint() { }
+		virtual ~SliderJoint() = default;
 
 		/** Returns the current position of the slider. */
 		virtual float getPosition() const = 0;
@@ -37,9 +38,9 @@ namespace bs
 		/** @copydoc setLimit() */
 		virtual LimitLinearRange getLimit() const = 0;
 
-		/** 
+		/**
 		 * Determines a limit that constrains the movement of the joint to a specific minimum and maximum distance. You must
-		 * enable the limit flag on the joint in order for this to be recognized. 
+		 * enable the limit flag on the joint in order for this to be recognized.
 		 *
 		 * @see LimitLinearRange
 		 */
@@ -51,8 +52,13 @@ namespace bs
 		/** Checks is the specified flag enabled. */
 		virtual bool hasFlag(SliderJointFlag flag) const = 0;
 
-		/** Creates a new spherical joint. */
-		static SPtr<SliderJoint> create(const SLIDER_JOINT_DESC& desc);
+		/**
+		 * Creates a new spherical joint.
+		 *
+		 * @param[in]	scene		Scene to which to add the joint.
+		 * @param[in]	desc		Settings describing the joint.
+		 */
+		static SPtr<SliderJoint> create(PhysicsScene& scene, const SLIDER_JOINT_DESC& desc);
 	};
 
 	/** Structure used for initializing a new SliderJoint. */

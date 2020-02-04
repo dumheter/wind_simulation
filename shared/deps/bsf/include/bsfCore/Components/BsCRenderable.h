@@ -16,7 +16,7 @@ namespace bs
 	/**
 	 * @copydoc	Renderable
 	 * 			
-	 * @note Wraps a TRenderable as a Component.
+	 * @note	Wraps a Renderable as a Component.
 	 */
 	class BS_CORE_EXPORT BS_SCRIPT_EXPORT(m:Rendering,n:Renderable) CRenderable : public Component
 	{
@@ -49,6 +49,22 @@ namespace bs
 		BS_SCRIPT_EXPORT(n:Materials,pr:getter)
 		const Vector<HMaterial>& getMaterials() { return mInternal->getMaterials(); }
 
+		/** @copydoc Renderable::setCullDistanceFactor */
+		BS_SCRIPT_EXPORT(n:CullDistance, pr:setter)
+		void setCullDistanceFactor(float factor) { mInternal->setCullDistanceFactor(factor); }
+
+		/** @copydoc Renderable::getCullDistanceFactor */
+		BS_SCRIPT_EXPORT(n:CullDistance, pr:getter)
+		float getCullDistanceFactor() const { return mInternal->getCullDistanceFactor(); }
+
+		/** @copydoc Renderable::setWriteVelocity */
+		BS_SCRIPT_EXPORT(n:WriteVelocity, pr:setter)
+		void setWriteVelocity(bool enable) { mInternal->setWriteVelocity(enable); }
+
+		/** @copydoc Renderable::getWriteVelocity */
+		BS_SCRIPT_EXPORT(n:WriteVelocity, pr:getter)
+		bool getWriteVelocity() const { return mInternal->getWriteVelocity(); }
+		
 		/** @copydoc Renderable::setLayer */
 		BS_SCRIPT_EXPORT(n:Layers,pr:setter)
 		void setLayer(UINT64 layer) { mInternal->setLayer(layer); }
@@ -64,7 +80,7 @@ namespace bs
 		/** @copydoc Component::calculateBounds */
 		bool calculateBounds(Bounds& bounds) override;
 
-		/** @name Internal 
+		/** @name Internal
 		 *  @{
 		 */
 

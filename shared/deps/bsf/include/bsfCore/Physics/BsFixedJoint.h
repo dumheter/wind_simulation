@@ -7,6 +7,7 @@
 
 namespace bs
 {
+	class PhysicsScene;
 	/** @addtogroup Physics
 	 *  @{
 	 */
@@ -18,10 +19,15 @@ namespace bs
 	{
 	public:
 		FixedJoint(const FIXED_JOINT_DESC& desc) { }
-		virtual ~FixedJoint() { }
+		virtual ~FixedJoint() = default;
 
-		/** Creates a new fixed joint. */
-		static SPtr<FixedJoint> create(const FIXED_JOINT_DESC& desc);
+		/**
+		 * Creates a new fixed joint.
+		 *
+		 * @param[in]	scene		Scene to which to add the joint.
+		 * @param[in]	desc		Settings describing the joint.
+		 */
+		static SPtr<FixedJoint> create(PhysicsScene& scene, const FIXED_JOINT_DESC& desc);
 	};
 
 	/** Structure used for initializing a new FixedJoint. */

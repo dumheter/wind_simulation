@@ -8,6 +8,8 @@
 
 namespace bs
 {
+	class PhysicsScene;
+
 	/** @addtogroup Physics
 	 *  @{
 	 */
@@ -16,11 +18,11 @@ namespace bs
 	class BS_CORE_EXPORT MeshCollider : public Collider, public IResourceListener
 	{
 	public:
-		MeshCollider();
+		MeshCollider() = default;
 
-		/** 
-		 * Sets a mesh that represents the collider geometry. This can be a generic triangle mesh, or and convex mesh. 
-		 * Triangle meshes are not supported as triggers, nor are they supported for colliders that are parts of a 
+		/**
+		 * Sets a mesh that represents the collider geometry. This can be a generic triangle mesh, or and convex mesh.
+		 * Triangle meshes are not supported as triggers, nor are they supported for colliders that are parts of a
 		 * non-kinematic rigidbody.
 		 */
 		void setMesh(const HPhysicsMesh& mesh) { mMesh = mesh; onMeshChanged(); markListenerResourcesDirty(); }
@@ -28,13 +30,14 @@ namespace bs
 		/** @copydoc setMesh() */
 		HPhysicsMesh getMesh() const { return mMesh; }
 
-		/** 
-		 * Creates a new mesh collider. 
+		/**
+		 * Creates a new mesh collider.
 		 *
+		 * @param[in]	scene		Scene into which to add the collider to.
 		 * @param[in]	position	Position of the collider.
 		 * @param[in]	rotation	Rotation of the collider.
 		 */
-		static SPtr<MeshCollider> create(const Vector3& position = Vector3::ZERO, 
+		static SPtr<MeshCollider> create(PhysicsScene& scene, const Vector3& position = Vector3::ZERO,
 			const Quaternion& rotation = Quaternion::IDENTITY);
 
 	protected:
@@ -47,8 +50,8 @@ namespace bs
 		/** @copydoc IResourceListener::notifyResourceChanged */
 		void notifyResourceChanged(const HResource& resource) override;
 
-		/** 
-		 * Triggered by the resources system whenever the attached collision mesh changed (e.g. was reimported) or loaded. 
+		/**
+		 * Triggered by the resources system whenever the attached collision mesh changed (e.g. was reimported) or loaded.
 		 */
 		virtual void onMeshChanged() { }
 

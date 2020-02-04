@@ -2,8 +2,7 @@
 //*********** Licensed under the MIT license. See LICENSE.md for full terms. This notice is not to be removed. ***********//
 #pragma once
 
-#include "Prerequisites/BsPlatformDefines.h"
-#include "Prerequisites/BsRTTIPrerequisites.h"
+#include "Prerequisites/BsPrerequisitesUtil.h"
 
 namespace bs
 {
@@ -16,7 +15,7 @@ namespace bs
 	/**
 	 * Wrapper class which indicates a given angle value is in radians.
 	 * 			
-	 * @note 
+	 * @note
 	 * Radian values are interchangeable with Degree values, and conversions will be done automatically between them.
 	 */
 	class BS_UTILITY_EXPORT Radian
@@ -76,8 +75,4 @@ namespace bs
 	};
 
 	/** @} */
-
-	/** @cond SPECIALIZATIONS */
-	BS_ALLOW_MEMCPY_SERIALIZATION(Radian);
-	/** @endcond */
 }

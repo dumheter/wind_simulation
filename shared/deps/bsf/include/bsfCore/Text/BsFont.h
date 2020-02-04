@@ -56,13 +56,13 @@ namespace bs
 	};
 
 	/**
-	 * Font resource containing data about textual characters and how to render text. Contains one or multiple font 
+	 * Font resource containing data about textual characters and how to render text. Contains one or multiple font
 	 * bitmaps, each for a specific size.
 	 */
 	class BS_CORE_EXPORT BS_SCRIPT_EXPORT(m:GUI_Engine) Font : public Resource
 	{
 	public:
-		virtual ~Font();
+		virtual ~Font() = default;
 
 		/**
 		 * Returns font bitmap for a specific font size.
@@ -74,8 +74,8 @@ namespace bs
 		SPtr<FontBitmap> getBitmap(UINT32 size) const;
 
 		/**	
-		 * Finds the available font bitmap size closest to the provided size. 
-		 * 
+		 * Finds the available font bitmap size closest to the provided size.
+		 *
 		 * @param[in]	size	Size of the bitmap in points.
 		 * @return				Nearest available bitmap size.
 		 */
@@ -111,9 +111,6 @@ namespace bs
 		friend class FontManager;
 
 		Font();
-
-		/** @copydoc Resource::getResourceDependencies */
-		void getResourceDependencies(FrameVector<HResource>& dependencies) const override;
 
 		/** @copydoc CoreObject::getCoreDependencies */
 		void getCoreDependencies(Vector<CoreObject*>& dependencies) override;
