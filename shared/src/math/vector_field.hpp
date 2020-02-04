@@ -26,44 +26,50 @@
 // Headers
 // ========================================================================== //
 
-#include "app.hpp"
+#include "common.hpp"
+
+#include <Math/BsVector3.h>
 
 // ========================================================================== //
-// Editor Declaration
+// VectorField Declaration
 // ========================================================================== //
 
 namespace wind
 {
 
-/* Main Editor class */
-class Editor : public App
+/* Class that represents a vector field */
+class VectorField
 {
   public:
-    Editor();
+    /* Construct a vector-field with the specified 'width', 'height' and
+     * 'depth' (in number of cells). The size of a cell (in meters) can also be
+     * specified.  */
+    VectorField(u32 width, u32 height, u32 depth, f32 cellsize);
 
-    void OnPreUpdate() override;
+    /* Destruct vector-field */
+    ~VectorField();
+
+    /* Draw lines to help with debugging the vector field. This is called only
+     * once to produce all the lines required for the 'DebugDraw' class. After
+     * clearing 'DebugDraw' this function needs to be called again */
+    void debugDraw();
+
+    /* Returns the reference to a vector in the vector field */
+    bs::Vector3 &GetVector(u32 x, u32 y, u32 z);
+
+    /* Returns the reference to a vector in the vector field */
+    const bs::Vector3 &GetVector(u32 x, u32 y, u32 z) const;
 
   private:
-    /* Setup the camera */
-    void setupCamera();
+    /* Dimensions */
+    u32 m_width, m_height, m_depth;
+    /* Cell size in meters */
+    f32 m_cellSize;
 
-    /* Setup the editor scene */
-    void setupScene();
-
-    /* Setup the editor GUI */
-    void setupGUI();
-
-    /* Register controls */
-    void registerControls();
-
-  public:
-    /* Editor window width */
-    static constexpr u32 WINDOW_WIDTH = 1280;
-    /* Editor window height */
-    static constexpr u32 WINDOW_HEIGHT = 720;
-
-    /* Scale of the ground plane */
-    static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
+    /* Vector field data. Laid out linearly */
+    bs::Vector3 *m_field = nullptr;
+    /* Size of field (in number of vectors) */
+    u32 m_fieldSize = 0;
 };
 
 } // namespace wind

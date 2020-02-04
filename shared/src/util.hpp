@@ -26,44 +26,25 @@
 // Headers
 // ========================================================================== //
 
-#include "app.hpp"
+#include "common.hpp"
+
+#include <RenderAPI/BsRenderWindow.h>
 
 // ========================================================================== //
-// Editor Declaration
+// Util Declaration
 // ========================================================================== //
 
 namespace wind
 {
 
-/* Main Editor class */
-class Editor : public App
+class Util
 {
-  public:
-    Editor();
-
-    void OnPreUpdate() override;
-
-  private:
-    /* Setup the camera */
-    void setupCamera();
-
-    /* Setup the editor scene */
-    void setupScene();
-
-    /* Setup the editor GUI */
-    void setupGUI();
-
-    /* Register controls */
-    void registerControls();
+    WIND_NAMESPACE_CLASS(Util);
 
   public:
-    /* Editor window width */
-    static constexpr u32 WINDOW_WIDTH = 1280;
-    /* Editor window height */
-    static constexpr u32 WINDOW_HEIGHT = 720;
-
-    /* Scale of the ground plane */
-    static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
+    /* Center the cursor in the middle of a window. Specifying nullptr as the
+     * window is the same as specifying the primary window */
+    static void CenterCursor(bs::SPtr<bs::RenderWindow> window = nullptr);
 };
 
 } // namespace wind

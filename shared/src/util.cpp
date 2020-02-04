@@ -20,50 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "util.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "app.hpp"
+#include <BsApplication.h>
+#include <Input/BsMouse.h>
+#include <Platform/BsCursor.h>
 
 // ========================================================================== //
-// Editor Declaration
+// Util Implementation
 // ========================================================================== //
 
 namespace wind
 {
 
-/* Main Editor class */
-class Editor : public App
+void Util::CenterCursor(bs::SPtr<bs::RenderWindow> window)
 {
-  public:
-    Editor();
+    using namespace bs;
 
-    void OnPreUpdate() override;
-
-  private:
-    /* Setup the camera */
-    void setupCamera();
-
-    /* Setup the editor scene */
-    void setupScene();
-
-    /* Setup the editor GUI */
-    void setupGUI();
-
-    /* Register controls */
-    void registerControls();
-
-  public:
-    /* Editor window width */
-    static constexpr u32 WINDOW_WIDTH = 1280;
-    /* Editor window height */
-    static constexpr u32 WINDOW_HEIGHT = 720;
-
-    /* Scale of the ground plane */
-    static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
-};
+    if (!window)
+    {
+        window = gApplication().getPrimaryWindow();
+    }
+    const RenderWindowProperties &windowProps = window->getProperties();
+    const UINT32 x = windowProps.left + (windowProps.width / 2);
+    const UINT32 y = windowProps.top + (windowProps.height / 2);
+    Cursor::instance().setScreenPosition(Vector2I(x, y));
+}
 
 } // namespace wind

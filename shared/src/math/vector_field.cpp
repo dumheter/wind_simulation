@@ -20,50 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "vector_field.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "app.hpp"
-
-// ========================================================================== //
-// Editor Declaration
+// VectorField Implementation
 // ========================================================================== //
 
 namespace wind
 {
 
-/* Main Editor class */
-class Editor : public App
+VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellsize)
+    : m_width(width), m_height(height), m_depth(depth), m_cellSize(cellsize)
 {
-  public:
-    Editor();
+    using namespace bs;
 
-    void OnPreUpdate() override;
+    m_fieldSize = m_width * m_height * m_depth;
+    m_field = new Vector3[m_fieldSize];
+}
 
-  private:
-    /* Setup the camera */
-    void setupCamera();
+// -------------------------------------------------------------------------- //
 
-    /* Setup the editor scene */
-    void setupScene();
+VectorField::~VectorField()
+{
+    delete m_field;
+}
 
-    /* Setup the editor GUI */
-    void setupGUI();
+// -------------------------------------------------------------------------- //
 
-    /* Register controls */
-    void registerControls();
+void VectorField::debugDraw()
+{
+}
 
-  public:
-    /* Editor window width */
-    static constexpr u32 WINDOW_WIDTH = 1280;
-    /* Editor window height */
-    static constexpr u32 WINDOW_HEIGHT = 720;
+// -------------------------------------------------------------------------- //
 
-    /* Scale of the ground plane */
-    static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
-};
+bs::Vector3 &VectorField::GetVector(u32 x, u32 y, u32 z)
+{
+    const u32 offset = x + (m_width * y) + (m_width * m_height * z);
+    return m_field[offset];
+}
+
+// -------------------------------------------------------------------------- //
+
+const bs::Vector3 &VectorField::GetVector(u32 x, u32 y, u32 z) const
+{
+    const u32 offset = x + (m_width * y) + (m_width * m_height * z);
+    return m_field[offset];
+}
 
 } // namespace wind
