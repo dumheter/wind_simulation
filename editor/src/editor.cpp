@@ -26,20 +26,22 @@
 // Headers
 // ========================================================================== //
 
-#include "Resources/BsResources.h"
-#include "Resources/BsResourceManifest.h"
-#include "Resources/BsBuiltinResources.h"
-#include "Importer/BsImporter.h"
-#include "Importer/BsTextureImportOptions.h"
-#include "Importer/BsMeshImportOptions.h"
-#include "Importer/BsTextureImportOptions.h"
-#include "Components/BsCSkybox.h"
-#include "Components/BsCCamera.h"
-#include "Components/BsCRenderable.h"
-#include "Scene/BsSceneObject.h"
-#include "Mesh/BsMesh.h"
-#include "Material/BsMaterial.h"
-#include "BsCameraFlyer.h"
+#include "asset.hpp"
+
+#include <Resources/BsResources.h>
+#include <Resources/BsResourceManifest.h>
+#include <Resources/BsBuiltinResources.h>
+#include <Importer/BsImporter.h>
+#include <Importer/BsTextureImportOptions.h>
+#include <Importer/BsMeshImportOptions.h>
+#include <Importer/BsTextureImportOptions.h>
+#include <Components/BsCSkybox.h>
+#include <Components/BsCCamera.h>
+#include <Components/BsCRenderable.h>
+#include <Scene/BsSceneObject.h>
+#include <Mesh/BsMesh.h>
+#include <Material/BsMaterial.h>
+#include <BsCameraFlyer.h>
 
 // ========================================================================== //
 // Editor Implementation
@@ -73,8 +75,7 @@ void Editor::setupCamera()
     const RenderWindowProperties &windowProp = window->getProperties();
 
     // Skybox
-    const Path skyboxAssetPath = "res/skybox/daytime.hdr.asset";
-    const HTexture skyboxTex = gResources().load<Texture>(skyboxAssetPath);
+    const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
     HSceneObject skybox = SceneObject::create("Skybox");
     HSkybox skyboxComp = skybox->addComponent<CSkybox>();
     skyboxComp->setTexture(skyboxTex);
@@ -103,8 +104,8 @@ void Editor::setupScene()
     using namespace bs;
 
     // Load textures
-    const HTexture texGrid = gResources().load<Texture>("res/textures/grid.png.asset");
-    const HTexture texGrid2 = gResources().load<Texture>("res/textures/grid_2.png.asset");
+    const HTexture texGrid = Asset::loadTexture("res/textures/grid.png");
+    const HTexture texGrid2 = Asset::loadTexture("res/textures/grid_2.png");
 
     // Setup plane
     const HShader shader = gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
