@@ -8,9 +8,13 @@ namespace bs
 	 *  @{
 	 */
 
-#if BS_IS_BANSHEE3D
-	constexpr const char* ENGINE_ASSEMBLY = "MBansheeEngine";
-	constexpr const char* SCRIPT_GAME_ASSEMBLY = "MScriptGame";
+#if BS_IS_BANSHEE3D || defined BS_IS_ASSET_TOOL
+	#define BS_INCLUDE_B3D_PATHS 1
+#else
+	#define BS_INCLUDE_B3D_PATHS 0
+#endif
+
+#if BS_INCLUDE_B3D_PATHS
 	constexpr const char* GAME_RESOURCES_FOLDER_NAME = "Resources/";
 	constexpr const char* GAME_SETTINGS_NAME = "GameSettings.asset";
 	constexpr const char* GAME_RESOURCE_MANIFEST_NAME = "ResourceManifest.asset";
@@ -27,12 +31,9 @@ namespace bs
 		/** Returns the absolute path where the engine binaries are located in. */
 		static const Path& getBinariesPath();
 
-#if BS_IS_BANSHEE3D
-		/**	Returns the absolute path where the managed release assemblies are located. */
-		static const Path& getReleaseAssemblyPath();
-
-		/**	Returns the absolute path where the managed debug assemblies are located. */
-		static const Path& getDebugAssemblyPath();
+#if BS_INCLUDE_B3D_PATHS
+		/**	Returns the absolute path where the builtin editor-specific assets are located. */
+		static const Path& getEditorDataPath();
 
 		/**	Returns the absolute path to the game settings file used by editor-built executables. */
 		static const Path& getGameSettingsPath();
@@ -42,11 +43,11 @@ namespace bs
 #endif
 		
 		/**
-		 * Searches common locations for a specified path by querying if the file/directory exists and returns the found 
+		 * Searches common locations for a specified path by querying if the file/directory exists and returns the found
 		 * path.
 		 * 			
 		 * @param[in]	path	Relative path to search for (for example "Data\").
-		 * @return				Path at which the relative path was found at. This path will be relative to the working 
+		 * @return				Path at which the relative path was found at. This path will be relative to the working
 		 *						directory.
 		 */
 		static Path findPath(const Path& path);
@@ -54,12 +55,15 @@ namespace bs
 		/** Path to the root data directory. Relative to working directory, or RAW_APP_ROOT. */
 		static const Path FRAMEWORK_DATA_PATH;
 		
-#if BS_IS_BANSHEE3D
 		/** Path where the release configuration managed assemblies are located at, relative to the working directory. */
 		static const Path RELEASE_ASSEMBLY_PATH;
 
 		/** Path where the debug configuration managed assemblies are located at, relative to the working directory. */
 		static const Path DEBUG_ASSEMBLY_PATH;;
+
+#if BS_INCLUDE_B3D_PATHS
+		/** Path to the root editor data directory. Relative to working directory, or RAW_APP_ROOT. */
+		static const Path EDITOR_DATA_PATH;
 #endif
 	};
 

@@ -11,7 +11,7 @@ namespace bs
 	 */
 
 	/**
-	 * Factory class for creating Renderer objects. Implement this class for any custom renderer classes you may have, and 
+	 * Factory class for creating Renderer objects. Implement this class for any custom renderer classes you may have, and
 	 * register it with renderer manager.
 	 * 			
 	 * @see		RendererManager
@@ -19,7 +19,7 @@ namespace bs
 	class BS_CORE_EXPORT RendererFactory
 	{
 	public:
-		virtual ~RendererFactory() { }
+		virtual ~RendererFactory() = default;
 
 		/**	Creates a new instance of the renderer. */
 		virtual SPtr<ct::Renderer> create() = 0;

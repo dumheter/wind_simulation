@@ -23,7 +23,7 @@ namespace bs
 		/**	Internal container for data about a single cursor icon. */
 		struct CustomIcon
 		{
-			CustomIcon() {}
+			CustomIcon() = default;
 			CustomIcon(const PixelData& pixelData, const Vector2I& hotSpot)
 				:hotSpot(hotSpot), pixelData(pixelData)
 			{ }
@@ -71,11 +71,11 @@ namespace bs
 		 *
 		 * @param[in]	name		The name to identify the cursor.
 		 * @param[in]	pixelData	Cursor image data.
-		 * @param[in]	hotSpot		Offset on the cursor image to where the actual input happens (for example tip of the 
+		 * @param[in]	hotSpot		Offset on the cursor image to where the actual input happens (for example tip of the
 		 *							Arrow cursor).
 		 * 						
 		 * @note	
-		 * Stores an internal copy of the pixel data. Clear it by calling removeCursorIcon(). If a custom icon with the 
+		 * Stores an internal copy of the pixel data. Clear it by calling removeCursorIcon(). If a custom icon with the
 		 * same name already exists it will be replaced.
 		 */
 		void setCursorIcon(const String& name, const PixelData& pixelData, const Vector2I& hotSpot);
@@ -85,7 +85,7 @@ namespace bs
 		 *
 		 * @param[in]	type		One of the built-in cursor types.
 		 * @param[in] 	pixelData	Cursor image data.
-		 * @param[in]	hotSpot		Offset on the cursor image to where the actual input happens (for example tip of the 
+		 * @param[in]	hotSpot		Offset on the cursor image to where the actual input happens (for example tip of the
 		 *							Arrow cursor).
 		 * 						
 		 * @note	
@@ -112,8 +112,8 @@ namespace bs
 
 		UnorderedMap<String, UINT32> mCustomIconNameToId;
 		UnorderedMap<UINT32, CustomIcon> mCustomIcons;
-		UINT32 mNextUniqueId;
-		INT32 mActiveCursorId;
+		UINT32 mNextUniqueId = (UINT32)CursorType::Count;
+		INT32 mActiveCursorId = -1;
 	};
 
 	/** Easy way to access Cursor. */

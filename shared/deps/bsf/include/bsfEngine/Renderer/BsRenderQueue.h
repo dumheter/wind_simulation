@@ -58,7 +58,7 @@ namespace bs { namespace ct
 		 *
 		 * @param[in]	element			Renderable element to add to the queue.
 		 * @param[in]	distFromCamera	Distance of this object from the camera. Used for distance sorting.
-		 * @param[in]	techniqueIdx	Index of the technique within @p element's material that's to be used to render the 
+		 * @param[in]	techniqueIdx	Index of the technique within @p element's material that's to be used to render the
 		 *								element with.
 		 */
 		void add(const RenderElement* element, float distFromCamera, UINT32 techniqueIdx);
@@ -73,7 +73,7 @@ namespace bs { namespace ct
 		const Vector<RenderQueueElement>& getSortedElements() const;
 
 		/**
-		 * Controls if and how a render queue groups renderable objects by material in order to reduce number of state 
+		 * Controls if and how a render queue groups renderable objects by material in order to reduce number of state
 		 * changes.
 		 */
 		void setStateReduction(StateReduction mode) { mStateReductionMode = mode; }
@@ -86,7 +86,7 @@ namespace bs { namespace ct
 		static bool elementSorterPreferGroup(UINT32 aIdx, UINT32 bIdx, const Vector<SortableElement>& lookup);
 
 		/**	Callback used for sorting elements with material grouping after sorting. */
-		static bool elementSorterPreferSort(UINT32 aIdx, UINT32 bIdx, const Vector<SortableElement>& lookup);
+		static bool elementSorterPreferDistance(UINT32 aIdx, UINT32 bIdx, const Vector<SortableElement>& lookup);
 
 		Vector<SortableElement> mSortableElements;
 		Vector<UINT32> mSortableElementIdx;

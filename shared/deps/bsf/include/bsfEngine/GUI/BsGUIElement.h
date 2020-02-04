@@ -5,6 +5,7 @@
 #include "BsPrerequisites.h"
 #include "GUI/BsGUIElementBase.h"
 #include "GUI/BsGUIOptions.h"
+#include "2D/BsSprite.h"
 #include "Math/BsRect2I.h"
 #include "Math/BsVector2I.h"
 #include "Image/BsColor.h"
@@ -17,6 +18,7 @@ namespace bs
 	 *  @{
 	 */
 
+	/** Contains options that change GUIElement behaviour. */
 	enum class GUIElementOption
 	{
 		/** 
@@ -34,6 +36,13 @@ namespace bs
 
 	typedef Flags<GUIElementOption> GUIElementOptions;
 	BS_FLAGS_OPERATORS(GUIElementOption)
+
+	/** Contains information about a single renderable element within a GUIElement. */
+	struct GUIRenderElement : SpriteRenderElement
+	{
+		GUIMeshType type = GUIMeshType::Triangle;
+		UINT32 depth = 0;
+	};
 
 	/**
 	 * Represents parent class for all visible GUI elements. Contains methods needed for positioning, rendering and
@@ -58,6 +67,7 @@ namespace bs
 
 	public:
 		GUIElement(String styleName, const GUIDimensions& dimensions, GUIElementOptions options = GUIElementOptions(0));
+		GUIElement(const char* styleName, const GUIDimensions& dimensions, GUIElementOptions options = GUIElementOptions(0));
 		virtual ~GUIElement() = default;
 
 		/**	
@@ -67,7 +77,7 @@ namespace bs
 		 * @param[in]	clear		If true the focus will be cleared from any elements currently in focus. Otherwise
 		 *							the element will just be appended to the in-focus list (if enabling focus).
 		 */
-		void setFocus(bool enabled, bool clear = false);
+		virtual void setFocus(bool enabled, bool clear = false);
 
 		/**	Sets the tint of the GUI element. */
 		virtual void setTint(const Color& color);
@@ -127,41 +137,20 @@ namespace bs
 		 */
 
 		/**
-		 * Returns the number of separate render elements in the GUI element.
-		 * 			
-		 * @return	The number render elements.
-		 *
-		 * @note	
-		 * GUI system attempts to reduce the number of GUI meshes so it will group sprites based on their material and 
-		 * textures. One render elements represents a group of such sprites that share a material/texture.
+		 * Returns information about all renderable elements in this GUI element, including their mesh, material and
+		 * general information.
 		 */
-		virtual UINT32 _getNumRenderElements() const = 0;
-
-		/**
-		 * Gets a material for the specified render element index.
-		 * 		
-		 * @return	Handle to the material.
-		 *
-		 * @see		_getNumRenderElements()
-		 */
-		virtual const SpriteMaterialInfo& _getMaterial(UINT32 renderElementIdx, SpriteMaterial** material) const = 0;
-
-		/**
-		 * Returns the type of mesh and number of vertices and indices that the specified render element will use. You will
-		 * need this value when creating the buffers before calling _fillBuffer().
-		 *
-		 * @see		_getNumRenderElements()
-		 * @see		_fillBuffer()
-		 */
-		virtual void _getMeshInfo(UINT32 renderElementIdx, UINT32& numVertices, UINT32& numIndices, GUIMeshType& type) const = 0;
+		const SmallVector<GUIRenderElement, 4>& _getRenderElements() const { return mRenderElements; }
 
 		/**
 		 * Fill the pre-allocated vertex, uv and index buffers with the mesh data for the specified render element.
 		 * 			
 		 * @param[out]	vertices			Previously allocated buffer where to store the vertices. Output is expected
-		 *									to match the GUIMeshType as returned by _getMeshInfo.
+		 *									to match the GUIMeshType as returned by getRenderElements() for the specified
+		 *									element.
 		 * @param[out]	indices				Previously allocated buffer where to store the indices.
 		 * @param[in]	vertexOffset		At which vertex should the method start filling the buffer.
+		 * @param[in]	offset				Offset that should be applied to all output vertex positions.
 		 * @param[in]	indexOffset			At which index should the method start filling the buffer.
 		 * @param[in]	maxNumVerts			Total number of vertices the buffers were allocated for. Used only for memory
 		 *									safety.
@@ -169,11 +158,16 @@ namespace bs
 		 *									safety.
 		 * @param[in]	renderElementIdx	Zero-based index of the render element.
 		 *
-		 * @see		_getNumRenderElements()
-		 * @see		_getMeshInfo()
 		 */
-		virtual void _fillBuffer(UINT8* vertices, UINT32* indices, UINT32 vertexOffset, UINT32 indexOffset,
-			UINT32 maxNumVerts, UINT32 maxNumIndices, UINT32 renderElementIdx) const = 0;
+		virtual void _fillBuffer(
+			UINT8* vertices,
+			UINT32* indices,
+			UINT32 vertexOffset,
+			UINT32 indexOffset,
+			const Vector2I& offset,
+			UINT32 maxNumVerts,
+			UINT32 maxNumIndices,
+			UINT32 renderElementIdx) const = 0;
 
 		/**
 		 * Recreates the internal render elements. Must be called before fillBuffer if element is dirty. Marks the element
@@ -219,14 +213,6 @@ namespace bs
 
 		/** @copydoc GUIElementBase::_changeParentWidget */
 		void _changeParentWidget(GUIWidget* widget) override;
-
-		/**
-		 * Returns depth for a specific render element. This contains a combination of widget depth (8 bit(, area depth
-		 * (16 bit) and render element depth (8 bit).
-		 *
-		 * @see		_getNumRenderElements
-		 */
-		virtual UINT32 _getRenderElementDepth(UINT32 renderElementIdx) const { return _getDepth(); }
 
 		/**
 		 * Returns the range of depths that the child elements can be rendered it.
@@ -287,7 +273,7 @@ namespace bs
 
 		/**	Returns a clip rectangle relative to the element, used for clipping	the input text. */
 		virtual Rect2I _getTextInputRect() const { return Rect2I(); }
-
+		
 		/** @} */
 
 	protected:
@@ -340,6 +326,7 @@ namespace bs
 		bool mIsDestroyed = false;
 		GUIElementOptions mOptionFlags;
 		Rect2I mClippedBounds;
+		SmallVector<GUIRenderElement, 4> mRenderElements;
 		
 	private:
 		static const Color DISABLED_COLOR;
@@ -353,4 +340,61 @@ namespace bs
 	};
 
 	/** @} */
+
+	/** @cond IMPLEMENTATION */
+	namespace impl
+	{
+		/** Helper class used for populating GUIRenderElement information from Sprite objects. */
+		struct GUIRenderElementHelper
+		{
+			/**
+			 * Contains the sprite to generate render element data for, as well as additional data not provided in the
+			 * sprite itself.
+			 */
+			struct SpriteInfo
+			{
+				SpriteInfo(Sprite* sprite, UINT32 depth = 0, GUIMeshType meshType = GUIMeshType::Triangle)
+					: sprite(sprite), depth(depth), meshType(meshType)
+				{ }
+				
+				Sprite* sprite;
+				UINT32 depth = 0;
+				GUIMeshType meshType = GUIMeshType::Triangle;
+			};
+
+			/**
+			 * Determines the total number of requires render elements from the provided set of sprites, and initializes that
+			 * many render elements from the sprite render elements and the extra information provided in SpriteInfo.
+			 */
+			template<UINT32 N>
+			static void populate(const SpriteInfo (&spriteInfos)[N], SmallVector<GUIRenderElement, 4>& output)
+			{
+				UINT32 totalCount = 0;
+				for (UINT32 i = 0; i < N; i++)
+					totalCount += spriteInfos[i].sprite ? spriteInfos[i].sprite->getNumRenderElements() : 0;
+
+				output.resize(totalCount);
+
+				UINT32 globalIdx = 0;
+				for (UINT32 i = 0; i < N; i++)
+				{
+					const SpriteInfo& spriteInfo = spriteInfos[i];
+					
+					UINT32 count = spriteInfo.sprite ? spriteInfo.sprite->getNumRenderElements() : 0;
+					for(UINT32 j = 0; j < count; j++)
+					{
+						GUIRenderElement& renderElem = output[globalIdx];
+						spriteInfo.sprite->getRenderElementInfo(j, renderElem);
+
+						renderElem.depth = spriteInfo.depth;
+						renderElem.type = spriteInfo.meshType;
+						
+						globalIdx++;
+					}
+				}
+			}
+		};
+	}
+
+	/** @endcond */
 }

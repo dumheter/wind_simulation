@@ -22,8 +22,8 @@ namespace bs
 		bool operator==(const DEPTH_STENCIL_STATE_DESC& rhs) const;
 
 		/**
-		 * If enabled, any pixel about to be written will be tested against the depth value currently in the buffer. If the 
-		 * depth test passes (depending on the set valueand chosen depth comparison function), that pixel is written and 
+		 * If enabled, any pixel about to be written will be tested against the depth value currently in the buffer. If the
+		 * depth test passes (depending on the set valueand chosen depth comparison function), that pixel is written and
 		 * depth is updated (if depth write is enabled).
 		 */
 		bool depthReadEnable = true;
@@ -32,13 +32,13 @@ namespace bs
 		bool depthWriteEnable = true;
 
 		/**
-		 * Determines what operation should the renderer use when comparing previous and current depth value. If the 
+		 * Determines what operation should the renderer use when comparing previous and current depth value. If the
 		 * operation passes, pixel with the current depth value will be considered visible.
 		 */
 		CompareFunction depthComparisonFunc = CMPF_LESS;
 
 		/**
-		 * If true then stencil buffer will also be updated when a pixel is written, and pixels will be tested against 
+		 * If true then stencil buffer will also be updated when a pixel is written, and pixels will be tested against
 		 * the stencil buffer before rendering.
 		 */
 		bool stencilEnable = false;
@@ -59,7 +59,7 @@ namespace bs
 		StencilOperation frontStencilPassOp = SOP_KEEP;
 
 		/**
-		 * Stencil comparison function used for front facing polygons. Stencil buffer will be modified according to 
+		 * Stencil comparison function used for front facing polygons. Stencil buffer will be modified according to
 		 * previously set stencil operations depending whether this comparison passes or fails.
 		 */
 		CompareFunction frontStencilComparisonFunc = CMPF_ALWAYS_PASS;
@@ -74,15 +74,11 @@ namespace bs
 		StencilOperation backStencilPassOp = SOP_KEEP;
 
 		/**
-		 * Stencil comparison function used for back facing polygons. Stencil buffer will be modified according	to 
+		 * Stencil comparison function used for back facing polygons. Stencil buffer will be modified according	to
 		 * previously set stencil operations depending whether this comparison passes or fails.
 		 */
 		CompareFunction backStencilComparisonFunc = CMPF_ALWAYS_PASS;
 	};
-
-	/** @cond SPECIALIZATIONS */
-	BS_ALLOW_MEMCPY_SERIALIZATION(DEPTH_STENCIL_STATE_DESC);
-	/** @endcond */
 
 	/** Properties of DepthStencilState. Shared between sim and core thread versions of DepthStencilState. */
 	class BS_CORE_EXPORT DepthStencilProperties
@@ -145,7 +141,7 @@ namespace bs
 	};
 
 	/**
-	 * Render system pipeline state that allows you to modify how an object is rendered. More exactly this state allows to 
+	 * Render system pipeline state that allows you to modify how an object is rendered. More exactly this state allows to
 	 * you to control how are depth and stencil buffers modified upon rendering.
 	 *
 	 * @note	Depth stencil states are immutable. Sim thread only.
@@ -153,7 +149,7 @@ namespace bs
 	class BS_CORE_EXPORT DepthStencilState : public IReflectable, public CoreObject
 	{
 	public:
-		virtual ~DepthStencilState();
+		virtual ~DepthStencilState() = default;
 
 		/**	Returns information about the depth stencil state. */
 		const DepthStencilProperties& getProperties() const;

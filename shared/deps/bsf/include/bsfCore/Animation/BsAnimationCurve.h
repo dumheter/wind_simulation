@@ -23,6 +23,16 @@ namespace bs
 		T inTangent; /**< Input tangent (going from the previous key to this one) of the key. */
 		T outTangent; /**< Output tangent (going from this key to next one) of the key. */
 		float time; /**< Position of the key along the animation spline. */
+
+		bool operator== (const TKeyframe<T>& rhs) const
+		{
+			return (value == rhs.value && inTangent == rhs.inTangent && outTangent == rhs.outTangent && time == rhs.time);
+		}
+
+		bool operator!= (const TKeyframe<T>& rhs) const
+		{
+			return !operator==(rhs);
+		}
 	};
 
 	/** Keyframe specialization for integers (no tangents). */
@@ -31,6 +41,16 @@ namespace bs
 	{
 		INT32 value; /**< Value of the key. */
 		float time; /**< Position of the key along the animation spline. */
+
+		bool operator== (const TKeyframe<INT32>& rhs) const
+		{
+			return (value == rhs.value && time == rhs.time);
+		}
+
+		bool operator!= (const TKeyframe<INT32>& rhs) const
+		{
+			return !operator==(rhs);
+		}
 	};
 
 	template struct BS_SCRIPT_EXPORT(m:Animation,n:KeyFrame,pl:true) TKeyframe<float>;
@@ -48,11 +68,11 @@ namespace bs
 	public:
 		typedef TKeyframe<T> KeyFrame;
 
-		TAnimationCurve();
+		TAnimationCurve() = default;
 
 		/**
 		 * Creates a new animation curve.
-		 * 
+		 *
 		 * @param[in]	keyframes	Keyframes to initialize the curve with. They must be sorted by time.
 		 */
 		BS_SCRIPT_EXPORT()
@@ -78,7 +98,7 @@ namespace bs
 		 * using the cached version of evaluate() for better performance.
 		 *
 		 * @param[in]	time	%Time to evaluate the curve at.		
-		 * @param[in]	loop	If true the curve will loop when it goes past the end or beggining. Otherwise the curve 
+		 * @param[in]	loop	If true the curve will loop when it goes past the end or beggining. Otherwise the curve
 		 *						value will be clamped.
 		 * @return				Interpolated value from the curve at provided time.
 		 */
@@ -116,14 +136,14 @@ namespace bs
 		 * and tangents.
 		 *
 		 * @param[in]	time	%Time to evaluate the curve at.		
-		 * @param[in]	loop	If true the curve will loop when it goes past the end or beggining. Otherwise the curve 
+		 * @param[in]	loop	If true the curve will loop when it goes past the end or beginning. Otherwise the curve
 		 *						value will be clamped.
 		 * @return				Keyframe containing the interpolated value and tangents at provided time.
 		 */
 		KeyFrame evaluateKey(float time, bool loop = true) const;
 
-		/** 
-		 * Splits a piece of the animation curve into a separate animation curve. 
+		/**
+		 * Splits a piece of the animation curve into a separate animation curve.
 		 *
 		 * @param[in]	start	Beginning time of the split curve.
 		 * @param[in]	end		End time of the split curve.
@@ -131,7 +151,7 @@ namespace bs
 		 */
 		TAnimationCurve<T> split(float start, float end);
 
-		/** 
+		/**
 		 * Converts a normal curve into an additive curve. It is assumed the first keyframe in the curve is the reference
 		 * key from which to generate the additive curve. Such curves can then be added on top of a curve containing
 		 * reference keys.
@@ -163,10 +183,12 @@ namespace bs
 		BS_SCRIPT_EXPORT(n:KeyFrames,pr:getter)
 		const Vector<TKeyframe<T>>& getKeyFrames() const { return mKeyframes; }
 
+		bool operator== (const TAnimationCurve<T>& rhs) const;
+		bool operator!= (const TAnimationCurve<T>& rhs) const { return !operator==(rhs); }
 	private:
 		friend struct RTTIPlainType<TAnimationCurve<T>>;
 
-		/** 
+		/**
 		 * Returns a pair of keys that can be used for interpolating to field the value at the provided time. This attempts
 		 * to find keys using the cache first, and if not possible falls back to a full search.
 		 *
@@ -180,8 +202,8 @@ namespace bs
 		 */
 		void findKeys(float time, const TCurveCache<T>& cache, UINT32& leftKey, UINT32& rightKey) const;
 
-		/** 
-		 * Returns a pair of keys that can be used for interpolating to field the value at the provided time. 
+		/**
+		 * Returns a pair of keys that can be used for interpolating to field the value at the provided time.
 		 *
 		 * @param[in]	time			Time for which to find the relevant keys from. It is expected to be clamped to a
 		 *								valid range within the curve.
@@ -193,8 +215,8 @@ namespace bs
 		/** Returns a keyframe index nearest to the provided time. */
 		UINT32 findKey(float time);
 
-		/** 
-		 * Calculates a key in-between the provided two keys. 
+		/**
+		 * Calculates a key in-between the provided two keys.
 		 *
 		 * @param[in]	lhs		Key to interpolate from.
 		 * @param[in]	rhs		Key to interpolate to.
@@ -212,9 +234,9 @@ namespace bs
 		static const UINT32 CACHE_LOOKAHEAD;
 
 		Vector<KeyFrame> mKeyframes;
-		float mStart;
-		float mEnd;
-		float mLength;
+		float mStart = 0.0f;
+		float mEnd = 0.0f;
+		float mLength = 0.0f;
 	};
 
 #ifdef BS_SBGEN
@@ -247,11 +269,11 @@ namespace bs
 	template <class T>
 	struct TNamedAnimationCurve
 	{
-		TNamedAnimationCurve() { }
+		TNamedAnimationCurve() = default;
 
 		/**
 		 * Constructs a new named animation curve.
-		 * 
+		 *
 		 * @param[in]	name	Name of the curve.
 		 * @param[in]	curve	Curve containing the animation data.
 		 */
@@ -261,7 +283,7 @@ namespace bs
 
 		/**
 		 * Constructs a new named animation curve.
-		 * 
+		 *
 		 * @param[in]	name	Name of the curve.
 		 * @param[in]	flags	Flags that describe the animation curve.
 		 * @param[in]	curve	Curve containing the animation data.

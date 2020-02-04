@@ -17,13 +17,13 @@ namespace bs
 	 */
 
 	/**
-	 * Base class containing common functionality for a reflectable pointer class field. 
+	 * Base class containing common functionality for a reflectable pointer class field.
 	 * 			
 	 * @note	
-	 * Reflectable fields are fields containing complex types deriving from IReflectable. They are serialized recursively 
+	 * Reflectable fields are fields containing complex types deriving from IReflectable. They are serialized recursively
 	 * and you may add/remove fields from them without breaking the serialized data.
 	 * @note
-	 * ReflectablePtr fields are different from Reflectable fields because other types may reference the same Reflectable 
+	 * ReflectablePtr fields are different from Reflectable fields because other types may reference the same Reflectable
 	 * object using a ReflectablePtr, while normal Reflectable fields are only referenced by a single field they're declared on.
 	 */
 	struct RTTIReflectablePtrFieldBase : public RTTIField
@@ -65,9 +65,6 @@ namespace bs
 		/** Returns the name of the class owning the field. */
 		virtual const String& getRTTIName() = 0;
 
-		/** @copydoc RTTIField::hasDynamicSize */
-		bool hasDynamicSize() override { return true; }
-
 		/** Retrieves the RTTI object for the type the field contains. */
 		virtual RTTITypeBase* getType() = 0;
 	};
@@ -88,49 +85,54 @@ namespace bs
 		 * Initializes a field pointing to a single data type implementing IReflectable interface.
 		 *
 		 * @param[in]	name		Name of the field.
-		 * @param[in]	uniqueId	Unique identifier for this field. Although name is also a unique identifier we want a 
-		 *							small data type that can be used for efficiently serializing data to disk and similar. 
+		 * @param[in]	uniqueId	Unique identifier for this field. Although name is also a unique identifier we want a
+		 *							small data type that can be used for efficiently serializing data to disk and similar.
 		 *							It is primarily used for compatibility between different versions of serialized data.
 		 * @param[in]	getter  	The getter method for the field.
 		 * @param[in]	setter  	The setter method for the field.
-		 * @param[in]	flags		Various flags you can use to specialize how systems handle this field. See "RTTIFieldFlag".
+		 * @param[in]	info		Various optional information about the field.
 		 */
-		void initSingle(String name, UINT16 uniqueId, GetterType getter, SetterType setter, UINT64 flags)
+		void initSingle(String name, UINT16 uniqueId, GetterType getter, SetterType setter, const RTTIFieldInfo& info)
 		{
 			this->getter = getter;
 			this->setter = setter;
 
-			init(std::move(name), uniqueId, false, SerializableFT_ReflectablePtr, flags);
+			init(std::move(name), RTTIFieldSchema(uniqueId, false, true, 0, SerializableFT_ReflectablePtr,
+				0, nullptr, info));
 		}
 
 		/**
 		 * Initializes a field containing an array of pointers to data types implementing IReflectable interface.
 		 *
 		 * @param[in]	name		Name of the field.
-		 * @param[in]	uniqueId	Unique identifier for this field. Although name is also a unique identifier we want a 
-		 *							small data type that can be used for efficiently serializing data to disk and similar. 
+		 * @param[in]	uniqueId	Unique identifier for this field. Although name is also a unique identifier we want a
+		 *							small data type that can be used for efficiently serializing data to disk and similar.
 		 *							It is primarily used for compatibility between different versions of serialized data.
 		 * @param[in]	getter  	The getter method for the field.
 		 * @param[in]	getSize 	Getter method that returns the size of an array.
 		 * @param[in]	setter  	The setter method for the field.
 		 * @param[in]	setSize 	Setter method that allows you to resize an array. Can be null.
-		 * @param[in]	flags		Various flags you can use to specialize how systems handle this field. See "RTTIFieldFlag".
+		 * @param[in]	info		Various optional information about the field.
 		 */
-		void initArray(String name, UINT16 uniqueId, ArrayGetterType getter, ArrayGetSizeType getSize, 
-			ArraySetterType setter, ArraySetSizeType setSize, UINT64 flags)
+		void initArray(String name, UINT16 uniqueId, ArrayGetterType getter, ArrayGetSizeType getSize,
+			ArraySetterType setter, ArraySetSizeType setSize, const RTTIFieldInfo& info)
 		{
 			arrayGetter = getter;
 			arraySetter = setter;
 			arrayGetSize = getSize;
 			arraySetSize = setSize;
 
-			init(std::move(name), uniqueId, true, SerializableFT_ReflectablePtr, flags);
+			init(std::move(name), RTTIFieldSchema(uniqueId, true, true, 0, SerializableFT_ReflectablePtr,
+				0, nullptr, info));
 		}
 
-		/** @copydoc RTTIField::getTypeSize */
-		UINT32 getTypeSize() override
+		/** @copydoc RTTIField::initSchema */
+		void initSchema() override
 		{
-			return 0; // Complex types don't store size the conventional way
+			// This need to be initialized after the field itself, otherwise we get recursive static constructor
+			// calls due to one type calling getRTTIStatic() on one another
+			schema.fieldTypeSchema = DataType::getRTTIStatic()->getSchema();;
+			schema.fieldTypeId = DataType::getRTTIStatic()->getRTTIId();
 		}
 
 		/** @copydoc RTTIReflectablePtrFieldBase::getValue */
@@ -165,7 +167,7 @@ namespace bs
 			if(!setter)
 			{
 				BS_EXCEPT(InternalErrorException,
-					"Specified field (" + mName + ") has no setter.");
+					"Specified field (" + name + ") has no setter.");
 			}
 
 			InterfaceType* rttiObject = static_cast<InterfaceType*>(rtti);
@@ -182,8 +184,8 @@ namespace bs
 
 			if(!arraySetter)
 			{
-				BS_EXCEPT(InternalErrorException, 
-					"Specified field (" + mName + ") has no setter.");
+				BS_EXCEPT(InternalErrorException,
+					"Specified field (" + name + ") has no setter.");
 			}
 
 			InterfaceType* rttiObject = static_cast<InterfaceType*>(rtti);
@@ -211,8 +213,8 @@ namespace bs
 
 			if(!arraySetSize)
 			{
-				BS_EXCEPT(InternalErrorException, 
-					"Specified field (" + mName + ") has no array size setter.");
+				BS_EXCEPT(InternalErrorException,
+					"Specified field (" + name + ") has no array size setter.");
 			}
 
 			InterfaceType* rttiObject = static_cast<InterfaceType*>(rtti);

@@ -15,7 +15,7 @@ namespace bs
 	/** A single vertex used for morph target animation. Contains a difference between base and target shape. */
 	struct BS_CORE_EXPORT MorphVertex
 	{
-		MorphVertex() { }
+		MorphVertex() = default;
 		MorphVertex(const Vector3& deltaPosition, const Vector3& deltaNormal, UINT32 sourceIdx)
 			:deltaPosition(deltaPosition), deltaNormal(deltaNormal), sourceIdx(sourceIdx)
 		{ }
@@ -25,10 +25,10 @@ namespace bs
 		UINT32 sourceIdx;
 	};
 
-	/** 
+	/**
 	 * @native
 	 * A set of vertices representing a single shape in a morph target animation. Vertices are represented as a difference
-	 * between base and target shape. 
+	 * between base and target shape.
 	 * @endnative
 	 * @script
 	 * Name and weight of a single shape in a morph target animation. Each shape internally represents a set of vertices
@@ -51,9 +51,9 @@ namespace bs
 		/** Returns a reference to all of the shape's vertices. Contains only vertices that differ from the base. */
 		const Vector<MorphVertex>& getVertices() const { return mVertices; }
 
-		/** 
-		 * Creates a new morph shape from the provided set of vertices. 
-		 * 
+		/**
+		 * Creates a new morph shape from the provided set of vertices.
+		 *
 		 * @param[in]	name		Name of the frame. Must be unique within a morph channel.
 		 * @param[in]	weight		Weight in range [0, 1]. Determines how are sequential shapes animated between within a
 		 *							morph channel. e.g. if there is a shape A with weight 0.3 and shape B with weight 0.8
@@ -75,7 +75,7 @@ namespace bs
 		static RTTITypeBase* getRTTIStatic();
 		RTTITypeBase* getRTTI() const override;
 
-		MorphShape(); // Serialization only
+		MorphShape() = default; // Serialization only
 	};
 
 	/**
@@ -104,7 +104,7 @@ namespace bs
 		static SPtr<MorphChannel> create(const String& name, const Vector<SPtr<MorphShape>>& shapes);
 
 	private:
-		MorphChannel();
+		MorphChannel() = default;
 		MorphChannel(const String& name, const Vector<SPtr<MorphShape>>& shapes);
 
 		String mName;
@@ -118,7 +118,7 @@ namespace bs
 		static RTTITypeBase* getRTTIStatic();
 		RTTITypeBase* getRTTI() const override;
 
-		/** 
+		/**
 		 * Creates MorphShapes with no data. You must populate its data manually.
 		 *
 		 * @note	For serialization use only.
@@ -126,7 +126,7 @@ namespace bs
 		static SPtr<MorphChannel> createEmpty();
 	};
 
-	/** 
+	/**
 	 * Contains a set of morph channels used for morph target animation. Each morph channel contains one or multiple shapes
 	 * which are blended together depending on frame animation. Each channel is then additively blended together depending
 	 * on some weight.
@@ -151,7 +151,7 @@ namespace bs
 		static SPtr<MorphShapes> create(const Vector<SPtr<MorphChannel>>& channels, UINT32 numVertices);
 
 	private:
-		MorphShapes();
+		MorphShapes() = default;
 		MorphShapes(const Vector<SPtr<MorphChannel>>& channels, UINT32 numVertices);
 
 		Vector<SPtr<MorphChannel>> mChannels;
@@ -165,7 +165,7 @@ namespace bs
 		static RTTITypeBase* getRTTIStatic();
 		RTTITypeBase* getRTTI() const override;
 
-		/** 
+		/**
 		 * Creates MorphShapes with no data. You must populate its data manually.
 		 *
 		 * @note	For serialization use only.

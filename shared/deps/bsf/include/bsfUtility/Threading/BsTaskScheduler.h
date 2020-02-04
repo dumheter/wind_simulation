@@ -45,7 +45,7 @@ namespace bs
 		 * @param[in]	dependency	(optional) Task dependency if one exists. If provided the task will
 		 * 							not be executed until its dependency is complete.
 		 */
-		static SPtr<Task> create(const String& name, std::function<void()> taskWorker, 
+		static SPtr<Task> create(const String& name, std::function<void()> taskWorker,
 			TaskPriority priority = TaskPriority::Normal, SPtr<Task> dependency = nullptr);
 
 		/** Returns true if the task has completed. */
@@ -53,6 +53,9 @@ namespace bs
 
 		/**	Returns true if the task has been canceled. */
 		bool isCanceled() const;
+
+		/** Returns true if the task has started or completed execution. */
+		bool hasStarted() const;
 
 		/**
 		 * Blocks the current thread until the task has completed.

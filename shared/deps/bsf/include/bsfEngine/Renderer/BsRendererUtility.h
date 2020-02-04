@@ -17,18 +17,18 @@ namespace bs { namespace ct
 	 */
 
 	/** Shader that copies a source texture into a render target, and optionally resolves it. */
-	class BlitMat : public RendererMaterial<BlitMat>
+	class BS_EXPORT BlitMat : public RendererMaterial<BlitMat>
 	{
 		RMAT_DEF("Blit.bsl");
 
 		/** Helper method used for initializing variations of this material. */
-		template<UINT32 msaa, bool color>
+		template<UINT32 MSAA, UINT32 MODE>
 		static const ShaderVariation& getVariation()
 		{
 			static ShaderVariation variation = ShaderVariation(
 			SmallVector<ShaderVariation::Param, 4>({
-				ShaderVariation::Param("MSAA_COUNT", msaa),
-				ShaderVariation::Param("COLOR", color),
+				ShaderVariation::Param("MSAA_COUNT", MSAA),
+				ShaderVariation::Param("MODE", MODE),
 			}));
 
 			return variation;
@@ -39,7 +39,7 @@ namespace bs { namespace ct
 		/** Executes the material on the currently bound render target, copying from @p source. */
 		void execute(const SPtr<Texture>& source, const Rect2& area, bool flipUV);
 
-		/** 
+		/**
 		 * Returns the material variation matching the provided parameters.
 		 *
 		 * @param	msaaCount		Number of MSAA samples in the input texture. If larger than 1 the texture will be resolved
@@ -48,10 +48,92 @@ namespace bs { namespace ct
 		 *							the input is a 1-component depth texture. This controls how is the texture resolve and is
 		 *							only relevant if @p msaaCount > 1. Color texture MSAA samples will be averaged, while for
 		 *							depth textures the minimum of all samples will be used.
+		 * @param	isFiltered		True if to apply bilinear filtering to the sampled texture. Only relevant for color
+		 *							textures with no multiple samples.
 		 */
-		static BlitMat* getVariation(UINT32 msaaCount, bool isColor);
+		static BlitMat* getVariation(UINT32 msaaCount, bool isColor, bool isFiltered);
 	private:
 		GpuParamTexture mSource;
+		bool mIsFiltered = false;
+	};
+
+	BS_PARAM_BLOCK_BEGIN(CompositeParamDef)
+		BS_PARAM_BLOCK_ENTRY(Color, gTint)
+	BS_PARAM_BLOCK_END
+
+	extern CompositeParamDef gCompositeParamDef;
+
+	/** Blends the contents of the provided texture with the bound render target. */
+	class BS_EXPORT CompositeMat : public RendererMaterial<CompositeMat>
+	{
+		RMAT_DEF("Composite.bsl");
+
+	public:
+		CompositeMat();
+
+		/**
+		 * Executes the post-process effect with the provided parameters and writes the results to the provided
+		 * render target.
+		*
+		* @param[in]	source			Texture to blend with the target.
+		* @param[in]	target			Render target to blend with and write the results to.
+		* @param[in]	tint			Optional value to multiply all the values from @p source before blending.
+		*/
+		void execute(const SPtr<Texture>& source, const SPtr<RenderTarget>& target, const Color& tint = Color::White);
+
+	private:
+		SPtr<GpuParamBlockBuffer> mParamBuffer;
+		GpuParamTexture mSourceTex;
+	};
+
+	BS_PARAM_BLOCK_BEGIN(BicubicUpsampleParamDef)
+		BS_PARAM_BLOCK_ENTRY(Color, gTint)
+		BS_PARAM_BLOCK_ENTRY(Vector2I, gTextureSize)
+		BS_PARAM_BLOCK_ENTRY(Vector2, gInvPixel)
+		BS_PARAM_BLOCK_ENTRY(Vector2, gInvTwoPixels)
+	BS_PARAM_BLOCK_END
+
+	extern BicubicUpsampleParamDef gBicubicUpsampleParamDef;
+
+	/** Samples the source texture using bicubic filtering and outputs the results to the provided render target. */
+	class BS_EXPORT BicubicUpsampleMat : public RendererMaterial<BicubicUpsampleMat>
+	{
+		RMAT_DEF("BicubicUpsample.bsl");
+
+		/** Helper method used for initializing variations of this material. */
+		template<bool HERMITE>
+		static const ShaderVariation& getVariation()
+		{
+			static ShaderVariation variation = ShaderVariation(
+			SmallVector<ShaderVariation::Param, 4>({
+				ShaderVariation::Param("HERMITE", HERMITE)
+			}));
+
+			return variation;
+		}
+	public:
+		BicubicUpsampleMat();
+
+		/**
+		* Executes the post-process effect with the provided parameters and writes the results to the provided
+		* render target.
+		*
+		* @param[in]	source			Texture to filter.
+		* @param[in]	target			Render target to write the results to. Results will be additively blended
+		*								with the target.
+		* @param[in]	tint			Optional value to multiply all the values from @p source before blending.
+		*/
+		void execute(const SPtr<Texture>& source, const SPtr<RenderTarget>& target, const Color& tint = Color::White);
+
+		/**
+		 * Returns the material variation matching the provided parameters.
+		 *
+		 * @param	hermite		If true, use Hermite cubic filtering, otherwise use Lagrange cubic filtering.
+		 */
+		static BicubicUpsampleMat* getVariation(bool hermite = false);
+	private:
+		SPtr<GpuParamBlockBuffer> mParamBuffer;
+		GpuParamTexture mSourceTex;
 	};
 
 	BS_PARAM_BLOCK_BEGIN(ClearParamDef)
@@ -61,7 +143,7 @@ namespace bs { namespace ct
 	extern ClearParamDef gClearParamDef;
 
 	/** Shader that clears the currently bound render target to an integer value. */
-	class ClearMat : public RendererMaterial<ClearMat>
+	class BS_EXPORT ClearMat : public RendererMaterial<ClearMat>
 	{
 		RMAT_DEF("Clear.bsl");
 
@@ -142,14 +224,14 @@ namespace bs { namespace ct
 		 *
 		 * @param[in]	mesh					Mesh to draw.
 		 * @param[in]	subMesh					Portion of the mesh to draw.
-		 * @param[in]	morphVertices			Buffer containing the morph shape vertices. Will be bound to stream 1. 
+		 * @param[in]	morphVertices			Buffer containing the morph shape vertices. Will be bound to stream 1.
 		 *										Expected to contain the same number of vertices as the source mesh.
 		 * @param[in]	morphVertexDeclaration	Vertex declaration describing vertices of the provided mesh and the vertices
 		 *										provided in the morph vertex buffer.
 		 *
 		 * @note	Core thread.
 		 */
-		void drawMorph(const SPtr<MeshBase>& mesh, const SubMesh& subMesh, const SPtr<VertexBuffer>& morphVertices, 
+		void drawMorph(const SPtr<MeshBase>& mesh, const SubMesh& subMesh, const SPtr<VertexBuffer>& morphVertices,
 			const SPtr<VertexDeclaration>& morphVertexDeclaration);
 
 		/**
@@ -163,17 +245,19 @@ namespace bs { namespace ct
 		 * @param[in]	isDepth	If true, the input texture is assumed to be a depth texture (instead of a color one).
 		 *						Multisampled depth textures will be resolved by taking the minimum value of all samples,
 		 *						unlike color textures which wil be averaged.
+		 * @param	isFiltered	True if to apply bilinear filtering to the sampled texture. Only relevant for color
+		 *						textures with no multiple samples.
 		 */
-		void blit(const SPtr<Texture>& texture, const Rect2I& area = Rect2I::EMPTY, bool flipUV = false, 
-			bool isDepth = false);
+		void blit(const SPtr<Texture>& texture, const Rect2I& area = Rect2I::EMPTY, bool flipUV = false,
+			bool isDepth = false, bool isFiltered = false);
 
 		/**
 		 * Draws a quad over the entire viewport in normalized device coordinates.
 		 * 			
 		 * @param[in]	uv				UV coordinates to assign to the corners of the quad.
-		 * @param[in]	textureSize		Size of the texture the UV coordinates are specified for. If the UV coordinates are 
-		 *								already in normalized (0, 1) range then keep this value as is. If the UV coordinates 
-		 *								are in texels then set this value to the texture size so they can be normalized 
+		 * @param[in]	textureSize		Size of the texture the UV coordinates are specified for. If the UV coordinates are
+		 *								already in normalized (0, 1) range then keep this value as is. If the UV coordinates
+		 *								are in texels then set this value to the texture size so they can be normalized
 		 *								internally.
 		 * @param[in]	numInstances	How many instances of the quad to draw (using instanced rendering). Useful when
 		 *								drawing to 3D textures.
@@ -181,7 +265,7 @@ namespace bs { namespace ct
 		 * 			
 		 * @note	Core thread.
 		 */
-		void drawScreenQuad(const Rect2& uv, const Vector2I& textureSize = Vector2I(1, 1), 
+		void drawScreenQuad(const Rect2& uv, const Vector2I& textureSize = Vector2I(1, 1),
 			UINT32 numInstances = 1, bool flipUV = false);
 
 		/**
@@ -200,8 +284,8 @@ namespace bs { namespace ct
 			drawScreenQuad(uv, textureSize, numInstances);
 		}
 
-		/** 
-		 * Clears the currently bound render target to the provided integer value. This is similar to 
+		/**
+		 * Clears the currently bound render target to the provided integer value. This is similar to
 		 * RenderAPI::clearRenderTarget(), except it supports integer clears.
 		 */
 		void clear(UINT32 value);
@@ -212,9 +296,9 @@ namespace bs { namespace ct
 		/** Returns a unit axis aligned box stencil mesh. */
 		SPtr<Mesh> getBoxStencil() const { return mUnitBoxStencilMesh; }
 
-		/** 
+		/**
 		 * Returns a stencil mesh used for a spot light. Actual vertex positions need to be computed in shader as this
-		 * method will return uninitialized vertex positions. 
+		 * method will return uninitialized vertex positions.
 		 */
 		SPtr<Mesh> getSpotLightStencil() const { return mSpotLightStencilMesh; }
 
@@ -222,7 +306,14 @@ namespace bs { namespace ct
 		SPtr<Mesh> getSkyBoxMesh() const { return mSkyBoxMesh; }
 
 	private:
-		SPtr<Mesh> mFullScreenQuadMesh;
+		static constexpr UINT32 NUM_QUAD_VB_SLOTS = 1024;
+
+		SPtr<IndexBuffer> mFullScreenQuadIB;
+		SPtr<VertexBuffer> mFullScreenQuadVB;
+		SPtr<VertexDataDesc> mFullscreenQuadVDesc;
+		SPtr<VertexDeclaration> mFullscreenQuadVDecl;
+		UINT32 mNextQuadVBSlot = 0;
+
 		SPtr<Mesh> mUnitSphereStencilMesh;
 		SPtr<Mesh> mUnitBoxStencilMesh;
 		SPtr<Mesh> mSpotLightStencilMesh;

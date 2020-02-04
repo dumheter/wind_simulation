@@ -70,7 +70,11 @@
   */
 
 /** @defgroup Particles Particles
-  *	Emission, updated and rendering of particles in the particle system.
+  *	Emission, updates and rendering of particles in the particle system.
+  */
+
+/** @defgroup Network Network
+  * Sending and receiving data over the network.
   */
 
 /** @cond RTTI */
@@ -135,6 +139,10 @@
  *	Emission, updates and rendering of particles in the particle system.
  */
 
+/** @defgroup Network-Internal Network
+ * Sending and receiving data over the network.
+ */
+
 /** @defgroup Physics-Internal Physics
  *	Physics system: colliders, triggers, rigidbodies, joints, scene queries, etc.
  */
@@ -178,6 +186,12 @@
 #define BS_MAX_MULTIPLE_RENDER_TARGETS 8
 #define BS_FORCE_SINGLETHREADED_RENDERING 0
 
+/**
+ * Runs the core thead on the application's main (initial) thread, rather than on a separate worker. Important for macOS
+ * which has limitations regarding what can run on non-main threads.
+ */
+#define BS_CORE_THREAD_IS_MAIN 0
+
 /** Maximum number of individual GPU queues, per type. */
 #define BS_MAX_QUEUES_PER_TYPE 8
 
@@ -219,7 +233,7 @@
 #include "Localization/BsHString.h"
 #include "String/BsStringID.h"
 
-namespace bs 
+namespace bs
 {
 	// Core objects
 	template<class T>
@@ -229,6 +243,11 @@ namespace bs
 #define CORE_OBJECT_FORWARD_DECLARE(TYPE)				\
 	class TYPE;											\
 	namespace ct { class TYPE; }						\
+	template<> struct CoreThreadType<TYPE> { typedef ct::TYPE Type; };
+
+#define CORE_OBJECT_FORWARD_DECLARE_STRUCT(TYPE)		\
+	struct TYPE;										\
+	namespace ct { struct TYPE; }						\
 	template<> struct CoreThreadType<TYPE> { typedef ct::TYPE Type; };
 
 	CORE_OBJECT_FORWARD_DECLARE(IndexBuffer)
@@ -265,6 +284,9 @@ namespace bs
 	CORE_OBJECT_FORWARD_DECLARE(VectorField)
 	CORE_OBJECT_FORWARD_DECLARE(Skybox)
 	CORE_OBJECT_FORWARD_DECLARE(Decal)
+	CORE_OBJECT_FORWARD_DECLARE_STRUCT(DepthOfFieldSettings)
+	CORE_OBJECT_FORWARD_DECLARE_STRUCT(ChromaticAberrationSettings)
+	CORE_OBJECT_FORWARD_DECLARE_STRUCT(RenderSettings)
 
 	class Collider;
 	class Rigidbody;
@@ -335,7 +357,6 @@ namespace bs
 	class Input;
 	struct PointerEvent;
 	class RendererFactory;
-	class AsyncOp;
 	class HardwareBufferManager;
 	class FontManager;
 	class RenderStateManager;
@@ -412,6 +433,7 @@ namespace bs
 	class SceneObject;
 	class Component;
 	class SceneManager;
+	class SceneInstance;
 	// RTTI
 	class MeshRTTI;
 	// Desc structs
@@ -458,15 +480,6 @@ namespace bs
 		class RenderStateManager;
 		class HardwareBufferManager;
 	}
-}
-
-/************************************************************************/
-/* 						         Typedefs								*/
-/************************************************************************/
-
-namespace bs
-{
-	typedef TCoreThreadQueue<CommandQueueNoSync> CoreThreadQueue;
 }
 
 /************************************************************************/
@@ -637,6 +650,24 @@ namespace bs
 		TID_ParticleRotation = 1190,
 		TID_Decal = 1191,
 		TID_CDecal = 1192,
+		TID_RenderTarget = 1193,
+		TID_RenderTexture = 1194,
+		TID_RenderWindow = 1195,
+		TID_ShaderVariationParamInfo = 1196,
+		TID_ShaderVariationParamValue = 1197,
+		TID_ScreenSpaceLensFlareSettings = 1198,
+		TID_ChromaticAberrationSettings = 1199,
+		TID_FilmGrainSettings = 1200,
+		TID_AutoExposureSettings = 1201,
+		TID_TonemappingSettings = 1202,
+		TID_WhiteBalanceSettings = 1203,
+		TID_ColorGradingSettings = 1204,
+		TID_DepthOfFieldSettings = 1205,
+		TID_AmbientOcclusionSettings = 1206,
+		TID_ScreenSpaceReflectionsSettings = 1207,
+		TID_ShadowSettings = 1208,
+		TID_MotionBlurSettings = 1209,
+		TID_TemporalAASettings = 1210,
 
 		// Moved from Engine layer
 		TID_CCamera = 30000,
@@ -646,14 +677,6 @@ namespace bs
 		TID_Renderable = 30004,
 		TID_Light = 30011,
 		TID_CLight = 30012,
-		TID_AutoExposureSettings = 30016,
-		TID_TonemappingSettings = 30017,
-		TID_WhiteBalanceSettings = 30018,
-		TID_ColorGradingSettings = 30019,
-		TID_DepthOfFieldSettings = 30020,
-		TID_AmbientOcclusionSettings = 30021,
-		TID_ScreenSpaceReflectionsSettings = 30022,
-		TID_ShadowSettings = 30023,
 	};
 }
 
@@ -711,6 +734,7 @@ namespace bs
 	typedef GameObjectHandle<CSphereCollider> HSphereCollider;
 	typedef GameObjectHandle<CCapsuleCollider> HCapsuleCollider;
 	typedef GameObjectHandle<CPlaneCollider> HPlaneCollider;
+	typedef GameObjectHandle<CMeshCollider> HMeshCollider;
 	typedef GameObjectHandle<CJoint> HJoint;
 	typedef GameObjectHandle<CHingeJoint> HHingeJoint;
 	typedef GameObjectHandle<CSliderJoint> HSliderJoint;
@@ -758,8 +782,8 @@ namespace bs
 	template <typename T, typename A = StdAlloc<T, ProfilerAlloc>>
 	using ProfilerStack = std::stack<T, std::deque<T, A>>;
 
-	/** Banshee thread policy that performs special startup/shutdown on threads managed by thread pool. */
-	class BS_CORE_EXPORT ThreadBansheePolicy
+	/** Default thread policy for the framework. Performs special startup/shutdown on threads managed by thread pool. */
+	class BS_CORE_EXPORT ThreadDefaultPolicy
 	{
 	public:
 		static void onThreadStarted(const String& name)
@@ -786,9 +810,9 @@ namespace bs
 
 	template<class T> struct CoreVariant<T, true> { typedef typename CoreThreadType<T>::Type Type; };
 
-	/** 
-	 * Allows a simple way to define a member that can be both CoreObject variants depending on the Core template 
-	 * parameter. 
+	/**
+	 * Allows a simple way to define a member that can be both CoreObject variants depending on the Core template
+	 * parameter.
 	 */
 	template<class T, bool Core>
 	using CoreVariantType = typename CoreVariant<T, Core>::Type;
@@ -801,10 +825,10 @@ namespace bs
 
 	template<class T> struct CoreVariantHandle<T, true> { typedef SPtr<typename CoreThreadType<T>::Type> Type; };
 
-	/** 
-	 * Allows a simple way to define a member that can be both CoreObject variants depending on the Core template 
-	 * parameter. Sim thread type is wrapped in as a resource handle while the core thread variant is wrapped in a shared 
-	 * pointer. 
+	/**
+	 * Allows a simple way to define a member that can be both CoreObject variants depending on the Core template
+	 * parameter. Sim thread type is wrapped in as a resource handle while the core thread variant is wrapped in a shared
+	 * pointer.
 	 */
 	template<class T, bool Core>
 	using CoreVariantHandleType = typename CoreVariantHandle<T, Core>::Type;
@@ -812,11 +836,14 @@ namespace bs
 	/** Flags that are provided to the serialization system to control serialization/deserialization. */
 	enum SerializationFlags
 	{
-		/** 
+		/**
 		 * Used when deserializing resources. Lets the system know not to discard any intermediate resource data that might
 		 * be required if the resource needs to be serialized.
 		 */
-		SF_KeepResourceSourceData
+		SF_KeepResourceSourceData = 1 << 0,
+
+		/** Only serializes elements with network replication flag enabled. */
+		SF_ReplicableOnly = 1 << 1
 	};
 
 	/** Helper type that can contain either a component or scene actor version of an object. */
@@ -861,6 +888,27 @@ namespace bs
 		GameObjectHandle<ComponentType> mComponent;
 		SPtr<T> mActor;
 	};
+
+	BS_LOG_CATEGORY(CoreThread, 20)
+	BS_LOG_CATEGORY(Renderer, 21)
+	BS_LOG_CATEGORY(Scene, 22)
+	BS_LOG_CATEGORY(Physics, 23)
+	BS_LOG_CATEGORY(Audio, 24)
+	BS_LOG_CATEGORY(RenderBackend, 25)
+	BS_LOG_CATEGORY(BSLCompiler, 26)
+	BS_LOG_CATEGORY(Particles, 27)
+	BS_LOG_CATEGORY(Resources, 28)
+	BS_LOG_CATEGORY(FBXImporter, 29)
+	BS_LOG_CATEGORY(PixelUtility, 30)
+	BS_LOG_CATEGORY(Texture, 31)
+	BS_LOG_CATEGORY(Mesh, 32)
+	BS_LOG_CATEGORY(GUI, 33)
+	BS_LOG_CATEGORY(Profiler, 34)
+	BS_LOG_CATEGORY(Material, 35)
+	BS_LOG_CATEGORY(FreeImageImporter, 36)
+	BS_LOG_CATEGORY(Script, 37)
+	BS_LOG_CATEGORY(Importer, 38)
+	BS_LOG_CATEGORY(Network, 39)
 }
 
 #include "Utility/BsCommonTypes.h"

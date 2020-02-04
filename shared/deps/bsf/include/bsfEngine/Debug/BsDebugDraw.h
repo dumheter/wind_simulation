@@ -56,7 +56,7 @@ namespace bs
 		 * @param[in]	radius		Radius of the base of the cone.
 		 * @param[in]	scale		Scale applied to cone's disc width & height. Allows you to create elliptical cones.
 		 */
-		void drawCone(const Vector3& base, const Vector3& normal, float height, float radius, 
+		void drawCone(const Vector3& base, const Vector3& normal, float height, float radius,
 			const Vector2& scale = Vector2::ONE);
 
 		/**
@@ -88,7 +88,7 @@ namespace bs
 		 * @param[in]	radius		Radius of the base of the cone.
 		 * @param[in]	scale		Scale applied to cone's disc width & height. Allows you to create elliptical cones.
 		 */
-		void drawWireCone(const Vector3& base, const Vector3& normal, float height, float radius, 
+		void drawWireCone(const Vector3& base, const Vector3& normal, float height, float radius,
 			const Vector2& scale = Vector2::ONE);
 
 		/** Draws a line between two points. */
@@ -119,10 +119,10 @@ namespace bs
 		 */
 		void drawWireArc(const Vector3& position, const Vector3& normal, float radius, Degree startAngle, Degree amountAngle);
 
-		/** 
+		/**
 		 * Draws a wireframe mesh.
 		 *
-		 * @param[in]	meshData	Object containing mesh vertices and indices. Vertices must be Vertex3 and indices 
+		 * @param[in]	meshData	Object containing mesh vertices and indices. Vertices must be Vertex3 and indices
 		 *							32-bit.
 		 */
 		void drawWireMesh(const SPtr<MeshData>& meshData);
@@ -164,7 +164,7 @@ namespace bs
 		/** Converts mesh data from DrawHelper into mesh data usable by the debug draw renderer. */
 		Vector<MeshRenderData> createMeshProxyData(const Vector<DrawHelper::ShapeMeshData>& meshData);
 
-		DrawHelper* mDrawHelper;
+		DrawHelper* mDrawHelper = nullptr;
 		Vector<DrawHelper::ShapeMeshData> mActiveMeshes;
 
 		SPtr<ct::DebugDrawRenderer> mRenderer;
@@ -226,10 +226,10 @@ namespace bs
 		void initialize(const Any& data) override;
 
 		/**	@copydoc RendererExtension::check */
-		bool check(const Camera& camera) override;
+		RendererExtensionRequest check(const ct::Camera& camera) override;
 
 		/**	@copydoc RendererExtension::render */
-		void render(const Camera& camera) override;
+		void render(const Camera& camera, const RendererViewContext& viewContext) override;
 
 		/**
 		 * Updates the internal data that is used for rendering. Normally you would call this after updating the meshes

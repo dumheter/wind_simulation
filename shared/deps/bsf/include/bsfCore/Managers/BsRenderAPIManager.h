@@ -16,13 +16,13 @@ namespace bs
 	class BS_CORE_EXPORT RenderAPIManager : public Module<RenderAPIManager>
 	{
 	public:
-		RenderAPIManager();
+		RenderAPIManager() = default;
 		~RenderAPIManager();
 
 		/**
 		 * Starts the render API with the provided name and creates the primary render window.
 		 *
-		 * @param[in]	name				Name of the render system to start. Factory for this render system must be 
+		 * @param[in]	name				Name of the render system to start. Factory for this render system must be
 		 *									previously registered.
 		 * @param[in]	primaryWindowDesc	Contains options used for creating the primary window.
 		 * @return							Created render window if initialization is successful, null otherwise.
@@ -33,7 +33,7 @@ namespace bs
 		void registerFactory(SPtr<RenderAPIFactory> factory);
 	private:
 		Vector<SPtr<RenderAPIFactory>> mAvailableFactories;
-		bool mRenderAPIInitialized;
+		bool mRenderAPIInitialized = false;
 	};
 
 	/** @} */
