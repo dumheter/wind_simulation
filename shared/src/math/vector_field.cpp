@@ -23,6 +23,12 @@
 #include "vector_field.hpp"
 
 // ========================================================================== //
+// Headers
+// ========================================================================== //
+
+#include <Debug/BsDebugDraw.h>
+
+// ========================================================================== //
 // VectorField Implementation
 // ========================================================================== //
 
@@ -49,6 +55,45 @@ VectorField::~VectorField()
 
 void VectorField::debugDraw()
 {
+    bs::Vector<bs::Vector3> points;
+
+    // Draw lines parallell with the x-axis
+    const f32 xStart = 0;
+    const f32 xEnd = m_cellSize * m_width;
+    for (u32 z = 0; z < m_depth + 1; z++)
+    {
+        for (u32 y = 0; y < m_height + 1; y++)
+        {
+            points.push_back(bs::Vector3(xStart, f32(y), f32(z)));
+            points.push_back(bs::Vector3(xEnd, f32(y), f32(z)));
+        }
+    }
+
+    // Draw lines parallell with the x-axis
+    const f32 yStart = 0;
+    const f32 yEnd = m_cellSize * m_height;
+    for (u32 z = 0; z < m_depth + 1; z++)
+    {
+        for (u32 x = 0; x < m_width + 1; x++)
+        {
+            points.push_back(bs::Vector3(f32(x), yStart, f32(z)));
+            points.push_back(bs::Vector3(f32(x), yEnd, f32(z)));
+        }
+    }
+
+    // Draw lines parallell with the x-axis
+    const f32 zStart = 0;
+    const f32 zEnd = m_cellSize * m_depth;
+    for (u32 y = 0; y < m_height + 1; y++)
+    {
+        for (u32 x = 0; x < m_width + 1; x++)
+        {
+            points.push_back(bs::Vector3(f32(x), f32(y), zStart));
+            points.push_back(bs::Vector3(f32(x), f32(y), zEnd));
+        }
+    }
+
+    bs::DebugDraw::instance().drawLineList(points);
 }
 
 // -------------------------------------------------------------------------- //

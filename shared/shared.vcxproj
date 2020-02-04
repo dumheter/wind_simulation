@@ -68,6 +68,7 @@
     <Lib>
       <AdditionalDependencies>bsf.lib;bsfD3D11RenderAPI.lib;bsfFBXImporter.lib;bsfFontImporter.lib;bsfFreeImgImporter.lib;bsfOpenAudio.lib;bsfPhysX.lib;bsfRenderBeast.lib;bsfSL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)deps\bsf\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -90,6 +91,7 @@
     <Lib>
       <AdditionalDependencies>bsf.lib;bsfD3D11RenderAPI.lib;bsfFBXImporter.lib;bsfFontImporter.lib;bsfFreeImgImporter.lib;bsfOpenAudio.lib;bsfPhysX.lib;bsfRenderBeast.lib;bsfSL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)deps\bsf\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

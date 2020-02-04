@@ -1,7 +1,10 @@
 # Project
 .vs/
 out/
+*.user
 *.asset
+runtime/Data/
+editor/Data/
 
 # Compiled Object files
 *.o
