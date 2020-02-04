@@ -52,7 +52,7 @@ class VectorField
     /* Draw lines to help with debugging the vector field. This is called only
      * once to produce all the lines required for the 'DebugDraw' class. After
      * clearing 'DebugDraw' this function needs to be called again */
-    void debugDraw();
+    void debugDraw(const bs::Vector3 &offset = bs::Vector3(0, 0, 0), bool drawFrame = true);
 
     /* Returns the reference to a vector in the vector field */
     bs::Vector3 &GetVector(u32 x, u32 y, u32 z);

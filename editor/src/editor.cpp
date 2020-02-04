@@ -62,8 +62,8 @@ Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
     setupGUI();
 
     DebugDraw::instance().setColor(Color::Red);
-    VectorField *vf = new VectorField(4, 4, 4, 1.0f);
-    vf->debugDraw();
+    VectorField *vf = new VectorField(30, 30, 30, 0.5f);
+    vf->debugDraw(Vector3(), false);
 }
 
 // -------------------------------------------------------------------------- //
