@@ -30,24 +30,24 @@ namespace bs
 	{
 	public:
 		/**
-		 * Checks if the resource is loaded. Until resource is loaded this handle is invalid and you may not get the 
+		 * Checks if the resource is loaded. Until resource is loaded this handle is invalid and you may not get the
 		 * internal resource from it.
 		 *
-		 * @param[in]	checkDependencies	If true, and if resource has any dependencies, this method will also check if 
+		 * @param[in]	checkDependencies	If true, and if resource has any dependencies, this method will also check if
 		 *									they are loaded.
 		 */
 		bool isLoaded(bool checkDependencies = true) const;
 
 		/**
 		 * Blocks the current thread until the resource is fully loaded.
-		 * 			
+		 *
 		 * @note	Careful not to call this on the thread that does the loading.
 		 */
 		void blockUntilLoaded(bool waitForDependencies = true) const;
 
 		/**
 		 * Releases an internal reference to this resource held by the resources system, if there is one.
-		 * 			
+		 *
 		 * @see		Resources::release(ResourceHandleBase&)
 		 */
 		void release();
@@ -69,11 +69,11 @@ namespace bs
 		void destroy();
 
 		/**
-		 * Sets the created flag to true and assigns the resource pointer. Called by the constructors, or if you 
-		 * constructed just using a UUID, then you need to call this manually before you can access the resource from 
+		 * Sets the created flag to true and assigns the resource pointer. Called by the constructors, or if you
+		 * constructed just using a UUID, then you need to call this manually before you can access the resource from
 		 * this handle.
-		 * 			
-		 * @note	
+		 *
+		 * @note
 		 * This is needed because two part construction is required due to  multithreaded nature of resource loading.
 		 * @note
 		 * Internal method.
@@ -92,9 +92,15 @@ namespace bs
 		/** Decrements the reference count of the handle. Only to be used by Resources for keeping internal references. */
 		void removeInternalRef();
 
-		/** 
-		 * @note	
-		 * All handles to the same source must share this same handle data. Otherwise things like counting number of 
+		/**
+		 * Notification sent by the resource system when the resource is done with the loading process. This will trigger
+		 * even if the load fails.
+		 */
+		void notifyLoadComplete();
+
+		/**
+		 * @note
+		 * All handles to the same source must share this same handle data. Otherwise things like counting number of
 		 * references or replacing pointed to resource become impossible without additional logic. */
 		SPtr<ResourceHandleData> mData;
 
@@ -141,12 +147,12 @@ namespace bs
 	protected:
 		void addRef()
 		{
-			if (mData) 
+			if (mData)
 				mData->mRefCount.fetch_add(1, std::memory_order_relaxed);
 		};
 
-		void releaseRef() 
-		{ 
+		void releaseRef()
+		{
 			if (mData)
 			{
 				std::uint32_t refCount = mData->mRefCount.fetch_sub(1, std::memory_order_release);
@@ -175,6 +181,8 @@ namespace bs
 	{
 	public:
 		TResourceHandle() = default;
+
+		TResourceHandle(std::nullptr_t) { }
 
 		/**	Copy constructor. */
 		TResourceHandle(const TResourceHandle& other)
@@ -216,7 +224,7 @@ namespace bs
 
 		/** Clears the handle making it invalid and releases any references held to the resource. */
 		TResourceHandle<T, WeakHandle>& operator=(std::nullptr_t ptr)
-		{ 	
+		{
 			this->releaseRef();
 			this->mData = nullptr;
 
@@ -225,7 +233,7 @@ namespace bs
 
 		/**	Copy assignment. */
 		TResourceHandle<T, WeakHandle>& operator=(const TResourceHandle<T, WeakHandle>& rhs)
-		{ 	
+		{
 			setHandleData(rhs.getHandleData());
 			return *this;
 		}
@@ -251,7 +259,7 @@ namespace bs
 		/**
 		 * Allows direct conversion of handle to bool.
 		 *
-		 * @note	This is needed because we can't directly convert to bool since then we can assign pointer to bool and 
+		 * @note	This is needed because we can't directly convert to bool since then we can assign pointer to bool and
 		 *			that's weird.
 		 */
 		operator int Bool_struct<T>::*() const
@@ -264,8 +272,8 @@ namespace bs
 		 *
 		 * @note	Throws exception if handle is invalid.
 		 */
-		T* get() const 
-		{ 
+		T* get() const
+		{
 			this->throwIfNotLoaded();
 
 			return reinterpret_cast<T*>(this->mData->mPtr.get());
@@ -277,7 +285,7 @@ namespace bs
 		 * @note	Throws exception if handle is invalid.
 		 */
 		SPtr<T> getInternalPtr() const
-		{ 
+		{
 			this->throwIfNotLoaded();
 
 			return std::static_pointer_cast<T>(this->mData->mPtr);
@@ -296,12 +304,14 @@ namespace bs
 		friend Resources;
 		template<class _T, bool _Weak>
 		friend class TResourceHandle;
-		template<class _Ty1, class _Ty2, bool Weak>
-		friend TResourceHandle<_Ty1, Weak> static_resource_cast(const TResourceHandle<_Ty2, Weak>& other);
+		template<class _Ty1, class _Ty2, bool _Weak2, bool _Weak1>
+		friend TResourceHandle<_Ty1, _Weak1> static_resource_cast(const TResourceHandle<_Ty2, _Weak2>& other);
+		template<class _Ty1, class _Ty2, bool _Weak2>
+		friend TResourceHandle<_Ty1, false> static_resource_cast(const TResourceHandle<_Ty2, _Weak2>& other);
 
 		/**
 		 * Constructs a new valid handle for the provided resource with the provided UUID.
-		 *			
+		 *
 		 * @note	Handle will take ownership of the provided resource pointer, so make sure you don't delete it elsewhere.
 		 */
 		explicit TResourceHandle(T* ptr, const UUID& uuid)
@@ -311,10 +321,11 @@ namespace bs
 			this->addRef();
 
 			this->setHandleData(SPtr<Resource>(ptr), uuid);
+			this->mIsCreated = true;
 		}
 
 		/**
-		 * Constructs an invalid handle with the specified UUID. You must call setHandleData() with the actual resource 
+		 * Constructs an invalid handle with the specified UUID. You must call setHandleData() with the actual resource
 		 * pointer to make the handle valid.
 		 */
 		TResourceHandle(const UUID& uuid)
@@ -331,7 +342,8 @@ namespace bs
 			this->mData = bs_shared_ptr_new<ResourceHandleData>();
 			this->addRef();
 
-			setHandleData(ptr, uuid);
+			this->setHandleData(ptr, uuid);
+			this->mData->mIsCreated = true;
 		}
 
 		/**	Replaces the internal handle data pointer, effectively transforming the handle into a different handle. */
@@ -357,7 +369,7 @@ namespace bs
 	/**	Checks if two handles point to the same resource. */
 	template<class _Ty1, bool _Weak1, class _Ty2, bool _Weak2>
 	bool operator==(const TResourceHandle<_Ty1, _Weak1>& _Left, const TResourceHandle<_Ty2, _Weak2>& _Right)
-	{	
+	{
 		if(_Left.getHandleData() != nullptr && _Right.getHandleData() != nullptr)
 			return _Left.getHandleData()->mPtr == _Right.getHandleData()->mPtr;
 
@@ -367,13 +379,13 @@ namespace bs
 	/**	Checks if a handle is null. */
 	template<class _Ty1, bool _Weak1, class _Ty2, bool _Weak2>
 	bool operator==(const TResourceHandle<_Ty1, _Weak1>& _Left, std::nullptr_t  _Right)
-	{	
+	{
 		return _Left.getHandleData() == nullptr || _Left.getHandleData()->mUUID.empty();
 	}
 
 	template<class _Ty1, bool _Weak1, class _Ty2, bool _Weak2>
 	bool operator!=(const TResourceHandle<_Ty1, _Weak1>& _Left, const TResourceHandle<_Ty2, _Weak2>& _Right)
-	{	
+	{
 		return (!(_Left == _Right));
 	}
 
@@ -387,8 +399,8 @@ namespace bs
 	template <typename T>
 	using ResourceHandle = TResourceHandle<T, false>;
 
-	/** 
-	 * @copydoc ResourceHandleBase 
+	/**
+	 * @copydoc ResourceHandleBase
 	 *
 	 * Weak handles don't prevent the resource from being unloaded.
 	 */
@@ -396,10 +408,20 @@ namespace bs
 	using WeakResourceHandle = TResourceHandle<T, true>;
 
 	/**	Casts one resource handle to another. */
-	template<class _Ty1, class _Ty2, bool Weak>
-	TResourceHandle<_Ty1, Weak> static_resource_cast(const TResourceHandle<_Ty2, Weak>& other)
+	template<class _Ty1, class _Ty2, bool _Weak2, bool _Weak1>
+	TResourceHandle<_Ty1, _Weak1> static_resource_cast(const TResourceHandle<_Ty2, _Weak2>& other)
 	{
-		TResourceHandle<_Ty1, Weak> handle;
+		TResourceHandle<_Ty1, _Weak1> handle;
+		handle.setHandleData(other.getHandleData());
+
+		return handle;
+	}
+
+	/**	Casts one resource handle to another. */
+	template<class _Ty1, class _Ty2, bool _Weak2>
+	TResourceHandle<_Ty1, false> static_resource_cast(const TResourceHandle<_Ty2, _Weak2>& other)
+	{
+		TResourceHandle<_Ty1, false> handle;
 		handle.setHandleData(other.getHandleData());
 
 		return handle;

@@ -42,6 +42,7 @@
 #include <Mesh/BsMesh.h>
 #include <Material/BsMaterial.h>
 #include <BsCameraFlyer.h>
+#include <Debug/BsDebugDraw.h>
 
 // ========================================================================== //
 // Editor Implementation
@@ -50,8 +51,10 @@
 namespace wind
 {
 
-Editor::Editor() : m_app(App::Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
+Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
 {
+    using namespace bs;
+
     registerControls();
     setupCamera();
     setupScene();
@@ -60,9 +63,12 @@ Editor::Editor() : m_app(App::Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
 
 // -------------------------------------------------------------------------- //
 
-void Editor::run()
+void Editor::OnPreUpdate()
 {
-    m_app.run();
+    using namespace bs;
+
+    // DebugDraw::instance().setColor(Color::Red);
+    // DebugDraw::instance().drawLine(Vector3(0, .1, 0), Vector3(1, .1, 0));
 }
 
 // -------------------------------------------------------------------------- //
@@ -111,11 +117,12 @@ void Editor::setupScene()
     const HShader shader = gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
     HMaterial planeMat = Material::create(shader);
     planeMat->setTexture("gAlbedoTex", texGrid);
-    planeMat->setVec2("gUVTile", Vector2::ONE * GROUND_PLANE_SCALE * 0.5f);
+    planeMat->setVec2("gUVTile", Vector2::ONE * GROUND_PLANE_SCALE * 4.0f);
     const HMesh planeMesh = gBuiltinResources().getMesh(BuiltinMesh::Quad);
 
     HSceneObject plane = SceneObject::create("Plane");
     plane->setScale(Vector3(GROUND_PLANE_SCALE, 1.0f, GROUND_PLANE_SCALE));
+    plane->setRotation(Quaternion(Degree(0), Degree(0), Degree(180)));
     HRenderable planeRenderable = plane->addComponent<CRenderable>();
     planeRenderable->setMesh(planeMesh);
     planeRenderable->setMaterial(planeMat);

@@ -6,7 +6,7 @@
 #include "Particles/BsParticleSystem.h"
 #include "Scene/BsComponent.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup Components-Core
 	 *  @{
@@ -24,7 +24,7 @@ namespace bs
 		virtual ~CParticleSystem() = default;
 		
 		/** @copydoc ParticleSystem::setSettings */
-		BS_SCRIPT_EXPORT(pr:setter,n:Settings,passByCopy)
+		BS_SCRIPT_EXPORT(pr:setter,n:Settings,passByCopy,inline)
 		void setSettings(const ParticleSystemSettings& settings);
 
 		/** @copydoc ParticleSystem::getSettings */
@@ -56,16 +56,24 @@ namespace bs
 		const Vector<SPtr<ParticleEvolver>>& getEvolvers() const { return mEvolvers; }
 
 		/** @copydoc ParticleSystem::setLayer() */
-		BS_SCRIPT_EXPORT(pr:setter,n:Layer)
+		BS_SCRIPT_EXPORT(pr:setter,n:Layer,layerMask)
 		void setLayer(UINT64 layer);
 
 		/** @copydoc ParticleSystem::getLayer() */
-		BS_SCRIPT_EXPORT(pr:getter,n:Layer)
+		BS_SCRIPT_EXPORT(pr:getter,n:Layer,layerMask)
 		UINT64 getLayer() const { return mLayer; }
 
 		/** @name Internal
 		 *  @{
 		 */
+
+		/**
+		 * Enables or disabled preview mode. Preview mode allows the particle system to play while the game is not running,
+		 * primarily for preview purposes in the editor. Returns true if the preview mode was enabled, false if it was
+		 * disabled or enabling preview failed.
+		 */
+		BS_SCRIPT_EXPORT(n:TogglePreviewMode,v:internal)
+		bool _togglePreviewMode(bool enabled);
 
 		/** Returns the ParticleSystem implementation wrapped by this component. */
 		ParticleSystem* _getInternal() const { return mInternal.get(); }
@@ -103,6 +111,8 @@ namespace bs
 		Vector<SPtr<ParticleEmitter>> mEmitters;
 		Vector<SPtr<ParticleEvolver>> mEvolvers;
 		UINT64 mLayer = 1;
+
+		bool mPreviewMode = false;
 
 		/************************************************************************/
 		/* 								RTTI		                     		*/

@@ -12,14 +12,14 @@ namespace bs
 	 *  @{
 	 */
 
-	/** 
+	/**
 	 * Represents a listener that hears audio sources. For spatial audio the volume and pitch of played audio is determined
 	 * by the distance, orientation and velocity differences between the source and the listener.
 	 */
 	class BS_CORE_EXPORT AudioListener : public IReflectable, public SceneActor
 	{
 	public:
-		virtual ~AudioListener() {}
+		virtual ~AudioListener() = default;
 
 		/** Sets the velocity of the listener. */
 		virtual void setVelocity(const Vector3& velocity);

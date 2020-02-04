@@ -36,12 +36,12 @@ namespace wind
 {
 
 /* Main Editor class */
-class Editor
+class Editor : public App
 {
   public:
     Editor();
 
-    void run();
+    void OnPreUpdate() override;
 
   private:
     /* Setup the camera */
@@ -63,11 +63,7 @@ class Editor
     static constexpr u32 WINDOW_HEIGHT = 720;
 
     /* Scale of the ground plane */
-    static constexpr f32 GROUND_PLANE_SCALE = 50.0f;
-
-  private:
-    /* Application handle */
-    App m_app;
+    static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
 };
 
 } // namespace wind

@@ -7,7 +7,7 @@
 #include "RenderAPI/BsRenderTarget.h"
 
 namespace bs
-{    
+{
 	/** @addtogroup RenderAPI
 	 *  @{
 	 */
@@ -30,7 +30,7 @@ namespace bs
 		virtual ~RenderTextureProperties() { }
 
 	private:
-		void construct(const TextureProperties* textureProps, UINT32 numSlices, UINT32 mipLevel, bool requiresFlipping, 
+		void construct(const TextureProperties* textureProps, UINT32 numSlices, UINT32 mipLevel, bool requiresFlipping,
 					   bool hwGamma);
 
 		friend class ct::RenderTexture;
@@ -46,10 +46,10 @@ namespace bs
 	class BS_CORE_EXPORT BS_SCRIPT_EXPORT(m:Rendering) RenderTexture : public RenderTarget
 	{
 	public:
-		virtual ~RenderTexture() { }
+		virtual ~RenderTexture() = default;
 
 		/** @copydoc TextureManager::createRenderTexture(const TEXTURE_DESC&, bool, PixelFormat) */
-		static SPtr<RenderTexture> create(const TEXTURE_DESC& colorDesc, 
+		static SPtr<RenderTexture> create(const TEXTURE_DESC& colorDesc,
 			bool createDepth = true, PixelFormat depthStencilFormat = PF_D32);
 
 		/** @copydoc TextureManager::createRenderTexture(const RENDER_TEXTURE_DESC&) */
@@ -95,6 +95,14 @@ namespace bs
 		HTexture mBindableDepthStencilTex;
 
 		RENDER_TEXTURE_DESC mDesc;
+
+		/************************************************************************/
+		/* 								SERIALIZATION                      		*/
+		/************************************************************************/
+	public:
+		friend class RenderTextureRTTI;
+		static RTTITypeBase* getRTTIStatic();
+		RTTITypeBase* getRTTI() const override;
 	};
 
 	/** @} */
@@ -125,7 +133,7 @@ namespace bs
 	{
 	public:
 		RenderTexture(const RENDER_TEXTURE_DESC& desc, UINT32 deviceIdx);
-		virtual ~RenderTexture();
+		virtual ~RenderTexture() = default;
 
 		/** @copydoc CoreObject::initialize */
 		void initialize() override;

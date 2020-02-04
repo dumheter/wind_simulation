@@ -5,12 +5,15 @@
 #include "Scene/BsSceneObject.h"
 #include "Components/BsCCamera.h"
 #include "Platform/BsCursor.h"
+#include "BsApplication.h"
+#include "Input/BsMouse.h"
+#include "Input/BsInput.h"
 
 namespace bs
 {
-const float CameraFlyer::START_SPEED = 40.0f;
-const float CameraFlyer::TOP_SPEED = 130.0f;
-const float CameraFlyer::ACCELERATION = 10.0f;
+const float CameraFlyer::START_SPEED = 8.0f;
+const float CameraFlyer::TOP_SPEED = 24.0f;
+const float CameraFlyer::ACCELERATION = 5.0f;
 const float CameraFlyer::FAST_MODE_MULTIPLIER = 2.0f;
 const float CameraFlyer::ROTATION_SPEED = 3.0f;
 
@@ -58,9 +61,17 @@ void CameraFlyer::update()
     if (camRotating != mLastButtonState)
     {
         if (camRotating)
+        {
             Cursor::instance().hide();
+        }
         else
+        {
             Cursor::instance().show();
+            const SPtr<RenderWindow> window = gApplication().getPrimaryWindow();
+            const UINT32 x = window->getProperties().left + (window->getProperties().width / 2);
+            const UINT32 y = window->getProperties().top + (window->getProperties().height / 2);
+            Cursor::instance().setScreenPosition(Vector2I(x, y));
+        }
 
         mLastButtonState = camRotating;
     }

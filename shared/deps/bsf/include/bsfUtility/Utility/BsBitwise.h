@@ -9,14 +9,14 @@
 #include <intrin.h>
 #endif
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup General
 	 *  @{
 	 */
 
 	/** Floating point number broken down into components for easier access. */
-	union Float754 
+	union Float754
 	{
 		UINT32 raw;
 		float value;
@@ -67,18 +67,6 @@ namespace bs
 	class Bitwise
 	{
 	public:
-		/** Returns the most significant bit set in a value. */
-		template<typename IntType>
-		static constexpr UINT32 mostSignificantBitSet(IntType value)
-		{
-			UINT32 result = 0;
-			while (value != 0) {
-				++result;
-				value >>= 1;
-			}
-			return result - 1;
-		}
-
 		/** Returns the power-of-two number greater or equal to the provided value. */
 		static UINT32 nextPow2(UINT32 n)
 		{
@@ -102,6 +90,37 @@ namespace bs
 				return prev;
 			
 			return next;
+		}
+
+
+		/** Returns base-2 logarithm for common bit counts (8, 16, 32, 64), as a constant expression. */
+		static constexpr UINT32 bitsLog2(UINT32 v)
+		{
+			switch(v)
+			{
+			default:
+			case 8: return 3;
+			case 16: return 4;
+			case 32: return 5;
+			case 64: return 6;
+			}
+		}
+
+		/** Returns modular exponentiation for integers. */
+		static UINT32 modPow(UINT32 val1, UINT32 val2, UINT32 t)
+		{
+			int res = 1;
+
+			while (val2 != 0)
+			{
+				if (val2 & 1)
+					res = (res * val1) % t;
+
+				val2 >>= 1;
+				val1 = (val1 * val1) % t;
+			}
+
+			return res;
 		}
 #if BS_COMPILER == BS_COMPILER_MSVC
 #pragma intrinsic(_BitScanReverse,_BitScanForward)
@@ -138,27 +157,53 @@ namespace bs
 		static UINT32 mostSignificantBit(UINT64 val)
 		{
 #if BS_COMPILER == BS_COMPILER_MSVC
+#if BS_ARCH_TYPE == BS_ARCHITECTURE_x86_64
 			unsigned long index;
 			_BitScanReverse64(&index, val);
 			return index;
+#else // BS_ARCH_TYPE
+			if (static_cast<UINT32>(val >> 32) != 0)
+			{
+				_BitScanReverse(&index, static_cast<UINT32>(val >> 32));
+				return index + 32;
+		}
+			else
+			{
+				_BitScanReverse(&index, static_cast<UINT32>(val));
+				return index;
+			}
+#endif // BS_ARCH_TYPE
 #elif BS_COMPILER == BS_COMPILER_GNUC || BS_COMPILER == BS_COMPILER_CLANG
 			return 31 - __builtin_clzll(val);
-#else
+#else // BS_COMPILER
 			static_assert(false, "Not implemented");
-#endif
+#endif // BS_COMPILER
 		}
 		/** Finds the least-significant non-zero bit in the provided value and returns the index of that bit. */
 		static UINT32 leastSignificantBit(UINT64 val)
 		{
 #if BS_COMPILER == BS_COMPILER_MSVC
+#if BS_ARCH_TYPE == BS_ARCHITECTURE_x86_64
 			unsigned long index;
 			_BitScanForward64(&index, val);
 			return index;
+#else // BS_ARCH_TYPE
+			if (static_cast<UINT32>(val) != 0)
+			{
+				_BitScanForward(&index, static_cast<UINT32>(val));
+				return index;
+			}
+			else
+			{
+				_BitScanForward(&index, static_cast<UINT32>(val >> 32));
+				return index + 32;
+			}
+#endif // BS_ARCH_TYPE
 #elif BS_COMPILER == BS_COMPILER_GNUC || BS_COMPILER == BS_COMPILER_CLANG
 			return __builtin_ctzll(val);
-#else
+#else // BS_COMPILER
 			static_assert(false, "Not implemented");
-#endif
+#endif // BS_COMPILER
 		}
 
 		/** Determines whether the number is power-of-two or not. */
@@ -181,6 +226,16 @@ namespace bs
 				mask >>= 1;
 			}
 			return result;
+		}
+
+		/** Count the number of set bits in a mask. */
+		static uint32_t countSetBits(uint32_t val)
+		{
+			uint32_t count = 0;
+			for (count = 0; val; count++)
+				val &= val - 1;
+
+			return count;
 		}
 
 		/** Takes a value with a given src bit mask, and produces another value with a desired bit mask. */
@@ -206,8 +261,8 @@ namespace bs
 			return (destValue << destBitShift);
 		}
 
-		/** 
-		 * Convert N bit color channel value to P bits. It fills P bits with the bit pattern repeated. 
+		/**
+		 * Convert N bit color channel value to P bits. It fills P bits with the bit pattern repeated.
 		 * (this is /((1<<n)-1) in fixed point).
 		 */
 		static uint32_t fixedToFixed(UINT32 value, uint32_t n, uint32_t p)
@@ -230,7 +285,7 @@ namespace bs
 			return value;
 		}
 
-		/** 
+		/**
 		 * Converts floating point value in range [0, 1] to an unsigned integer of a certain number of bits. Works for any
 		 * value of bits between 0 and 31.
 		 */
@@ -241,7 +296,7 @@ namespace bs
 			return Math::roundToInt(value * (1 << bits));
 		}
 
-		/** 
+		/**
 		 * Converts floating point value in range [-1, 1] to an unsigned integer of a certain number of bits. Works for any
 		 * value of bits between 0 and 31.
 		 */
@@ -262,7 +317,7 @@ namespace bs
 			return uintToUnorm(value) * 2.0f - 1.0f;
 		}
 
-		/** 
+		/**
 		 * Converts floating point value in range [0, 1] to an unsigned integer of a certain number of bits. Works for any
 		 * value of bits between 0 and 31.
 		 */
@@ -274,7 +329,7 @@ namespace bs
 			return Math::roundToInt(value * (1 << bits));
 		}
 
-		/** 
+		/**
 		 * Converts floating point value in range [-1, 1] to an unsigned integer of a certain number of bits. Works for any
 		 * value of bits between 0 and 31.
 		 */
@@ -298,7 +353,7 @@ namespace bs
 			return uintToUnorm<bits>(value) * 2.0f - 1.0f;
 		}
 
-		/** 
+		/**
 		 * Interpolates between two values using the @p t parameter. All parameters must be in [0, 255] range. When @p t
 		 * is zero, @p from value will be returned, and when it is 255 @p to value will be returned, and interpolation
 		 * between @p from and @p to will occurr for in-between values.
@@ -313,7 +368,7 @@ namespace bs
 			return (from + (((to - from) * t) >> 8)) & 0xFF;
 		}
 
-		/** 
+		/**
 		 * Interpolates between two values using the @p t parameter. All parameters must be in [0, 65536] range. When @p t
 		 * is zero, @p from value will be returned, and when it is 65536 @p to value will be returned, and interpolation
 		 * between @p from and @p to will occurr for in-between values.
@@ -369,7 +424,7 @@ namespace bs
 					((UINT16*)dest)[0] = (UINT16)value;
 					break;
 				case 3:
-#if BS_ENDIAN == BS_ENDIAN_BIG      
+#if BS_ENDIAN == BS_ENDIAN_BIG
 					((UINT8*)dest)[0] = (UINT8)((value >> 16) & 0xFF);
 					((UINT8*)dest)[1] = (UINT8)((value >> 8) & 0xFF);
 					((UINT8*)dest)[2] = (UINT8)(value & 0xFF);
@@ -393,7 +448,7 @@ namespace bs
 				case 2:
 					return ((UINT16*)src)[0];
 				case 3:
-#if BS_ENDIAN == BS_ENDIAN_BIG      
+#if BS_ENDIAN == BS_ENDIAN_BIG
 					return ((UINT32)((UINT8*)src)[0]<<16)|
 							((UINT32)((UINT8*)src)[1]<<8)|
 							((UINT32)((UINT8*)src)[2]);
@@ -404,7 +459,7 @@ namespace bs
 #endif
 				case 4:
 					return ((UINT32*)src)[0];
-			} 
+			}
 			return 0; // ?
 		}
 
@@ -438,7 +493,7 @@ namespace bs
 				if (m == 0) // Inf
 				{
 					return static_cast<UINT16>(s | 0x7c00);
-				} 
+				}
 				else    // NAN
 				{
 					m >>= 13;
@@ -624,7 +679,9 @@ namespace bs
 				output = ((exponent + 112) << 23) | (mantissa << 18);
 			}
 
-			return *(float*)&output;
+			float result;
+			std::memcpy(&result, &output, sizeof(float));
+			return result;
 		}
 
 		/** Converts a 11-bit float to a 32-bit float according to OpenGL packed_float extension. */
@@ -664,7 +721,252 @@ namespace bs
 				output = ((exponent + 112) << 23) | (mantissa << 17);
 			}
 
-			return *(float*)&output;
+			float result;
+			std::memcpy(&result, &output, sizeof(float));
+			return result;
+		}
+
+		/**
+		 * Encodes a 32-bit integer value as a base-128 varint. Varints are a method of serializing integers using one or
+		 * more bytes, where smaller values use less bytes.
+		 *
+		 * @param[in]	value		Value to encode.
+		 * @param[out]	output		Buffer to store the encoded bytes in. Must be at least 5 bytes in length.
+		 * @return					Number of bytes required to store the value, in range [1, 5]
+		 */
+		static UINT32 encodeVarInt(UINT32 value, UINT8* output)
+		{
+			UINT32 idx = 0;
+			if (value & 0xFFFFFF80U)
+			{
+				output[idx++] = (UINT8)(value | 0x80);
+				value >>= 7;
+
+				if (value & 0xFFFFFF80U)
+				{
+					output[idx++] = (UINT8)(value | 0x80);
+					value >>= 7;
+
+					if (value & 0xFFFFFF80U)
+					{
+						output[idx++] = (UINT8)(value | 0x80);
+						value >>= 7;
+
+						if (value & 0xFFFFFF80U)
+						{
+							output[idx++] = (UINT8)(value | 0x80);
+							value >>= 7;
+						}
+					}
+				}
+			}
+
+			output[idx++] = (UINT8)value;
+			return idx;
+		}
+
+		/**
+		 * Decodes a value encoded using encodeVarInt(UINT32, UINT8*).
+		 *
+		 * @param[out]	value	Variable to receive the decoded value.
+		 * @param[in]	input	Input buffer to decode the data from.
+		 * @param[in]	size	Size of the input buffer.
+		 * @return				Number of bytes read.
+		 */
+		static UINT32 decodeVarInt(UINT32& value, const UINT8* input, UINT32 size)
+		{
+			if(size == 0)
+				return 0;
+
+			UINT32 idx = 0;
+			value = (UINT32)(input[idx] & 0x7F);
+			if (input[idx++] & 0x80 && --size)
+			{
+				value |= (UINT32)(input[idx] & 0x7F) << 7;
+
+				if (input[idx++] & 0x80 && --size)
+				{
+					value |= (UINT32)(input[idx] & 0x7F) << 14;
+
+					if (input[idx++] & 0x80 && --size)
+					{
+						value |= (UINT32)(input[idx] & 0x7F) << 21;
+
+						if (input[idx++] & 0x80 && --size)
+							value |= (UINT32)(input[idx++]) << 28;
+					}
+				}
+			}
+
+			return !size || input[idx - 1] & 0x80 ? 0 : idx;
+		}
+
+		/** @copydoc encodeVarInt(UINT32, UINT8*) */
+		static UINT32 encodeVarInt(INT32 value, UINT8* output)
+		{
+			// Encode using zig-zag pattern so that negative values don't take up max byte count
+			UINT32 temp = (value << 1) ^ (value >> 31);
+			return encodeVarInt(temp, output);
+		}
+
+		/** @copydoc decodeVarInt(UINT32&, const UINT8*, UINT32) */
+		static UINT32 decodeVarInt(INT32& value, const UINT8* input, UINT32 size)
+		{
+			UINT32 temp;
+			
+			UINT32 readBytes = decodeVarInt(temp, input, size);
+			value = (INT32)((temp >> 1) ^ -((INT32)temp & 1));
+
+			return readBytes;
+		}
+
+		/**
+		 * Encodes a 64-bit integer value as a base-128 varint. Varints are a method of serializing integers using one or
+		 * more bytes, where smaller values use less bytes.
+		 *
+		 * @param[in]	value		Value to encode.
+		 * @param[out]	output		Buffer to store the encoded bytes in. Must be at least 10 bytes in length.
+		 * @return					Number of bytes required to store the value, in range [1, 10]
+		 */
+		static UINT32 encodeVarInt(UINT64 value, UINT8* output)
+		{
+			UINT32 idx = 0;
+			if (value & 0xFFFFFFFFFFFFFF80ULL)
+			{
+				output[idx++] = (UINT8)(value | 0x80);
+				value >>= 7;
+
+				if (value & 0xFFFFFFFFFFFFFF80ULL)
+				{
+					output[idx++] = (UINT8)(value | 0x80);
+					value >>= 7;
+
+					if (value & 0xFFFFFFFFFFFFFF80ULL)
+					{
+						output[idx++] = (UINT8)(value | 0x80);
+						value >>= 7;
+
+						if (value & 0xFFFFFFFFFFFFFF80ULL)
+						{
+							output[idx++] = (UINT8)(value | 0x80);
+							value >>= 7;
+
+							if (value & 0xFFFFFFFFFFFFFF80ULL)
+							{
+								output[idx++] = (UINT8)(value | 0x80);
+								value >>= 7;
+
+								if (value & 0xFFFFFFFFFFFFFF80ULL)
+								{
+									output[idx++] = (UINT8)(value | 0x80);
+									value >>= 7;
+
+									if (value & 0xFFFFFFFFFFFFFF80ULL)
+									{
+										output[idx++] = (UINT8)(value | 0x80);
+										value >>= 7;
+
+										if (value & 0xFFFFFFFFFFFFFF80ULL)
+										{
+											output[idx++] = (UINT8)(value | 0x80);
+											value >>= 7;
+
+											if (value & 0xFFFFFFFFFFFFFF80ULL)
+											{
+												output[idx++] = (UINT8)(value | 0x80);
+												value >>= 7;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			output[idx++] = (UINT8)value;
+			return idx;
+		}
+
+		/**
+		 * Decodes a value encoded using encodeVarInt(UINT64, UINT8*).
+		 *
+		 * @param[out]	value	Variable to receive the decoded value.
+		 * @param[in]	input	Input buffer to decode the data from.
+		 * @param[in]	size	Size of the input buffer.
+		 * @return				Number of bytes read.
+		 */
+		static UINT32 decodeVarInt(UINT64& value, const UINT8* input, UINT32 size)
+		{
+			if(size == 0)
+				return 0;
+
+			UINT32 idx = 0;
+			value = (UINT64)(input[idx] & 0x7F);
+			if (input[idx++] & 0x80 && --size)
+			{
+				value |= (UINT64)(input[idx] & 0x7F) << 7;
+
+				if (input[idx++] & 0x80 && --size)
+				{
+					value |= (UINT64)(input[idx] & 0x7F) << 14;
+
+					if (input[idx++] & 0x80 && --size)
+					{
+						value |= (UINT64)(input[idx] & 0x7F) << 21;
+
+						if (input[idx++] & 0x80 && --size)
+						{
+							value |= (UINT64)(input[idx] & 0x7F) << 28;
+
+							if (input[idx++] & 0x80 && --size)
+							{
+								value |= (UINT64)(input[idx] & 0x7F) << 35;
+
+								if (input[idx++] & 0x80 && --size)
+								{
+									value |= (UINT64)(input[idx] & 0x7F) << 42;
+
+									if (input[idx++] & 0x80 && --size)
+									{
+										value |= (UINT64)(input[idx] & 0x7F) << 49;
+
+										if (input[idx++] & 0x80 && --size)
+										{
+											value |= (UINT64)(input[idx] & 0x7F) << 56;
+
+											if (input[idx++] & 0x80 && --size)
+												value |= (UINT64)(input[idx++]) << 63;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			return !size || input[idx - 1] & 0x80 ? 0 : idx;
+		}
+
+		/** @copydoc encodeVarInt(UINT64, UINT8*) */
+		static UINT32 encodeVarInt(INT64 value, UINT8* output)
+		{
+			// Encode using zig-zag pattern so that negative values don't take up max byte count
+			UINT64 temp = (value << 1) ^ (value >> 63);
+			return encodeVarInt(temp, output);
+		}
+
+		/** @copydoc decodeVarInt(UINT64&, const UINT8*, UINT32) */
+		static UINT32 decodeVarInt(INT64& value, const UINT8* input, UINT32 size)
+		{
+			UINT64 temp;
+
+			UINT32 readBytes = decodeVarInt(temp, input, size);
+			value = (INT64)((temp >> 1) ^ -((INT64)temp & 1));
+
+			return readBytes;
 		}
 
 		/** Converts a float in range [-1,1] into an unsigned 8-bit integer. */

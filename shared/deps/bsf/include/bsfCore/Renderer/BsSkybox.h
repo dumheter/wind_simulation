@@ -33,13 +33,13 @@ namespace bs
 		SkyboxBase() = default;
 		virtual ~SkyboxBase() = default;
 
-		/** 
+		/**
 		 * Brightness multiplier that will be applied to skybox values before they're being used. Allows you to make the
-		 * skybox more or less bright. Equal to one by default. 
+		 * skybox more or less bright. Equal to one by default.
 		 */
 		void setBrightness(float brightness) { mBrightness = brightness; _markCoreDirty(); }
 
-		/** @see setBrightness */
+		/** @copydoc setBrightness */
 		float getBrightness() const { return mBrightness; }
 
 	protected:
@@ -93,9 +93,9 @@ namespace bs
 	protected:
 		Skybox();
 
-		/** 
-		 * Filters the skybox radiance texture, generating filtered radiance (for reflections) and irradiance. Should be 
-		 * called any time the skybox texture changes. 
+		/**
+		 * Filters the skybox radiance texture, generating filtered radiance (for reflections) and irradiance. Should be
+		 * called any time the skybox texture changes.
 		 */
 		void filterTexture();
 
@@ -132,7 +132,7 @@ namespace bs
 		public:
 			~Skybox();
 
-			/** 
+			/**
 			 * Returns a texture containing filtered version of the radiance texture used for reflections. This might not
 			 * be available if it hasn't been generated yet.
 			 */

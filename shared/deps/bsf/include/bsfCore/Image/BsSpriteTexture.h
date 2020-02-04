@@ -12,8 +12,8 @@ namespace bs
 	 *  @{
 	 */
 
-	/** 
-	 * Descriptor that describes a simple sprite sheet animation. The parent texture is split into a grid of 
+	/**
+	 * Descriptor that describes a simple sprite sheet animation. The parent texture is split into a grid of
 	 * @p numRows x @p numColumns, each representing one frame of the animation. Every frame is of equal size. Frames are
 	 * sequentially evaluated starting from the top-most row, iterating over all columns in a row and then moving to next
 	 * row, up to @p count frames. Frames in rows/colums past @p count. @p fps frames are evaluated every second, allowing
@@ -26,15 +26,15 @@ namespace bs
 			: numRows(numRows), numColumns(numColumns), count(count), fps(fps)
 		{ }
 
-		/** 
-		 * Number of rows to divide the parent's texture area. Determines height of the individual frame (depends on 
-		 * parent texture size). 
+		/**
+		 * Number of rows to divide the parent's texture area. Determines height of the individual frame (depends on
+		 * parent texture size).
 		 */
 		UINT32 numRows = 1;
 
-		/** 
-		 * Number of columns to divide the parent's texture area. Determines column of the individual frame (depends on 
-		 * parent texture size). 
+		/**
+		 * Number of columns to divide the parent's texture area. Determines column of the individual frame (depends on
+		 * parent texture size).
 		 */
 		UINT32 numColumns = 1;
 
@@ -95,14 +95,17 @@ namespace bs
 		/** Transforms wanted UV coordinates into coordinates you can use for sampling the internal texture. */
 		Vector2 transformUV(const Vector2& uv) const { return mUVOffset + uv * mUVScale; }
 
-		/** 
+		/**
 		 * Evaluates the UV coordinate offset and size to use at the specified time. If the sprite texture doesn't
 		 * have animation playback enabled then just the default offset and size will be provided, otherwise the
 		 * animation will be evaluated and appropriate UV returned.
 		 */
 		Rect2 evaluate(float t) const;
 
-		/** 
+		/** Returns the row and column of the current animation frame for time @p t. */
+		void getAnimationFrame(float t, UINT32& row, UINT32& column) const;
+
+		/**
 		 * Sets properties describing sprite animation. The animation splits the sprite area into a grid of sub-images
 		 * which can be evaluated over time. In order to view the animation you must also enable playback through
 		 * setAnimationPlayback().
@@ -171,7 +174,7 @@ namespace bs
 	public:
 		/**	Determines the internal texture that the sprite texture references. */
 		BS_SCRIPT_EXPORT(n:Texture,pr:setter)
-		void setTexture(const HTexture& texture) { mAtlasTexture = texture; markDependenciesDirty(); }
+		void setTexture(const HTexture& texture);
 
 		/**	@copydoc setTexture() */
 		BS_SCRIPT_EXPORT(n:Texture,pr:getter)
@@ -184,6 +187,20 @@ namespace bs
 		/**	Returns height of the sprite texture in pixels. */
 		BS_SCRIPT_EXPORT(n:Height,pr:getter)
 		UINT32 getHeight() const;
+
+		/**	
+		 * Returns width of a single animation frame sprite texture in pixels. If the texture has no animation this
+		 * is the same as getWidth().
+		 */
+		BS_SCRIPT_EXPORT(n:FrameWidth,pr:getter)
+		UINT32 getFrameWidth() const;
+
+		/**	
+		 * Returns height of a single animation frame sprite texture in pixels. If the texture has no animation this
+		 * is the same as getHeight().
+		 */
+		BS_SCRIPT_EXPORT(n:FrameHeight,pr:getter)
+		UINT32 getFrameHeight() const;
 
 		/**	Retrieves a core implementation of a sprite texture usable only from the core thread. */
 		SPtr<ct::SpriteTexture> getCore() const;
@@ -222,14 +239,14 @@ namespace bs
 		/** @copydoc create(const Vector2&, const Vector2&, const HTexture&) */
 		SpriteTexture(const Vector2& uvOffset, const Vector2& uvScale, const HTexture& texture);
 
+		/** @copydoc CoreObject::initialize */
+		void initialize() override;
+
 		/** @copydoc CoreObject::createCore */
 		SPtr<ct::CoreObject> createCore() const override;
 
 		/** @copydoc CoreObject::syncToCore */
 		CoreSyncData syncToCore(FrameAlloc* allocator) override;
-
-		/** @copydoc Resource::getResourceDependencies */
-		void getResourceDependencies(FrameVector<HResource>& dependencies) const override;
 
 		/** @copydoc CoreObject::getCoreDependencies */
 		void getCoreDependencies(Vector<CoreObject*>& dependencies) override;
@@ -238,7 +255,7 @@ namespace bs
 		/* 								RTTI		                     		*/
 		/************************************************************************/
 
-		/**	Creates a new empty and uninitialized sprite texture. To be used by factory methods. */
+		/**	Creates a new empty and uninitialized sprite texture. */
 		static SPtr<SpriteTexture> createEmpty();
 	public:
 		friend class SpriteTextureRTTI;
@@ -271,7 +288,7 @@ namespace bs
 		private:
 			friend class bs::SpriteTexture;
 
-			SpriteTexture(const Vector2& uvOffset, const Vector2& uvScale, SPtr<Texture> texture, 
+			SpriteTexture(const Vector2& uvOffset, const Vector2& uvScale, SPtr<Texture> texture,
 				const SpriteSheetGridAnimation& anim, SpriteAnimationPlayback playback);
 
 			/** @copydoc CoreObject::syncToCore */

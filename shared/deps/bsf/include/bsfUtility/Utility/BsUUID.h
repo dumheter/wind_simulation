@@ -5,7 +5,6 @@
 #include "Prerequisites/BsPlatformDefines.h"
 #include "String/BsString.h"
 #include "Prerequisites/BsTypes.h"
-#include "Prerequisites/BsRTTIPrerequisites.h"
 #include "Utility/BsUtil.h"
 
 namespace bs
@@ -20,7 +19,7 @@ namespace bs
 		/** Initializes an empty UUID. */
 		constexpr UUID() = default;
 
-		/** Initializes an UUID using Banshee's UUID representation. */
+		/** Initializes an UUID using framework's UUID representation. */
 		constexpr UUID(UINT32 data1, UINT32 data2, UINT32 data3, UINT32 data4)
 		: mData{data1, data2, data3, data4}
 		{ }
@@ -70,8 +69,6 @@ namespace bs
 		UINT32 mData[4] = {0, 0, 0, 0};
 	};
 
-	BS_ALLOW_MEMCPY_SERIALIZATION(UUID)
-
 	/**
 	 * Utility class for generating universally unique identifiers.
 	 *
@@ -85,6 +82,7 @@ namespace bs
 	};
 
 	/** @} */
+
 }
 
 /** @cond STDLIB */
@@ -101,10 +99,10 @@ struct hash<bs::UUID>
 	size_t operator()(const bs::UUID& value) const
 	{
 		size_t hash = 0;
-		bs::hash_combine(hash, value.mData[0]);
-		bs::hash_combine(hash, value.mData[1]);
-		bs::hash_combine(hash, value.mData[2]);
-		bs::hash_combine(hash, value.mData[3]);
+		bs::bs_hash_combine(hash, value.mData[0]);
+		bs::bs_hash_combine(hash, value.mData[1]);
+		bs::bs_hash_combine(hash, value.mData[2]);
+		bs::bs_hash_combine(hash, value.mData[3]);
 
 		return hash;
 	}

@@ -5,7 +5,7 @@
 #include "Prerequisites/BsPrerequisitesUtil.h"
 #include "Math/BsVector3.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup Math
 	 *  @{
@@ -19,7 +19,7 @@ namespace bs
 		Sphere() = default;
 
 		Sphere(const Vector3& center, float radius)
-			:mRadius(radius), mCenter(center) 
+			:mRadius(radius), mCenter(center)
 		{ }
 
 		/** Returns the radius of the sphere. */
@@ -70,8 +70,4 @@ namespace bs
 	};
 
 	/** @} */
-
-	/** @cond SPECIALIZATIONS */
-	BS_ALLOW_MEMCPY_SERIALIZATION(Sphere);
-	/** @endcond */
 }

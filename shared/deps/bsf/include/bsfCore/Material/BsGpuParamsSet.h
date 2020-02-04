@@ -69,6 +69,7 @@ namespace bs
 			UINT32 paramIdx;
 			UINT32 blockIdx;
 			UINT32 offset;
+			UINT32 arrayStride;
 		};
 
 		/** Information about how an object parameter maps from a material parameter to a GPU stage slot. */
@@ -99,21 +100,21 @@ namespace bs
 		};
 
 	public:
-		TGpuParamsSet() {}
+		TGpuParamsSet() = default;
 		TGpuParamsSet(const SPtr<TechniqueType>& technique, const ShaderType& shader,
 			const SPtr<MaterialParamsType>& params);
 		~TGpuParamsSet();
 
-		/** 
-		 * Returns a set of GPU parameters for the specified pass. 
+		/**
+		 * Returns a set of GPU parameters for the specified pass.
 		 *
 		 * @param[in]	passIdx		Pass in which to look the GPU program for in.
-		 * @return					GPU parameters object that can be used for setting parameters of all GPU programs 
+		 * @return					GPU parameters object that can be used for setting parameters of all GPU programs
 		 *							in a pass. Returns null if pass doesn't exist.
 		 */
 		SPtr<GpuParamsType> getGpuParams(UINT32 passIdx = 0);
 
-		/** 
+		/**
 		 * Searches for a parameter block buffer with the specified name, and returns an index you can use for accessing it.
 		 * Returns -1 if buffer was not found.
 		 */
@@ -183,8 +184,8 @@ namespace bs
 	class BS_CORE_EXPORT GpuParamsSet : public TGpuParamsSet<false>
 	{
 	public:
-		GpuParamsSet() { }
-		GpuParamsSet(const SPtr<Technique>& technique, const HShader& shader, 
+		GpuParamsSet() = default;
+		GpuParamsSet(const SPtr<Technique>& technique, const HShader& shader,
 			const SPtr<MaterialParams>& params)
 			:TGpuParamsSet(technique, shader, params)
 		{ }
@@ -196,7 +197,7 @@ namespace bs
 	class BS_CORE_EXPORT GpuParamsSet : public TGpuParamsSet<true>
 	{
 	public:
-		GpuParamsSet() { }
+		GpuParamsSet() = default;
 		GpuParamsSet(const SPtr<Technique>& technique, const SPtr<Shader>& shader,
 			const SPtr<MaterialParams>& params)
 			:TGpuParamsSet(technique, shader, params)

@@ -4,7 +4,7 @@
 
 #include "Prerequisites/BsPrerequisitesUtil.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup Image
 	 *  @{
@@ -15,8 +15,8 @@ namespace bs
 	typedef UINT32 ABGR;
 	typedef UINT32 BGRA;
 
-	/** 
-	 * Color represented as 4 components, each being a floating point value ranging from 0 to 1. Color components are 
+	/**
+	 * Color represented as 4 components, each being a floating point value ranging from 0 to 1. Color components are
 	 * red, green, blue and alpha.
 	 */
 	class BS_UTILITY_EXPORT Color
@@ -31,7 +31,7 @@ namespace bs
 		static const Color LightGray;
 		static const Color BansheeOrange;
 
-		constexpr explicit Color(float red = 1.0f, float green = 1.0f, float blue = 1.0f, float alpha = 1.0f ) 
+		constexpr explicit Color(float red = 1.0f, float green = 1.0f, float blue = 1.0f, float alpha = 1.0f )
 			:r(red), g(green), b(blue), a(alpha)
 		{ }
 
@@ -50,14 +50,20 @@ namespace bs
 		/** Returns the color as a 32-bit value in ABGR order. */
 		ABGR getAsABGR() const;
 
-		/** 
-		 * Convert the current color to hue, saturation and brightness values. 
-		 * 
+		/**
+		 * Convert the current color to hue, saturation and brightness values.
+		 *
 		 * @param[in] hue			Output hue value, scaled to the [0,1] range.
 		 * @param[in] saturation	Output saturation level, [0,1].
 		 * @param[in] brightness	Output brightness level, [0,1].
 		 */
 		void getHSB(float* hue, float* saturation, float* brightness) const;
+
+		/** Converts the current color from gamma to linear space and returns the result. */
+		Color getLinear() const;
+
+		/** Converts the current color from linear to gamma space and returns the result. */
+		Color getGamma() const;
 
 		/** Clamps color value to the range [0, 1]. */
 		void saturate()
@@ -211,7 +217,7 @@ namespace bs
 		/** Creates a color value from a 32-bit value that encodes a ABGR color. */
 		static Color fromABGR(ABGR val);
 
-		/** 
+		/**
 		 * Creates a color value from hue, saturation and brightness.
 		 *
 		 * @param[in] hue			Hue value, scaled to the [0,1] range.
@@ -226,7 +232,7 @@ namespace bs
 		 */
 		static Color lerp(float t, const Color& a, const Color& b);
 
-		/** 
+		/**
 		 * Linearly interpolates between the two colors using @p t. t should be in [0, 255] range, where t = 0 corresponds
 		 * to the left color, while t = 1 corresponds to the right color. Operates directly on 8-bit per channel
 		 * encoded color instead of on floating point values.
@@ -253,10 +259,6 @@ namespace bs
 		float r, g, b, a;
 	};
 
-	/** @cond SPECIALIZATIONS */
-	BS_ALLOW_MEMCPY_SERIALIZATION(Color);
-	/** @endcond */
-
 	/** @} */
 }
 
@@ -265,16 +267,16 @@ namespace bs
 namespace std
 {
 /** Hash value generator for Color. */
-template<> 
+template<>
 struct hash<bs::Color>
 {
 	size_t operator()(const bs::Color& color) const
 	{
 		size_t hash = 0;
-		bs::hash_combine(hash, color.r);
-		bs::hash_combine(hash, color.g);
-		bs::hash_combine(hash, color.b);
-		bs::hash_combine(hash, color.a);
+		bs::bs_hash_combine(hash, color.r);
+		bs::bs_hash_combine(hash, color.g);
+		bs::bs_hash_combine(hash, color.b);
+		bs::bs_hash_combine(hash, color.a);
 
 		return hash;
 	}

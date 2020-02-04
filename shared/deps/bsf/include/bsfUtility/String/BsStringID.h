@@ -16,7 +16,7 @@ namespace bs
 	 * comparing raw strings.
 	 *
 	 * @note	
-	 * Essentially a unique ID is generated for each string and then the ID is used for comparisons as if you were using 
+	 * Essentially a unique ID is generated for each string and then the ID is used for comparisons as if you were using
 	 * an integer or an enum.
 	 * @note
 	 * Thread safe.
@@ -83,6 +83,9 @@ namespace bs
 			return mData != rhs.mData;
 		}
 
+		/** Implicitly converts to a normal string. */
+		operator String() const { return String(mData->chars); }
+
 		/**	Returns true if the string id has no value assigned. */
 		bool empty() const
 		{
@@ -113,7 +116,7 @@ namespace bs
 		UINT32 calcHash(T const& input);
 
 		/**
-		 * Allocates a new string entry and assigns it a unique ID. Optionally expands the chunks buffer if the new entry 
+		 * Allocates a new string entry and assigns it a unique ID. Optionally expands the chunks buffer if the new entry
 		 * doesn't fit.
 		 */
 		InternalData* allocEntry();
@@ -129,70 +132,6 @@ namespace bs
 		static SpinLock mSync;
 	};
 
-	/** @cond SPECIALIZATIONS */
-
-	template<> struct RTTIPlainType <StringID>
-	{
-		enum { id = TID_StringID }; enum { hasDynamicSize = 1 };
-
-		static void toMemory(const StringID& data, char* memory)
-		{
-			UINT32 size = getDynamicSize(data);
-
-			UINT32 curSize = sizeof(UINT32);
-			memcpy(memory, &size, curSize);
-			memory += curSize;
-
-			bool isEmpty = data.empty();
-			memory = rttiWriteElem(isEmpty, memory);
-
-			if (!isEmpty)
-			{
-				UINT32 length = (UINT32)strlen(data.c_str());
-				memcpy(memory, data.c_str(), length * sizeof(char));
-			}
-		}
-
-		static UINT32 fromMemory(StringID& data, char* memory)
-		{
-			UINT32 size;
-			memcpy(&size, memory, sizeof(UINT32));
-			memory += sizeof(UINT32);
-
-			bool empty = false;
-			memory = rttiReadElem(empty, memory);
-
-			if (!empty)
-			{
-				UINT32 length = (size - sizeof(UINT32) - sizeof(bool)) / sizeof(char);
-
-				auto name = (char*)bs_stack_alloc(length + 1);
-				memcpy(name, memory, length);
-				name[length] = '\0';
-
-				data = StringID(name);
-				bs_stack_free(name);
-			}
-
-			return size;
-		}
-
-		static UINT32 getDynamicSize(const StringID& data)
-		{
-			UINT32 dataSize = sizeof(bool) + sizeof(UINT32);
-
-			bool isEmpty = data.empty();
-			if (!isEmpty)
-			{
-				UINT32 length = (UINT32)strlen(data.c_str());
-				dataSize += length * sizeof(char);
-			}
-
-			return (UINT32)dataSize;
-		}
-	};
-
-	/** @endcond */
 	/** @} */
 }
 

@@ -23,23 +23,29 @@ namespace bs
 		DecalBase(const Vector2& size, float maxDistance);
 		virtual ~DecalBase() = default;
 
-		/** Size of the decal in world space units. */
-		void setSize(const Vector2& size) { mSize = size; _markCoreDirty(); updateBounds(); }
+		/** Width and height of the decal. */
+		void setSize(const Vector2& size) { mSize = Vector2::max(Vector2::ZERO, size); _markCoreDirty(); updateBounds(); }
 
 		/** @copydoc setSize */
-		Vector2 getSize() const
+		Vector2 getSize() const { return mSize; }
+
+		/** Returns width and height of the decal, scaled by decal's transform. */
+		Vector2 getWorldSize() const
 		{
 			return Vector2(mSize.x * mTransform.getScale().x, mSize.y * mTransform.getScale().y);
 		}
 
 		/** Determines the maximum distance (from its origin) at which the decal is displayed. */
-		void setMaxDistance(float distance) { mMaxDistance = distance; _markCoreDirty(); updateBounds(); }
+		void setMaxDistance(float distance) { mMaxDistance = Math::max(0.0f, distance); _markCoreDirty(); updateBounds(); }
 
 		/** @copydoc getSize */
-		float getMaxDistance() const { return mMaxDistance * mTransform.getScale().z; }
+		float getMaxDistance() const { return mMaxDistance; }
 
-		/** 
-		 * Bitfield that allows you to mask on which objects will the decal be projected onto. Only objects with the 
+		/** Maximum distance (from its origin) at which the decal is displayed, scaled by decal's transform. */
+		float getWorldMaxDistance() const { return mMaxDistance * mTransform.getScale().z; }
+
+		/**
+		 * Bitfield that allows you to mask on which objects will the decal be projected onto. Only objects with the
 		 * matching layers will be projected onto. Note that decal layer mask only supports 32-bits and objects with
 		 * layers in bits >= 32 will always be projected onto.
 		 */
@@ -49,7 +55,7 @@ namespace bs
 		UINT32 getLayerMask() const { return mLayerMask; }
 
 		/**
-		 * Determines the layer that controls whether a system is considered visible in a specific camera. Layer must match 
+		 * Determines the layer that controls whether a system is considered visible in a specific camera. Layer must match
 		 * camera layer bitfield in order for the camera to render the decal.
 		 */
 		void setLayer(UINT64 layer);
@@ -64,7 +70,7 @@ namespace bs
 		Matrix4 getMatrix() const { return mTfrmMatrix; }
 
 		/**
-		 * Returns the transform matrix that is applied to the object when its being rendered. This transform matrix does 
+		 * Returns the transform matrix that is applied to the object when its being rendered. This transform matrix does
 		 * not include scale values.
 		 */
 		Matrix4 getMatrixNoScale() const { return mTfrmMatrixNoScale; }
@@ -119,7 +125,7 @@ namespace bs
 
 	namespace ct { class Decal; }
 
-	/** 
+	/**
 	 * Specifies a decal that will be projected onto scene geometry. User can set the material to use when rendering
 	 * the decal, as well as control decal orientation and size.
 	 */
@@ -145,6 +151,9 @@ namespace bs
 
 		/** @copydoc CoreObject::createCore */
 		SPtr<ct::CoreObject> createCore() const override;
+
+		/** @copydoc CoreObject::getCoreDependencies */
+		void getCoreDependencies(Vector<CoreObject*>& dependencies) override;
 
 		/** @copydoc DecalBase::_markCoreDirty */
 		void _markCoreDirty(ActorDirtyFlag flags = ActorDirtyFlag::Everything) override;
