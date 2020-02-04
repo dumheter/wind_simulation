@@ -1,6 +1,7 @@
 # Project
 .vs/
 out/
+*.asset
 
 # Compiled Object files
 *.o
