@@ -16,7 +16,7 @@ App::App(const Info& info)
 	appDesc.audio = "bsfOpenAudio";
 	appDesc.importers = { "bsfFBXImporter", "bsfFontImporter", "bsfFreeImgImporter" };
 	appDesc.primaryWindowDesc.title = m_title;
-	appDesc.primaryWindowDesc.hidden = true;
+	appDesc.primaryWindowDesc.hidden = false;
 	appDesc.primaryWindowDesc.allowResize = true;
 	appDesc.primaryWindowDesc.videoMode = VideoMode(m_width, m_height);
 	Application::startUp(appDesc);

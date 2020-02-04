@@ -17,3 +17,5 @@ out/
 # Executables
 *.exe
 *.out
+
+*.user
