@@ -25,7 +25,7 @@ namespace bs
 		 * Creates a new label with the specified text.
 		 *
 		 * @param[in]	text		Text to display.
-		 * @param[in]	styleName	Optional style to use for the element. Style will be retrieved from GUISkin of the 
+		 * @param[in]	styleName	Optional style to use for the element. Style will be retrieved from GUISkin of the
 		 *							GUIWidget the element is used on. If not specified default button style is used.
 		 */
 		static GUILabel* create(const HString& text, const String& styleName = StringUtil::BLANK);
@@ -79,24 +79,19 @@ namespace bs
 	protected:
 		~GUILabel();
 
-		/** @copydoc GUIElement::_getNumRenderElements */
-		UINT32 _getNumRenderElements() const override;
-
-		/** @copydoc GUIElement::_getMaterial */
-		const SpriteMaterialInfo& _getMaterial(UINT32 renderElementIdx, SpriteMaterial** material) const override;
-
-		/** @copydoc GUIElement::_getMeshInfo() */
-		void _getMeshInfo(UINT32 renderElementIdx, UINT32& numVertices, UINT32& numIndices, GUIMeshType& type) const override;
-
-		/** @copydoc GUIElement::_getRenderElementDepth */
-		UINT32 _getRenderElementDepth(UINT32 renderElementIdx) const override;
-
 		/** @copydoc GUIElement::_getRenderElementDepthRange */
 		UINT32 _getRenderElementDepthRange() const override;
 
 		/** @copydoc GUIElement::_fillBuffer */
-		void _fillBuffer(UINT8* vertices, UINT32* indices, UINT32 vertexOffset, UINT32 indexOffset,
-			UINT32 maxNumVerts, UINT32 maxNumIndices, UINT32 renderElementIdx) const override;
+		void _fillBuffer(
+			UINT8* vertices,
+			UINT32* indices,
+			UINT32 vertexOffset,
+			UINT32 indexOffset,
+			const Vector2I& offset,
+			UINT32 maxNumVerts,
+			UINT32 maxNumIndices,
+			UINT32 renderElementIdx) const override;
 
 		/** @copydoc GUIElement::updateRenderElementsInternal */
 		void updateRenderElementsInternal() override;

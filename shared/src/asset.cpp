@@ -48,21 +48,21 @@ bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr, bool 
     HTexture texture = gResources().load<Texture>(assetPath);
     if (!texture)
     {
-        gDebug().logWarning("Texture '" + path.toString() +
-                            "' has not yet been imported. This process can take a while");
+        gDebug().log("Texture '" + path.toString() + "' has not yet been imported. This process can take a while",
+                     LogVerbosity::Warning);
 
         const SPtr<ImportOptions> _impOpt = Importer::instance().createImportOptions(path);
         if (rtti_is_of_type<TextureImportOptions>(_impOpt))
         {
             TextureImportOptions *impOpt = static_cast<TextureImportOptions *>(_impOpt.get());
-            impOpt->setSRGB(srgb);
+            impOpt->sRGB = srgb;
             if (hdr)
             {
-                impOpt->setFormat(PF_RG11B10F);
+                impOpt->format = PF_RG11B10F;
             }
-            impOpt->setGenerateMipmaps(mipmaps);
-            impOpt->setCPUCached(true);
-            impOpt->setIsCubemap(false);
+            impOpt->generateMips = mipmaps;
+            impOpt->cpuCached = true;
+            impOpt->cubemap = false;
         }
         texture = gImporter().import<Texture>(path, _impOpt);
         gResources().save(texture, assetPath, true);
@@ -82,22 +82,23 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr)
     HTexture texture = gResources().load<Texture>(assetPath);
     if (!texture)
     {
-        gDebug().logWarning("Cubemap texture '" + path.toString() +
-                            "' has not yet been imported. This process can take a while");
+        gDebug().log("Cubemap texture '" + path.toString() +
+                         "' has not yet been imported. This process can take a while",
+                     LogVerbosity::Warning);
 
         const SPtr<ImportOptions> _impOpt = Importer::instance().createImportOptions(path);
         if (rtti_is_of_type<TextureImportOptions>(_impOpt))
         {
             TextureImportOptions *impOpt = static_cast<TextureImportOptions *>(_impOpt.get());
-            impOpt->setSRGB(srgb);
+            impOpt->sRGB = srgb;
             if (hdr)
             {
-                impOpt->setFormat(PF_RG11B10F);
+                impOpt->format = PF_RG11B10F;
             }
-            impOpt->setGenerateMipmaps(true);
-            impOpt->setCPUCached(true);
-            impOpt->setIsCubemap(true);
-            impOpt->setCubemapSourceType(CubemapSourceType::Cylindrical);
+            impOpt->generateMips = true;
+            impOpt->cpuCached = true;
+            impOpt->cubemap = true;
+            impOpt->cubemapSourceType = CubemapSourceType::Cylindrical;
         }
         texture = gImporter().import<Texture>(path, _impOpt);
         gResources().save(texture, assetPath, true);

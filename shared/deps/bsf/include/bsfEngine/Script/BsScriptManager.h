@@ -5,7 +5,7 @@
 #include "BsPrerequisites.h"
 #include "Utility/BsModule.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup Script-Internal
 	 *  @{
@@ -15,10 +15,13 @@ namespace bs
 	class BS_EXPORT ScriptLibrary
 	{
 	public:
-		virtual ~ScriptLibrary() { }
+		virtual ~ScriptLibrary() = default;
 
 		/**	Called when the script system is being activated. */
 		virtual void initialize() = 0;
+
+		/** Called once per frame. */
+		virtual void update() { }
 
 		/** Called when the script libraries should be reloaded (for example when they are recompiled). */
 		virtual void reload() = 0;
@@ -31,11 +34,11 @@ namespace bs
 	class BS_EXPORT ScriptManager : public Module<ScriptManager>
 	{
 	public:
-		ScriptManager() { }
-		~ScriptManager() { }
+		ScriptManager();
+		~ScriptManager();
 
-		/** Initializes the currently active script library loading the scripts contained within. */
-		void initialize();
+		/** Called once per frame. */
+		void update();
 
 		/**
 		 * Reloads any scripts in the currently active library. Should be called after some change to the scripts was made
@@ -43,14 +46,17 @@ namespace bs
 		 */
 		void reload();
 
-		/** Sets the active script library that controls what kind and which scripts are loaded. */
-		void _setScriptLibrary(const SPtr<ScriptLibrary>& library);
+		/**
+		 * Sets the active script library that controls what kind and which scripts are loaded. Must be called before
+		 * the module is started up.
+		 */
+		static void _setScriptLibrary(const SPtr<ScriptLibrary>& library) { sScriptLibrary = library; }
+
+		/** Returns the currently assigned script library. */
+		static const SPtr<ScriptLibrary>& _getScriptLibrary() { return sScriptLibrary; }
 
 	private:
-		/** @copydoc ScriptManager::onShutDown */
-		void onShutDown() override;
-
-		SPtr<ScriptLibrary> mScriptLibrary;
+		static SPtr<ScriptLibrary> sScriptLibrary;
 	};
 
 	/** @} */

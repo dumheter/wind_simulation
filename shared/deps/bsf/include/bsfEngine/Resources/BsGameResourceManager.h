@@ -4,6 +4,7 @@
 
 #include "BsPrerequisites.h"
 #include "Utility/BsModule.h"
+#include "Resources/BsResources.h"
 
 namespace bs
 {
@@ -11,7 +12,7 @@ namespace bs
 	 *  @{
 	 */
 
-	/** 
+	/**
 	 * Provides a way to map one resource path to another path. Useful if the resources are being referenced using a path
 	 * that is not the path to their physical location.
 	 */
@@ -42,10 +43,10 @@ namespace bs
 	class BS_EXPORT IGameResourceLoader
 	{
 	public:
-		virtual ~IGameResourceLoader() { }
+		virtual ~IGameResourceLoader() = default;
 
 		/**	Loads the resource at the specified path. */
-		virtual HResource load(const Path& path, bool keepLoaded) const = 0;
+		virtual HResource load(const Path& path, ResourceLoadFlags flags, bool async) const = 0;
 
 		/** @copydoc GameResourceManager::setMapping */
 		virtual void setMapping(const SPtr<ResourceMapping>& mapping) { }
@@ -56,7 +57,7 @@ namespace bs
 	{
 	public:
 		/** @copydoc IGameResourceLoader::load */
-		HResource load(const Path& path, bool keepLoaded) const override;
+		HResource load(const Path& path, ResourceLoadFlags flags, bool async) const override;
 
 		/** @copydoc IGameResourceLoader::setMapping */
 		void setMapping(const SPtr<ResourceMapping>& mapping) override;
@@ -81,16 +82,16 @@ namespace bs
 		 * 			
 		 * @see	Resources::load
 		 */
-		HResource load(const Path& path, bool keepLoaded) const;	
+		HResource load(const Path& path, ResourceLoadFlags flags, bool async) const;
 
 		/** @copydoc load */
 		template <class T>
-		ResourceHandle<T> load(const Path& filePath, bool keepLoaded)
+		ResourceHandle<T> load(const Path& filePath, ResourceLoadFlags flags, bool async)
 		{
-			return static_resource_cast<T>(load(filePath, keepLoaded));
+			return static_resource_cast<T>(load(filePath, flags, async));
 		}
 
-		/** 
+		/**
 		 * Sets an optional mapping that be applied to any path provided to load(). This allows you to reference files
 		 * using different names and/or folder structure than they are actually in.
 		 *

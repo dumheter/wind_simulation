@@ -12,26 +12,26 @@ namespace bs
 	 */
 
 	/**
-	 * Describes a virtual button. Virtual buttons allow you to map custom actions without needing to know about what 
+	 * Describes a virtual button. Virtual buttons allow you to map custom actions without needing to know about what
 	 * physical buttons trigger those actions.
 	 */
 	struct BS_EXPORT VIRTUAL_BUTTON_DESC
 	{
-		VIRTUAL_BUTTON_DESC();
+		VIRTUAL_BUTTON_DESC() = default;
 
 		/**
 		 * Constructs a virtual button descriptor.
 		 *
 		 * @param[in]	buttonCode	Physical button the virtual button is triggered by.
 		 * @param[in]	modifiers	Modifiers required to be pressed with the physical button to trigger the virtual button.
-		 * @param[in]	repeatable	If true, the virtual button events will be sent continually while the physical button 
+		 * @param[in]	repeatable	If true, the virtual button events will be sent continually while the physical button
 		 *							is being held.
 		 */
 		VIRTUAL_BUTTON_DESC(ButtonCode buttonCode, ButtonModifier modifiers = ButtonModifier::None, bool repeatable = false);
 
-		ButtonCode buttonCode;
-		ButtonModifier modifiers;
-		bool repeatable;
+		ButtonCode buttonCode = BC_0;
+		ButtonModifier modifiers = ButtonModifier::None;
+		bool repeatable = false;
 	};
 
 	/**
@@ -40,7 +40,7 @@ namespace bs
 	 */
 	struct BS_EXPORT VIRTUAL_AXIS_DESC
 	{
-		VIRTUAL_AXIS_DESC() {}
+		VIRTUAL_AXIS_DESC() = default;
 
 		/**
 		 * Constructs a new virtual axis descriptor.
@@ -70,20 +70,20 @@ namespace bs
 	};
 
 	/**
-	 * Identifier for a virtual button. 
+	 * Identifier for a virtual button.
 	 * 				
 	 * Primary purpose of this class is to avoid expensive string compare, and instead use a unique button identifier for
-	 * compare. Generally you want to create one of these using the button name, and then store it for later use. 
+	 * compare. Generally you want to create one of these using the button name, and then store it for later use.
 	 *
 	 * @note			
 	 * This class is not thread safe and should only be used on the sim thread.
 	 *
 	 * @see		VIRTUAL_BUTTON_DESC
 	 */
-	class BS_EXPORT VirtualButton 
+	class BS_EXPORT VirtualButton
 	{
 	public:
-		VirtualButton();
+		VirtualButton() = default;
 		VirtualButton(const String& name);
 
 		bool operator== (const VirtualButton& rhs) const
@@ -91,7 +91,7 @@ namespace bs
 			return (buttonIdentifier == rhs.buttonIdentifier);
 		}
 
-		UINT32 buttonIdentifier;
+		UINT32 buttonIdentifier = 0;
 	private:
 		/** Returns a static map of all virtual button identifiers and their buttons. */
 		static Map<String, UINT32>& getUniqueButtonIds();
@@ -100,12 +100,12 @@ namespace bs
 	};
 
 	/**
-	 * Identifier for a virtual axis. 
+	 * Identifier for a virtual axis.
 	 * 			
 	 * Primary purpose of this class is to avoid expensive string compare (axis names), and instead use a unique axis
-	 * identifier for compare. Generally you want to create one of these using the axis name, and then store it for later 
-	 * use. 
-	 * 
+	 * identifier for compare. Generally you want to create one of these using the axis name, and then store it for later
+	 * use.
+	 *
 	 * @note
 	 * This class is not thread safe and should only be used on the sim thread.
 	 *
@@ -114,10 +114,10 @@ namespace bs
 	class BS_EXPORT VirtualAxis
 	{
 	public:
-		VirtualAxis();
+		VirtualAxis() = default;
 		VirtualAxis(const String& name);
 
-		UINT32 axisIdentifier;
+		UINT32 axisIdentifier = 0;
 
 		bool operator== (const VirtualAxis& rhs) const
 		{
@@ -158,7 +158,7 @@ namespace bs
 		};
 
 	public:
-		InputConfiguration();
+		InputConfiguration() = default;
 
 		/**
 		 * Registers a new virtual button.
@@ -166,7 +166,7 @@ namespace bs
 		 * @param[in]	name		Unique name used to access the virtual button.
 		 * @param[in]	buttonCode	Physical button the virtual button is triggered by.
 		 * @param[in]	modifiers	Modifiers required to be pressed with the physical button to trigger the virtual button.
-		 * @param[in]	repeatable	If true, the virtual button events will be sent continually while the physical button 
+		 * @param[in]	repeatable	If true, the virtual button events will be sent continually while the physical button
 		 *							is being held.
 		 */
 		void registerButton(const String& name, ButtonCode buttonCode, ButtonModifier modifiers = ButtonModifier::None, bool repeatable = false);
@@ -201,8 +201,8 @@ namespace bs
 		 *  @{
 		 */
 
-		/** 
-		 * Returns data about virtual buttons that are triggered by the specified physical button code and modifier flags. 
+		/**
+		 * Returns data about virtual buttons that are triggered by the specified physical button code and modifier flags.
 		 */
 		bool _getButtons(ButtonCode code, UINT32 modifiers, Vector<VirtualButton>& btns, Vector<VIRTUAL_BUTTON_DESC>& btnDescs) const;
 
@@ -215,7 +215,7 @@ namespace bs
 		Vector<VirtualButtonData> mButtons[BC_Count];
 		Vector<VirtualAxisData> mAxes;
 
-		UINT64 mRepeatInterval;
+		UINT64 mRepeatInterval = 300;
 	};
 
 	/** @} */

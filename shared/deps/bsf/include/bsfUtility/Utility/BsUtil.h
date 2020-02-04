@@ -10,12 +10,22 @@ namespace bs
 
 	/** Generates a new hash for the provided type using the default standard hasher and combines it with a previous hash. */
 	template <class T>
-	void hash_combine(std::size_t& seed, const T& v)
+	void bs_hash_combine(std::size_t& seed, const T& v)
 	{
 		using HashType = typename std::conditional<std::is_enum<T>::value, EnumClassHash, std::hash<T>>::type;
 
 		HashType hasher;
 		seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+	}
+
+	/** Generates a hash for the provided type. Type must have a std::hash specialization. */
+	template <class T>
+	size_t bs_hash(const T& v)
+	{
+		using HashType = typename std::conditional<std::is_enum<T>::value, EnumClassHash, std::hash<T>>::type;
+
+		HashType hasher;
+		return hasher(v);
 	}
 
 	/** Generates an MD5 hash string for the provided source string. */
@@ -67,7 +77,7 @@ namespace bs
 		return N;
 	}
 
-	/** 
+	/**
 	 * Erases the provided element from the container, but first swaps the element so its located at the end of the
 	 * container, making the erase operation cheaper at the cost of an extra move operation. Doesn't preserve ordering
 	 * within the element. Returns true if a swap occurred, or false if the element was already at the end of the container.

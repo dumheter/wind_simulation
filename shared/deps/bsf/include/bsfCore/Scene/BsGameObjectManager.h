@@ -16,7 +16,7 @@ namespace bs
 	enum GameObjectDeserializationModeFlags
 	{
 		/** All handles will point to old ID that were restored from the deserialized file. */
-		GODM_UseOriginalIds = 0x01, 
+		GODM_UseOriginalIds = 0x01,
 		/** All handles will point to new IDs that were given to the deserialized GameObjects. */
 		GODM_UseNewIds = 0x02,
 		/** Handles pointing to GameObjects outside of the currently deserialized set
@@ -26,7 +26,9 @@ namespace bs
 		will be broken. */
 		GODM_BreakExternal = 0x08,
 		/** Handles pointing to GameObjects that cannot be found will not be set to null. */
-		GODM_KeepMissing = 0x10
+		GODM_KeepMissing = 0x10,
+		/** When enabled, new UUIDs will be generated for all deserialized game objects. */
+		GODM_UseNewUUID = 0x20
 	};
 
 	/**
@@ -45,7 +47,7 @@ namespace bs
 		 * 			
 		 * @param[in]	object			Constructed GameObject to wrap in the handle and initialize.
 		 * @return						Handle to the GameObject.
-		 * 
+		 *
 		 * @note	Thread safe.
 		 */
 		GameObjectHandleBase registerObject(const SPtr<GameObject>& object);
@@ -59,7 +61,7 @@ namespace bs
 		void unregisterObject(GameObjectHandleBase& object);
 
 		/**
-		 * Attempts to find a GameObject handle based on the GameObject instance ID. Returns empty handle if ID cannot be 
+		 * Attempts to find a GameObject handle based on the GameObject instance ID. Returns empty handle if ID cannot be
 		 * found.
 		 *
 		 * @note	Thread safe.
@@ -67,7 +69,7 @@ namespace bs
 		GameObjectHandleBase getObject(UINT64 id) const;
 
 		/**
-		 * Attempts to find a GameObject handle based on the GameObject instance ID. Returns true if object with the 
+		 * Attempts to find a GameObject handle based on the GameObject instance ID. Returns true if object with the
 		 * specified ID is found, false otherwise.
 		 *
 		 * @note	Thread safe.
@@ -76,22 +78,22 @@ namespace bs
 
 		/**	
 		 * Checks if the GameObject with the specified instance ID exists.
-		 * 
+		 *
 		 * @note	Thread safe.
 		 */
 		bool objectExists(UINT64 id) const;
 
 		/**
-		 * Changes the instance ID by which an object can be retrieved by. 
+		 * Changes the instance ID by which an object can be retrieved by.
 		 *
 		 * @note	Caller is required to update the object itself with the new ID.
 		 * @note	Thread safe.
 		 */
 		void remapId(UINT64 oldId, UINT64 newId);
 
-		/** 
-		 * Allocates a new unique game object ID. 
-		 * 
+		/**
+		 * Allocates a new unique game object ID.
+		 *
 		 * @note	Thread safe.
 		 */
 		UINT64 reserveId();
@@ -127,7 +129,7 @@ namespace bs
 	public:
 		/**
 		 * Starts game object deserialization.
-		 * 
+		 *
 		 * @param[in]	options		One or a combination of GameObjectDeserializationModeFlags, controlling how
 		 *							are game objects deserialized.
 		 */
@@ -145,6 +147,9 @@ namespace bs
 
 		/** Resolves all registered handles and objects, and triggers end callbacks. */
 		void resolve();
+
+		/** Determines should new UUID's be generated for deserialized objects, or existing ones kept. */
+		bool getUseNewUUIDs() const { return (mOptions & GODM_UseNewUUID) != 0; }
 
 	private:
 		UnorderedMap<UINT64, UINT64> mIdMapping;

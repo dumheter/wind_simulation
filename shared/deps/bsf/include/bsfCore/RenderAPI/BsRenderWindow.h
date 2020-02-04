@@ -45,35 +45,65 @@ namespace bs
 	 */
 
 	/** Structure that is used for initializing a render window. */
-	struct BS_CORE_EXPORT RENDER_WINDOW_DESC
+	struct BS_CORE_EXPORT BS_SCRIPT_EXPORT(m:RenderAPI,pl:true,api:bsf) RENDER_WINDOW_DESC
 	{
-		RENDER_WINDOW_DESC()
-		: fullscreen(false), vsync(false), vsyncInterval(1), hidden(false), depthBuffer(true)
-		, multisampleCount(0), multisampleHint(""), gamma(false), left(-1), top(-1), title("")
-		, showTitleBar(true), showBorder(true), allowResize(true), toolWindow (false), modal(false)
-		, hideUntilSwap(false)
-		{ }
+		/** Output monitor, frame buffer resize and refresh rate. */
+		VideoMode videoMode;
 
-		VideoMode videoMode; /**< Output monitor, frame buffer resize and refresh rate. */
-		bool fullscreen; /**< Should the window be opened in fullscreen mode. */
-		bool vsync; /**< Should the window wait for vertical sync before swapping buffers. */
-		UINT32 vsyncInterval; /**< Determines how many vsync intervals occur per frame. FPS = refreshRate/interval. Usually 1 when vsync active. */
-		bool hidden; /**< Should the window be hidden initially. */
-		bool depthBuffer; /**< Should the window be created with a depth/stencil buffer. */
-		UINT32 multisampleCount; /**< If higher than 1, texture containing multiple samples per pixel is created. */
-		String multisampleHint; /**< Hint about what kind of multisampling to use. Render system specific. */
-		bool gamma; /**< Should the written color pixels be gamma corrected before write. */
-		INT32 left; /**< Window origin on X axis in pixels. -1 == screen center. Relative to monitor provided in videoMode. */
-		INT32 top; /**< Window origin on Y axis in pixels. -1 == screen center. Relative to monitor provided in videoMode. */
-		String title; /**< Title of the window. */
-		bool showTitleBar; /**< Determines if the title-bar should be shown or not. */
-		bool showBorder; /**< Determines if the window border should be shown or not. */
-		bool allowResize; /**< Determines if the user can resize the window by dragging on the window edges. */
-		bool toolWindow; /**< Tool windows have no task bar entry and always remain on top of their parent window. */
-		bool modal; /**< When a modal window is open all other windows will be locked until modal window is closed. */
-		bool hideUntilSwap; /**< Window will be created as hidden and only be shown when the first framebuffer swap happens. */
+		/** Should the window be opened in fullscreen mode. */
+		bool fullscreen = false;
 
-		NameValuePairList platformSpecific; /**< Platform-specific creation options. */
+		/** Should the window wait for vertical sync before swapping buffers. */
+		bool vsync = false;
+
+		/** Determines how many vsync intervals occur per frame. FPS = refreshRate/interval. Usually 1 when vsync active. */
+		UINT32 vsyncInterval = 1;
+
+		/** Should the window be hidden initially. */
+		bool hidden = false;
+
+		/** Should the window be created with a depth/stencil buffer. */
+		bool depthBuffer = false;
+
+		/** If higher than 1, texture containing multiple samples per pixel is created. */
+		UINT32 multisampleCount = 0;
+
+		/** Hint about what kind of multisampling to use. Render system specific. */
+		String multisampleHint = "";
+
+		/** Should the written color pixels be gamma corrected before write. */
+		bool gamma = false;
+
+		/** Window origin on X axis in pixels. -1 == screen center. Relative to monitor provided in videoMode. */
+		INT32 left = -1;
+
+		/** Window origin on Y axis in pixels. -1 == screen center. Relative to monitor provided in videoMode. */
+		INT32 top = -1;
+
+		/** Title of the window. */
+		String title = "";
+
+		/** Determines if the title-bar should be shown or not. */
+		bool showTitleBar = true;
+
+		/** Determines if the window border should be shown or not. */
+		bool showBorder = true;
+
+		/** Determines if the user can resize the window by dragging on the window edges. */
+		bool allowResize = true;
+
+		/** Tool windows have no task bar entry and always remain on top of their parent window. */
+		bool toolWindow = false;
+
+		/** When a modal window is open all other windows will be locked until modal window is closed. */
+		bool modal = false;
+
+		/** Window will be created as hidden and only be shown when the first framebuffer swap happens. */
+		bool hideUntilSwap = false;
+
+		/** Platform-specific creation options. */
+		BS_SCRIPT_EXPORT(ex:true)
+		UnorderedMap<String, String> platformSpecific;
 	};
 
 	/**	Contains various properties that describe a render window. */
@@ -121,7 +151,7 @@ namespace bs
 		virtual Vector2I windowToScreenPos(const Vector2I& windowPos) const = 0;
 
 		/**	
-		 * Resize the window to specified width and height in pixels. 
+		 * Resize the window to specified width and height in pixels.
 		 *
 		 * @param[in]	width		Width of the window in pixels.
 		 * @param[in]	height		Height of the window in pixels.
@@ -129,67 +159,67 @@ namespace bs
 		virtual void resize(UINT32 width, UINT32 height);
 
 		/**	
-		 * Move the window to specified screen coordinates. 
+		 * Move the window to specified screen coordinates.
 		 *
 		 * @param[in]	left		Position of the left border of the window on the screen.
 		 * @param[in]	top			Position of the top border of the window on the screen.
-		 * 
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void move(INT32 left, INT32 top);
 
-		/** 
-		 * Hides the window. 
-		 * 
+		/**
+		 * Hides the window.
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void hide();
 
-		/** 
-		 * Shows a previously hidden window. 
-		 * 
+		/**
+		 * Shows a previously hidden window.
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void show();
 
-		/** 
-		 * @copydoc ct::RenderWindow::minimize  
-		 * 
+		/**
+		 * @copydoc ct::RenderWindow::minimize
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void minimize();
 
-		/** 
-		 * @copydoc ct::RenderWindow::maximize 
-		 * 
+		/**
+		 * @copydoc ct::RenderWindow::maximize
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void maximize();
 
-		/** 
-		 * @copydoc ct::RenderWindow::restore  
-		 * 
+		/**
+		 * @copydoc ct::RenderWindow::restore
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void restore();
 
-		/** 
-		 * @copydoc ct::RenderWindow::setFullscreen(UINT32, UINT32, float, UINT32) 
-		 * 
+		/**
+		 * @copydoc ct::RenderWindow::setFullscreen(UINT32, UINT32, float, UINT32)
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void setFullscreen(UINT32 width, UINT32 height, float refreshRate = 60.0f, UINT32 monitorIdx = 0);
 
-		/** 
-		 * @copydoc ct::RenderWindow::setFullscreen(const VideoMode&) 
-		 * 
+		/**
+		 * @copydoc ct::RenderWindow::setFullscreen(const VideoMode&)
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void setFullscreen(const VideoMode& videoMode);
 
-		/** 
-		 * @copydoc ct::RenderWindow::setWindowed 
-		 * 
+		/**
+		 * @copydoc ct::RenderWindow::setWindowed
+		 *
 		 * @note This is an @ref asyncMethod "asynchronous method".
 		 */
 		virtual void setWindowed(UINT32 width, UINT32 height);
@@ -204,7 +234,7 @@ namespace bs
 		void destroy() override;
 
 		/**
-		 * Creates a new render window using the specified options. Optionally makes the created window a child of another 
+		 * Creates a new render window using the specified options. Optionally makes the created window a child of another
 		 * window.
 		 */
 		static SPtr<RenderWindow> create(RENDER_WINDOW_DESC& desc, SPtr<RenderWindow> parentWindow = nullptr);
@@ -218,6 +248,13 @@ namespace bs
 
 		/** Notifies the window that a specific event occurred. Usually called by the platform specific main event loop. */
 		void _notifyWindowEvent(WindowEventType type);
+
+		// Methods to notify this window of external events that change the properties.
+		// These are useful when using "externalWindowHandle"
+		void _onExternalResize(UINT32 width, UINT32 height);
+		void _onExternalMove(INT32 top, INT32 left);
+		void _onExternalFocus(bool focused);
+		void _onExternalMaximized(bool maximized);
 
 		/** Method that triggers whenever the window changes size or position. */
 		virtual void _windowMovedOrResized() { }
@@ -238,6 +275,14 @@ namespace bs
 	protected:
 		RENDER_WINDOW_DESC mDesc;
 		UINT32 mWindowId;
+
+		/************************************************************************/
+		/* 								SERIALIZATION                      		*/
+		/************************************************************************/
+	public:
+		friend class RenderWindowRTTI;
+		static RTTITypeBase* getRTTIStatic();
+		RTTITypeBase* getRTTI() const override;
 	};
 
 	/** @} */
@@ -255,7 +300,7 @@ namespace bs
 		RenderWindow(const RENDER_WINDOW_DESC& desc, UINT32 windowId);
 		virtual ~RenderWindow();
 
-		/** 
+		/**
 		 * Switches the window to fullscreen mode. Child windows cannot go into fullscreen mode.
 		 *
 		 * @param[in]	width		Width of the window frame buffer in pixels.
@@ -287,7 +332,7 @@ namespace bs
 
 		/**
 		 * Makes the render target active or inactive. (for example in the case of a window, it will hide or restore the
-		 * window). 
+		 * window).
 		 */
 		virtual void setActive(bool state);
 

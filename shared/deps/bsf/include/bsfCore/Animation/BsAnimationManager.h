@@ -42,15 +42,18 @@ namespace bs
 		};
 
 		/**
-		 * Maps animation ID to a animation information structure, which points to relevant skeletal or morph shape data. 
+		 * Maps animation ID to a animation information structure, which points to relevant skeletal or morph shape data.
 		 */
 		UnorderedMap<UINT64, AnimInfo> infos;
 
 		/** Global joint transforms for all skeletons in the scene. */
 		Vector<Matrix4> transforms;
+
+		/** True if the animation is being evaluated asynchronously along with rendering (delayed one frame). */
+		bool async = false;
 	};
 
-	/** 
+	/**
 	 * Keeps track of all active animations, queues animation thread tasks and synchronizes data between simulation, core
 	 * and animation threads.
 	 */
@@ -62,7 +65,7 @@ namespace bs
 		/** Pauses or resumes the animation evaluation. */
 		void setPaused(bool paused);
 
-		/** 
+		/**
 		 * Determines how often to evaluate animations. If rendering is not running at adequate framerate the animation
 		 * could end up being evaluated less times than specified here.
 		 *
@@ -73,7 +76,7 @@ namespace bs
 		/**
 		 * Evaluates animations for all animated objects, and returns the evaluated skeleton bone poses and morph shape
 		 * meshes that can be passed along to the renderer.
-		 * 
+		 *
 		 * @param[in]		async		If true the method returns immediately while the animation gets evaluated in the
 		 *								background. The returned evaluated data will be the data from the previous frame.
 		 *								Therefore note that this introduces a one frame latency on the animation. If the
@@ -97,16 +100,16 @@ namespace bs
 			DataReady
 		};
 
-		/** 
-		 * Registers a new animation and returns a unique ID for it. Must be called whenever an Animation is constructed. 
+		/**
+		 * Registers a new animation and returns a unique ID for it. Must be called whenever an Animation is constructed.
 		 */
 		UINT64 registerAnimation(Animation* anim);
 
 		/** Unregisters an animation with the specified ID. Must be called before an Animation is destroyed. */
 		void unregisterAnimation(UINT64 id);
 
-		/** 
-		 * Evaluates animation for a single object and writes the result in the currently active write buffer. 
+		/**
+		 * Evaluates animation for a single object and writes the result in the currently active write buffer.
 		 *
 		 * @param[in]	anim		Proxy representing the animation to evaluate.
 		 * @param[in]	boneIdx		Index in the output buffer in which to write evaluated bone information. This will be
@@ -114,14 +117,15 @@ namespace bs
 		 */
 		void evaluateAnimation(AnimationProxy* anim, UINT32& boneIdx);
 
-		UINT64 mNextId;
+		UINT64 mNextId = 1;
 		UnorderedMap<UINT64, Animation*> mAnimations;
 		
-		float mUpdateRate;
-		float mAnimationTime;
-		float mLastAnimationUpdateTime;
-		float mNextAnimationUpdateTime;
-		bool mPaused;
+		float mUpdateRate = 1.0f / 60.0f;
+		float mAnimationTime = 0.0f;
+		float mLastAnimationUpdateTime = 0.0f;
+		float mNextAnimationUpdateTime = 0.0f;
+		float mLastAnimationDeltaTime = 0.0f;
+		bool mPaused = false;
 
 		SPtr<VertexDataDesc> mBlendShapeVertexDesc;
 
@@ -130,8 +134,8 @@ namespace bs
 		Vector<ConvexVolume> mCullFrustums;
 		EvaluatedAnimationData mAnimData[CoreThread::NUM_SYNC_BUFFERS + 1];
 
-		UINT32 mPoseReadBufferIdx;
-		UINT32 mPoseWriteBufferIdx;
+		UINT32 mPoseReadBufferIdx = 2;
+		UINT32 mPoseWriteBufferIdx = 0;
 		
 		Signal mWorkerDoneSignal;
 		Mutex mMutex;

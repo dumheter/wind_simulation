@@ -2,7 +2,12 @@
 
 #include <cstdint>
 
-namespace wind {
+// ========================================================================== //
+// Types
+// ========================================================================== //
+
+namespace wind
+{
 
 using u8 = uint8_t;
 using u16 = uint16_t;
@@ -17,4 +22,14 @@ using s64 = int64_t;
 using f32 = float;
 using f64 = double;
 
-}
+} // namespace wind
+
+// ========================================================================== //
+// Macros
+// ========================================================================== //
+
+/* Macro to force a namespace class */
+#define WIND_NAMESPACE_CLASS(type)                                                                                     \
+  public:                                                                                                              \
+    type() = delete;                                                                                                   \
+    ~type() = delete;

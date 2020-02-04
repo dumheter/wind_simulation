@@ -5,7 +5,7 @@
 #include "BsCorePrerequisites.h"
 #include "CoreThread/BsCoreObject.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup RenderAPI
 	 *  @{
@@ -73,9 +73,9 @@ namespace bs
 		typedef ct::PIPELINE_STATE_DESC StateDescType;
 	};
 
-	/** 
+	/**
 	 * Templated version of GraphicsPipelineState so it can be used for both core and non-core versions of the pipeline
-	 * state. 
+	 * state.
 	 */
 	template<bool Core>
 	class BS_CORE_EXPORT TGraphicsPipelineState
@@ -88,7 +88,7 @@ namespace bs
 		using StateDescType = typename TGpuPipelineStateTypes<Core>::StateDescType;
 		using GpuPipelineParamInfoType = typename TGpuPipelineStateTypes<Core>::GpuPipelineParamInfoType;
 
-		virtual ~TGraphicsPipelineState() { }
+		virtual ~TGraphicsPipelineState() = default;
 
 		bool hasVertexProgram() const { return mData.vertexProgram != nullptr; }
 		bool hasFragmentProgram() const { return mData.fragmentProgram != nullptr; }
@@ -110,16 +110,16 @@ namespace bs
 		const SPtr<GpuPipelineParamInfoType>& getParamInfo() const { return mParamInfo; }
 
 	protected:
-		TGraphicsPipelineState();
+		TGraphicsPipelineState() = default;
 		TGraphicsPipelineState(const StateDescType& desc);
 
 		StateDescType mData;
 		SPtr<GpuPipelineParamInfoType> mParamInfo;
 	};
 
-	/** 
+	/**
 	 * Templated version of ComputePipelineState so it can be used for both core and non-core versions of the pipeline
-	 * state. 
+	 * state.
 	 */
 	template<bool Core>
 	class BS_CORE_EXPORT TComputePipelineState
@@ -128,7 +128,7 @@ namespace bs
 		using GpuProgramType = SPtr<CoreVariantType<GpuProgram, Core>>;
 		using GpuPipelineParamInfoType = typename TGpuPipelineStateTypes<Core>::GpuPipelineParamInfoType;
 
-		virtual ~TComputePipelineState() { }
+		virtual ~TComputePipelineState() = default;
 
 		const GpuProgramType& getProgram() const { return mProgram; }
 
@@ -151,13 +151,13 @@ namespace bs
 
 	/**
 	 * Describes the state of the GPU pipeline that determines how are primitives rendered. It consists of programmable
-	 * states (vertex, fragment, geometry, etc. GPU programs), as well as a set of fixed states (blend, rasterizer, 
+	 * states (vertex, fragment, geometry, etc. GPU programs), as well as a set of fixed states (blend, rasterizer,
 	 * depth-stencil). Once created the state is immutable, and can be bound to RenderAPI for rendering.
 	 */
 	class BS_CORE_EXPORT GraphicsPipelineState : public CoreObject, public TGraphicsPipelineState<false>
 	{
 	public:
-		virtual ~GraphicsPipelineState() { }
+		virtual ~GraphicsPipelineState() = default;
 
 		/**
 		 * Retrieves a core implementation of the pipeline object usable only from the core thread.
@@ -178,14 +178,14 @@ namespace bs
 	};
 
 	/**
-	 * Describes the state of the GPU pipeline that determines how are compute programs executed. It consists of 
+	 * Describes the state of the GPU pipeline that determines how are compute programs executed. It consists of
 	 * of a single programmable state (GPU program). Once created the state is immutable, and can be bound to RenderAPI for
 	 * use.
 	 */
 	class BS_CORE_EXPORT ComputePipelineState : public CoreObject, public TComputePipelineState<false>
 	{
 	public:
-		virtual ~ComputePipelineState() { }
+		virtual ~ComputePipelineState() = default;
 
 		/**
 		 * Retrieves a core implementation of the pipeline object usable only from the core thread.
@@ -218,13 +218,13 @@ namespace bs
 	{
 	public:
 		GraphicsPipelineState(const PIPELINE_STATE_DESC& desc, GpuDeviceFlags deviceMask);
-		virtual ~GraphicsPipelineState() { }
+		virtual ~GraphicsPipelineState() = default;
 
 		/** @copydoc CoreObject::initialize() */
 		void initialize() override;
 
 		/** @copydoc RenderStateManager::createGraphicsPipelineState */
-		static SPtr<GraphicsPipelineState> create(const PIPELINE_STATE_DESC& desc, 
+		static SPtr<GraphicsPipelineState> create(const PIPELINE_STATE_DESC& desc,
 			GpuDeviceFlags deviceMask = GDF_DEFAULT);
 
 	protected:
@@ -236,7 +236,7 @@ namespace bs
 	{
 	public:
 		ComputePipelineState(const SPtr<GpuProgram>& program, GpuDeviceFlags deviceMask);
-		virtual ~ComputePipelineState() { }
+		virtual ~ComputePipelineState() = default;
 
 		/** @copydoc CoreObject::initialize() */
 		void initialize() override;

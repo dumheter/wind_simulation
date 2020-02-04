@@ -18,12 +18,12 @@ namespace bs
 		FocusGained, /**< GUI element gained input focus. */
 		MoveLeft, /**< Input caret was moved left (for example for navigating an input box). */
 		MoveRight, /**< Input caret was moved right (for example for navigating an input box). */
-		MoveUp, /**< Input caret was moved up (for example for navigating an input box). */ 
-		MoveDown, /**< Input caret was moved down (for example for navigating an input box). */ 
-		SelectLeft, /**< Input Selection was moved left (for example for selecting text in an input box). */ 
-		SelectRight, /**< Input Selection was moved right (for example for selecting text in an input box). */ 
-		SelectUp, /**< Input Selection was moved up (for example for selecting text in an input box). */ 
-		SelectDown, /**< Input Selection was moved down (for example for selecting text in an input box). */ 
+		MoveUp, /**< Input caret was moved up (for example for navigating an input box). */
+		MoveDown, /**< Input caret was moved down (for example for navigating an input box). */
+		SelectLeft, /**< Input Selection was moved left (for example for selecting text in an input box). */
+		SelectRight, /**< Input Selection was moved right (for example for selecting text in an input box). */
+		SelectUp, /**< Input Selection was moved up (for example for selecting text in an input box). */
+		SelectDown, /**< Input Selection was moved down (for example for selecting text in an input box). */
 		Escape, /**< Escape key was pressed. */
 		Delete, /**< Delete key was pressed. */
 		Backspace, /**< Backspace key was pressed. */
@@ -38,9 +38,7 @@ namespace bs
 	class BS_EXPORT GUICommandEvent
 	{
 	public:
-		GUICommandEvent()
-			:mType(GUICommandEventType::Redraw)
-		{ }
+		GUICommandEvent() = default;
 
 		/**	Returns type describing what kind of event this is. */
 		GUICommandEventType getType() const { return mType; }
@@ -50,7 +48,7 @@ namespace bs
 		/**	Sets type describing what kind of event this is. */
 		void setType(GUICommandEventType type) { mType = type; }
 
-		GUICommandEventType mType;
+		GUICommandEventType mType = GUICommandEventType::Redraw;
 	};
 
 	/** @} */

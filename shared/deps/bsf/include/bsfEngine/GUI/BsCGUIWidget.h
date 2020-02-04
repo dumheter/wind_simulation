@@ -17,7 +17,7 @@ namespace bs
 	class BS_EXPORT CGUIWidget : public Component
 	{
 	public:
-		virtual ~CGUIWidget();
+		virtual ~CGUIWidget() = default;
 
 		/** @copydoc GUIWidget::setSkin */
 		void setSkin(const HGUISkin& skin);
@@ -42,9 +42,6 @@ namespace bs
 
 		/** @copydoc GUIWidget::getBounds */
 		const Rect2I& getBounds() const;
-
-		/** @copydoc GUIWidget::isDirty */
-		bool isDirty(bool cleanIfDirty);
 
 		/** @copydoc GUIWidget::getTarget */
 		Viewport* getTarget() const;

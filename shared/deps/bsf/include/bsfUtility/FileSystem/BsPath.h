@@ -217,12 +217,15 @@ namespace bs
 		 */
 		void setExtension(const String& extension);
 
+		/** Returns a filename with extension. */
+		const String& getFilename() const { return mFilename; }
+
 		/**
 		 * Returns a filename in the path.
 		 *
 		 * @param[in]	extension	If true, returned filename will contain an extension.
 		 */
-		String getFilename(bool extension = true) const;
+		String getFilename(bool extension) const;
 
 		/** Returns file extension with the leading ".". */
 		String getExtension() const;
@@ -451,62 +454,6 @@ namespace bs
 		bool mIsAbsolute = false;
 	};
 
-	/** @cond SPECIALIZATIONS */
-
-	/**
-	 * RTTIPlainType specialization for Path that allows paths be serialized as value types.
-	 *
-	 * @see		RTTIPlainType
-	 */
-	template<> struct RTTIPlainType<Path>
-	{
-		enum { id = TID_Path }; enum { hasDynamicSize = 1 };
-
-		static void toMemory(const Path& data, char* memory)
-		{
-			UINT32 size = getDynamicSize(data);
-			memcpy(memory, &size, sizeof(UINT32));
-			memory += sizeof(UINT32);
-
-			memory = rttiWriteElem(data.mDevice, memory);
-			memory = rttiWriteElem(data.mNode, memory);
-			memory = rttiWriteElem(data.mFilename, memory);
-			memory = rttiWriteElem(data.mIsAbsolute, memory);
-			rttiWriteElem(data.mDirectories, memory);
-		}
-
-		static UINT32 fromMemory(Path& data, char* memory)
-		{
-			UINT32 size;
-			memcpy(&size, memory, sizeof(UINT32));
-			memory += sizeof(UINT32);
-
-			memory = rttiReadElem(data.mDevice, memory);
-			memory = rttiReadElem(data.mNode, memory);
-			memory = rttiReadElem(data.mFilename, memory);
-			memory = rttiReadElem(data.mIsAbsolute, memory);
-			rttiReadElem(data.mDirectories, memory);
-
-			return size;
-		}
-
-		static UINT32 getDynamicSize(const Path& data)
-		{
-			UINT64 dataSize = rttiGetElemSize(data.mDevice) + rttiGetElemSize(data.mNode) + rttiGetElemSize(data.mFilename) +
-				rttiGetElemSize(data.mIsAbsolute) + rttiGetElemSize(data.mDirectories) + sizeof(UINT32);
-
-#if BS_DEBUG_MODE
-			if (dataSize > std::numeric_limits<UINT32>::max())
-			{
-				__string_throwDataOverflowException();
-			}
-#endif
-
-			return (UINT32)dataSize;
-		}
-	};
-
-	/** @endcond */
 	/** @} */
 }
 
@@ -521,12 +468,12 @@ namespace std
 		size_t operator()(const bs::Path& path) const
 		{
 			size_t hash = 0;
-			bs::hash_combine(hash, path.mFilename);
-			bs::hash_combine(hash, path.mDevice);
-			bs::hash_combine(hash, path.mNode);
+			bs::bs_hash_combine(hash, path.mFilename);
+			bs::bs_hash_combine(hash, path.mDevice);
+			bs::bs_hash_combine(hash, path.mNode);
 
 			for (auto& dir : path.mDirectories)
-				bs::hash_combine(hash, dir);
+				bs::bs_hash_combine(hash, dir);
 
 			return hash;
 		}

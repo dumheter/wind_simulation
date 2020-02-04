@@ -25,25 +25,25 @@ namespace bs
 	/**	Types of builtin textures that are always available. */
 	enum class BuiltinTexture
 	{
-		White, Black, Normal
+		White, Black, Normal, BokehFlare
 	};
 
 	/** Types of builtin shaders that are always available. */
-	enum class BuiltinShader
+	enum class BS_SCRIPT_EXPORT() BuiltinShader
 	{
-		Custom, 
+		Custom,
 		/** Physically based shader used for opaque 3D geometry. */
-		Standard, 
+		Standard,
 		/** Physically based shader used for transparent 3D geometry. */
 		Transparent,
 		/** Special shader used for rendering particles without any lighting, with support for transparency. */
 		ParticlesUnlit,
-		/** 
-		 * Special shader used for rendering particles with lighting using the forward rendering pipeline (supports 
-		 * transparency). 
+		/**
+		 * Special shader used for rendering particles with lighting using the forward rendering pipeline (supports
+		 * transparency).
 		 */
 		ParticlesLit,
-		/** 
+		/**
 		 * Special shader used for rendering particles with lighting using the deferred rendering pipeline (no support
 		 * for transparency).
 		 */
@@ -116,9 +116,6 @@ namespace bs
 		/**	Creates a material used for image sprite rendering (for example images in GUI). */
 		HMaterial createSpriteImageMaterial() const;
 
-		/**	Creates a material used for non-transparent image sprite rendering (for example images in GUI). */
-		HMaterial createSpriteNonAlphaImageMaterial() const;
-
 		/** Creates a material used for antialiased line rendering (for example curve rendering in GUI). */
 		HMaterial createSpriteLineMaterial() const;
 
@@ -127,7 +124,7 @@ namespace bs
 
 		/**
 		 * Loads a shader at the specified path.
-		 * 
+		 *
 		 * @param[in]	path	Path relative to the default shader folder with no file extension.
 		 */
 		HShader getShader(const Path& path) const;
@@ -147,13 +144,21 @@ namespace bs
 		/**	Returns absolute path to the builtin icons folder. */
 		static Path getIconFolder();
 
+#if BS_IS_BANSHEE3D || defined BS_IS_ASSET_TOOL
+		/**	Returns absolute path to the editor builtin shader include folder. */
+		static Path getEditorShaderIncludeFolder();
+
+#endif
+
 		static constexpr const char* IconTextureName = "bsfIcon.png";
 		static constexpr const char* MultiLineLabelStyle = "MultiLineLabel";
 
 		static constexpr const char* SHADER_FOLDER = "Shaders/";
 		static constexpr const char* CURSOR_FOLDER = "Cursors/";
 		static constexpr const char* ICON_FOLDER = "Icons/";
-		static constexpr const char* SKIN_FOLDER = "Skin/"; 
+		static constexpr const char* ICON3D_FOLDER = "Icons3D/";
+		static constexpr const char* SKIN_FOLDER = "Skin/";
+		static constexpr const char* ANIMATED_SPRITES_FOLDER = "AnimatedSprites/";
 		static constexpr const char* SHADER_INCLUDE_FOLDER = "Shaders/Includes/";
 		static constexpr const char* MESH_FOLDER = "Meshes/";
 		static constexpr const char* TEXTURE_FOLDER = "Textures/";
@@ -204,7 +209,6 @@ namespace bs
 
 		HShader mShaderSpriteText;
 		HShader mShaderSpriteImage;
-		HShader mShaderSpriteNonAlphaImage;
 		HShader mShaderSpriteLine;
 		HShader mShaderDiffuse;
 		HShader mShaderTransparent;
@@ -249,8 +253,7 @@ namespace bs
 		static const Vector2I CursorSizeWEHotspot;
 
 		static const String ShaderSpriteTextFile;
-		static const String ShaderSpriteImageAlphaFile;
-		static const String ShaderSpriteImageNoAlphaFile;
+		static const String ShaderSpriteImageFile;
 		static const String ShaderSpriteLineFile;
 	};
 

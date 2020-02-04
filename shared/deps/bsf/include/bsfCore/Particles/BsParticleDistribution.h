@@ -12,7 +12,7 @@
 #include "Utility/BsBitwise.h"
 #include "Utility/BsLookupTable.h"
 
-namespace bs 
+namespace bs
 {
 	/** @addtogroup Particles-Internal
 	 *  @{
@@ -38,11 +38,12 @@ namespace bs
 	 */
 
 	/** Specifies a color as a distribution, which can include a constant color, random color range or a color gradient. */
-	struct BS_CORE_EXPORT BS_SCRIPT_EXPORT(m:Particles) ColorDistribution
+	template<class T>
+	struct TColorDistribution
 	{
 		/** Creates a new empty distribution. */
 		BS_SCRIPT_EXPORT()
-		ColorDistribution()
+		TColorDistribution()
 			: mType(PDT_Constant)
 			, mMinGradient({ ColorGradientKey(Color::Black, 0.0f) })
 			, mMaxGradient({ ColorGradientKey(Color::Black, 0.0f) })
@@ -50,7 +51,7 @@ namespace bs
 
 		/** Creates a new distribution that returns a constant color. */
 		BS_SCRIPT_EXPORT()
-		ColorDistribution(const Color& color)
+		TColorDistribution(const Color& color)
 			: mType(PDT_Constant)
 			, mMinGradient({ ColorGradientKey(color, 0.0f) })
 			, mMaxGradient({ ColorGradientKey(color, 0.0f) })
@@ -58,7 +59,7 @@ namespace bs
 
 		/** Creates a new distribution that returns a random color in the specified range. */
 		BS_SCRIPT_EXPORT()
-		ColorDistribution(const Color& minColor, const Color& maxColor)
+		TColorDistribution(const Color& minColor, const Color& maxColor)
 			: mType(PDT_RandomRange)
 			, mMinGradient({ ColorGradientKey(minColor, 0.0f) })
 			, mMaxGradient({ ColorGradientKey(maxColor, 0.0f) })
@@ -66,62 +67,62 @@ namespace bs
 
 		/** Creates a new distribution that evaluates a color gradient. */
 		BS_SCRIPT_EXPORT()
-		ColorDistribution(const ColorGradient& gradient)
+		TColorDistribution(const T& gradient)
 			: mType(PDT_Curve), mMinGradient(gradient), mMaxGradient(gradient)
 		{
 			if(mMinGradient.getNumKeys() == 0)
-				mMinGradient = ColorGradient({ ColorGradientKey(Color::Black, 0.0f) });
+				mMinGradient = T({ ColorGradientKey(Color::Black, 0.0f) });
 
 			if(mMaxGradient.getNumKeys() == 0)
-				mMaxGradient = ColorGradient({ ColorGradientKey(Color::Black, 0.0f) });
+				mMaxGradient = T({ ColorGradientKey(Color::Black, 0.0f) });
 		}
 
 		/** Creates a new distribution that returns a random color in a range determined by two gradients. */
 		BS_SCRIPT_EXPORT()
-		ColorDistribution(const ColorGradient& minGradient, const ColorGradient& maxGradient)
+		TColorDistribution(const T& minGradient, const T& maxGradient)
 			: mType(PDT_RandomCurveRange), mMinGradient(minGradient), mMaxGradient(maxGradient)
 		{
 			if(mMinGradient.getNumKeys() == 0)
-				mMinGradient = ColorGradient({ ColorGradientKey(Color::Black, 0.0f) });
+				mMinGradient = T({ ColorGradientKey(Color::Black, 0.0f) });
 
 			if(mMaxGradient.getNumKeys() == 0)
-				mMaxGradient = ColorGradient({ ColorGradientKey(Color::Black, 0.0f) });
+				mMaxGradient = T({ ColorGradientKey(Color::Black, 0.0f) });
 		}
 
 		/** Returns the type of the represented distribution. */
 		BS_SCRIPT_EXPORT(pr:getter,n:DistributionType)
 		PropertyDistributionType getType() const { return mType; }
 
-		/** 
-		 * Returns the constant value of the distribution, or the minimal value of a constant range. Undefined if 
-		 * the distribution is represented by a gradient. 
+		/**
+		 * Returns the constant value of the distribution, or the minimal value of a constant range. Undefined if
+		 * the distribution is represented by a gradient.
 		 */
 		BS_SCRIPT_EXPORT()
 		Color getMinConstant() const { return mMinGradient.getKey(0).color; }
 
-		/** 
+		/**
 		 * Returns the maximum value of a constant range. Only defined if the distribution represents a non-gradient range.
 		 */
 		BS_SCRIPT_EXPORT()
 		Color getMaxConstant() const { return mMaxGradient.getKey(0).color; }
 
-		/** 
-		 * Returns the gradient representing the distribution, or the first gradient representing a gradient range. 
+		/**
+		 * Returns the gradient representing the distribution, or the first gradient representing a gradient range.
 		 * Undefined if the distribution is represented by a constant or a non-gradient range.
 		 */
 		BS_SCRIPT_EXPORT()
-		const ColorGradient& getMinGradient() const { return mMinGradient; }
+		const T& getMinGradient() const { return mMinGradient; }
 
-		/** 
-		 * Returns the curve representing the second gradient of a gradient range. Only defined if the distribution 
+		/**
+		 * Returns the curve representing the second gradient of a gradient range. Only defined if the distribution
 		 * represents a gradient range.
 		 */
 		BS_SCRIPT_EXPORT()
-		const ColorGradient& getMaxGradient() const { return mMaxGradient; }
+		const T& getMaxGradient() const { return mMaxGradient; }
 
-		/** 
+		/**
 		 * Evaluates the value of the distribution.
-		 * 
+		 *
 		 * @param[in]	t		Time at which to evaluate the distribution. This is only relevant if the distribution
 		 *						contains gradients.
 		 * @param[in]	factor	Value in range [0, 1] that determines how to interpolate between min/max value, if the
@@ -130,9 +131,9 @@ namespace bs
 		 * @return				Evaluated color.
 		 *
 		 */
-		RGBA evaluate(float t, float factor) const
+		typename T::ColorType evaluate(float t, float factor) const
 		{
-			const UINT32 byteFactor = Bitwise::unormToUint<8>(factor);
+			const auto lerpFactor = impl::TGradientHelper<typename T::ColorType>::toLerpFactor(factor);
 			switch(mType)
 			{
 			default:
@@ -140,26 +141,26 @@ namespace bs
 				return mMinGradient.evaluate(0.0f);
 			case PDT_RandomRange:
 				{
-					const RGBA minColor = mMinGradient.evaluate(0.0f);
-					const RGBA maxColor = mMaxGradient.evaluate(0.0f);
+					const auto minColor = mMinGradient.evaluate(0.0f);
+					const auto maxColor = mMaxGradient.evaluate(0.0f);
 
-					return Color::lerp(byteFactor, minColor, maxColor);
+					return Color::lerp(lerpFactor, minColor, maxColor);
 				}
 			case PDT_Curve:
 				return mMinGradient.evaluate(t);
 			case PDT_RandomCurveRange:
 				{
-					const RGBA minColor = mMinGradient.evaluate(t);
-					const RGBA maxColor = mMaxGradient.evaluate(t);
+					const auto minColor = mMinGradient.evaluate(t);
+					const auto maxColor = mMaxGradient.evaluate(t);
 
-					return Color::lerp(byteFactor, minColor, maxColor);
+					return Color::lerp(lerpFactor, minColor, maxColor);
 				}
 			}
 		}
 
-		/** 
+		/**
 		 * Evaluates the value of the distribution.
-		 * 
+		 *
 		 * @param[in]	t		Time at which to evaluate the distribution. This is only relevant if the distribution
 		 *						contains gradients.
 		 * @param[in]	factor	Random number generator that determines the factor. Factor determines how to interpolate
@@ -167,7 +168,7 @@ namespace bs
 		 * @return				Evaluated color.
 		 *
 		 */
-		RGBA evaluate(float t, const Random& factor) const
+		typename T::ColorType evaluate(float t, const Random& factor) const
 		{
 			switch(mType)
 			{
@@ -176,21 +177,21 @@ namespace bs
 				return mMinGradient.evaluate(0.0f);
 			case PDT_RandomRange:
 			{
-				const RGBA minColor = mMinGradient.evaluate(0.0f);
-				const RGBA maxColor = mMaxGradient.evaluate(0.0f);
+				const auto minColor = mMinGradient.evaluate(0.0f);
+				const auto maxColor = mMaxGradient.evaluate(0.0f);
 
-				const UINT32 byteFactor = Bitwise::unormToUint<8>(factor.getUNorm());
-				return Color::lerp(byteFactor, minColor, maxColor);
+				const auto lerpFactor = impl::TGradientHelper<typename T::ColorType>::toLerpFactor(factor.getUNorm());
+				return Color::lerp(lerpFactor, minColor, maxColor);
 			}
 			case PDT_Curve:
 				return mMinGradient.evaluate(t);
 			case PDT_RandomCurveRange:
 				{
-					const RGBA minColor = mMinGradient.evaluate(t);
-					const RGBA maxColor = mMaxGradient.evaluate(t);
+					const auto minColor = mMinGradient.evaluate(t);
+					const auto maxColor = mMaxGradient.evaluate(t);
 
-					const UINT32 byteFactor = Bitwise::unormToUint<8>(factor.getUNorm());
-					return Color::lerp(byteFactor, minColor, maxColor);
+					const auto lerpFactor = impl::TGradientHelper<typename T::ColorType>::toLerpFactor(factor.getUNorm());
+					return Color::lerp(lerpFactor, minColor, maxColor);
 				}
 			}
 		}
@@ -198,7 +199,7 @@ namespace bs
 		/**
 		 * Converts the distribution into a lookup table that's faster to access. The distribution will be resampled
 		 * using a fixed sample rate with equidistant samples.
-		 * 
+		 *
 		 * @param[in]	numSamples			Determines how many samples to output in the lookup table. This value is ignored
 		 *									for non-curve distributions in which case there is always just one sample.
 		 * @param[in]	ignoreRange			If the curve represents a range (either between constants or curves), this
@@ -208,13 +209,34 @@ namespace bs
 		 * @return							Resampled lookup table.
 		 */
 		LookupTable toLookupTable(UINT32 numSamples = 128, bool ignoreRange = false) const;
+
+		bool operator== (const TColorDistribution<T>& rhs) const
+		{
+			if(mType != rhs.mType)
+				return false;
+
+			if(mType == PDT_Constant || mType == PDT_Curve)
+				return mMinGradient == rhs.mMinGradient;
+			else
+				return mMinGradient == rhs.mMinGradient && mMaxGradient == rhs.mMaxGradient;
+		}
+
+		bool operator!= (const TColorDistribution<T>& rhs) const { return !operator==(rhs); }
 	private:
-		friend struct RTTIPlainType<ColorDistribution>;
+		friend struct RTTIPlainType<TColorDistribution<T>>;
 
 		PropertyDistributionType mType;
-		ColorGradient mMinGradient;
-		ColorGradient mMaxGradient;
+		T mMinGradient;
+		T mMaxGradient;
 	};
+
+	using ColorDistribution = TColorDistribution<ColorGradient>;
+	using ColorHDRDistribution = TColorDistribution<ColorGradientHDR>;
+
+#ifdef BS_SBGEN
+	template struct BS_SCRIPT_EXPORT(m:Particles,n:ColorDistribution) TColorDistribution<ColorGradient>;
+	template struct BS_SCRIPT_EXPORT(m:Particles,n:ColorHDRDistribution) TColorDistribution<ColorGradientHDR>;
+#endif
 
 	/** Specifies a value as a distribution, which can include a constant value, random range or a curve. */
 	template<class T>
@@ -271,36 +293,36 @@ namespace bs
 		BS_SCRIPT_EXPORT(pr:getter,n:DistributionType)
 		PropertyDistributionType getType() const { return mType; }
 
-		/** 
-		 * Returns the constant value of the distribution, or the minimal value of a constant range. Undefined if 
-		 * the distribution is represented by a curve. 
+		/**
+		 * Returns the constant value of the distribution, or the minimal value of a constant range. Undefined if
+		 * the distribution is represented by a curve.
 		 */
 		BS_SCRIPT_EXPORT()
 		const T& getMinConstant() const { return mMinCurve.getKeyFrames()[0].value; }
 
-		/** 
+		/**
 		 * Returns the maximum value of a constant range. Only defined if the distribution represents a non-curve range.
 		 */
 		BS_SCRIPT_EXPORT()
 		const T& getMaxConstant() const { return mMaxCurve.getKeyFrames()[0].value; }
 
-		/** 
+		/**
 		 * Returns the curve representing the distribution, or the first curve representing a curve range. Undefined if
 		 * the distribution is represented by a constant or a non-curve range.
 		 */
 		BS_SCRIPT_EXPORT()
 		const TAnimationCurve<T>& getMinCurve() const { return mMinCurve; }
 
-		/** 
+		/**
 		 * Returns the curve representing the second curve of a curve range. Only defined if the distribution represents
 		 * a curve range.
 		 */
 		BS_SCRIPT_EXPORT()
 		const TAnimationCurve<T>& getMaxCurve() const { return mMaxCurve; }
 
-		/** 
+		/**
 		 * Evaluates the value of the distribution.
-		 * 
+		 *
 		 * @param[in]	t		Time at which to evaluate the distribution. This is only relevant if the distribution
 		 *						contains curves.
 		 * @param[in]	factor	Value in range [0, 1] that determines how to interpolate between min/max value, if the
@@ -331,9 +353,9 @@ namespace bs
 			}
 		}
 
-		/** 
+		/**
 		 * Evaluates the value of the distribution.
-		 * 
+		 *
 		 * @param[in]	t		Time at which to evaluate the distribution. This is only relevant if the distribution
 		 *						contains curves.
 		 * @param[in]	factor	Random number generator that determines the factor. Factor determines how to interpolate
@@ -366,7 +388,7 @@ namespace bs
 		/**
 		 * Converts the distribution into a lookup table that's faster to access. The distribution will be resampled
 		 * using a fixed sample rate with equidistant samples.
-		 * 
+		 *
 		 * @param[in]	numSamples			Determines how many samples to output in the lookup table. This value is ignored
 		 *									for non-curve distributions in which case there is always just one sample.
 		 * @param[in]	ignoreRange			If the curve represents a range (either between constants or curves), this
@@ -376,6 +398,19 @@ namespace bs
 		 * @return							Resampled lookup table.
 		 */
 		LookupTable toLookupTable(UINT32 numSamples = 128, bool ignoreRange = false) const;
+
+		bool operator== (const TDistribution<T>& rhs) const
+		{
+			if(mType != rhs.mType)
+				return false;
+
+			if(mType == PDT_Constant || mType == PDT_Curve)
+				return mMinCurve == rhs.mMinCurve;
+			else
+				return mMinCurve == rhs.mMinCurve && mMaxCurve == rhs.mMaxCurve;
+		}
+
+		bool operator!= (const TDistribution<T>& rhs) const { return !operator==(rhs); }
 	private:
 		friend struct RTTIPlainType<TDistribution<T>>;
 

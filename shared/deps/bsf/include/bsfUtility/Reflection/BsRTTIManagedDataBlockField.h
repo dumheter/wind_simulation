@@ -16,10 +16,10 @@ namespace bs
 	 */
 
 	/**
-	 * Base class containing common functionality for a managed data block class field. 
+	 * Base class containing common functionality for a managed data block class field.
 	 * 			
 	 * @note	
-	 * Managed data blocks are just blocks of memory that may, or may not be released automatically when they are no longer 
+	 * Managed data blocks are just blocks of memory that may, or may not be released automatically when they are no longer
 	 * referenced. They are useful when wanting to return some temporary data only for serialization purposes.
 	 */
 	struct RTTIManagedDataBlockFieldBase : public RTTIField
@@ -42,37 +42,25 @@ namespace bs
 		 * Initializes a field that returns a block of bytes. Can be used for serializing pretty much anything.
 		 *
 		 * @param[in]	name			Name of the field.
-		 * @param[in]	uniqueId		Unique identifier for this field. Although name is also a unique identifier we want a 
-		 *								small data type that can be used for efficiently serializing data to disk and similar. 
+		 * @param[in]	uniqueId		Unique identifier for this field. Although name is also a unique identifier we want a
+		 *								small data type that can be used for efficiently serializing data to disk and similar.
 		 *								It is primarily used for compatibility between different versions of serialized data.
 		 * @param[in]	getter  		The getter method for the field.
 		 * @param[in]	setter  		The setter method for the field.
-		 * @param[in]	flags			Various flags you can use to specialize how systems handle this field. See RTTIFieldFlag.
+		 * @param[in]	info			Various optional information about the field.
 		 */
-		void initSingle(String name, UINT16 uniqueId, GetterType getter, SetterType setter, UINT64 flags)
+		void initSingle(String name, UINT16 uniqueId, GetterType getter, SetterType setter, const RTTIFieldInfo& info)
 		{
 			this->getter = getter;
 			this->setter = setter;
 
-			init(std::move(name), uniqueId, false, SerializableFT_DataBlock, flags);
-		}
-
-		/** @copydoc RTTIField::getTypeSize */
-		UINT32 getTypeSize() override
-		{
-			return 0; // Data block types don't store size the conventional way
-		}
-
-		/** @copydoc RTTIField::hasDynamicSize */
-		bool hasDynamicSize() override
-		{
-			return true;
+			init(std::move(name), RTTIFieldSchema(uniqueId, false, true, 0, SerializableFT_DataBlock, 0, nullptr, info));
 		}
 
 		/** @copydoc RTTIField::getArraySize */
 		UINT32 getArraySize(RTTITypeBase* rtti, void* object) override
 		{
-			BS_EXCEPT(InternalErrorException, 
+			BS_EXCEPT(InternalErrorException,
 				"Data block types don't support arrays.");
 
 			return 0;
@@ -81,7 +69,7 @@ namespace bs
 		/** @copydoc RTTIField::setArraySize */
 		void setArraySize(RTTITypeBase* rtti, void* object, UINT32 size) override
 		{
-			BS_EXCEPT(InternalErrorException, 
+			BS_EXCEPT(InternalErrorException,
 				"Data block types don't support arrays.");
 		}
 

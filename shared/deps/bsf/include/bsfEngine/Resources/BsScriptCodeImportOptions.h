@@ -13,18 +13,17 @@ namespace bs
 	 */
 
 	/** Contains import options you may use to control how is a file containing script source code importer. */
-	class BS_EXPORT ScriptCodeImportOptions : public ImportOptions
+	class BS_EXPORT BS_SCRIPT_EXPORT(m:Importer,api:bsf,api:bed) ScriptCodeImportOptions : public ImportOptions
 	{
 	public:
-		ScriptCodeImportOptions();
+		ScriptCodeImportOptions() = default;
 
-		/**	Sets whether the script is editor-only or a normal game script. */
-		void setEditorScript(bool editorScript) { mEditorScript = editorScript; }
-
-		/**	Checks whether the script is editor-only or a normal game script. */
-		bool isEditorScript() const { return mEditorScript; }
+		/**	Determines whether the script is editor-only or a normal game script. */
+		BS_SCRIPT_EXPORT()
+		bool editorScript = false;
 
 		/** Creates a new import options object that allows you to customize how is script code imported. */
+		BS_SCRIPT_EXPORT(ec:T)
 		static SPtr<ScriptCodeImportOptions> create();
 
 		/************************************************************************/
@@ -34,9 +33,6 @@ namespace bs
 		friend class ScriptCodeImportOptionsRTTI;
 		static RTTITypeBase* getRTTIStatic();
 		RTTITypeBase* getRTTI() const override;
-
-	private:
-		bool mEditorScript;
 	};
 
 	/** @} */

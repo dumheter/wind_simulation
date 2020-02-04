@@ -4,6 +4,7 @@
 
 #include "BsCorePrerequisites.h"
 #include "Image/BsPixelData.h"
+#include "Math/BsVector2I.h"
 
 namespace bs
 {
@@ -51,7 +52,7 @@ namespace bs
 	enum class MirrorModeBits
 	{
 		X = 1 << 0,
-		Y = 1 << 1, 
+		Y = 1 << 1,
 		Z = 1 << 2
 	};
 
@@ -79,7 +80,7 @@ namespace bs
 	};
 
 	/**	Utility methods for converting and managing pixel data and formats. */
-	class BS_CORE_EXPORT PixelUtil 
+	class BS_CORE_EXPORT PixelUtil
 	{
 	public:
 		/**	Filtering types to use when scaling images. */
@@ -92,6 +93,18 @@ namespace bs
 		/**	Returns the size of a single pixel of the provided pixel format, in bytes. */
 		static UINT32 getNumElemBytes(PixelFormat format);
 
+		/**
+		 * Returns the size of a single compressed block, in bytes. Returns pixel size if the format is not block
+		 * compressed.
+		 */
+		static UINT32 getBlockSize(PixelFormat format);
+
+		/**
+		 * Returns the dimensions of a single compressed block, in number of pixels. Returns 1x1 for non-block-compressed
+		 * formats.
+		 */
+		static Vector2I getBlockDimensions(PixelFormat format);
+
 		/**	Returns the size of a single pixel of the provided pixel format, in bits. */
 		static UINT32 getNumElemBits(PixelFormat format);
 
@@ -99,13 +112,15 @@ namespace bs
 		static UINT32 getMemorySize(UINT32 width, UINT32 height, UINT32 depth, PixelFormat format);
 		
 		/**	Calculates the size of a mip level of a texture with the provided size. */
-		static void getSizeForMipLevel(UINT32 width, UINT32 height, UINT32 depth, UINT32 mipLevel, 
+		static void getSizeForMipLevel(UINT32 width, UINT32 height, UINT32 depth, UINT32 mipLevel,
 			UINT32& mipWidth, UINT32& mipHeight, UINT32& mipDepth);
 
-		/** 
-		 * Calculates row and depth pitch for a texture surface of the specified size and format. For most this will be
-		 * equal to their width & height, respectively. But some texture formats (especially compressed ones) might
-		 * require extra padding.
+		/**
+		 * Calculates row and depth pitch for a texture surface of the specified size and format. For most formats row
+		 * pitch will equal the number of bytes required for storing "width" pixels, and slice pitch will equal the
+		 * number of bytes required for storing "width*height" pixels. But some texture formats (especially compressed
+		 * ones) might require extra padding. Input width/height/depth values are in pixels, while output pitch values
+		 * are in bytes.
 		 */
 		static void getPitch(UINT32 width, UINT32 height, UINT32 depth, PixelFormat format,
 			UINT32& rowPitch, UINT32& depthPitch);
@@ -132,15 +147,15 @@ namespace bs
 		/** Checks does the provided format store data in normalized range. */
 		static bool isNormalized(PixelFormat format);
 
-		/** 
-		 * Checks is the provided format valid for the texture type and usage. 
-		 * 
+		/**
+		 * Checks is the provided format valid for the texture type and usage.
+		 *
 		 * @param[in, out]	format	Format to check. If format is not valid the method will update this with the closest
 		 *							relevant format.
 		 * @param[in]		texType	Type of the texture the format will be used for.
 		 * @param[in]		usage	A set of TextureUsage flags that define how will a texture be used.
 		 * @return					True if the format is valid, false if not.
-		 * 
+		 *
 		 * @note	This method checks only for obvious format mismatches:
 		 *			- Using depth format for anything but a depth-stencil buffer
 		 *			- Using anything but a depth format for a depth-stencil-buffer
@@ -152,13 +167,13 @@ namespace bs
 		static bool checkFormat(PixelFormat& format, TextureType texType, int usage);
 
 		/**
-		 * Checks are the provided dimensions valid for the specified pixel format. Some formats (like BC) require 
+		 * Checks are the provided dimensions valid for the specified pixel format. Some formats (like BC) require
 		 * width/height to be multiples of four and some formats dont allow depth larger than 1.
 		 */
 		static bool isValidExtent(UINT32 width, UINT32 height, UINT32 depth, PixelFormat format);
 
 		/**
-		 * Returns the number of bits per each element in the provided pixel format. This will return all zero for 
+		 * Returns the number of bits per each element in the provided pixel format. This will return all zero for
 		 * compressed and depth/stencil formats.
 		 */
 		static void getBitDepths(PixelFormat format, int(&rgba)[4]);
@@ -176,7 +191,7 @@ namespace bs
 		 * Returns number of bits you need to shift a pixel element in order to move it to the start of the data type.
 		 *
 		 * @note	
-		 * For example if your color is stored in an UINT32 and you want to extract the red channel you should AND the color 
+		 * For example if your color is stored in an UINT32 and you want to extract the red channel you should AND the color
 		 * UINT32 with the bit-mask for the red channel and then right shift it by the red channel bit shift amount.
 		 */
 		static void getBitShifts(PixelFormat format, UINT8 (&rgba)[4]);
@@ -185,7 +200,7 @@ namespace bs
 		static String getFormatName(PixelFormat srcformat);
 
 		/**
-		 * Returns true if the pixel data in the format can be directly accessed and read. This is generally not true 
+		 * Returns true if the pixel data in the format can be directly accessed and read. This is generally not true
 		 * for compressed formats.
 		 */
 		static bool isAccessible(PixelFormat srcformat);
@@ -197,7 +212,7 @@ namespace bs
 		static UINT32 getNumElements(PixelFormat format);
 
 		/**
-		 * Returns the maximum number of mip maps that can be generated until we reach the minimum size possible. This 
+		 * Returns the maximum number of mip maps that can be generated until we reach the minimum size possible. This
 		 * does not count the base level.
 		 */
 		static UINT32 getMaxMipmaps(UINT32 width, UINT32 height, UINT32 depth, PixelFormat format);
@@ -221,13 +236,13 @@ namespace bs
 		static void unpackColor(Color* color, PixelFormat format, const void* src);
 
 		/**
-		 * Reads the color from the provided memory location and stores it into the provided color elements, as bytes 
+		 * Reads the color from the provided memory location and stores it into the provided color elements, as bytes
 		 * clamped to [0, 255] range.
 		 */
 		static void unpackColor(UINT8* r, UINT8* g, UINT8* b, UINT8* a, PixelFormat format, const void* src);
 
 		/**
-		 * Reads the color from the provided memory location and stores it into the provided color elements. If the format 
+		 * Reads the color from the provided memory location and stores it into the provided color elements. If the format
 		 * is not natively floating point a conversion is done in such a way that returned values range [0.0, 1.0].
 		 */
 		static void unpackColor(float* r, float* g, float* b, float* a, PixelFormat format, const void* src);
@@ -254,7 +269,7 @@ namespace bs
 		 * Generates mip-maps from the provided source data using the specified compression options. Returned list includes
 		 * the base level.
 		 *
-		 * @return	A list of calculated mip-map data. First entry is the largest mip and other follow in order from 
+		 * @return	A list of calculated mip-map data. First entry is the largest mip and other follow in order from
 		 *			largest to smallest.
 		 */
 		static Vector<SPtr<PixelData>> genMipmaps(const PixelData& src, const MipMapGenOptions& options);
@@ -266,7 +281,7 @@ namespace bs
 		 */
 		static void scale(const PixelData& src, PixelData& dst, Filter filter = FILTER_LINEAR);
 
-		/** 
+		/**
 		 * Mirrors the contents of the provided object along the X, Y and/or Z axes. */
 		static void mirror(PixelData& pixelData, MirrorMode mode);
 
@@ -276,12 +291,6 @@ namespace bs
 		 * @p offsetX, @p offsetY and @p offsetZ parameters.
 		 */
 		static void copy(const PixelData& src, PixelData& dst, UINT32 offsetX = 0, UINT32 offsetY = 0, UINT32 offsetZ = 0);
-
-		/** Converts a color in linear space to a color in sRGB space. Only converts the RGB components. */
-		static Color linearToSRGB(const Color& color);
-
-		/** Converts a color in sRGB space to a color in linear space. Only converts the RGB components. */
-		static Color SRGBToLinear(const Color& color);
 
 		/** Converts pixel data in linear space to one in sRGB space. Only converts the RGB components. */
 		static void linearToSRGB(PixelData& pixelData);

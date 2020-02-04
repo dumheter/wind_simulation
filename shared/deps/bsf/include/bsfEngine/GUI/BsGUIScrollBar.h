@@ -47,7 +47,7 @@ namespace bs
 		void setTint(const Color& color) override;
 
 		/**
-		 * Triggered whenever the scrollbar handle is moved or resized. Values provided are the handle position and size 
+		 * Triggered whenever the scrollbar handle is moved or resized. Values provided are the handle position and size
 		 * in percent (ranging [0, 1]).
 		 */
 		Event<void(float posPct, float sizePct)> onScrollOrResize;
@@ -90,27 +90,22 @@ namespace bs
 		GUIScrollBar(bool horizontal, bool resizable, const String& styleName, const GUIDimensions& dimensions);
 		virtual ~GUIScrollBar();
 
-		/** @copydoc GUIElement::_getNumRenderElements */
-		UINT32 _getNumRenderElements() const override;
-
-		/** @copydoc GUIElement::_getMaterial */
-		const SpriteMaterialInfo& _getMaterial(UINT32 renderElementIdx, SpriteMaterial** material) const override;
-
-		/** @copydoc GUIElement::_getMeshInfo() */
-		void _getMeshInfo(UINT32 renderElementIdx, UINT32& numVertices, UINT32& numIndices, GUIMeshType& type) const override;
-
 		/** @copydoc GUIElement::_fillBuffer */
-		void _fillBuffer(UINT8* vertices, UINT32* indices, UINT32 vertexOffset, UINT32 indexOffset,
-			UINT32 maxNumVerts, UINT32 maxNumIndices, UINT32 renderElementIdx) const override;
+		void _fillBuffer(
+			UINT8* vertices,
+			UINT32* indices,
+			UINT32 vertexOffset,
+			UINT32 indexOffset,
+			const Vector2I& offset,
+			UINT32 maxNumVerts,
+			UINT32 maxNumIndices,
+			UINT32 renderElementIdx) const override;
 
 		/** @copydoc GUIElement::updateRenderElementsInternal */
 		void updateRenderElementsInternal() override;
 
 		/** @copydoc GUIElement::updateClippedBounds */
 		void updateClippedBounds() override;
-
-		/** @copydoc GUIElement::_getRenderElementDepth */
-		UINT32 _getRenderElementDepth(UINT32 renderElementIdx) const override;
 
 		/** @copydoc	GUIElement::_getRenderElementDepthRange */
 		UINT32 _getRenderElementDepthRange() const override;
@@ -132,7 +127,7 @@ namespace bs
 		}
 	private:
 		/**
-		 * Triggered whenever the scroll handle moves. Provided value represents the new position and size of the handle 
+		 * Triggered whenever the scroll handle moves. Provided value represents the new position and size of the handle
 		 * in percent (ranging [0, 1]).
 		 */
 		void handleMoved(float handlePct, float sizePct);

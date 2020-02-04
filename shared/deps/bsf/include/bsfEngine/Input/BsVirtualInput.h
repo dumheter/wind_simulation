@@ -5,6 +5,7 @@
 #include "BsPrerequisites.h"
 #include "Utility/BsModule.h"
 #include "Input/BsInputConfiguration.h"
+#include "Utility/BsDynArray.h"
 
 namespace bs
 {
@@ -41,6 +42,7 @@ namespace bs
 		struct DeviceData
 		{
 			Map<UINT32, ButtonData> cachedStates;
+			DynArray<UINT32> heldButtons;
 		};
 
 		/**	Data container for a virtual button event. */
@@ -80,7 +82,7 @@ namespace bs
 		bool isButtonUp(const VirtualButton& button, UINT32 deviceIdx = 0) const;
 
 		/**
-		 * Check is the virtual button is being held. This state is active as long as the button is being held down, 
+		 * Check is the virtual button is being held. This state is active as long as the button is being held down,
 		 * possibly for multiple frames.
 		 *
 		 * @param[in]	button		Virtual button identifier.
@@ -126,7 +128,7 @@ namespace bs
 		SPtr<InputConfiguration> mInputConfiguration;
 		Vector<DeviceData> mDevices;
 		Queue<VirtualButtonEvent> mEvents;
-		UINT32 mActiveModifiers;
+		UINT32 mActiveModifiers = (UINT32)ButtonModifier::None;
 
 		// Transient
 		Vector<VirtualButton> tempButtons;

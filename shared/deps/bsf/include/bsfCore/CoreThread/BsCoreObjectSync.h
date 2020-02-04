@@ -3,6 +3,7 @@
 #pragma once
 
 #include "BsCorePrerequisites.h"
+#include "Reflection/BsRTTIPlain.h"
 
 namespace bs
 {
@@ -31,6 +32,12 @@ namespace bs
 		// Returns the underlying type if the provided type is a shared pointer, or itself otherwise
 		template<typename T> struct decay_sptr { using value = T; };
 		template<typename T> struct decay_sptr<SPtr<T>> { using value = typename SPtr<T>::element_type; };
+
+		// Checks if a specific template specialization exists
+		template <class T, std::size_t = sizeof(T)>
+		std::true_type is_complete_impl(T *);
+		std::false_type is_complete_impl(...);
+		template <class T> using is_complete = decltype(is_complete_impl(std::declval<T*>()));
 
 		template<typename T>
 		using decay_all_t = typename decay_sptr<typename decay_handle<std::decay_t<T>>::value>::value;
@@ -89,7 +96,7 @@ namespace bs
 
 		/** Convert shared-pointers with classes that derive from CoreObject to their core thread variants. */
 		template <class T>
-		decltype(((std::decay_t<typename std::decay_t<T>::element_type>*)nullptr)->getCore()) 
+		decltype(((std::decay_t<typename std::decay_t<T>::element_type>*)nullptr)->getCore())
 		get_core_object(T&& value, std::enable_if_t<
 			is_shared_ptr<std::decay_t<T>>::value &&
 			(std::is_class<std::decay_t<typename std::decay_t<T>::element_type>>::value &&
@@ -108,22 +115,22 @@ namespace bs
 	 *  @{
 	 */
 
-	/** 
-	 * Writes the provided values into the underlying buffer using rttiWriteElem(). Each write advances the buffer to the
+	/**
+	 * Writes the provided values into the underlying buffer using rtti_write(). Each write advances the buffer to the
 	 * next write location. Caller is responsible for not writing out of range.
-	 * 
-	 * As input accepts any trivially copyable types, types with RTTIPlainType specializations, any shared pointer, as well 
+	 *
+	 * As input accepts any trivially copyable types, types with RTTIPlainType specializations, any shared pointer, as well
 	 * as any resource handle or CoreObject shared ptr which will automatically get converted to their core thread variants.
 	 *
-	 * Types that provide a rttiEnumFields() method will have that method executed with this object provided as the 
+	 * Types that provide a rttiEnumFields() method will have that method executed with this object provided as the
 	 * parameter, * allowing the type to recurse over its fields.
 	 */
 	struct RttiCoreSyncWriter
 	{
 		using MyType = RttiCoreSyncWriter;
 
-		RttiCoreSyncWriter(char** data)
-			:mWritePtr(data)
+		RttiCoreSyncWriter(Bitstream& stream)
+			:mStream(stream)
 		{}
 
 		/** If the type offers a rttiEnumFields method, recurse into it. */
@@ -145,7 +152,7 @@ namespace bs
 		void writeInternal(T&& value, std::enable_if_t<
 			!detail::is_shared_ptr<std::decay_t<T>>::value>* = 0)
 		{
-			(*mWritePtr) = rttiWriteElem(value, *mWritePtr);
+			rtti_write(value, mStream);
 		}
 
 		template<class T>
@@ -154,28 +161,28 @@ namespace bs
 		{
 			using SPtrType = std::decay_t<T>;
 
-			SPtrType* sptrPtr = new (*mWritePtr) SPtrType;
+			SPtrType* sptrPtr = new (mStream.cursor()) SPtrType;
 			*sptrPtr = (value);
 
-			(*mWritePtr) += sizeof(SPtrType);
+			mStream.skipBytes(sizeof(SPtrType));
 		}
 
-		char** mWritePtr;
+		Bitstream& mStream;
 	};
 
-	/** 
-	 * Reads values from the underlying buffer and writes them to the output object using rttiReadElem(). Each read advances
+	/**
+	 * Reads values from the underlying buffer and writes them to the output object using rtti_read(). Each read advances
 	 * the buffer to the next value. Caller is responsible for not reading out of range.
 	 *
-	 * As output accepts any trivially copyable types, types with RTTIPlainType specializations and any shared pointers. 
-	 * 
-	 * Types that provide a rttiEnumFields() method will have that method executed with this object provided as the 
+	 * As output accepts any trivially copyable types, types with RTTIPlainType specializations and any shared pointers.
+	 *
+	 * Types that provide a rttiEnumFields() method will have that method executed with this object provided as the
 	 * parameter, allowing the type to recurse over its fields.
 	 */
 	struct RttiCoreSyncReader
 	{
-		RttiCoreSyncReader(char** data)
-			:mReadPtr(data)
+		RttiCoreSyncReader(Bitstream& stream)
+			:mStream(stream)
 		{}
 
 		/** If the type offers a rttiEnumFields method, recurse into it. */
@@ -197,7 +204,7 @@ namespace bs
 		void readInternal(T&& value, std::enable_if_t<
 			!detail::is_shared_ptr<std::decay_t<T>>::value>* = 0)
 		{
-			(*mReadPtr) = rttiReadElem(value, *mReadPtr);
+			rtti_read(value, mStream);
 		}
 
 		template<class T>
@@ -206,30 +213,30 @@ namespace bs
 		{
 			using SPtrType = std::decay_t<T>;
 
-			SPtrType* sptr = (SPtrType*)(*mReadPtr);
+			SPtrType* sptr = (SPtrType*)(mStream.cursor());
 			value = *sptr;
 			sptr->~SPtrType();
 
-			(*mReadPtr) += sizeof(SPtrType);
+			mStream.skipBytes(sizeof(SPtrType));
 		}
 
-		char** mReadPtr;
+		Bitstream& mStream;
 	};
 
-	/** 
-	 * Calculates size of provided values using rttiGetElemSize(). All sizes are accumulated in the location provided upon
+	/**
+	 * Calculates size of provided values using rtti_size(). All sizes are accumulated in the location provided upon
 	 * construction.
 	 *
-	 * As input accepts any trivially copyable types, types with RTTIPlainType specializations, any shared pointers, 
+	 * As input accepts any trivially copyable types, types with RTTIPlainType specializations, any shared pointers,
 	 * as well as any resource handle or CoreObject shared ptr which will automatically get converted to
-	 * their core thread variants. 
+	 * their core thread variants.
 	 *
-	 * Types that provide a rttiEnumFields() method will have that method executed with this object provided as the 
+	 * Types that provide a rttiEnumFields() method will have that method executed with this object provided as the
 	 * parameter, allowing the type to recurse over its fields.
 	 */
 	struct RttiCoreSyncSize
 	{
-		RttiCoreSyncSize(UINT32& size)
+		RttiCoreSyncSize(uint32_t& size)
 			:mSize(size)
 		{ }
 
@@ -252,7 +259,7 @@ namespace bs
 		void getSizeInternal(T&& value, std::enable_if_t<
 			!detail::is_shared_ptr<std::decay_t<T>>::value>* = 0)
 		{
-			mSize += rttiGetElemSize(value);
+			mSize += rtti_size(value).bytes;
 		}
 
 		template<class T>
@@ -263,7 +270,7 @@ namespace bs
 			mSize += sizeof(SPtrType);
 		}
 
-		UINT32& mSize;
+		uint32_t& mSize;
 	};
 
 	/**
@@ -271,33 +278,32 @@ namespace bs
 	 * method implementation.
 	 */
 	template<class T>
-	UINT32 coreSyncGetElemSize(T& v)
+	uint32_t csync_size(T& v)
 	{
-		UINT32 size = 0;
+		uint32_t size = 0;
 		v.rttiEnumFields(RttiCoreSyncSize(size));
 		return size;
 	}
 
 	/**
-	 * Writes the provided object into the provided memory location, using rules for core object syncing. Returns the
-	 * memory location after the end of the written object. 
+	 * Writes the provided object into the provided memory location, using rules for core object syncing. Advances the
+	 * stream cursor by the number of bytes written. Object must have rttiEnumFields() method implementation.
 	 */
 	template<class T>
-	char* coreSyncWriteElem(T& v, char* memory)
+	void csync_write(T& v, Bitstream& stream)
 	{
-		v.rttiEnumFields(RttiCoreSyncWriter(&memory));
-		return memory;
+		v.rttiEnumFields(RttiCoreSyncWriter(stream));
 	}
 
 	/**
 	 * Decodes information from the provided memory buffer and writes it into the provided object, using rules for core
-	 * object syncing. Returns the memory location after the end of the read object. 
+	 * object syncing. Advances the stream cursor by number of bytes read. Object must have rttiEnumFields() method
+	 * implementation.  
 	 */
 	template<class T>
-	char* coreSyncReadElem(T& v, char* memory)
+	void csync_read(T& v, Bitstream& stream)
 	{
-		v.rttiEnumFields(RttiCoreSyncReader(&memory));
-		return memory;
+		v.rttiEnumFields(RttiCoreSyncReader(stream));
 	}
 
 	/** @} */

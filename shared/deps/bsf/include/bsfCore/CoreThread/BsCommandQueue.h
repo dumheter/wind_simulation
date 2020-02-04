@@ -13,58 +13,50 @@ namespace bs
 	 */
 
 	/**
-	 * Command queue policy that provides no synchonization. Should be used with command queues that are used on a single 
+	 * Command queue policy that provides no synchonization. Should be used with command queues that are used on a single
 	 * thread only.
 	 */
 	class CommandQueueNoSync
 	{
 	public:
-		CommandQueueNoSync() {}
-		virtual ~CommandQueueNoSync() {}
+		struct LockGuard { };
 
 		bool isValidThread(ThreadId ownerThread) const
 		{
 			return BS_THREAD_CURRENT_ID == ownerThread;
 		}
 
-		void lock() { };
-		void unlock() { }
+		LockGuard lock();
 	};
 
 	/**
-	 * Command queue policy that provides synchonization. Should be used with command queues that are used on multiple 
+	 * Command queue policy that provides synchonization. Should be used with command queues that are used on multiple
 	 * threads.
 	 */
 	class CommandQueueSync
 	{
 	public:
-		CommandQueueSync()
-			:mLock(mCommandQueueMutex, std::defer_lock)
-		{ }
-		virtual ~CommandQueueSync() {}
+		struct LockGuard
+		{
+			Lock lock;
+		};
 
 		bool isValidThread(ThreadId ownerThread) const
 		{
 			return true;
 		}
 
-		void lock() 
+		LockGuard lock()
 		{
-			mLock.lock();
+			return LockGuard { Lock(mCommandQueueMutex) };
 		};
-
-		void unlock()
-		{
-			mLock.unlock();
-		}
 
 	private:
 		Mutex mCommandQueueMutex;
-		Lock mLock;
 	};
 
 	/**
-	 * Represents a single queued command in the command list. Contains all the data for executing the command and checking 
+	 * Represents a single queued command in the command list. Contains all the data for executing the command and checking
 	 * up on the command status.
 	 */
 	struct QueuedCommand
@@ -83,7 +75,7 @@ namespace bs
 
 		UINT32 debugId;
 #else
-		QueuedCommand(std::function<void(AsyncOp&)> _callback, const SPtr<AsyncOpSyncData>& asyncOpSyncData, 
+		QueuedCommand(std::function<void(AsyncOp&)> _callback, const SPtr<AsyncOpSyncData>& asyncOpSyncData,
 			bool _notifyWhenComplete = false, UINT32 _callbackId = 0)
 			: callbackWithReturnValue(_callback), asyncOp(asyncOpSyncData), returnsValue(true), callbackId(_callbackId)
 			, notifyWhenComplete(_notifyWhenComplete)
@@ -146,12 +138,11 @@ namespace bs
 		 * @param[in]	threadId	   	Identifier for the thread the command queue will be getting commands from.					
 		 */
 		CommandQueueBase(ThreadId threadId);
-		virtual ~CommandQueueBase();
 
 		/**
 		 * Gets the thread identifier the command queue is used on.
 		 * 			
-		 * @note	If the command queue is using a synchonized access policy generally this is not relevant as it may be 
+		 * @note	If the command queue is using a synchonized access policy generally this is not relevant as it may be
 		 *			used on multiple threads.
 		 */
 		ThreadId getThreadId() const { return mMyThreadId; }
@@ -175,16 +166,16 @@ namespace bs
 		 * @param[in]	commandIdx	Zero-based index of the command.
 		 *
 		 * @note	
-		 * This is helpful when you receive an error on the executing thread and you cannot tell from where was the command 
-		 * that caused the error queued from. However you can make a note of the queue and command index and set a 
+		 * This is helpful when you receive an error on the executing thread and you cannot tell from where was the command
+		 * that caused the error queued from. However you can make a note of the queue and command index and set a
 		 * breakpoint so that it gets triggered next time you run the program. At that point you can know exactly which part
 		 * of code queued the command by examining the stack trace.
 		 */
 		static void addBreakpoint(UINT32 queueIdx, UINT32 commandIdx);
 
 		/**
-		 * Queue up a new command to execute. Make sure the provided function has all of its parameters properly bound. 
-		 * Last parameter must be unbound and of AsyncOp& type. This is used to signal that the command is completed, and 
+		 * Queue up a new command to execute. Make sure the provided function has all of its parameters properly bound.
+		 * Last parameter must be unbound and of AsyncOp& type. This is used to signal that the command is completed, and
 		 * also for storing the return value.		
 		 *
 		 * @param[in]	commandCallback		Command to queue for execution.
@@ -193,19 +184,19 @@ namespace bs
 		 * @param[in]	_callbackId			(optional) Identifier for the callback so you can then later find it
 		 * 									if needed.
 		 *
-		 * @return							Async operation object that you can continuously check until the command 
-		 *									completes. After it completes AsyncOp::isResolved() will return true and return 
+		 * @return							Async operation object that you can continuously check until the command
+		 *									completes. After it completes AsyncOp::isResolved() will return true and return
 		 *									data will be valid (if the callback provided any).
 		 *
 		 * @note	
-		 * Callback method also needs to call AsyncOp::markAsResolved once it is done processing. (If it doesn't it will 
+		 * Callback method also needs to call AsyncOp::markAsResolved once it is done processing. (If it doesn't it will
 		 * still be called automatically, but the return value will default to nullptr)
 		 */
 		AsyncOp queueReturn(std::function<void(AsyncOp&)> commandCallback, bool _notifyWhenComplete = false, UINT32 _callbackId = 0);
 
 		/**
-		 * Queue up a new command to execute. Make sure the provided function has all of its parameters properly bound. 
-		 * Provided command is not expected to return a value. If you wish to return a value from the callback use the 
+		 * Queue up a new command to execute. Make sure the provided function has all of its parameters properly bound.
+		 * Provided command is not expected to return a value. If you wish to return a value from the callback use the
 		 * queueReturn() which accepts an AsyncOp parameter.
 		 *
 		 * @param[in]	commandCallback		Command to queue for execution.
@@ -217,7 +208,7 @@ namespace bs
 		void queue(std::function<void()> commandCallback, bool _notifyWhenComplete = false, UINT32 _callbackId = 0);
 
 		/**
-		 * Returns a copy of all queued commands and makes room for new ones. Must be called from the thread that created 
+		 * Returns a copy of all queued commands and makes room for new ones. Must be called from the thread that created
 		 * the command queue. Returned commands must be passed to playback() method.
 		 */
 		Queue<QueuedCommand>* flush();
@@ -229,18 +220,22 @@ namespace bs
 		bool isEmpty();
 
 	protected:
+		~CommandQueueBase();
+
 		/**
-		 * Helper method that throws an "Invalid thread" exception. Used primarily so we can avoid including Exception 
+		 * Helper method that throws an "Invalid thread" exception. Used primarily so we can avoid including Exception
 		 * include in this header.
 		 */
 		void throwInvalidThreadException(const String& message) const;
 
 	private:
 		Queue<QueuedCommand>* mCommands;
-		Stack<Queue<QueuedCommand>*> mEmptyCommandQueues; /**< List of empty queues for reuse. */
 
 		SPtr<AsyncOpSyncData> mAsyncOpSyncData;
 		ThreadId mMyThreadId;
+
+		Stack<Queue<QueuedCommand>*> mEmptyCommandQueues; /**< List of empty queues for reuse. */
+		Mutex mEmptyCommandQueueMutex;
 
 		// Various variables that allow for easier debugging by allowing us to trigger breakpoints
 		// when a certain command was queued.
@@ -284,7 +279,7 @@ namespace bs
 	/**
 	 * @copydoc CommandQueueBase
 	 * 			
-	 * Use SyncPolicy to choose whether you want command queue be synchonized or not. Synchonized command queues may be 
+	 * Use SyncPolicy to choose whether you want command queue be synchonized or not. Synchonized command queues may be
 	 * used across multiple threads and non-synchonized only on one.
 	 */
 	template<class SyncPolicy = CommandQueueNoSync>
@@ -296,22 +291,19 @@ namespace bs
 			:CommandQueueBase(threadId)
 		{ }
 
-		~CommandQueue() 
+		~CommandQueue()
 		{ }
 
 		/** @copydoc CommandQueueBase::queueReturn */
 		AsyncOp queueReturn(std::function<void(AsyncOp&)> commandCallback, bool _notifyWhenComplete = false, UINT32 _callbackId = 0)
 		{
 #if BS_DEBUG_MODE
-#if BS_THREAD_SUPPORT != 0
 			if(!this->isValidThread(getThreadId()))
 				throwInvalidThreadException("Command queue accessed outside of its creation thread.");
 #endif
-#endif
 
-			this->lock();
+			typename SyncPolicy::LockGuard lockGuard = this->lock();
 			AsyncOp asyncOp = CommandQueueBase::queueReturn(commandCallback, _notifyWhenComplete, _callbackId);
-			this->unlock();
 
 			return asyncOp;
 		}
@@ -320,30 +312,24 @@ namespace bs
 		void queue(std::function<void()> commandCallback, bool _notifyWhenComplete = false, UINT32 _callbackId = 0)
 		{
 #if BS_DEBUG_MODE
-#if BS_THREAD_SUPPORT != 0
 			if(!this->isValidThread(getThreadId()))
 				throwInvalidThreadException("Command queue accessed outside of its creation thread.");
 #endif
-#endif
 
-			this->lock();
+			typename SyncPolicy::LockGuard lockGuard = this->lock();
 			CommandQueueBase::queue(commandCallback, _notifyWhenComplete, _callbackId);
-			this->unlock();
 		}
 
 		/** @copydoc CommandQueueBase::flush */
 		bs::Queue<QueuedCommand>* flush()
 		{
 #if BS_DEBUG_MODE
-#if BS_THREAD_SUPPORT != 0
 			if(!this->isValidThread(getThreadId()))
 				throwInvalidThreadException("Command queue accessed outside of its creation thread.");
 #endif
-#endif
 
-			this->lock();
-			bs::Queue<QueuedCommand>* commands = CommandQueueBase::flush();
-			this->unlock();
+			typename SyncPolicy::LockGuard lockGuard = this->lock();
+			Queue<QueuedCommand>* commands = CommandQueueBase::flush();
 
 			return commands;
 		}
@@ -352,30 +338,24 @@ namespace bs
 		void cancelAll()
 		{
 #if BS_DEBUG_MODE
-#if BS_THREAD_SUPPORT != 0
 			if(!this->isValidThread(getThreadId()))
 				throwInvalidThreadException("Command queue accessed outside of its creation thread.");
 #endif
-#endif
 
-			this->lock();
+			typename SyncPolicy::LockGuard lockGuard = this->lock();
 			CommandQueueBase::cancelAll();
-			this->unlock();
 		}
 
 		/** @copydoc CommandQueueBase::isEmpty */
 		bool isEmpty()
 		{
 #if BS_DEBUG_MODE
-#if BS_THREAD_SUPPORT != 0
 			if(!this->isValidThread(getThreadId()))
 				throwInvalidThreadException("Command queue accessed outside of its creation thread.");
 #endif
-#endif
 
-			this->lock();
+			typename SyncPolicy::LockGuard lockGuard = this->lock();
 			bool empty = CommandQueueBase::isEmpty();
-			this->unlock();
 
 			return empty;
 		}
