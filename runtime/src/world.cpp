@@ -1,11 +1,30 @@
 #include "world.hpp"
+#include "asset.hpp"
+#include "BsFPSCamera.h"
+#include "bsFPSWalker.h"
 #include "GUI/BsGUILayout.h"
 #include "GUI/BsGUILayoutY.h"
 #include "GUI/BsCGUIWidget.h"
 #include "GUI/BsGUIPanel.h"
-#include "GUI/BsGUILayoutY.h"
 #include "GUI/BsGUILabel.h"
-#include "asset.hpp"
+#include "Scene/BsSceneObject.h"
+#include "Material/BsMaterial.h"
+#include "Importer/BsImporter.h"
+#include "Input/BsInput.h"
+#include "Components/BsCPlaneCollider.h"
+#include "Components/BsCBoxCollider.h"
+#include "Components/BsCCharacterController.h"
+#include "Components/BsCRenderable.h"
+#include "Components/BsCCamera.h"
+#include "Components/BsCRigidbody.h"
+#include "Physics/BsPhysicsMaterial.h"
+#include "Physics/BsPlaneCollider.h"
+#include "Physics/BsBoxCollider.h"
+#include "Physics/BsRigidbody.h"
+#include "Platform/BsCursor.h"
+#include "RenderAPI/BsRenderWindow.h"
+#include "RenderAPI/BsRenderTarget.h"
+#include "Resources/BsBuiltinResources.h"
 
 namespace wind
 {
@@ -27,13 +46,6 @@ World::World(const App::Info& info)
   auto player = createPlayer();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
-
-  // m_entities.push_back(std::move(cube));
-  // m_entities.push_back(std::move(cube2));
-  // m_entities.push_back(std::move(floor));
-  // m_entities.push_back(std::move(player));
-  // m_entities.push_back(std::move(camera));
-  // m_entities.push_back(std::move(gui));
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player)
