@@ -5,10 +5,38 @@
 #include "GUI/BsGUIPanel.h"
 #include "GUI/BsGUILayoutY.h"
 #include "GUI/BsGUILabel.h"
+#include "asset.hpp"
 
 namespace wind
 {
-bs::HSceneObject CreateCamera(bs::HSceneObject player)
+
+World::World(const App::Info& info)
+ : App(info)
+{
+  using namespace bs;
+  setupInput();
+  auto floorMaterial = createMaterial("res/textures/grid.png");
+  auto cubeMaterial = createMaterial("res/textures/grid_2.png");
+  auto stdPhysicsMaterial = createPhysicsMaterial();
+  auto cube = createCube(cubeMaterial, stdPhysicsMaterial);
+  cube->setPosition(Vector3(0.0f, 2.0f, -8.0f));
+  auto cube2 = createCube(cubeMaterial, stdPhysicsMaterial);
+  cube2->setPosition(Vector3(0.0f, 4.0f, -8.0f));
+  cube2->setRotation(Quaternion(Degree(0), Degree(45), Degree(0)));
+  auto floor = createFloor(floorMaterial, stdPhysicsMaterial);
+  auto player = createPlayer();
+  auto camera = createCamera(player);
+  auto gui = createGUI(camera);
+
+  // m_entities.push_back(std::move(cube));
+  // m_entities.push_back(std::move(cube2));
+  // m_entities.push_back(std::move(floor));
+  // m_entities.push_back(std::move(player));
+  // m_entities.push_back(std::move(camera));
+  // m_entities.push_back(std::move(gui));
+}
+
+bs::HSceneObject World::createCamera(bs::HSceneObject player)
 {
     using namespace bs;
     HSceneObject camera = SceneObject::create("Camera");
@@ -36,7 +64,7 @@ bs::HSceneObject CreateCamera(bs::HSceneObject player)
     return camera;
 }
 
-bs::HSceneObject CreatePlayer()
+bs::HSceneObject World::createPlayer()
 {
     using namespace bs;
     HSceneObject player = SceneObject::create("Player");
@@ -47,7 +75,7 @@ bs::HSceneObject CreatePlayer()
     return player;
 }
 
-void SetupInput()
+void World::setupInput()
 {
     using namespace bs;
     gInput().onButtonUp.connect([](const ButtonEvent &ev) {
@@ -83,7 +111,7 @@ void SetupInput()
     inputConfig->registerAxis("Vertical", VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseY));
 }
 
-bs::HSceneObject CreateCube(bs::HMaterial material, bs::HPhysicsMaterial physicsMaterial)
+bs::HSceneObject World::createCube(bs::HMaterial material, bs::HPhysicsMaterial physicsMaterial)
 {
     using namespace bs;
     HSceneObject cube = SceneObject::create("Cube");
@@ -98,7 +126,7 @@ bs::HSceneObject CreateCube(bs::HMaterial material, bs::HPhysicsMaterial physics
     return cube;
 }
 
-bs::HSceneObject CreateFloor(bs::HMaterial material, bs::HPhysicsMaterial physicsMaterial)
+bs::HSceneObject World::createFloor(bs::HMaterial material, bs::HPhysicsMaterial physicsMaterial)
 {
     using namespace bs;
     HSceneObject floor = SceneObject::create("Floor");
@@ -108,28 +136,30 @@ bs::HSceneObject CreateFloor(bs::HMaterial material, bs::HPhysicsMaterial physic
     floorRenderable->setMesh(planeMesh);
     HPlaneCollider planeCollider = floor->addComponent<CPlaneCollider>();
     planeCollider->setMaterial(physicsMaterial);
-    floor->setScale(Vector3(50.0f, 1.0f, 50.0f));
+    constexpr float kSize = 50.0f;
+    floor->setScale(Vector3(kSize, 1.0f, kSize));
+    material->setVec2("gUVTile", Vector2::ONE - (Vector2::ONE * -kSize));
     return floor;
 }
 
-bs::HPhysicsMaterial CreatePhysicsMaterial()
+bs::HPhysicsMaterial World::createPhysicsMaterial()
 {
     using namespace bs;
     HPhysicsMaterial physicsMaterial = PhysicsMaterial::create(1.0f, 1.0f, 0.5f);
     return physicsMaterial;
 }
 
-bs::HMaterial CreateMaterial(const bs::String &path)
+bs::HMaterial World::createMaterial(const bs::String &path)
 {
     using namespace bs;
     HShader shader = gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
     HMaterial material = Material::create(shader);
-    HTexture texture = gImporter().import<Texture>(path);
+    HTexture texture = Asset::loadTexture(path);
     material->setTexture("gAlbedoTex", texture);
     return material;
 }
 
-bs::HSceneObject CreateGUI(bs::HSceneObject camera)
+bs::HSceneObject World::createGUI(bs::HSceneObject camera)
 {
     using namespace bs;
     auto gui = SceneObject::create("GUI");
