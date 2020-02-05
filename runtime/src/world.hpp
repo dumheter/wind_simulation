@@ -1,18 +1,15 @@
 #pragma once
 
-#include "app.hpp"
 #include "BsApplication.h"
+#include "app.hpp"
 
 namespace wind {
 
+class World : public App {
+public:
+  World(const App::Info &info);
 
-class World : public App
-{
- public:
-
-  World(const App::Info& info);
-
- private:
+private:
   void setupInput();
 
   bs::HSceneObject createCamera(bs::HSceneObject player);
@@ -26,5 +23,4 @@ class World : public App
   bs::HSceneObject createGUI(bs::HSceneObject camera);
 };
 
-
-}
+} // namespace wind
