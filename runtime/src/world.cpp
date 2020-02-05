@@ -26,6 +26,7 @@
 #include "Scene/BsSceneObject.h"
 #include "asset.hpp"
 #include "bsFPSWalker.h"
+#include <Components/BsCSkybox.h>
 
 namespace wind {
 
@@ -44,6 +45,11 @@ World::World(const App::Info &info) : App(info) {
   auto player = createPlayer();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
+
+  const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
+  HSceneObject skybox = SceneObject::create("Skybox");
+  HSkybox skyboxComp = skybox->addComponent<CSkybox>();
+  skyboxComp->setTexture(skyboxTex);
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
