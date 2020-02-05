@@ -6,8 +6,7 @@
 // Types
 // ========================================================================== //
 
-namespace wind
-{
+namespace wind {
 
 using u8 = uint8_t;
 using u16 = uint16_t;
@@ -29,7 +28,7 @@ using f64 = double;
 // ========================================================================== //
 
 /* Macro to force a namespace class */
-#define WIND_NAMESPACE_CLASS(type)                                                                                     \
-  public:                                                                                                              \
-    type() = delete;                                                                                                   \
-    ~type() = delete;
+#define WIND_NAMESPACE_CLASS(type)                                             \
+public:                                                                        \
+  type() = delete;                                                             \
+  ~type() = delete;
