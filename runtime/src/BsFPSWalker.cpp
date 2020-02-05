@@ -48,6 +48,7 @@ void FPSWalker::update()
     bool goingLeft = gVirtualInput().isButtonHeld(mMoveLeft);
     bool goingRight = gVirtualInput().isButtonHeld(mMoveRight);
     bool fastMove = gVirtualInput().isButtonHeld(mFastMove);
+    bool jumping = gVirtualInput().isButtonHeld(mSpace);
 
     const Transform &tfrm = SO()->getTransform();
 
@@ -61,7 +62,7 @@ void FPSWalker::update()
         direction += tfrm.getRight();
     if (goingLeft)
         direction -= tfrm.getRight();
-
+    
     // Eliminate vertical movement
     direction.y = 0.0f;
     direction.normalize();
@@ -95,6 +96,10 @@ void FPSWalker::update()
 
     // Note: Gravity is acceleration, but since the walker doesn't support falling, just apply it as a velocity
     const Vector3 gravity = SceneManager::instance().getMainScene()->getPhysicsScene()->getGravity();
-    mController->move((velocity + gravity) * frameDelta);
+    Vector3 jump{};
+    if (jumping) {
+        jump = Vector3(0.0f, 20.0f, 0.0f);
+    }
+    mController->move((velocity + gravity + jump) * frameDelta);
 }
 } // namespace bs

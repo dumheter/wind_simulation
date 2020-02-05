@@ -90,20 +90,14 @@ bs::HSceneObject World::createPlayer()
 void World::setupInput()
 {
     using namespace bs;
-    gInput().onButtonUp.connect([](const ButtonEvent &ev) {
+    gInput().onButtonUp.connect([this](const ButtonEvent &ev) {
         if (ev.buttonCode == BC_ESCAPE)
         {
             gApplication().quitRequested();
         }
     });
 
-    // Register input configuration
-    // bsf allows you to use VirtualInput system which will map input device buttons and axes to arbitrary names,
-    // which allows you to change input buttons without affecting the code that uses it, since the code is only
-    // aware of the virtual names.  If you want more direct input, see Input class.
     auto inputConfig = gVirtualInput().getConfiguration();
-
-    // Camera controls for buttons (digital 0-1 input, e.g. keyboard or gamepad button)
     inputConfig->registerButton("Forward", BC_W);
     inputConfig->registerButton("Back", BC_S);
     inputConfig->registerButton("Left", BC_A);
@@ -116,9 +110,6 @@ void World::setupInput()
     inputConfig->registerButton("RotateObj", BC_MOUSE_LEFT);
     inputConfig->registerButton("RotateCam", BC_MOUSE_RIGHT);
     inputConfig->registerButton("Space", BC_SPACE);
-
-    // Camera controls for axes (analog input, e.g. mouse or gamepad thumbstick)
-    // These return values in [-1.0, 1.0] range.
     inputConfig->registerAxis("Horizontal", VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
     inputConfig->registerAxis("Vertical", VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseY));
 }
