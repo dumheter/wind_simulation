@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include <Importer/BsImporter.h>
+#include <Importer/BsMeshImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
 #include <Reflection/BsRTTIType.h>
 #include <Resources/BsResources.h>
@@ -103,6 +104,37 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
     gResources().save(texture, assetPath, true);
   }
   return texture;
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::HMesh Asset::loadMesh(const bs::Path &path, bool cpuCached) {
+  using namespace bs;
+
+  Path assetPath = path;
+  assetPath.setExtension(path.getExtension() + ".asset");
+
+  HMesh mesh = gResources().load<Mesh>(assetPath);
+  if (!mesh) {
+    gDebug().log(
+        "Mesh '" + path.toString() +
+            "' has not yet been imported. This process can take a while",
+        LogVerbosity::Warning);
+
+    const SPtr<ImportOptions> _impOpt =
+        Importer::instance().createImportOptions(path);
+    if (rtti_is_of_type<MeshImportOptions>(_impOpt)) {
+      MeshImportOptions *impOpt =
+          static_cast<MeshImportOptions *>(_impOpt.get());
+      impOpt->cpuCached = cpuCached;
+      impOpt->importNormals = true;
+      impOpt->importTangents = true;
+      impOpt->importScale = 1.0f;
+    }
+    mesh = gImporter().import<Mesh>(path, _impOpt);
+    gResources().save(mesh, assetPath, true);
+  }
+  return mesh;
 }
 
 } // namespace wind

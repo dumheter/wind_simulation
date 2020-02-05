@@ -71,7 +71,7 @@ public:
   static constexpr u32 WINDOW_HEIGHT = 720;
 
   /* Scale of the ground plane */
-  static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
+  static constexpr f32 GROUND_PLANE_SCALE = 4.0f;
 };
 
 } // namespace wind
