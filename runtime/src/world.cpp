@@ -46,6 +46,7 @@ World::World(const App::Info &info) : App(info) {
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
 
+
   const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
   HSceneObject skybox = SceneObject::create("Skybox");
   HSkybox skyboxComp = skybox->addComponent<CSkybox>();
@@ -111,6 +112,7 @@ void World::setupInput() {
   inputConfig->registerButton("RotateObj", BC_MOUSE_LEFT);
   inputConfig->registerButton("RotateCam", BC_MOUSE_RIGHT);
   inputConfig->registerButton("Space", BC_SPACE);
+  inputConfig->registerButton("Gravity", BC_Q);
   inputConfig->registerAxis("Horizontal",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",

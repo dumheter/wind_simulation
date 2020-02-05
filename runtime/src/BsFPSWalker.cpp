@@ -40,6 +40,7 @@ FPSWalker::FPSWalker(const HSceneObject &parent) : Component(parent) {
   mMoveRight = VirtualButton("Right");
   mFastMove = VirtualButton("FastMove");
   mSpace = VirtualButton("Space");
+  mGravity = VirtualButton("Gravity");
 }
 
 void FPSWalker::update() {
@@ -87,21 +88,23 @@ void FPSWalker::update() {
     mCurrentSpeed = 0.0f;
   }
 
-  // If the current speed isn't too small, move the camera in the wanted
-  // direction
   Vector3 velocity(BsZero);
   float tooSmall = std::numeric_limits<float>::epsilon();
   if (mCurrentSpeed > tooSmall)
     velocity = direction * mCurrentSpeed;
 
-  // Note: Gravity is acceleration, but since the walker doesn't support
-  // falling, just apply it as a velocity
-  const Vector3 gravity =
-      SceneManager::instance().getMainScene()->getPhysicsScene()->getGravity();
-  Vector3 jump{};
-  if (jumping) {
-    jump = Vector3(0.0f, 20.0f, 0.0f);
+  if (gVirtualInput().isButtonDown(mGravity)) {
+    toggleGravity();
   }
+
+  const Vector3 gravity = m_gravity ? SceneManager::instance()
+                                          .getMainScene()
+                                          ->getPhysicsScene()
+                                          ->getGravity()
+                                    : Vector3();
+
+  const Vector3 jump = !jumping ? Vector3() : Vector3(0.0f, 20.0f, 0.0f);
+
   mController->move((velocity + gravity + jump) * frameDelta);
 }
 } // namespace bs
