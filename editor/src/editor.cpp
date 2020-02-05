@@ -43,6 +43,7 @@
 #include <Material/BsMaterial.h>
 #include <BsCameraFlyer.h>
 #include <Debug/BsDebugDraw.h>
+#include "math/vector_field.hpp"
 
 // ========================================================================== //
 // Editor Implementation
@@ -59,16 +60,16 @@ Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT})
     setupCamera();
     setupScene();
     setupGUI();
+
+    DebugDraw::instance().setColor(Color::Red);
+    VectorField *vf = new VectorField(4, 4, 4, 1.0f);
+    vf->debugDraw();
 }
 
 // -------------------------------------------------------------------------- //
 
 void Editor::OnPreUpdate()
 {
-    using namespace bs;
-
-    // DebugDraw::instance().setColor(Color::Red);
-    // DebugDraw::instance().drawLine(Vector3(0, .1, 0), Vector3(1, .1, 0));
 }
 
 // -------------------------------------------------------------------------- //
