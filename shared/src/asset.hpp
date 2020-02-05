@@ -9,8 +9,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -33,24 +33,24 @@
 // Asset Declaration
 // ========================================================================== //
 
-namespace wind
-{
+namespace wind {
 
 /* Asset utilities */
-class Asset
-{
-  private:
-    Asset() = delete;
-    ~Asset() = delete;
+class Asset {
+private:
+  Asset() = delete;
+  ~Asset() = delete;
 
-  public:
-    /* Load texture from file. An attempt will first be made to load an '.asset'
-     * file for the path, otherwise the resource will be imported */
-    static bs::HTexture loadTexture(const bs::Path &path, bool srgb = true, bool hdr = false, bool mipmaps = true);
+public:
+  /* Load texture from file. An attempt will first be made to load an '.asset'
+   * file for the path, otherwise the resource will be imported */
+  static bs::HTexture loadTexture(const bs::Path &path, bool srgb = true,
+                                  bool hdr = false, bool mipmaps = true);
 
-    /* Load cubemap from file. An attempt will first be made to load an '.asset'
-     * file for the path, otherwise the resource will be imported */
-    static bs::HTexture loadCubemap(const bs::Path &path, bool srgb = true, bool hdr = false);
+  /* Load cubemap from file. An attempt will first be made to load an '.asset'
+   * file for the path, otherwise the resource will be imported */
+  static bs::HTexture loadCubemap(const bs::Path &path, bool srgb = true,
+                                  bool hdr = false);
 };
 
 } // namespace wind

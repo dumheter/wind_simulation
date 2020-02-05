@@ -9,8 +9,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -32,38 +32,36 @@
 // Editor Declaration
 // ========================================================================== //
 
-namespace wind
-{
+namespace wind {
 
 /* Main Editor class */
-class Editor : public App
-{
-  public:
-    Editor();
+class Editor : public App {
+public:
+  Editor();
 
-    void OnPreUpdate() override;
+  void OnPreUpdate() override;
 
-  private:
-    /* Setup the camera */
-    void setupCamera();
+private:
+  /* Setup the camera */
+  void setupCamera();
 
-    /* Setup the editor scene */
-    void setupScene();
+  /* Setup the editor scene */
+  void setupScene();
 
-    /* Setup the editor GUI */
-    void setupGUI();
+  /* Setup the editor GUI */
+  void setupGUI();
 
-    /* Register controls */
-    void registerControls();
+  /* Register controls */
+  void registerControls();
 
-  public:
-    /* Editor window width */
-    static constexpr u32 WINDOW_WIDTH = 1280;
-    /* Editor window height */
-    static constexpr u32 WINDOW_HEIGHT = 720;
+public:
+  /* Editor window width */
+  static constexpr u32 WINDOW_WIDTH = 1280;
+  /* Editor window height */
+  static constexpr u32 WINDOW_HEIGHT = 720;
 
-    /* Scale of the ground plane */
-    static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
+  /* Scale of the ground plane */
+  static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
 };
 
 } // namespace wind

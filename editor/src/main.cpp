@@ -26,12 +26,11 @@
 // Main
 // ========================================================================== //
 
-int main()
-{
-    using namespace wind;
+int main() {
+  using namespace wind;
 
-    Editor editor;
-    editor.run();
+  Editor editor;
+  editor.run();
 
-    return 0;
+  return 0;
 }

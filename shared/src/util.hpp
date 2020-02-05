@@ -9,8 +9,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -34,17 +34,15 @@
 // Util Declaration
 // ========================================================================== //
 
-namespace wind
-{
+namespace wind {
 
-class Util
-{
-    WIND_NAMESPACE_CLASS(Util);
+class Util {
+  WIND_NAMESPACE_CLASS(Util);
 
-  public:
-    /* Center the cursor in the middle of a window. Specifying nullptr as the
-     * window is the same as specifying the primary window */
-    static void CenterCursor(bs::SPtr<bs::RenderWindow> window = nullptr);
+public:
+  /* Center the cursor in the middle of a window. Specifying nullptr as the
+   * window is the same as specifying the primary window */
+  static void CenterCursor(bs::SPtr<bs::RenderWindow> window = nullptr);
 };
 
 } // namespace wind

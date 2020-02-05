@@ -9,8 +9,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -34,80 +34,67 @@
 // App Declaration
 // ========================================================================== //
 
-namespace wind
-{
+namespace wind {
 
 /* Application class */
-class App
-{
-    friend class AppDelegate;
+class App {
+  friend class AppDelegate;
 
-  public:
-    /* App information */
-    struct Info
-    {
-        bs::String title;
-        u32 width = 1280;
-        u32 height = 720;
-    };
+public:
+  /* App information */
+  struct Info {
+    bs::String title;
+    u32 width = 1280;
+    u32 height = 720;
+  };
 
-  public:
-    /* Create application */
-    App(const Info &info);
+public:
+  /* Create application */
+  App(const Info &info);
 
-    /* Virtual destructor */
-    virtual ~App() = default;
+  /* Virtual destructor */
+  virtual ~App() = default;
 
-    /* Run application */
-    void run();
+  /* Run application */
+  void run();
 
-    /* Hide application window */
-    void hide();
+  /* Hide application window */
+  void hide();
 
-    /* Show application window */
-    void show();
+  /* Show application window */
+  void show();
 
-    /* Show profiler overlay (GPU) */
-    void showProfilerGPU(bs::HCamera camera);
+  /* Show profiler overlay (GPU) */
+  void showProfilerGPU(bs::HCamera camera);
 
-    /* Show profiler overlay (CPU) */
-    void showProfilerCPU(bs::HCamera camera);
+  /* Show profiler overlay (CPU) */
+  void showProfilerCPU(bs::HCamera camera);
 
-    /* Hide profiler (GPU or CPU depending on which is active) */
-    void hideProfiler();
+  /* Hide profiler (GPU or CPU depending on which is active) */
+  void hideProfiler();
 
-    /* Startup callback */
-    virtual void OnStartup()
-    {
-    }
+  /* Startup callback */
+  virtual void OnStartup() {}
 
-    /* Shutdown callback */
-    virtual void OnShutdown()
-    {
-    }
-    /* Pre-update callback */
-    virtual void OnPreUpdate()
-    {
-    }
+  /* Shutdown callback */
+  virtual void OnShutdown() {}
+  /* Pre-update callback */
+  virtual void OnPreUpdate() {}
 
-    /* Post-update callback */
-    virtual void OnPostUpdate()
-    {
-    }
+  /* Post-update callback */
+  virtual void OnPostUpdate() {}
 
-    /* Fixed-update callback */
-    virtual void OnFixedUpdate()
-    {
-    }
+  /* Fixed-update callback */
+  virtual void OnFixedUpdate() {}
 
-  private:
-    static App *g_app;
+private:
+  static App *g_app;
 
-  private:
-    /* Application title */
-    bs::String m_title;
-    u32 m_width;
-    u32 m_height;
+private:
+  /* Application title */
+  bs::String m_title;
+  u32 m_width;
+  u32 m_height;
 };
 
 } // namespace wind
