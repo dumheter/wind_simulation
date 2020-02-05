@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "common.hpp"
+#include "math/field.hpp"
 
 #include <Math/BsVector3.h>
 
@@ -37,7 +38,8 @@
 namespace wind {
 
 /* Class that represents a vector field */
-class VectorField {
+
+class VectorField : public Field<bs::Vector3> {
 public:
   /* Construct a vector-field with the specified 'width', 'height' and
    * 'depth' (in number of cells). The size of a cell (in meters) can also be
@@ -47,27 +49,8 @@ public:
   /* Destruct vector-field */
   ~VectorField();
 
-  /* Draw lines to help with debugging the vector field. This is called only
-   * once to produce all the lines required for the 'DebugDraw' class. After
-   * clearing 'DebugDraw' this function needs to be called again */
-  void debugDraw();
-
-  /* Returns the reference to a vector in the vector field */
-  bs::Vector3 &GetVector(u32 x, u32 y, u32 z);
-
-  /* Returns the reference to a vector in the vector field */
-  const bs::Vector3 &GetVector(u32 x, u32 y, u32 z) const;
-
-private:
-  /* Dimensions */
-  u32 m_width, m_height, m_depth;
-  /* Cell size in meters */
-  f32 m_cellSize;
-
-  /* Vector field data. Laid out linearly */
-  bs::Vector3 *m_field = nullptr;
-  /* Size of field (in number of vectors) */
-  u32 m_fieldSize = 0;
+  /* \copydoc Field::debugDrawObject */
+  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
 };
 
 } // namespace wind

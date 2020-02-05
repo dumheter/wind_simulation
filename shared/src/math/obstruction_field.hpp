@@ -26,52 +26,36 @@
 // Headers
 // ========================================================================== //
 
-#include "app.hpp"
+#include "common.hpp"
+#include "math/field.hpp"
 
-#include <BsPrerequisites.h>
-#include <Renderer/BsCamera.h>
-#include <Scene/BsSceneObject.h>
+#include <Scene/BsSceneManager.h>
 
 // ========================================================================== //
-// Editor Declaration
+// VectorField Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/* Main Editor class */
-class Editor final : public App {
+/* Class that represents an obstruction field. This field represents whether
+ * or not a cell has an obstruction in it. */
+class ObstructionField : public Field<bool> {
 public:
-  /* Construct an editor */
-  Editor();
+  /* Construct an obstruction field with the specified 'width', 'height' and
+   * 'depth' (in number of cells). The size of a cell (in meters) can also be
+   * specified.  */
+  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  /* \copydoc App::OnPreUpdate */
-  void OnPreUpdate() override;
+  /* Destruct vector-field */
+  ~ObstructionField();
 
-private:
-  /* Setup the camera */
-  void setupCamera();
-
-  /* Setup the editor scene */
-  void setupScene();
-
-  /* Setup the editor GUI */
-  void setupGUI();
-
-  /* Register controls */
-  void registerControls();
-
-private:
-  /* Camera object */
-  bs::HSceneObject m_camera;
+  /* \copydoc Field::debugDrawObject */
+  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
 
 public:
-  /* Editor window width */
-  static constexpr u32 WINDOW_WIDTH = 1280;
-  /* Editor window height */
-  static constexpr u32 WINDOW_HEIGHT = 720;
-
-  /* Scale of the ground plane */
-  static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
+  static ObstructionField *buildForScene(
+      const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,
+      const bs::Vector3 &position = bs::Vector3(), f32 cellSize = 1.0f);
 };
 
 } // namespace wind

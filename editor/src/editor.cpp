@@ -27,16 +27,23 @@
 // ========================================================================== //
 
 #include "asset.hpp"
-
+#include "math/obstruction_field.hpp"
 #include "math/vector_field.hpp"
+
 #include <BsCameraFlyer.h>
 #include <Components/BsCCamera.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCSkybox.h>
 #include <Debug/BsDebugDraw.h>
+#include <GUI/BsCGUIWidget.h>
+#include <GUI/BsGUILabel.h>
+#include <GUI/BsGUILayout.h>
+#include <GUI/BsGUILayoutY.h>
+#include <GUI/BsGUIPanel.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
+#include <Input/BsInput.h>
 #include <Material/BsMaterial.h>
 #include <Mesh/BsMesh.h>
 #include <Resources/BsBuiltinResources.h>
@@ -59,13 +66,21 @@ Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT}) {
   setupGUI();
 
   DebugDraw::instance().setColor(Color::Red);
-  VectorField *vf = new VectorField(4, 4, 4, 1.0f);
-  vf->debugDraw();
+  ObstructionField *f = ObstructionField::buildForScene(
+      SceneManager::instance().getMainScene(),
+      Vector3(GROUND_PLANE_SCALE * 2, 5, GROUND_PLANE_SCALE * 2));
+  f->debugDraw(Vector3(), true);
 }
 
 // -------------------------------------------------------------------------- //
 
-void Editor::OnPreUpdate() {}
+void Editor::OnPreUpdate() {
+  using namespace bs;
+
+  if (gInput().isButtonDown(ButtonCode::BC_ESCAPE)) {
+    gApplication().quitRequested();
+  }
+}
 
 // -------------------------------------------------------------------------- //
 
@@ -82,10 +97,10 @@ void Editor::setupCamera() {
   skyboxComp->setTexture(skyboxTex);
 
   // Camera
-  HSceneObject camera = SceneObject::create("Camera");
-  camera->setPosition(Vector3(.0f, 2.5f, -4.0f) * 0.65f);
-  camera->lookAt(Vector3(.0f, 1.5f, .0f));
-  HCamera cameraComp = camera->addComponent<CCamera>();
+  m_camera = SceneObject::create("Camera");
+  m_camera->setPosition(Vector3(25.0f, 2.5f, 25.0f - 4.0f) * 0.65f);
+  m_camera->lookAt(Vector3(.0f, 1.5f, .0f));
+  HCamera cameraComp = m_camera->addComponent<CCamera>();
   cameraComp->getViewport()->setTarget(window);
   cameraComp->setNearClipDistance(0.005f);
   cameraComp->setFarClipDistance(1000);
@@ -95,7 +110,7 @@ void Editor::setupCamera() {
   cameraComp->setRenderSettings(renderSettings);
 
   // Flying camera
-  const HCameraFlyer cameraFlyerComp = camera->addComponent<CameraFlyer>();
+  const HCameraFlyer cameraFlyerComp = m_camera->addComponent<CameraFlyer>();
 }
 
 // -------------------------------------------------------------------------- //
@@ -117,7 +132,7 @@ void Editor::setupScene() {
 
   HSceneObject plane = SceneObject::create("Plane");
   plane->setScale(Vector3(GROUND_PLANE_SCALE, 1.0f, GROUND_PLANE_SCALE));
-  plane->setRotation(Quaternion(Degree(0), Degree(0), Degree(180)));
+  plane->move(Vector3(GROUND_PLANE_SCALE, 0.0f, GROUND_PLANE_SCALE));
   HRenderable planeRenderable = plane->addComponent<CRenderable>();
   planeRenderable->setMesh(planeMesh);
   planeRenderable->setMaterial(planeMat);
@@ -125,7 +140,21 @@ void Editor::setupScene() {
 
 // -------------------------------------------------------------------------- //
 
-void Editor::setupGUI() {}
+void Editor::setupGUI() {
+  using namespace bs;
+
+  // Setup GUI
+  HSceneObject gui = SceneObject::create("GUI");
+  HCamera cameraComp = m_camera->getComponent<CCamera>();
+  HGUIWidget guiComp = gui->addComponent<CGUIWidget>(cameraComp);
+  GUIPanel *mainPanel = guiComp->getPanel();
+  GUILayoutY *vertLayout = GUILayoutY::create();
+  mainPanel->addElement(vertLayout);
+
+  // Build interface
+  HString quitString("Press the Escape key to quit");
+  vertLayout->addNewElement<GUILabel>(quitString);
+}
 
 // -------------------------------------------------------------------------- //
 
