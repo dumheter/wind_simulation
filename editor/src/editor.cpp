@@ -47,6 +47,7 @@
 #include <GUI/BsGUILayoutY.h>
 #include <GUI/BsGUIPanel.h>
 #include <GUI/BsGUIProgressBar.h>
+#include <GUI/BsGUIToggle.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
@@ -75,10 +76,11 @@ Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT}) {
   setupGUI();
 
   DebugDraw::instance().setColor(Color::Red);
-  ObstructionField *f = ObstructionField::buildForScene(
+  m_obstrField = ObstructionField::buildForScene(
       SceneManager::instance().getMainScene(),
-      Vector3(GROUND_PLANE_SCALE * 2, 5, GROUND_PLANE_SCALE * 2));
-  f->debugDraw(Vector3(), true);
+      Vector3(GROUND_PLANE_SCALE * 2, 5, GROUND_PLANE_SCALE * 2), Vector3(),
+      0.5f);
+  m_obstrField->debugDraw(Vector3(), false);
 }
 
 // -------------------------------------------------------------------------- //
@@ -143,7 +145,7 @@ void Editor::setupScene() {
 
   HSceneObject plane = SceneObject::create("Plane");
   plane->setScale(Vector3(GROUND_PLANE_SCALE, 1.0f, GROUND_PLANE_SCALE));
-  plane->move(Vector3(GROUND_PLANE_SCALE, 0.4f, GROUND_PLANE_SCALE));
+  plane->move(Vector3(GROUND_PLANE_SCALE, .4f, GROUND_PLANE_SCALE));
   HRenderable planeRenderable = plane->addComponent<CRenderable>();
   planeRenderable->setMesh(planeMesh);
   planeRenderable->setMaterial(planeMat);
@@ -167,20 +169,22 @@ void Editor::setupScene() {
   boxCollider->setMass(25.0f);
   // HRigidbody boxRigidbody = box->addComponent<CRigidbody>();
 
-  // Dragon!
+  // Bunny
   // HTexture dragonAlbedo = Asset::loadTexture("res/textures/dragon.png");
-  HMesh dragonMesh = Asset::loadMesh("res/models/dragon.obj");
-  HMaterial dragonMat = Material::create(shader);
-  dragonMat->setTexture("gAlbedoTex", texGrid2);
-  HSceneObject dragon = SceneObject::create("Dragon");
-  dragon->setPosition(Vector3(3, 2, 3));
-  HRenderable dragonRenderable = dragon->addComponent<CRenderable>();
-  dragonRenderable->setMesh(dragonMesh);
-  dragonRenderable->setMaterial(dragonMat);
-  HPhysicsMaterial dragonPhysMat = PhysicsMaterial::create(1.0f, 1.0f, 1.0f);
-  HMeshCollider dragonCollider = dragon->addComponent<CMeshCollider>();
-  dragonCollider->setMaterial(dragonPhysMat);
-  dragonCollider->setMass(100.0f);
+  auto [bunnyMesh, bunnyPhysMesh] =
+      Asset::loadMeshWithPhysics("res/models/stanford-bunny.fbx", 0.006f);
+  HMaterial bunnyMat = Material::create(shader);
+  bunnyMat->setTexture("gAlbedoTex", texGrid2);
+  HSceneObject bunny = SceneObject::create("bunny");
+  bunny->setPosition(Vector3(5, 3, 4));
+  HRenderable bunnyRenderable = bunny->addComponent<CRenderable>();
+  bunnyRenderable->setMesh(bunnyMesh);
+  bunnyRenderable->setMaterial(bunnyMat);
+  HPhysicsMaterial bunnyPhysMat = PhysicsMaterial::create(1.0f, 1.0f, 1.0f);
+  HMeshCollider bunnyCollider = bunny->addComponent<CMeshCollider>();
+  bunnyCollider->setMaterial(bunnyPhysMat);
+  bunnyCollider->setMass(15.0f);
+  bunnyCollider->setMesh(bunnyPhysMesh);
 }
 
 // -------------------------------------------------------------------------- //
@@ -199,12 +203,29 @@ void Editor::setupGUI() {
   // Build interface
   GUILabel *label =
       panel->addNewElement<GUILabel>(HString("Press Escape to quit"));
-  panel->setPosition(2, 2);
+  panel->setPosition(4, 4);
 
-  GUIButton *button = panel->addNewElement<GUIButton>(HString("Quit"));
-  button->setWidth(90);
-  button->setPosition(2, 18);
-  button->onClick.connect([]() { gApplication().quitRequested(); });
+  GUIButton *quitButton = panel->addNewElement<GUIButton>(HString("Quit"));
+  quitButton->setWidth(90);
+  quitButton->setPosition(2, 18);
+  quitButton->onClick.connect([]() { gApplication().quitRequested(); });
+
+  GUIToggle *frameToggle = panel->addNewElement<GUIToggle>(HString("Frame"));
+  frameToggle->setPosition(2, 40);
+  frameToggle->onToggled.connect([this](bool t) {
+    DebugDraw::instance().clear();
+    m_obstrField->debugDraw(Vector3(), t);
+  });
+
+  GUIToggle *debugToggle =
+      panel->addNewElement<GUIToggle>(HString("Obstruction Toggle"));
+  debugToggle->setPosition(20, 40);
+  debugToggle->onToggled.connect([this](bool t) {
+    DebugDraw::instance().clear();
+    if (t) {
+      m_obstrField->debugDraw(Vector3(), true);
+    }
+  });
 }
 
 // -------------------------------------------------------------------------- //

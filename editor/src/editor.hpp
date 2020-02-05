@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "app.hpp"
+#include "math/obstruction_field.hpp"
 
 #include <BsPrerequisites.h>
 #include <Renderer/BsCamera.h>
@@ -63,6 +64,9 @@ private:
 private:
   /* Camera object */
   bs::HSceneObject m_camera;
+
+  /* Obstruction field */
+  ObstructionField *m_obstrField;
 
 public:
   /* Editor window width */

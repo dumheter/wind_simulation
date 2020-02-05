@@ -60,6 +60,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -75,6 +76,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

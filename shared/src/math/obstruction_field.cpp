@@ -88,7 +88,10 @@ ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
   const SPtr<PhysicsScene> physicsScene = scene->getPhysicsScene();
 
   // Dimensions
-  u32 width = u32(extent.x), height = u32(extent.y), depth = u32(extent.z);
+  f32 mul = 1 / cellSize;
+  u32 width = u32(extent.x * mul);
+  u32 height = u32(extent.y * mul);
+  u32 depth = u32(extent.z * mul);
 
   // Check for collisions in each cell
   ObstructionField *field =
@@ -99,8 +102,10 @@ ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
       f32 yPos = position.y + (y * cellSize);
       for (u32 x = 0; x < width; x++) {
         f32 xPos = position.x + (x * cellSize);
-        AABox aabb{Vector3(xPos + 0.05, yPos + 0.05, zPos + 0.05),
-                   Vector3(xPos + 0.95f, yPos + 0.95f, zPos + 0.95f)};
+        f32 offMin = 0.05f * cellSize;
+        f32 offMax = 0.95f * cellSize;
+        AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
+                   Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
         if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
           field->Get(x, y, z) = true;
         }
