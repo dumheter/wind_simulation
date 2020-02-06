@@ -1,5 +1,6 @@
 #include "world.hpp"
 
+#include <alflib/core/assert.hpp>
 #include "BsFPSCamera.h"
 #include "Components/BsCBoxCollider.h"
 #include "Components/BsCCamera.h"
@@ -26,12 +27,19 @@
 #include "Scene/BsSceneObject.h"
 #include "asset.hpp"
 #include "bsFPSWalker.h"
+#include <Components/BsCSkybox.h>
 
 namespace wind {
 
 World::World(const App::Info &info) : App(info) {
-  using namespace bs;
   setupInput();
+  setupScene();
+  setupPlayer();
+}
+
+void World::setupScene()
+{
+  using namespace bs;
   auto floorMaterial = createMaterial("res/textures/grid.png");
   auto cubeMaterial = createMaterial("res/textures/grid_2.png");
   auto stdPhysicsMaterial = createPhysicsMaterial();
@@ -41,12 +49,38 @@ World::World(const App::Info &info) : App(info) {
   cube2->setPosition(Vector3(0.0f, 4.0f, -8.0f));
   cube2->setRotation(Quaternion(Degree(0), Degree(45), Degree(0)));
   auto floor = createFloor(floorMaterial, stdPhysicsMaterial);
+  const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
+  HSceneObject skybox = SceneObject::create("Skybox");
+  HSkybox skyboxComp = skybox->addComponent<CSkybox>();
+  skyboxComp->setTexture(skyboxTex);
+}
+
+void World::setupPlayer()
+{
+  using namespace bs;
+  AlfAssert(m_players.emtpy(), "m_players must be empty before setting up the player");
+
   auto player = createPlayer();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
+  m_players.push_back(std::move(player));
 }
 
-bs::HSceneObject World::createCamera(bs::HSceneObject player) {
+void World::reset()
+{
+  for (auto player : m_players) {
+    player->destroy();
+  }
+  m_players.Clear();
+}
+
+bs::HSceneObject getPlayer()
+{
+  AlfAssert(!m_players.empty(), "must setupPlayer before getPlayer");
+  return m_players[0];
+}
+
+    bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   using namespace bs;
   HSceneObject camera = SceneObject::create("Camera");
   camera->setParent(player);
@@ -105,6 +139,7 @@ void World::setupInput() {
   inputConfig->registerButton("RotateObj", BC_MOUSE_LEFT);
   inputConfig->registerButton("RotateCam", BC_MOUSE_RIGHT);
   inputConfig->registerButton("Space", BC_SPACE);
+  inputConfig->registerButton("Gravity", BC_Q);
   inputConfig->registerAxis("Horizontal",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",

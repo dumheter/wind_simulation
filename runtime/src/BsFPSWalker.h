@@ -18,6 +18,8 @@ public:
    */
   void update() override;
 
+  void toggleGravity() { m_gravity = !m_gravity; }
+
 private:
   HCharacterController mController;
 
@@ -29,6 +31,9 @@ private:
   VirtualButton mMoveRight; /**< Key binding for moving the camera right. */
   VirtualButton mFastMove;  /**< Key that speeds up movement while held. */
   VirtualButton mSpace;
+  VirtualButton mGravity;
+
+  bool m_gravity = true;
 };
 
 using HFPSWalker = GameObjectHandle<FPSWalker>;

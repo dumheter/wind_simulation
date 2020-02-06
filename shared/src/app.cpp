@@ -29,6 +29,7 @@
 #include "Components/BsCCamera.h"
 #include "RenderAPI/BsRenderWindow.h"
 #include "Renderer/BsCamera.h"
+#include "microprofile/microprofile.h"
 
 // ========================================================================== //
 // AppDelegate Declaration/Implementation
@@ -43,6 +44,7 @@ public:
 
 protected:
   void fixedUpdate() override {
+    MICROPROFILE_SCOPEI("group", "timername", MP_YELLOW);
     Application::fixedUpdate();
     App::g_app->OnFixedUpdate();
   }

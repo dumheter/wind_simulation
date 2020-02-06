@@ -58,7 +58,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;$(ProjectDir)src\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -66,7 +66,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>bsf.lib;bsfD3D11RenderAPI.lib;bsfFBXImporter.lib;bsfFontImporter.lib;bsfFreeImgImporter.lib;bsfOpenAudio.lib;bsfPhysX.lib;bsfRenderBeast.lib;bsfSL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bsf.lib;bsfD3D11RenderAPI.lib;bsfFBXImporter.lib;bsfFontImporter.lib;bsfFreeImgImporter.lib;bsfOpenAudio.lib;bsfPhysX.lib;bsfRenderBeast.lib;bsfSL.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)deps\bsf\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -79,7 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;$(ProjectDir)src\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -89,7 +89,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>bsf.lib;bsfD3D11RenderAPI.lib;bsfFBXImporter.lib;bsfFontImporter.lib;bsfFreeImgImporter.lib;bsfOpenAudio.lib;bsfPhysX.lib;bsfRenderBeast.lib;bsfSL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bsf.lib;bsfD3D11RenderAPI.lib;bsfFBXImporter.lib;bsfFontImporter.lib;bsfFreeImgImporter.lib;bsfOpenAudio.lib;bsfPhysX.lib;bsfRenderBeast.lib;bsfSL.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)deps\bsf\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -98,18 +98,51 @@
     <ClCompile Include="src\app.cpp" />
     <ClCompile Include="src\asset.cpp" />
     <ClCompile Include="src\BsCameraFlyer.cpp" />
+    <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\math\obstruction_field.cpp" />
     <ClCompile Include="src\math\vector_field.cpp" />
+    <ClCompile Include="src\thirdparty\fmt\format.cc" />
+    <ClCompile Include="src\thirdparty\microprofile\microprofile.cpp" />
+    <ClCompile Include="src\thirdparty\stb\stb_vorbis.c" />
     <ClCompile Include="src\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\app.hpp" />
+    <ClInclude Include="src\assert.hpp" />
     <ClInclude Include="src\asset.hpp" />
     <ClInclude Include="src\BsCameraFlyer.h" />
     <ClInclude Include="src\common.hpp" />
+    <ClInclude Include="src\log.hpp" />
     <ClInclude Include="src\math\field.hpp" />
     <ClInclude Include="src\math\obstruction_field.hpp" />
     <ClInclude Include="src\math\vector_field.hpp" />
+    <ClInclude Include="src\thirdparty\fmt\core.h" />
+    <ClInclude Include="src\thirdparty\fmt\format-inl.h" />
+    <ClInclude Include="src\thirdparty\fmt\format.h" />
+    <ClInclude Include="src\thirdparty\fmt\ostream.h" />
+    <ClInclude Include="src\thirdparty\microprofile\microprofile.h" />
+    <ClInclude Include="src\thirdparty\microprofile\microprofile_html.h" />
+    <ClInclude Include="src\thirdparty\stb\stb.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_connected_components.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_c_lexer.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_divide.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_ds.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_dxt.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_easy_font.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_image_resize.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_image_write.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_include.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_leakcheck.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_perlin.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_rect_pack.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_sprintf.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_textedit.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_tilemap_editor.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_truetype.h" />
+    <ClInclude Include="src\thirdparty\stb\stb_voxel_render.h" />
+    <ClInclude Include="src\thirdparty\stb\stretchy_buffer.h" />
     <ClInclude Include="src\util.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
