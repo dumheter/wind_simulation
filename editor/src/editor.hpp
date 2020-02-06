@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "app.hpp"
+#include "math/obstruction_field.hpp"
 
 #include <BsPrerequisites.h>
 #include <Renderer/BsCamera.h>
@@ -64,6 +65,9 @@ private:
   /* Camera object */
   bs::HSceneObject m_camera;
 
+  /* Obstruction field */
+  ObstructionField *m_obstrField;
+
 public:
   /* Editor window width */
   static constexpr u32 WINDOW_WIDTH = 1280;
@@ -71,7 +75,7 @@ public:
   static constexpr u32 WINDOW_HEIGHT = 720;
 
   /* Scale of the ground plane */
-  static constexpr f32 GROUND_PLANE_SCALE = 15.0f;
+  static constexpr f32 GROUND_PLANE_SCALE = 4.0f;
 };
 
 } // namespace wind

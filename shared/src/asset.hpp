@@ -26,6 +26,10 @@
 // Headers
 // ========================================================================== //
 
+#include <tuple>
+
+#include "common.hpp"
+
 #include "BsCorePrerequisites.h"
 #include "Resources/BsResource.h"
 
@@ -51,6 +55,17 @@ public:
    * file for the path, otherwise the resource will be imported */
   static bs::HTexture loadCubemap(const bs::Path &path, bool srgb = true,
                                   bool hdr = false);
+
+  /* Load mesh from file. An attempt will first be made to load an '.asset'
+   * file for the path, otherwise the resource will be imported */
+  static bs::HMesh loadMesh(const bs::Path &path, f32 scale = 1.0f,
+                            bool cpuCached = false);
+
+  /* Load mesh from file. An attempt will first be made to load an '.asset'
+   * file for the path, otherwise the resource will be imported */
+  static std::tuple<bs::HMesh, bs::HPhysicsMesh>
+  loadMeshWithPhysics(const bs::Path &path, f32 scale = 1.0f,
+                      bool cpuCached = false);
 };
 
 } // namespace wind

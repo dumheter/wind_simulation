@@ -27,10 +27,14 @@
 // ========================================================================== //
 
 #include <BsPrerequisites.h>
+#include <Components/BsCBoxCollider.h>
 #include <Components/BsCRenderable.h>
 #include <CoreThread/BsCoreThread.h>
 #include <Debug/BsDebugDraw.h>
 #include <Mesh/BsMesh.h>
+#include <Physics/BsPhysics.h>
+#include <Physics/BsPhysicsCommon.h>
+#include <Physics/BsPhysicsMaterial.h>
 #include <Scene/BsSceneObject.h>
 #include <Threading/BsThreading.h>
 
@@ -44,7 +48,6 @@ ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
                                    f32 cellsize)
     : Field(width, height, depth, cellsize) {
   using namespace bs;
-
   for (u32 i = 0; i < m_dataSize; i++) {
     m_data[i] = false;
   }
@@ -81,9 +84,35 @@ ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
                                 const bs::Vector3 &position, f32 cellSize) {
   using namespace bs;
 
-  const HSceneObject &root = scene->getRoot();
+  // Physics scene
+  const SPtr<PhysicsScene> physicsScene = scene->getPhysicsScene();
 
-  return new ObstructionField(u32(extent.x), u32(extent.y), u32(extent.z));
+  // Dimensions
+  f32 mul = 1 / cellSize;
+  u32 width = u32(extent.x * mul);
+  u32 height = u32(extent.y * mul);
+  u32 depth = u32(extent.z * mul);
+
+  // Check for collisions in each cell
+  ObstructionField *field =
+      new ObstructionField(width, height, depth, cellSize);
+  for (u32 z = 0; z < depth; z++) {
+    f32 zPos = position.z + (z * cellSize);
+    for (u32 y = 0; y < height; y++) {
+      f32 yPos = position.y + (y * cellSize);
+      for (u32 x = 0; x < width; x++) {
+        f32 xPos = position.x + (x * cellSize);
+        f32 offMin = 0.05f * cellSize;
+        f32 offMax = 0.95f * cellSize;
+        AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
+                   Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
+        if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
+          field->Get(x, y, z) = true;
+        }
+      }
+    }
+  }
+  return field;
 }
 
 } // namespace wind
