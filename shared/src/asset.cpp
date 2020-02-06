@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include <Importer/BsImporter.h>
+#include <Importer/BsMeshImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
 #include <Reflection/BsRTTIType.h>
 #include <Resources/BsResources.h>
@@ -103,6 +104,82 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
     gResources().save(texture, assetPath, true);
   }
   return texture;
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::HMesh Asset::loadMesh(const bs::Path &path, float scale, bool cpuCached) {
+  using namespace bs;
+
+  Path assetPath = path;
+  assetPath.setExtension(path.getExtension() + ".asset");
+
+  HMesh mesh = gResources().load<Mesh>(assetPath);
+  if (!mesh) {
+    gDebug().log(
+        "Mesh '" + path.toString() +
+            "' has not yet been imported. This process can take a while",
+        LogVerbosity::Warning);
+
+    const SPtr<ImportOptions> _impOpt =
+        Importer::instance().createImportOptions(path);
+    if (rtti_is_of_type<MeshImportOptions>(_impOpt)) {
+      MeshImportOptions *impOpt =
+          static_cast<MeshImportOptions *>(_impOpt.get());
+      impOpt->cpuCached = cpuCached;
+      impOpt->importNormals = true;
+      impOpt->importTangents = true;
+      impOpt->importScale = scale;
+    }
+    mesh = gImporter().import<Mesh>(path, _impOpt);
+    gResources().save(mesh, assetPath, true);
+  }
+  return mesh;
+}
+
+// -------------------------------------------------------------------------- //
+
+std::tuple<bs::HMesh, bs::HPhysicsMesh>
+Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached) {
+  using namespace bs;
+
+  Path assetPath = path;
+  assetPath.setExtension(path.getExtension() + ".asset");
+  Path physAssetPath = path;
+  physAssetPath.setExtension(path.getExtension() + ".phys.asset");
+
+  // Try to load assets
+  HMesh mesh = gResources().load<Mesh>(assetPath);
+  HPhysicsMesh physMesh = gResources().load<PhysicsMesh>(physAssetPath);
+
+  // Otherwise import them
+  if (!mesh) {
+    gDebug().log(
+        "Mesh '" + path.toString() +
+            "' has not yet been imported. This process can take a while",
+        LogVerbosity::Warning);
+
+    const SPtr<ImportOptions> _impOpt =
+        Importer::instance().createImportOptions(path);
+    if (rtti_is_of_type<MeshImportOptions>(_impOpt)) {
+      MeshImportOptions *impOpt =
+          static_cast<MeshImportOptions *>(_impOpt.get());
+      impOpt->cpuCached = cpuCached;
+      impOpt->importNormals = true;
+      impOpt->importTangents = true;
+      impOpt->importScale = scale;
+      impOpt->collisionMeshType = CollisionMeshType::Normal;
+    }
+
+    // Import mesh and physics mesh
+    auto res = gImporter().importAll(path, _impOpt);
+    mesh = static_resource_cast<Mesh>(res->entries[0].value);
+    physMesh = static_resource_cast<PhysicsMesh>(res->entries[1].value);
+
+    gResources().save(mesh, assetPath, true);
+    gResources().save(physMesh, physAssetPath, true);
+  }
+  return std::make_tuple(mesh, physMesh);
 }
 
 } // namespace wind
