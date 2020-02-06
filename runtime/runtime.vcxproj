@@ -58,7 +58,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)deps\gamenetworkingsockets\include;$(ProjectDir)..\shared\src\thirdparty;$(ProjectDir)deps\alflib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)deps\gamenetworkingsockets\include;$(ProjectDir)..\shared\src\thirdparty;$(ProjectDir)deps\alflib\include;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -74,7 +75,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)deps\gamenetworkingsockets\include;$(ProjectDir)..\shared\src\thirdparty;$(ProjectDir)deps\alflib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)deps\gamenetworkingsockets\include;$(ProjectDir)..\shared\src\thirdparty;$(ProjectDir)deps\alflib\include;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -93,29 +95,11 @@
     <ClCompile Include="src\BsFPSCamera.cpp" />
     <ClCompile Include="src\BsFPSWalker.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\network\client.cpp" />
-    <ClCompile Include="src\network\connection_id.cpp" />
-    <ClCompile Include="src\network\network.cpp" />
-    <ClCompile Include="src\network\net_common.cpp" />
-    <ClCompile Include="src\network\packet.cpp" />
-    <ClCompile Include="src\network\packet_handler.cpp" />
-    <ClCompile Include="src\network\server.cpp" />
-    <ClCompile Include="src\network\side.cpp" />
     <ClCompile Include="src\world.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BsFPSCamera.h" />
     <ClInclude Include="src\BsFPSWalker.h" />
-    <ClInclude Include="src\network\client.hpp" />
-    <ClInclude Include="src\network\connection_id.hpp" />
-    <ClInclude Include="src\network\connection_state.hpp" />
-    <ClInclude Include="src\network\network.hpp" />
-    <ClInclude Include="src\network\net_common.hpp" />
-    <ClInclude Include="src\network\packet.hpp" />
-    <ClInclude Include="src\network\packet_handler.hpp" />
-    <ClInclude Include="src\network\packet_header.hpp" />
-    <ClInclude Include="src\network\server.hpp" />
-    <ClInclude Include="src\network\side.hpp" />
     <ClInclude Include="src\world.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
