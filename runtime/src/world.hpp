@@ -21,6 +21,9 @@ private:
   bs::HPhysicsMaterial createPhysicsMaterial();
   bs::HMaterial createMaterial(const bs::String &path);
   bs::HSceneObject createGUI(bs::HSceneObject camera);
+
+  // Network<kServer> m_server;
+  // Network<kClient> m_client;
 };
 
 } // namespace wind
