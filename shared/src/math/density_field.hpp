@@ -48,6 +48,9 @@ public:
 
   /* \copydoc Field::debugDrawObject */
   void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
+
+  /* \copydoc Field::getSafe */
+  f32 getSafe(s32 x, s32 y, s32 z) override;
 };
 
 } // namespace wind

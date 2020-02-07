@@ -36,11 +36,11 @@ WindSimulation::~WindSimulation() {
 
 void WindSimulation::step(f32 delta) {
   // Sources
-  // m_bufferIndex = (m_bufferIndex + 1) % BUFFER_COUNT;
+  m_bufferIndex = (m_bufferIndex + 1) % BUFFER_COUNT;
 
   // Diffusion
   stepDensityDiffusion(delta);
-  m_bufferIndex = (m_bufferIndex + 1) % BUFFER_COUNT;
+  // m_bufferIndex = (m_bufferIndex + 1) % BUFFER_COUNT;
 
   // Motion
   // stepDensityAdvection(delta);
@@ -54,9 +54,7 @@ void WindSimulation::init() {
     DensityField::Pos pos = getDensityField()->fromOffset(i);
     for (u32 j = 0; j < BUFFER_COUNT; j++) {
       m_densityFields[j]->get(i) =
-          getDensityField()->isEdgePos(pos)
-              ? 0
-              : i / f32(getDensityField()->getDataSize() - 1);
+          i / f32(getDensityField()->getDataSize() - 1);
     }
   }
 
@@ -64,9 +62,7 @@ void WindSimulation::init() {
   for (u32 i = 0; i < getVectorField()->getDataSize(); i++) {
     VectorField::Pos pos = getVectorField()->fromOffset(i);
     for (u32 j = 0; j < BUFFER_COUNT; j++) {
-      m_vectorFields[j]->get(i) = getVectorField()->isEdgePos(pos)
-                                      ? bs::Vector3()
-                                      : bs::Vector3(1, 0, 0);
+      m_vectorFields[j]->get(i) = bs::Vector3(1, 0, 1);
     }
   }
 
@@ -87,13 +83,13 @@ void WindSimulation::stepDensityDiffusion(f32 delta) {
   // Run 20 iterations
   for (u32 k = 0; k < 20; k++) {
     // For each cell
-    for (u32 z = 1; z < m_depth - 1; z++) {
-      for (u32 y = 1; y < m_height - 1; y++) {
-        for (u32 x = 1; x < m_width - 1; x++) {
-          f32 b = p->get(x - 1, y, z) + p->get(x + 1, y, z) +
-                  p->get(x, y - 1, z) + p->get(x, y + 1, z) +
-                  p->get(x, y, z - 1) + p->get(x, y, z + 1);
-          p->get(x, y, z) = (p0->get(x, y, z) + a * b) / (1.0f + 6.0f * a);
+    for (u32 z = 0; z < m_depth; z++) {
+      for (u32 y = 0; y < m_height; y++) {
+        for (u32 x = 0; x < m_width; x++) {
+          f32 b = p->getSafe(x - 1, y, z) + p->getSafe(x + 1, y, z) +
+                  p->getSafe(x, y - 1, z) + p->getSafe(x, y + 1, z) +
+                  p->getSafe(x, y, z - 1) + p->getSafe(x, y, z + 1);
+          p->get(x, y, z) = (p0->getSafe(x, y, z) + a * b) / (1.0f + 6.0f * a);
         }
       }
     }
@@ -113,53 +109,33 @@ void WindSimulation::stepDensityAdvection(f32 delta) {
   DensityField *p = getDensityField();
   DensityField *p0 = getDensityFieldPrev();
   VectorField *v = getVectorField();
-  VectorField *v0 = getVectorFieldPrev();
 
-  for (u32 z = 1; z < m_depth - 1; z++) {
-    for (u32 y = 1; y < m_height - 1; y++) {
-      for (u32 x = 1; x < m_width - 1; x++) {
-        const bs::Vector3 &vec = v->get(x, y, z);
-        f32 _x = x - dt0 * vec.x;
-        f32 _y = y - dt0 * vec.y;
-        f32 _z = z - dt0 * vec.z;
+  for (u32 k = 0; k < m_depth; k++) {
+    for (u32 j = 0; j < m_height; j++) {
+      for (u32 i = 0; i < m_width; i++) {
+        const bs::Vector3 &vec = v->get(i, j, k);
+        f32 x = Clamp(i - dt0 * vec.x, 0.5f, m_width + 0.5f);
+        f32 y = Clamp(j - dt0 * vec.y, 0.5f, m_height + 0.5f);
+        f32 z = Clamp(k - dt0 * vec.z, 0.5f, m_depth + 0.5f);
+        u32 i0 = u32(std::floor(x)), i1 = i0 + 1;
+        u32 j0 = u32(std::floor(y)), j1 = j0 + 1;
+        u32 k0 = u32(std::floor(z)), k1 = k0 + 1;
 
-        // _x
-        if (_x < 0.5f) {
-          _x = 0.5f;
-        } else if (_x > m_width + 0.5f) {
-          _x = m_width + 0.5f;
-        }
-        u32 x0 = u32(_x);
-        u32 x1 = x0 + 1;
+        f32 a1 = x - i0, a0 = 1 - a1;
+        f32 b1 = x - j0, b0 = 1 - b1;
+        f32 c1 = x - k0, c0 = 1 - c1;
 
-        // _y
-        if (_y < 0.5f) {
-          _y = 0.5f;
-        } else if (_y > m_height + 0.5f) {
-          _y = m_height + 0.5f;
-        }
-        u32 y0 = u32(_y);
-        u32 y1 = y0 + 1;
+        f32 ab0 =
+            b0 * (a0 * p0->getSafe(i0, j0, k0) + a1 * p0->getSafe(i0, j0, k1));
+        f32 ab1 =
+            b1 * (a0 * p0->getSafe(i0, j1, k0) + a1 * p0->getSafe(i0, j1, k1));
+        f32 ab2 =
+            b0 * (a0 * p0->getSafe(i1, j0, k0) + a1 * p0->getSafe(i1, j0, k1));
+        f32 ab3 =
+            b1 * (a0 * p0->getSafe(i1, j1, k0) + a1 * p0->getSafe(i1, j1, k1));
+        f32 v = c0 * (ab0 + ab1) + c1 * (ab2 + ab3);
 
-        // _z
-        if (_z < 0.5f) {
-          _z = 0.5f;
-        } else if (_z > m_depth + 0.5f) {
-          _z = m_depth + 0.5f;
-        }
-        u32 z0 = u32(_z);
-        u32 z1 = z0 + 1;
-
-        //
-        f32 s1 = _x - x0;
-        f32 s0 = 1 - s1;
-        f32 t1 = _y - y0;
-        f32 t0 = 1 - t1;
-        f32 u1 = _z - z0;
-        f32 u0 = 1 - u1;
-
-        //
-        p->get(x, y, z);
+        p->get(i, j, k) = v;
       }
     }
   }
@@ -173,24 +149,24 @@ void WindSimulation::setDensityBorderCond() {
   DensityField *p0 = getDensityFieldPrev();
 
   // Set X bounds
-  for (u32 z = 1; z < m_depth - 1; z++) {
-    for (u32 y = 1; y < m_height - 1; y++) {
-      p->get(0, y, z) = p->get(1, y, z);
-      p->get(m_width - 1, y, z) = p->get(m_width - 2, y, z);
+  for (u32 z = 0; z < m_depth; z++) {
+    for (u32 y = 0; y < m_height; y++) {
+      p->get(0, y, z) = p->getSafe(1, y, z);
+      p->get(m_width - 1, y, z) = p->getSafe(m_width - 2, y, z);
     }
   }
   // Set Y bounds
-  for (u32 z = 1; z < m_depth - 1; z++) {
-    for (u32 x = 1; x < m_width - 1; x++) {
-      p->get(x, 0, z) = p->get(x, 1, z);
-      p->get(x, m_height - 1, z) = p->get(x, m_height - 2, z);
+  for (u32 z = 01; z < m_depth; z++) {
+    for (u32 x = 0; x < m_width; x++) {
+      p->get(x, 0, z) = p->getSafe(x, 1, z);
+      p->get(x, m_height - 1, z) = p->getSafe(x, m_height - 2, z);
     }
   }
   // Set Z bounds
-  for (u32 y = 1; y < m_height - 1; y++) {
-    for (u32 x = 1; x < m_width - 1; x++) {
-      p->get(x, y, 0) = p->get(x, y, 1);
-      p->get(x, y, m_depth - 1) = p->get(x, y, m_depth - 2);
+  for (u32 y = 0; y < m_height; y++) {
+    for (u32 x = 0; x < m_width; x++) {
+      p->get(x, y, 0) = p->getSafe(x, y, 1);
+      p->get(x, y, m_depth - 1) = p->getSafe(x, y, m_depth - 2);
     }
   }
 }
@@ -201,20 +177,18 @@ void WindSimulation::debugDraw(FieldKind kind, const bs::Vector3 &offset,
                                bool drawFrame) {
   bs::DebugDraw::instance().clear();
 
-  bs::Vector3 off = offset - (bs::Vector3::ONE * m_cellSize);
-
   // Draw correct type
   switch (kind) {
   case FieldKind::DENSITY: {
-    getDensityField()->debugDraw(off, drawFrame);
+    getDensityField()->debugDraw(offset, drawFrame);
     break;
   }
   case FieldKind::VECTOR: {
-    getVectorField()->debugDraw(off, drawFrame);
+    getVectorField()->debugDraw(offset, drawFrame);
     break;
   }
   case FieldKind::OBSTRUCTION: {
-    getObstructionField()->debugDraw(off, drawFrame);
+    getObstructionField()->debugDraw(offset, drawFrame);
     break;
   }
   default:
@@ -234,14 +208,13 @@ WindSimulation::createFromScene(const bs::SPtr<bs::SceneInstance> &scene,
 
   // Dimensions
   f32 mul = 1 / cellSize;
-  sim->m_width = u32(extent.x * mul) + 2;
-  sim->m_height = u32(extent.y * mul) + 2;
-  sim->m_depth = u32(extent.z * mul) + 2;
+  sim->m_width = u32(extent.x * mul);
+  sim->m_height = u32(extent.y * mul);
+  sim->m_depth = u32(extent.z * mul);
 
   // Allocate buffers
-  sim->m_obstructionField = ObstructionField::buildForScene(
-      scene, extent + (bs::Vector3::ONE),
-      position - (bs::Vector3::ONE * cellSize), cellSize);
+  sim->m_obstructionField =
+      ObstructionField::buildForScene(scene, extent, position, cellSize);
   for (u32 i = 0; i < BUFFER_COUNT; i++) {
     sim->m_densityFields[i] = new DensityField(sim->m_width, sim->m_height,
                                                sim->m_depth, sim->m_cellSize);

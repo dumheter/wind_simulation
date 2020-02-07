@@ -32,3 +32,17 @@ using f64 = double;
 public:                                                                        \
   type() = delete;                                                             \
   ~type() = delete;
+
+// ========================================================================== //
+// Macros
+// ========================================================================== //
+
+namespace wind {
+
+/* Clamp 'value' between two other values 'min' and 'max' */
+template <typename T, typename S, typename U>
+inline constexpr T Clamp(T value, S min, U max) {
+  return value < min ? min : value > max ? max : value;
+}
+
+} // namespace wind

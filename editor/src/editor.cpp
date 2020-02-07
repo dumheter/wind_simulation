@@ -86,7 +86,7 @@ void Editor::onStartup() {
   m_windSim = WindSimulation::createFromScene(
       SceneManager::instance().getMainScene(),
       Vector3(GROUND_PLANE_SCALE * 2.0f, 6, GROUND_PLANE_SCALE * 2.0f),
-      Vector3(), 0.25f);
+      Vector3(), 0.5f);
 }
 
 // -------------------------------------------------------------------------- //
@@ -111,7 +111,7 @@ void Editor::onPreUpdate() {
 
   // Run simulation step
   if (m_runSim) {
-    m_windSim->step(gTime().getFrameDelta() * 0.05f);
+    m_windSim->step(gTime().getFrameDelta());
   }
 
   // Redraw each frame

@@ -103,6 +103,8 @@ private:
   /* Updates the density field according to the border conditions set */
   void setDensityBorderCond();
 
+  void doSomeStuff();
+
 public:
   /* Construct a wind simulation from a scene. All data required is determined
    * from the objects in the scene */

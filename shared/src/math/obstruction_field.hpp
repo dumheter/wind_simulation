@@ -52,6 +52,9 @@ public:
   /* \copydoc Field::debugDrawObject */
   void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
 
+  /* \copydoc Field::getSafe */
+  bool getSafe(s32 x, s32 y, s32 z) override;
+
 public:
   static ObstructionField *buildForScene(
       const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,

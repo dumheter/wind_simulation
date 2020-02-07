@@ -72,4 +72,53 @@ void VectorField::debugDrawObject(const bs::Vector3 &offset) {
   bs::DebugDraw::instance().drawLineList(points);
 }
 
+// -------------------------------------------------------------------------- //
+
+bs::Vector3 VectorField::getSafe(s32 x, s32 y, s32 z) {
+  switch (m_borderKind) {
+    // Default border value
+  case BorderKind::DEFAULT: {
+    return isInBounds(x, y, z) ? get(x, y, z) : m_borderDefaultValue;
+  }
+    // Contained border vectors
+  case BorderKind::CONTAINED: {
+    bool rx = !isInBoundsX(x);
+    bool ry = !isInBoundsY(y);
+    bool rz = !isInBoundsZ(z);
+    x = Clamp(x, 0, s32(m_dim.width) - 1);
+    y = Clamp(y, 0, s32(m_dim.height) - 1);
+    z = Clamp(z, 0, s32(m_dim.depth) - 1);
+    bs::Vector3 &v = get(x, y, z);
+    if (rx) {
+      v.x = 0;
+    }
+    if (ry) {
+      v.y = 0;
+    }
+    if (rz) {
+      v.z = 0;
+    }
+    return v;
+  }
+    // Empty border value
+  case BorderKind::BLOCKED: {
+    return isInBounds(x, y, z) ? get(x, y, z) : bs::Vector3();
+  }
+  }
+
+  // CANNOT HAPPEN!
+  exit(-234);
+  return bs::Vector3::ZERO;
+}
+
+// -------------------------------------------------------------------------- //
+
+void VectorField::setBorder(BorderKind kind) { m_borderKind = kind; }
+
+// -------------------------------------------------------------------------- //
+
+void VectorField::setBorderDefaultValue(const bs::Vector3 &value) {
+  m_borderDefaultValue = value;
+}
+
 } // namespace wind

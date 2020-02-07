@@ -79,6 +79,14 @@ void ObstructionField::debugDrawObject(const bs::Vector3 &offset) {
   }
 }
 
+// -------------------------------------------------------------------------- //
+
+bool ObstructionField::getSafe(s32 x, s32 y, s32 z) {
+  return isInBounds(x, y, z) ? get(x, y, z) : false;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObstructionField *
 ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
                                 const bs::Vector3 &extent,

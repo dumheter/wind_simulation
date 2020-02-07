@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include "common.hpp"
+
 // ========================================================================== //
 // VectorField Implementation
 // ========================================================================== //
@@ -58,6 +60,15 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
       }
     }
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
+  x = Clamp(x, 0, s32(m_dim.width) - 1);
+  y = Clamp(y, 0, s32(m_dim.height) - 1);
+  z = Clamp(z, 0, s32(m_dim.depth) - 1);
+  return get(x, y, z);
 }
 
 } // namespace wind

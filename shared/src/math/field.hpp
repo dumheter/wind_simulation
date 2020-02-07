@@ -43,7 +43,7 @@ template <typename T> class Field {
 public:
   /* Field position */
   struct Pos {
-    u32 x, y, z;
+    s32 x, y, z;
   };
 
 public:
@@ -64,21 +64,40 @@ public:
                  bool drawFrame = true);
 
   /* Convert position (x, y, z) to a data offset */
-  u32 fromPos(u32 x, u32 y, u32 z);
+  u32 fromPos(s32 x, s32 y, s32 z);
 
   /* Convert position (x, y, z) to a data offset */
-  u32 fromPos(const Pos &pos);
+  u32 fromPos(const Pos &pos) { return fromPos(pos.x, pos.y, pos.z); }
 
   /* Convert offset in data to position */
   Pos fromOffset(u32 offset);
 
   /* Returns whether or not the specified position is an edge position. i.e. it
    * lies on the edge of the field */
-  bool isEdgePos(u32 x, u32 y, u32 z);
+  bool isEdgePos(s32 x, s32 y, s32 z) const;
 
   /* Returns whether or not the specified position is an edge position. i.e. it
    * lies on the edge of the field */
-  bool isEdgePos(const Pos &pos);
+  bool isEdgePos(const Pos &pos) const {
+    return isEdgePos(pos.x, pos.y, pos.z);
+  }
+
+  /* Returns whether or not a position is in bounds of the field */
+  bool isInBounds(s32 x, s32 y, s32 z) const;
+
+  /* Returns whether or not a position is in bounds of the field */
+  bool isInBounds(const Pos &pos) const {
+    return isInBounds(pos.x, pos.y, pos.z);
+  }
+
+  /* Returns whether or not a position is in the X bounds of the field */
+  bool isInBoundsX(s32 x) const;
+
+  /* Returns whether or not a position is in the Y bounds of the field */
+  bool isInBoundsY(s32 y) const;
+
+  /* Returns whether or not a position is in the X bounds of the field */
+  bool isInBoundsZ(s32 z) const;
 
   /* Returns the reference to a vector in the vector field */
   T &get(u32 offset);
@@ -87,10 +106,20 @@ public:
   const T &get(u32 offset) const;
 
   /* Returns the reference to a vector in the vector field */
-  T &get(u32 x, u32 y, u32 z);
+  T &get(s32 x, s32 y, s32 z);
 
   /* Returns the reference to a vector in the vector field */
-  const T &get(u32 x, u32 y, u32 z) const;
+  const T &get(s32 x, s32 y, s32 z) const;
+
+  /* Returns the value at a position. Safety are added such that points outside
+   * the field returns a special value. This value depends on the type of
+   * field */
+  virtual T getSafe(s32 x, s32 y, s32 z) = 0;
+
+  /* Returns the value at a position. Safety are added such that points outside
+   * the field returns a special value. This value depends on the type of
+   * field */
+  T getSafe(const Pos &pos) { return getSafe(pos.x, pos.y, pos.z); }
 
   /* Returns the size of the data buffer in number of elements */
   u32 getDataSize() { return m_dataSize; }
@@ -190,61 +219,80 @@ void Field<T>::debugDraw(const bs::Vector3 &offset, bool drawFrame) {
 
 // -------------------------------------------------------------------------- //
 
-template <typename T> inline u32 Field<T>::fromPos(u32 x, u32 y, u32 z) {
+template <typename T> inline u32 Field<T>::fromPos(s32 x, s32 y, s32 z) {
+  assert(isInBounds(x, y, z) && "Position cannot lie outside of field");
   return x + (m_dim.width * y) + (m_dim.width * m_dim.height * z);
-}
-
-// -------------------------------------------------------------------------- //
-
-template <typename T> inline u32 Field<T>::fromPos(const Pos &pos) {
-  return pos.x + (m_dim.width * pos.y) + (m_dim.width * m_dim.height * pos.z);
 }
 
 // -------------------------------------------------------------------------- //
 
 template <typename T>
 inline typename Field<T>::Pos Field<T>::fromOffset(u32 offset) {
-  u32 x = offset % m_dim.width;
-  u32 y = (offset % (m_dim.width * m_dim.height)) / m_dim.width;
-  u32 z = offset / (m_dim.width * m_dim.height);
+  assert(offset < m_dataSize && "Offset cannot lie outside of field data");
+  s32 x = offset % m_dim.width;
+  s32 y = (offset % (m_dim.width * m_dim.height)) / m_dim.width;
+  s32 z = offset / (m_dim.width * m_dim.height);
   return Pos{x, y, z};
 }
 
 // -------------------------------------------------------------------------- //
 
-template <typename T> inline bool Field<T>::isEdgePos(u32 x, u32 y, u32 z) {
+template <typename T>
+inline bool Field<T>::isEdgePos(s32 x, s32 y, s32 z) const {
+  assert(isInBounds(x, y, z) && "Position cannot lie outside of field");
   return x == 0 || y == 0 || z == 0 || x == m_dim.width - 1 ||
          y == m_dim.height - 1 || z == m_dim.depth - 1;
 }
 
 // -------------------------------------------------------------------------- //
 
-template <typename T> inline bool Field<T>::isEdgePos(const Pos &pos) {
-  return isEdgePos(pos.x, pos.y, pos.z);
+template <typename T>
+inline bool Field<T>::isInBounds(s32 x, s32 y, s32 z) const {
+  return isInBoundsX(x) && isInBoundsY(y) && isInBoundsZ(z);
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline bool Field<T>::isInBoundsX(s32 x) const {
+  return x >= 0 && x < s32(m_dim.width);
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline bool Field<T>::isInBoundsY(s32 y) const {
+  return y >= 0 && y < s32(m_dim.height);
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline bool Field<T>::isInBoundsZ(s32 z) const {
+  return z >= 0 && z < s32(m_dim.depth);
 }
 
 // -------------------------------------------------------------------------- //
 
 template <typename T> inline T &Field<T>::get(u32 offset) {
+  assert(offset < m_dataSize && "Offset cannot lie outside of field data");
   return m_data[offset];
 }
 
 // -------------------------------------------------------------------------- //
 
 template <typename T> inline const T &Field<T>::get(u32 offset) const {
+  assert(offset < m_dataSize && "Offset cannot lie outside of field data");
   return m_data[offset];
 }
 
 // -------------------------------------------------------------------------- //
 
-template <typename T> T &Field<T>::get(u32 x, u32 y, u32 z) {
+template <typename T> T &Field<T>::get(s32 x, s32 y, s32 z) {
   const u32 offset = x + (m_dim.width * y) + (m_dim.width * m_dim.height * z);
   return get(offset);
 }
 
 // -------------------------------------------------------------------------- //
 
-template <typename T> const T &Field<T>::get(u32 x, u32 y, u32 z) const {
+template <typename T> const T &Field<T>::get(s32 x, s32 y, s32 z) const {
   const u32 offset = x + (m_dim.width * y) + (m_dim.width * m_dim.height * z);
   return get(offset);
 }
