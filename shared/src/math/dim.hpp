@@ -20,56 +20,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "vector_field.hpp"
+#pragma once
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include <Debug/BsDebugDraw.h>
-
-// ========================================================================== //
-// VectorField Implementation
+// Dim3D Declaration
 // ========================================================================== //
 
 namespace wind {
 
-VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellsize)
-    : Field(width, height, depth, cellsize) {
-  using namespace bs;
+/* 3D dimensions structure*/
+struct Dim3D {
+  /* Width of the volume */
+  u32 width;
+  /* Height of the volume */
+  u32 height;
+  /* Depth of the volume */
+  u32 depth;
+};
 
-  for (u32 i = 0; i < m_dataSize; i++) {
-    m_data[i] = bs::Vector3(0, 1, 1);
-  }
+} // namespace wind
+
+// ========================================================================== //
+// Functions
+// ========================================================================== //
+
+namespace wind {
+
+inline bool operator==(const Dim3D &lhs, const Dim3D &rhs) {
+  return (lhs.width == rhs.width) && (lhs.height == rhs.height) &&
+         (lhs.depth == rhs.depth);
 }
 
 // -------------------------------------------------------------------------- //
 
-void VectorField::debugDrawObject(const bs::Vector3 &offset) {
-  bs::Vector<bs::Vector3> points;
-
-  // Draw vectors
-  for (u32 z = 0; z < m_dim.depth; z++) {
-    const f32 zPos = offset.z + (z * m_cellSize);
-    for (u32 y = 0; y < m_dim.height; y++) {
-      const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_dim.width; x++) {
-        const f32 xPos = offset.x + (x * m_cellSize);
-        const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
-                               yPos + (m_cellSize / 2.0f),
-                               zPos + (m_cellSize / 2.0f));
-        const bs::Vector3 &vec = get(x, y, z);
-
-        const bs::Vector3 start = base - (vec * .1f);
-        const bs::Vector3 end = base + (vec * .1f);
-        points.push_back(start);
-        points.push_back(end);
-      }
-    }
-  }
-
-  bs::DebugDraw::instance().setColor(bs::Color::Red);
-  bs::DebugDraw::instance().drawLineList(points);
+inline bool operator!=(const Dim3D &lhs, const Dim3D &rhs) {
+  return !(lhs == rhs);
 }
 
 } // namespace wind

@@ -46,7 +46,7 @@ public:
    * specified.  */
   ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  /* Destruct vector-field */
+  /* Destruct field */
   ~ObstructionField();
 
   /* \copydoc Field::debugDrawObject */

@@ -44,10 +44,7 @@ public:
   /* Construct a vector-field with the specified 'width', 'height' and
    * 'depth' (in number of cells). The size of a cell (in meters) can also be
    * specified.  */
-  VectorField(u32 width, u32 height, u32 depth, f32 cellsize);
-
-  /* Destruct vector-field */
-  ~VectorField();
+  VectorField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
   /* \copydoc Field::debugDrawObject */
   void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;

@@ -31,6 +31,7 @@ private:
   VirtualButton mMoveLeft;  /**< Key binding for moving the camera left. */
   VirtualButton mMoveRight; /**< Key binding for moving the camera right. */
   VirtualButton mMoveUp;
+  VirtualButton mMoveDown;
   VirtualButton mFastMove; /**< Key that speeds up movement while held. */
   VirtualButton
       mRotateCam; /**< Key that allows camera to be rotated while held. */

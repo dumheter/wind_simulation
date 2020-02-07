@@ -20,23 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "obstruction_field.hpp"
+#include "math/density_field.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
-
-#include <BsPrerequisites.h>
-#include <Components/BsCBoxCollider.h>
-#include <Components/BsCRenderable.h>
-#include <CoreThread/BsCoreThread.h>
-#include <Debug/BsDebugDraw.h>
-#include <Mesh/BsMesh.h>
-#include <Physics/BsPhysics.h>
-#include <Physics/BsPhysicsCommon.h>
-#include <Physics/BsPhysicsMaterial.h>
-#include <Scene/BsSceneObject.h>
-#include <Threading/BsThreading.h>
 
 // ========================================================================== //
 // VectorField Implementation
@@ -44,19 +32,15 @@
 
 namespace wind {
 
-ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
-                                   f32 cellsize)
+DensityField::DensityField(u32 width, u32 height, u32 depth, f32 cellsize)
     : Field(width, height, depth, cellsize) {
   using namespace bs;
-  for (u32 i = 0; i < m_dataSize; i++) {
-    m_data[i] = false;
-  }
 }
 
 // -------------------------------------------------------------------------- //
 
-void ObstructionField::debugDrawObject(const bs::Vector3 &offset) {
-  bs::DebugDraw::instance().setColor(bs::Color::BansheeOrange);
+void DensityField::debugDrawObject(const bs::Vector3 &offset) {
+  bs::DebugDraw::instance().setColor(bs::Color::Blue);
 
   // Draw vectors
   for (u32 z = 0; z < m_dim.depth; z++) {
@@ -68,52 +52,12 @@ void ObstructionField::debugDrawObject(const bs::Vector3 &offset) {
         const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
                                yPos + (m_cellSize / 2.0f),
                                zPos + (m_cellSize / 2.0f));
-        const bool obstructed = get(x, y, z);
-
-        if (obstructed) {
-          bs::DebugDraw::instance().drawCube(base, bs::Vector3::ONE *
-                                                       (m_cellSize * 0.05f));
-        }
+        const f32 density = get(x, y, z);
+        bs::DebugDraw::instance().drawCube(
+            base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
       }
     }
   }
-}
-
-ObstructionField *
-ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
-                                const bs::Vector3 &extent,
-                                const bs::Vector3 &position, f32 cellSize) {
-  using namespace bs;
-
-  // Physics scene
-  const SPtr<PhysicsScene> physicsScene = scene->getPhysicsScene();
-
-  // Dimensions
-  f32 mul = 1 / cellSize;
-  u32 width = u32(extent.x * mul);
-  u32 height = u32(extent.y * mul);
-  u32 depth = u32(extent.z * mul);
-
-  // Check for collisions in each cell
-  ObstructionField *field =
-      new ObstructionField(width, height, depth, cellSize);
-  for (u32 z = 0; z < depth; z++) {
-    f32 zPos = position.z + (z * cellSize);
-    for (u32 y = 0; y < height; y++) {
-      f32 yPos = position.y + (y * cellSize);
-      for (u32 x = 0; x < width; x++) {
-        f32 xPos = position.x + (x * cellSize);
-        f32 offMin = 0.05f * cellSize;
-        f32 offMax = 0.95f * cellSize;
-        AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
-                   Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
-        if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
-          field->get(x, y, z) = true;
-        }
-      }
-    }
-  }
-  return field;
 }
 
 } // namespace wind
