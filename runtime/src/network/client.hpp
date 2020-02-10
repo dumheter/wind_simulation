@@ -1,79 +1,80 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
+#include "BsApplication.h"
 #include "common.hpp"
+#include "network/connection_state.hpp"
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
+#include "utility/unique_id.hpp"
+#include <optional>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
-#include "network/connection_state.hpp"
-#include "core/macros.hpp"
 
-// ========================================================================== //
-// Forward Declarations
-// ========================================================================== //
+namespace wind {
 
-namespace dib::game {
-DIB_FORWARD_DECLARE_CLASS(World);
-}
+class World;
 
-// ========================================================================== //
-// Client Declaration
-// ========================================================================== //
-
-namespace dib {
-
-class Client : public ISteamNetworkingSocketsCallbacks
-{
+class Client : public ISteamNetworkingSocketsCallbacks {
 public:
-  Client(game::World* world);
+  Client(World *world);
+  Client(World *world, ConnectionId activeConnection);
 
   virtual ~Client() final;
 
   /**
    * Update internal state and check for packets.
+   * Also handle packets.
    */
-  void Poll(bool& got_packet, Packet& packet_out);
+  bool Poll();
 
   /**
    * The result of the connection attempt will be reported later when polling.
    */
-  void Connect(const SteamNetworkingIPAddr& address);
+  void Connect(const SteamNetworkingIPAddr &address);
 
   void CloseConnection();
 
-  SendResult PacketSend(const Packet& packet, const SendStrategy send_strategy);
+  void setUid(UniqueId uid) { m_uid = uid; }
 
-  ConnectionState GetConnectionState() { return connection_state_; }
+  UniqueId getUid() const { return m_uid; }
 
-  ConnectionId GetConnectionId() const { return connection_; }
+  SendResult PacketSend(const Packet &packet, const SendStrategy send_strategy);
 
-  std::optional<SteamNetworkingQuickConnectionStatus> GetConnectionStatus()
-    const;
+  ConnectionState GetConnectionState() { return m_connectionState; }
 
-  std::optional<u32> GetOurPlayerEntity() const { return our_player_entity_; }
+  ConnectionId getConnectionId() const { return m_connection; }
 
-  void SetOurPlayerEntity(const std::optional<u32> maybe_entity)
-  {
-    our_player_entity_ = maybe_entity;
+  std::optional<SteamNetworkingQuickConnectionStatus>
+  GetConnectionStatus() const;
+
+  bool operator==(const Client &other) const {
+    return m_connection == other.m_connection;
   }
 
+  bool operator!=(const Client &other) const { return !(*this == other); }
+
 private:
+  void handlePacket();
+
   void PollSocketStateChanges();
 
-  bool PollIncomingPackets(Packet& packet_out);
+  bool PollIncomingPackets();
 
   virtual void OnSteamNetConnectionStatusChanged(
-    SteamNetConnectionStatusChangedCallback_t* status) override;
+      SteamNetConnectionStatusChangedCallback_t *status) override;
 
   void SetConnectionState(const ConnectionState connection_state);
 
 private:
-  HSteamNetConnection connection_;
-  ISteamNetworkingSockets* socket_interface_;
-  ConnectionState connection_state_;
-  game::World* world_;
-  std::optional<u32> our_player_entity_;
+  ConnectionId m_connection;
+  ISteamNetworkingSockets *m_socketInterface;
+  ConnectionState m_connectionState;
+  World *m_world;
+  UniqueId m_uid;
+  Packet m_packet{10000};
 };
-}
+
+} // namespace wind
+
 #endif // CLIENT_HPP_

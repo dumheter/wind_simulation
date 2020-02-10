@@ -1,6 +1,5 @@
 #include "world.hpp"
 
-#include <alflib/core/assert.hpp>
 #include "BsFPSCamera.h"
 #include "Components/BsCBoxCollider.h"
 #include "Components/BsCCamera.h"
@@ -27,18 +26,19 @@
 #include "Scene/BsSceneObject.h"
 #include "asset.hpp"
 #include "bsFPSWalker.h"
+#include "cmyplayer.hpp"
+#include "log.hpp"
 #include <Components/BsCSkybox.h>
+#include <alflib/core/assert.hpp>
 
 namespace wind {
 
 World::World(const App::Info &info) : App(info) {
   setupInput();
   setupScene();
-  setupPlayer();
 }
 
-void World::setupScene()
-{
+void World::setupScene() {
   using namespace bs;
   auto floorMaterial = createMaterial("res/textures/grid.png");
   auto cubeMaterial = createMaterial("res/textures/grid_2.png");
@@ -55,32 +55,60 @@ void World::setupScene()
   skyboxComp->setTexture(skyboxTex);
 }
 
-void World::setupPlayer()
-{
+bs::HSceneObject World::setupMyPlayer() {
   using namespace bs;
-  AlfAssert(m_players.emtpy(), "m_players must be empty before setting up the player");
+  AlfAssert(m_netComps.empty(),
+            "m_netComps must be empty before setting up myplayer");
 
-  auto player = createPlayer();
+  HSceneObject player = SceneObject::create("Player");
+  HCharacterController charController =
+      player->addComponent<CCharacterController>();
+  charController->setHeight(1.0f);
+  charController->setRadius(0.4f);
+  player->addComponent<FPSWalker>();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
-  m_players.push_back(std::move(player));
+  auto cmyplayer = player->addComponent<CMyPlayer>(this);
+  // m_players.push_back(player);
+  return player;
 }
 
-void World::reset()
-{
-  for (auto player : m_players) {
-    player->destroy();
+bs::HSceneObject World::setupPlayer() {
+  using namespace bs;
+  AlfAssert(!m_netComps.empty(),
+            "m_netComps must not be empty before setting up a player");
+
+  HSceneObject player = SceneObject::create("Player");
+  HCharacterController charController =
+      player->addComponent<CCharacterController>();
+  charController->setHeight(1.0f);
+  charController->setRadius(0.4f);
+  HRenderable renderable = player->addComponent<CRenderable>();
+  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
+  HShader shader =
+      gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
+  HMaterial material = Material::create(shader);
+  HTexture texture = Asset::loadTexture("res/grid_2.png");
+  material->setTexture("gAlbedoTex", texture);
+  renderable->setMesh(mesh);
+  renderable->setMaterial(material);
+  HCNetComponent netComp = player->addComponent<CNetComponent>();
+  m_netComps.push_back(netComp);
+  return player;
+}
+
+void World::reset() {
+  for (auto netComp : m_netComps) {
+    netComp->destroy();
   }
-  m_players.Clear();
+  m_netComps.clear();
 }
 
-bs::HSceneObject getPlayer()
-{
-  AlfAssert(!m_players.empty(), "must setupPlayer before getPlayer");
-  return m_players[0];
-}
+void World::onPlayerJoin(UniqueId playerUid) { logInfo("player joined TODO"); }
 
-    bs::HSceneObject World::createCamera(bs::HSceneObject player) {
+void World::onPlayerLeave(UniqueId uid) {}
+
+bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   using namespace bs;
   HSceneObject camera = SceneObject::create("Camera");
   camera->setParent(player);
@@ -105,17 +133,6 @@ bs::HSceneObject getPlayer()
   Cursor::instance().clipToWindow(*primaryWindow);
 
   return camera;
-}
-
-bs::HSceneObject World::createPlayer() {
-  using namespace bs;
-  HSceneObject player = SceneObject::create("Player");
-  HCharacterController charController =
-      player->addComponent<CCharacterController>();
-  charController->setHeight(1.0f);
-  charController->setRadius(0.4f);
-  player->addComponent<FPSWalker>();
-  return player;
 }
 
 void World::setupInput() {
@@ -207,4 +224,10 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   mainPanel->addElement(vertLayout);
   return gui;
 }
+
+void World::addNetComp(HCNetComponent netComp) {
+  logVerbose("net component with id [{}] added", netComp->getUniqueId());
+  m_netComps.push_back(netComp);
+}
+
 } // namespace wind

@@ -29,8 +29,8 @@
 // Project headers
 #include "alflib/core/assert.hpp"
 #include "alflib/core/common.hpp"
-#include "alflib/platform/detection.hpp"
 #include "alflib/math/limits.hpp"
+#include "alflib/platform/detection.hpp"
 
 // ========================================================================== //
 // Functions
@@ -45,12 +45,7 @@ namespace alflib {
  * \param b Second value.
  * \return Minimum value.
  */
-template<typename T>
-constexpr T
-Min(T a, T b)
-{
-  return a < b ? a : b;
-}
+template <typename T> constexpr T Min(T a, T b) { return a < b ? a : b; }
 
 // -------------------------------------------------------------------------- //
 
@@ -61,12 +56,7 @@ Min(T a, T b)
  * \param b Second value.
  * \return Maximum value.
  */
-template<typename T>
-constexpr T
-Max(T a, T b)
-{
-  return a > b ? a : b;
-}
+template <typename T> constexpr T Max(T a, T b) { return a > b ? a : b; }
 
 // -------------------------------------------------------------------------- //
 
@@ -76,12 +66,7 @@ Max(T a, T b)
  * \param a Value to get absolute value of.
  * \return Absolute value of 'a'.
  */
-template<typename T>
-constexpr T
-Absolute(T a)
-{
-  return a > T{ 0 } ? a : -a;
-}
+template <typename T> constexpr T Absolute(T a) { return a > T{0} ? a : -a; }
 
 // -------------------------------------------------------------------------- //
 
@@ -93,10 +78,7 @@ Absolute(T a)
  * \param max Maximum value.
  * \return Clamped value.
  */
-template<typename T>
-constexpr T
-Clamp(T value, T min, T max)
-{
+template <typename T> constexpr T Clamp(T value, T min, T max) {
   return value < min ? min : value > max ? max : value;
 }
 
@@ -107,11 +89,7 @@ Clamp(T value, T min, T max)
  * \param value Value to get square root of.
  * \return Square root value.
  */
-inline f32
-SquareRoot(f32 value)
-{
-  return sqrtf(value);
-}
+inline f32 SquareRoot(f32 value) { return sqrtf(value); }
 
 // -------------------------------------------------------------------------- //
 
@@ -120,11 +98,7 @@ SquareRoot(f32 value)
  * \param value Value to get square root of.
  * \return Square root value.
  */
-inline f64
-SquareRoot(f64 value)
-{
-  return sqrt(value);
-}
+inline f64 SquareRoot(f64 value) { return sqrt(value); }
 
 // -------------------------------------------------------------------------- //
 
@@ -134,11 +108,7 @@ SquareRoot(f64 value)
  * \param power Power to raise the value with.
  * \return Resulting value.
  */
-inline f32
-Power(f32 value, f32 power)
-{
-  return powf(value, power);
-}
+inline f32 Power(f32 value, f32 power) { return powf(value, power); }
 
 // -------------------------------------------------------------------------- //
 
@@ -148,11 +118,7 @@ Power(f32 value, f32 power)
  * \param power Power to raise the value with.
  * \return Resulting value.
  */
-inline f64
-Power(f64 value, f64 power)
-{
-  return powf(value, power);
-}
+inline f64 Power(f64 value, f64 power) { return pow(value, power); }
 
 // -------------------------------------------------------------------------- //
 
@@ -161,9 +127,7 @@ Power(f64 value, f64 power)
  * \param value Value to check if power of two.
  * \return True if the value is a power of two, otherwise false.
  */
-constexpr bool
-IsPowerOfTwo(u64 value)
-{
+constexpr bool IsPowerOfTwo(u64 value) {
   return value && !(value & (value - 1));
 }
 
@@ -175,9 +139,7 @@ IsPowerOfTwo(u64 value)
  * \param alignment Value to align to.
  * \return Aligned value.
  */
-inline u64
-AlignPowerOfTwo(u64 base, u32 alignment)
-{
+inline u64 AlignPowerOfTwo(u64 base, u32 alignment) {
 #if defined(ALFLIB_TARGET_WINDOWS)
 #pragma warning(push)
 #pragma warning(disable : 4146)
@@ -201,9 +163,7 @@ AlignPowerOfTwo(u64 base, u32 alignment)
  * \param rhs Right-hand side.
  * \return True if the two floating-point numbers are equal otherwise false.
  */
-inline bool
-FloatEqual(f32 lhs, f32 rhs)
-{
+inline bool FloatEqual(f32 lhs, f32 rhs) {
   return Absolute(lhs - rhs) < F32_EPSILON;
 }
 
@@ -216,10 +176,8 @@ FloatEqual(f32 lhs, f32 rhs)
  * \param rhs Right-hand side.
  * \return True if the two floating-point numbers are equal otherwise false.
  */
-inline bool
-FloatEqual(f64 lhs, f64 rhs)
-{
+inline bool FloatEqual(f64 lhs, f64 rhs) {
   return Absolute(lhs - rhs) < F64_EPSILON;
 }
 
-}
+} // namespace alflib

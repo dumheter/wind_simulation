@@ -1,133 +1,112 @@
 #include "server.hpp"
-#include <dlog.hpp>
-#include "game/world.hpp"
-#include "game/ecs/components/player_data_component.hpp"
-#include "game/ecs/systems/player_system.hpp"
-#include "game/ecs/systems/generic_system.hpp"
+#include "log.hpp"
 #include <microprofile/microprofile.h>
 
-namespace dib {
+namespace wind {
 
-Server::Server(game::World* world)
-  : socket_interface_(SteamNetworkingSockets())
-  , world_(world)
-{}
+Server::Server(World *world)
+    : m_socketInterface(SteamNetworkingSockets()), m_world(world) {}
 
-Server::~Server()
-{
-  socket_interface_->CloseListenSocket(socket_);
-  for (auto connection : connections_) {
-    CloseConnection(connection);
+Server::~Server() {
+  m_socketInterface->CloseListenSocket(m_socket);
+  for (auto &client : m_clients) {
+    client.CloseConnection();
   }
 }
 
-void
-Server::Poll(bool& got_packet, Packet& packet_out)
-{
+void Server::Poll() {
   MICROPROFILE_SCOPEI("server", "poll", MP_YELLOW);
   PollSocketStateChanges();
-  got_packet = PollIncomingPackets(packet_out);
+  const bool got_packet = PollIncomingPacket(m_packet);
+  if (got_packet) {
+    handlePacket(m_packet);
+  }
 }
 
-void
-Server::StartServer(const u16 port)
-{
+void Server::StartServer(const u16 port) {
   SteamNetworkingIPAddr addr{};
   addr.Clear();
   addr.m_port = port;
-  socket_ = socket_interface_->CreateListenSocketIP(addr);
-  if (socket_ == k_HSteamListenSocket_Invalid) {
-    DLOG_ERROR("failed to create a listen socket on port {}", port);
-    std::exit(3);
+  m_socket = m_socketInterface->CreateListenSocketIP(addr, 0, nullptr);
+  if (m_socket == k_HSteamListenSocket_Invalid) {
+    logError("failed to create a listen socket on port {}", port);
+    std::exit(1);
   }
-  DLOG_VERBOSE("listening on port {}.", port);
+  logVerbose("listening on port {}.", port);
 }
 
-void
-Server::CloseConnection(HSteamNetConnection connection)
-{
-  if (connection != k_HSteamNetConnection_Invalid) {
-    socket_interface_->CloseConnection(connection, 0, nullptr, false);
-  }
-}
-
-void
-Server::PacketBroadcast(const Packet& packet, const SendStrategy send_strategy)
-{
-  for (auto connection : connections_) {
-    Common::SendPacket(packet, send_strategy, connection, socket_interface_);
+void Server::PacketBroadcast(const Packet &packet,
+                             const SendStrategy send_strategy) {
+  for (auto &client : m_clients) {
+    Common::SendPacket(packet, send_strategy, client.getConnectionId(),
+                       m_socketInterface);
   }
 }
 
-void
-Server::PacketBroadcastExclude(const Packet& packet,
-                               const SendStrategy send_strategy,
-                               const ConnectionId exclude_connection)
-{
-  for (auto connection : connections_) {
-    if (connection != exclude_connection) {
-      Common::SendPacket(packet, send_strategy, connection, socket_interface_);
+void Server::PacketBroadcastExclude(const Packet &packet,
+                                    const SendStrategy send_strategy,
+                                    const ConnectionId exclude_connection) {
+  for (auto &client : m_clients) {
+    if (client.getConnectionId() != exclude_connection) {
+      Common::SendPacket(packet, send_strategy, client.getConnectionId(),
+                         m_socketInterface);
     }
   }
 }
 
-SendResult
-Server::PacketUnicast(const Packet& packet,
-                      const SendStrategy send_strategy,
-                      const HSteamNetConnection target_connection)
-{
-  return Common::SendPacket(
-    packet, send_strategy, target_connection, socket_interface_);
+SendResult Server::PacketUnicast(const Packet &packet,
+                                 const SendStrategy send_strategy,
+                                 const ConnectionId target_connection) {
+  return Common::SendPacket(packet, send_strategy, target_connection,
+                            m_socketInterface);
 }
 
 std::optional<SteamNetworkingQuickConnectionStatus>
-Server::GetConnectionStatus(const ConnectionId connection_id) const
-{
+Server::GetConnectionStatus(const ConnectionId connection_id) const {
   SteamNetworkingQuickConnectionStatus status;
   const bool ok =
-    socket_interface_->GetQuickConnectionStatus(connection_id, &status);
+      m_socketInterface->GetQuickConnectionStatus(connection_id, &status);
   return ok ? std::optional(status) : std::nullopt;
 }
 
-void
-Server::PollSocketStateChanges()
-{
+void Server::PollSocketStateChanges() {
   MICROPROFILE_SCOPEI("server", "poll socket state changes", MP_YELLOW);
 
-  socket_interface_->RunCallbacks(this);
+  m_socketInterface->RunCallbacks(this);
 }
 
-bool
-Server::PollIncomingPackets(Packet& packet_out)
-{
+bool Server::PollIncomingPacket(Packet &packet_out) {
   MICROPROFILE_SCOPEI("server", "poll incoming packets", MP_YELLOW);
 
-  ISteamNetworkingMessage* msg = nullptr;
+  ISteamNetworkingMessage *msg = nullptr;
   const int msg_count =
-    socket_interface_->ReceiveMessagesOnListenSocket(socket_, &msg, 1);
+      m_socketInterface->ReceiveMessagesOnConnection(m_socket, &msg, 1);
 
   bool got_packet = false;
   if (msg_count > 0) {
-    bool ok =
-      packet_out.SetPacket(static_cast<const u8*>(msg->m_pData), msg->m_cbSize);
+    bool ok = packet_out.SetPacket(static_cast<const u8 *>(msg->m_pData),
+                                   msg->m_cbSize);
     if (ok) {
-      if (auto it = connections_.find(msg->m_conn); it != connections_.end()) {
-        packet_out.SetFromConnection(*it);
-        got_packet = true;
-      } else {
-        DLOG_WARNING("received packet from unknown connection, dropping it");
+      for (auto &client : m_clients) {
+        if (client.getConnectionId() == msg->m_conn) {
+          packet_out.SetFromConnection(client.getConnectionId());
+          got_packet = true;
+          break;
+        }
+      }
+      if (!got_packet) {
+        logWarning("received packet from unknown connection, dropping it");
         DisconnectConnection(msg->m_conn);
       }
     } else {
-      DLOG_ERROR("could not parse packet, too big [{}/{}]",
-                 msg->m_cbSize,
-                 packet_out.GetPacketCapacity());
+      logError("could not parse packet, too big [{}/{}]", msg->m_cbSize,
+               packet_out.GetPacketCapacity());
     }
 
     msg->Release();
 
   } else if (msg_count < 0) {
-    DLOG_WARNING("failed to check for messages, closing connection");
+    logWarning("failed to check for messages, closing connection");
     if (msg != nullptr) {
       DisconnectConnection(msg->m_conn);
     }
@@ -136,106 +115,97 @@ Server::PollIncomingPackets(Packet& packet_out)
   return got_packet;
 }
 
-void
-Server::OnSteamNetConnectionStatusChanged(
-  SteamNetConnectionStatusChangedCallback_t* status)
-{
+void Server::handlePacket(Packet &packet) { logVerbose("todo handle packet"); }
+
+void Server::OnSteamNetConnectionStatusChanged(
+    SteamNetConnectionStatusChangedCallback_t *status) {
   switch (status->m_info.m_eState) {
-    case k_ESteamNetworkingConnectionState_None: {
-      // DLOG_VERBOSE("state none");
+  case k_ESteamNetworkingConnectionState_None: {
+    logVeryVerbose("state none");
+    break;
+  }
+
+  case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
+    logWarning("Problem detected locally.");
+    [[fallthrough]];
+  case k_ESteamNetworkingConnectionState_ClosedByPeer: {
+    if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connected) {
+      logInfo("Connection {}, [{}], disconnected with reason [{}], [{}].",
+              status->m_hConn, status->m_info.m_szConnectionDescription,
+              status->m_info.m_eEndReason, status->m_info.m_szEndDebug);
+    } else if (status->m_eOldState !=
+               k_ESteamNetworkingConnectionState_Connecting) {
+      logWarning("unknown state");
+    }
+
+    DisconnectConnection(status->m_hConn);
+
+    break;
+  }
+
+  case k_ESteamNetworkingConnectionState_Connecting: {
+    logVerbose("Connection from [{}], adding.",
+               status->m_info.m_szConnectionDescription);
+    if (m_socketInterface->AcceptConnection(status->m_hConn) != k_EResultOK) {
+      logWarning("Failed to accept a connection");
       break;
     }
 
-    case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
-      DLOG_WARNING("Problem detected locally.");
-      [[fallthrough]];
-    case k_ESteamNetworkingConnectionState_ClosedByPeer: {
-      if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connected) {
-        DLOG_INFO("Connection {}, [{}], disconnected with reason [{}], [{}].",
-                  status->m_hConn,
-                  status->m_info.m_szConnectionDescription,
-                  status->m_info.m_eEndReason,
-                  status->m_info.m_szEndDebug);
-      } else if (status->m_eOldState !=
-                 k_ESteamNetworkingConnectionState_Connecting) {
-        DLOG_WARNING("unknown state");
-      }
+    m_clients.push_back(Client{m_world, status->m_hConn});
 
-      DisconnectConnection(status->m_hConn);
+    Packet packet{};
+    packet.SetHeader(PacketHeaderTypes::kPlayerJoin);
+    auto mw = packet.GetMemoryWriter();
+    mw->Write(m_clients.back().getUid());
+    mw.Finalize();
+    PacketBroadcast(packet, SendStrategy::kReliable);
 
-      break;
-    }
+    m_world->onPlayerJoin(m_clients.back().getUid());
 
-    case k_ESteamNetworkingConnectionState_Connecting: {
-      DLOG_VERBOSE("Connection request from [{}].",
-                   status->m_info.m_szConnectionDescription);
+    break;
+  }
 
-      auto [it, ok] = connections_.insert(status->m_hConn);
-      if (!ok) {
-        DLOG_WARNING("Attempted to add connection [{}], but failed.",
-                     status->m_hConn);
-      }
+  case k_ESteamNetworkingConnectionState_Connected: {
+    logVerbose("connected");
 
-      if (socket_interface_->AcceptConnection(status->m_hConn) != k_EResultOK) {
-        connections_.erase(it);
-        CloseConnection(status->m_hConn);
-        DLOG_WARNING("Failed to accept a connection");
-      }
+    // Send a sync packet to the connection
+    // Packet packet{};
+    // const auto res =
+    //     PacketUnicast(packet, SendStrategy::kReliable, status->m_hConn);
+    // if (res != SendResult::kSuccess) {
+    //   logWarning("failed to send sync packet to {}, disconnecting them.",
+    //              status->m_hConn);
+    //   DisconnectConnection(status->m_hConn);
+    // }
+    break;
+  }
 
-      break;
-    }
-
-    case k_ESteamNetworkingConnectionState_Connected: {
-      DLOG_VERBOSE("connected");
-
-      // Send a sync packet to the connection
-      Packet packet{};
-      auto& packet_handler = world_->GetNetwork().GetPacketHandler();
-      packet_handler.BuildPacketSync(packet);
-      const auto res =
-        PacketUnicast(packet, SendStrategy::kReliable, status->m_hConn);
-      if (res != SendResult::kSuccess) {
-        DLOG_WARNING("failed to send sync packet to {}, disconnecting them.",
-                     status->m_hConn);
-        DisconnectConnection(status->m_hConn);
-      }
-      break;
-    }
-
-    default: {
-      DLOG_WARNING("default ??");
-    }
+  default: {
+    logWarning("default ??");
+  }
   }
 }
 
-void
-Server::DisconnectConnection(const HSteamNetConnection connection)
-{
-  if (auto it = connections_.find(connection); it != connections_.end()) {
-    CloseConnection(connection);
-    connections_.erase(it);
+void Server::DisconnectConnection(const HSteamNetConnection connection) {
+  UniqueId leaveUid{};
 
-    // remove from ecs system
-    auto& registry = world_->GetEntityManager().GetRegistry();
-    auto maybe_player_data =
-      system::PlayerDataFromConnectionId(registry, connection);
-    if (maybe_player_data) {
-      DLOG_INFO("Disconnected [{}]", **maybe_player_data);
-
-      Packet packet{};
-      auto& packet_handler = world_->GetNetwork().GetPacketHandler();
-      packet_handler.BuildPacketHeader(packet,
-                                       PacketHeaderStaticTypes::kPlayerLeave);
-      auto mw = packet.GetMemoryWriter();
-      mw->Write((*maybe_player_data)->uuid);
-      mw.Finalize();
-      PacketBroadcast(packet, SendStrategy::kReliable);
-
-      // Delete last since we are using the data to print
-      system::Delete<PlayerData>(registry, (*maybe_player_data)->uuid);
-    } else {
-      DLOG_INFO("Disconnected connection [{}], (not a player).", connection);
+  for (auto client = m_clients.begin(); client != m_clients.end(); ++client) {
+    if (client->getConnectionId() == connection) {
+      leaveUid = client->getUid();
+      m_clients.erase(client);
+      break;
     }
   }
+
+  if (leaveUid) {
+    Packet packet{};
+    packet.SetHeader(PacketHeaderTypes::kPlayerLeave);
+    auto mw = packet.GetMemoryWriter();
+    mw->Write(leaveUid);
+    mw.Finalize();
+    PacketBroadcast(packet, SendStrategy::kReliable);
+  } else {
+    logWarning("attempted to disconnect a connection, but did not find it");
+  }
 }
-}
+} // namespace wind

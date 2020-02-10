@@ -1,112 +1,97 @@
 #include "client.hpp"
-#include <dlog.hpp>
-#include "game/world.hpp"
-#include "game/ecs/components/player_data_component.hpp"
-#include "game/ecs/systems/player_system.hpp"
-#include "game/ecs/systems/generic_system.hpp"
+#include "log.hpp"
+#include "world.hpp"
 #include <microprofile/microprofile.h>
 
-namespace dib {
+namespace wind {
 
-Client::Client(game::World* world)
-  : connection_(k_HSteamNetConnection_Invalid)
-  , socket_interface_(SteamNetworkingSockets())
-  , connection_state_(ConnectionState::kDisconnected)
-  , world_(world)
-{}
+Client::Client(World *world)
+    : m_connection(k_HSteamNetConnection_Invalid),
+      m_socketInterface(SteamNetworkingSockets()),
+      m_connectionState(ConnectionState::kDisconnected), m_world(world),
+      m_uid(UniqueId::kInvalid) {}
 
-Client::~Client()
-{
-  CloseConnection();
-}
+Client::Client(World *world, ConnectionId activeConnection)
+    : m_connection(activeConnection),
+      m_socketInterface(SteamNetworkingSockets()),
+      m_connectionState(ConnectionState::kConnected), m_world(world),
+      m_uid(UniqueId::kInvalid) {}
 
-void
-Client::Poll(bool& got_packet, Packet& packet_out)
-{
+Client::~Client() { CloseConnection(); }
+
+bool Client::Poll() {
   MICROPROFILE_SCOPEI("client", "poll", MP_YELLOW);
   PollSocketStateChanges();
-  got_packet = PollIncomingPackets(packet_out);
+  const bool gotPacket = PollIncomingPackets();
+  handlePacket();
+  return gotPacket;
 }
 
-void
-Client::Connect(const SteamNetworkingIPAddr& address)
-{
-  connection_ = socket_interface_->ConnectByIPAddress(address);
-  if (connection_ == k_HSteamNetConnection_Invalid) {
-    DLOG_WARNING("failed to connect");
+void Client::Connect(const SteamNetworkingIPAddr &address) {
+  m_connection = m_socketInterface->ConnectByIPAddress(address, 0, nullptr);
+  if (m_connection == k_HSteamNetConnection_Invalid) {
+    logWarning("failed to connect");
+  } else {
+    logVeryVerbose("connected");
   }
 }
 
-void
-Client::CloseConnection()
-{
-  if (connection_ != k_HSteamNetConnection_Invalid) {
+void Client::CloseConnection() {
+  if (m_connection != k_HSteamNetConnection_Invalid) {
     SetConnectionState(ConnectionState::kDisconnected);
-    socket_interface_->CloseConnection(connection_, 0, nullptr, false);
-    connection_ = k_HSteamNetConnection_Invalid;
+    m_socketInterface->CloseConnection(m_connection, 0, nullptr, false);
+    m_connection = k_HSteamNetConnection_Invalid;
+    logVeryVerbose("closed connection");
   }
 
-  // TODO save our PlayerData
-  DLOG_VERBOSE("TODO save player before destroying");
-
-  // clear all player entities
-  auto& registry = world_->GetEntityManager().GetRegistry();
-  system::DeleteEntitiesWithComponent<PlayerData>(registry);
-
-  // clear ourPlayerEntity
-  our_player_entity_ = std::nullopt;
+  // m_player->destroy();
 }
 
-SendResult
-Client::PacketSend(const Packet& packet, const SendStrategy send_strategy)
-{
-  return Common::SendPacket(
-    packet, send_strategy, connection_, socket_interface_);
+SendResult Client::PacketSend(const Packet &packet,
+                              const SendStrategy send_strategy) {
+  return Common::SendPacket(packet, send_strategy, m_connection,
+                            m_socketInterface);
 }
 
 std::optional<SteamNetworkingQuickConnectionStatus>
-Client::GetConnectionStatus() const
-{
+Client::GetConnectionStatus() const {
   SteamNetworkingQuickConnectionStatus status;
   const bool ok =
-    socket_interface_->GetQuickConnectionStatus(connection_, &status);
+      m_socketInterface->GetQuickConnectionStatus(m_connection, &status);
   return ok ? std::optional(status) : std::nullopt;
 }
 
-void
-Client::PollSocketStateChanges()
-{
+void Client::handlePacket() { logVerbose("TODO handle packet"); }
+
+void Client::PollSocketStateChanges() {
   MICROPROFILE_SCOPEI("client", "poll socket state changes", MP_YELLOW);
 
-  socket_interface_->RunCallbacks(this);
+  m_socketInterface->RunCallbacks(this);
 }
 
-bool
-Client::PollIncomingPackets(Packet& packet_out)
-{
+bool Client::PollIncomingPackets() {
   MICROPROFILE_SCOPEI("client", "poll incoming packets", MP_YELLOW);
 
-  ISteamNetworkingMessage* msg = nullptr;
+  ISteamNetworkingMessage *msg = nullptr;
   const int msg_count =
-    socket_interface_->ReceiveMessagesOnConnection(connection_, &msg, 1);
+      m_socketInterface->ReceiveMessagesOnConnection(m_connection, &msg, 1);
 
   bool got_packet = false;
   if (msg_count > 0) {
-    bool ok =
-      packet_out.SetPacket(static_cast<const u8*>(msg->m_pData), msg->m_cbSize);
+    bool ok = m_packet.SetPacket(static_cast<const u8 *>(msg->m_pData),
+                                 msg->m_cbSize);
     if (ok) {
-      packet_out.SetFromConnection(msg->m_conn);
+      m_packet.SetFromConnection(msg->m_conn);
       got_packet = true;
     } else {
-      DLOG_ERROR("could not parse packet, too big [{}/{}]",
-                 msg->m_cbSize,
-                 packet_out.GetPacketCapacity());
+      logError("could not parse packet, too big [{}/{}]", msg->m_cbSize,
+               m_packet.GetPacketCapacity());
     }
     msg->Release();
 
   } else if (msg_count < 0) {
-    if (connection_state_ != ConnectionState::kDisconnected) {
-      DLOG_VERBOSE("failed to check for messages, disconnecting");
+    if (m_connectionState != ConnectionState::kDisconnected) {
+      logVerbose("failed to check for messages, disconnecting");
       CloseConnection();
     }
   }
@@ -114,59 +99,55 @@ Client::PollIncomingPackets(Packet& packet_out)
   return got_packet;
 }
 
-void
-Client::OnSteamNetConnectionStatusChanged(
-  SteamNetConnectionStatusChangedCallback_t* status)
-{
+void Client::OnSteamNetConnectionStatusChanged(
+    SteamNetConnectionStatusChangedCallback_t *status) {
   switch (status->m_info.m_eState) {
-    case k_ESteamNetworkingConnectionState_None: {
-      // DLOG_VERBOSE("state none");
-      break;
+  case k_ESteamNetworkingConnectionState_None: {
+    // logVerbose("state none");
+    break;
+  }
+
+  case k_ESteamNetworkingConnectionState_ClosedByPeer: {
+    if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting) {
+      logWarning("Connection could not be established.");
+    } else {
+      logInfo("connection closed by peer");
     }
 
-    case k_ESteamNetworkingConnectionState_ClosedByPeer: {
-      if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting) {
-        DLOG_WARNING("Connection could not be established.");
-      } else {
-        DLOG_INFO("connection closed by peer");
-      }
+    // cleanup connection
+    CloseConnection();
+    break;
+  }
 
-      // cleanup connection
-      CloseConnection();
-      break;
-    }
+  case k_ESteamNetworkingConnectionState_ProblemDetectedLocally: {
+    logInfo("connection problem detected locally");
 
-    case k_ESteamNetworkingConnectionState_ProblemDetectedLocally: {
-      DLOG_INFO("connection problem detected locally");
+    // cleanup connection
+    CloseConnection();
+    break;
+  }
 
-      // cleanup connection
-      CloseConnection();
-      break;
-    }
+  case k_ESteamNetworkingConnectionState_Connecting: {
+    logVerbose("connecting");
+    break;
+  }
 
-    case k_ESteamNetworkingConnectionState_Connecting: {
-      DLOG_VERBOSE("connecting");
-      break;
-    }
+  case k_ESteamNetworkingConnectionState_Connected: {
+    logInfo("connected");
+    SetConnectionState(ConnectionState::kConnected);
+    break;
+  }
 
-    case k_ESteamNetworkingConnectionState_Connected: {
-      DLOG_INFO("connected");
-      SetConnectionState(ConnectionState::kConnected);
-      break;
-    }
-
-    default: {
-      DLOG_WARNING("default ??");
-    }
+  default: {
+    logWarning("default ??");
+  }
   }
 }
 
-void
-Client::SetConnectionState(const ConnectionState connection_state)
-{
-  connection_state_ = connection_state;
-  DLOG_INFO("{}",
-            connection_state == ConnectionState::kConnected ? "connected"
-                                                            : "disconnected");
+void Client::SetConnectionState(const ConnectionState connection_state) {
+  m_connectionState = connection_state;
+  logInfo("{}", connection_state == ConnectionState::kConnected
+                    ? "connected"
+                    : "disconnected");
 }
-}
+} // namespace wind

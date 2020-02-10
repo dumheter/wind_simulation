@@ -8,22 +8,11 @@
 
 namespace wind {
 
-enum class NetworkState
-{
-  kClientOffline = 0,
-  kServer,
-  kClientOnline
-};
+enum class NetworkState { kClientOffline = 0, kServer, kClientOnline };
 
-enum class SendResult
-{
-  kSuccess = 0,
-  kReconnect,
-  kRetry
-};
+enum class SendResult { kSuccess = 0, kReconnect, kRetry };
 
-enum class SendStrategy : int
-{
+enum class SendStrategy : int {
   kReliable = k_nSteamNetworkingSend_Reliable,
   kUnreliable = k_nSteamNetworkingSend_Unreliable,
 
@@ -37,14 +26,12 @@ enum class SendStrategy : int
 
 namespace Common {
 
-SendResult
-SendPacket(const Packet& packet,
-           const SendStrategy send_strategy,
-           const HSteamNetConnection connection,
-           ISteamNetworkingSockets* socket_interface);
+SendResult SendPacket(const Packet &packet, const SendStrategy send_strategy,
+                      const HSteamNetConnection connection,
+                      ISteamNetworkingSockets *socket_interface);
 
 }
 
-}
+} // namespace wind
 
 #endif // NET_COMMON_HPP_

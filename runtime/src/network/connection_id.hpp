@@ -9,6 +9,6 @@ using ConnectionId = u32;
 
 constexpr ConnectionId kConnectionIdUnknown = 0;
 
-}
+} // namespace wind
 
 #endif // CONNECTION_ID_HPP_
