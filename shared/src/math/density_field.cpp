@@ -20,13 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "vector_field.hpp"
+#include "math/density_field.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include <Debug/BsDebugDraw.h>
+#include "common.hpp"
 
 // ========================================================================== //
 // VectorField Implementation
@@ -34,19 +34,15 @@
 
 namespace wind {
 
-VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellsize)
+DensityField::DensityField(u32 width, u32 height, u32 depth, f32 cellsize)
     : Field(width, height, depth, cellsize) {
   using namespace bs;
-
-  for (u32 i = 0; i < m_dataSize; i++) {
-    m_data[i] = bs::Vector3(0, 1, 1);
-  }
 }
 
 // -------------------------------------------------------------------------- //
 
-void VectorField::debugDrawObject(const bs::Vector3 &offset) {
-  bs::Vector<bs::Vector3> points;
+void DensityField::debugDrawObject(const bs::Vector3 &offset) {
+  bs::DebugDraw::instance().setColor(bs::Color::Blue);
 
   // Draw vectors
   for (u32 z = 0; z < m_dim.depth; z++) {
@@ -58,67 +54,21 @@ void VectorField::debugDrawObject(const bs::Vector3 &offset) {
         const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
                                yPos + (m_cellSize / 2.0f),
                                zPos + (m_cellSize / 2.0f));
-        const bs::Vector3 &vec = get(x, y, z);
-
-        const bs::Vector3 start = base - (vec * .1f);
-        const bs::Vector3 end = base + (vec * .1f);
-        points.push_back(start);
-        points.push_back(end);
+        const f32 density = get(x, y, z);
+        bs::DebugDraw::instance().drawCube(
+            base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
       }
     }
   }
-
-  bs::DebugDraw::instance().setColor(bs::Color::Red);
-  bs::DebugDraw::instance().drawLineList(points);
 }
 
 // -------------------------------------------------------------------------- //
 
-bs::Vector3 VectorField::getSafe(s32 x, s32 y, s32 z) {
-  switch (m_borderKind) {
-    // Default border value
-  case BorderKind::DEFAULT: {
-    return isInBounds(x, y, z) ? get(x, y, z) : m_borderDefaultValue;
-  }
-    // Contained border vectors
-  case BorderKind::CONTAINED: {
-    bool rx = !isInBoundsX(x);
-    bool ry = !isInBoundsY(y);
-    bool rz = !isInBoundsZ(z);
-    x = Clamp(x, 0, s32(m_dim.width) - 1);
-    y = Clamp(y, 0, s32(m_dim.height) - 1);
-    z = Clamp(z, 0, s32(m_dim.depth) - 1);
-    bs::Vector3 &v = get(x, y, z);
-    if (rx) {
-      v.x = 0;
-    }
-    if (ry) {
-      v.y = 0;
-    }
-    if (rz) {
-      v.z = 0;
-    }
-    return v;
-  }
-    // Empty border value
-  case BorderKind::BLOCKED: {
-    return isInBounds(x, y, z) ? get(x, y, z) : bs::Vector3();
-  }
-  }
-
-  // CANNOT HAPPEN!
-  exit(-234);
-  return bs::Vector3::ZERO;
-}
-
-// -------------------------------------------------------------------------- //
-
-void VectorField::setBorder(BorderKind kind) { m_borderKind = kind; }
-
-// -------------------------------------------------------------------------- //
-
-void VectorField::setBorderDefaultValue(const bs::Vector3 &value) {
-  m_borderDefaultValue = value;
+f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
+  x = Clamp(x, 0, s32(m_dim.width) - 1);
+  y = Clamp(y, 0, s32(m_dim.height) - 1);
+  z = Clamp(z, 0, s32(m_dim.depth) - 1);
+  return get(x, y, z);
 }
 
 } // namespace wind

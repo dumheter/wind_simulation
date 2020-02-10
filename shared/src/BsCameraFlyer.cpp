@@ -38,6 +38,7 @@ CameraFlyer::CameraFlyer(const HSceneObject &parent) : Component(parent) {
   mMoveLeft = VirtualButton("Left");
   mMoveRight = VirtualButton("Right");
   mMoveUp = VirtualButton("Up");
+  mMoveDown = VirtualButton("Down");
   mFastMove = VirtualButton("FastMove");
   mRotateCam = VirtualButton("RotateCam");
   mHorizontalAxis = VirtualAxis("Horizontal");
@@ -51,6 +52,7 @@ void CameraFlyer::update() {
   const bool goingLeft = gVirtualInput().isButtonHeld(mMoveLeft);
   const bool goingRight = gVirtualInput().isButtonHeld(mMoveRight);
   const bool goingUp = gVirtualInput().isButtonHeld(mMoveUp);
+  const bool goingDown = gVirtualInput().isButtonHeld(mMoveDown);
   const bool fastMove = gVirtualInput().isButtonHeld(mFastMove);
   const bool camRotating = gVirtualInput().isButtonHeld(mRotateCam);
 
@@ -110,6 +112,8 @@ void CameraFlyer::update() {
 
   if (goingUp)
     direction += tfrm.getUp();
+  if (goingDown)
+    direction -= tfrm.getUp();
 
   // If a direction is chosen, normalize it to determine final direction.
   if (direction.squaredLength() != 0) {

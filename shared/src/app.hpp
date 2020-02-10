@@ -48,6 +48,12 @@ public:
     u32 height = 720;
   };
 
+  /* Video mode */
+  struct VideoMode {
+    u32 width;
+    u32 height;
+  };
+
 public:
   /* Create application */
   App(const Info &info);
@@ -64,6 +70,16 @@ public:
   /* Show application window */
   void show();
 
+  /* Enter fullscreen */
+  void enterFullscreen(VideoMode videoMode = VideoMode{0, 0},
+                       u32 monitorIdx = 0);
+
+  /* Exit fullscreen */
+  void exitFullscreen();
+
+  /* Returns whether or not the application is currently fullscreen */
+  bool isFullscreen() { return m_isFullscreen; }
+
   /* Show profiler overlay (GPU) */
   void showProfilerGPU(bs::HCamera camera);
 
@@ -74,18 +90,19 @@ public:
   void hideProfiler();
 
   /* Startup callback */
-  virtual void OnStartup() {}
+  virtual void onStartup() {}
 
   /* Shutdown callback */
-  virtual void OnShutdown() {}
+  virtual void onShutdown() {}
+
   /* Pre-update callback */
-  virtual void OnPreUpdate() {}
+  virtual void onPreUpdate() {}
 
   /* Post-update callback */
-  virtual void OnPostUpdate() {}
+  virtual void onPostUpdate() {}
 
   /* Fixed-update callback */
-  virtual void OnFixedUpdate() {}
+  virtual void onFixedUpdate() {}
 
 private:
   static App *g_app;
@@ -93,8 +110,18 @@ private:
 private:
   /* Application title */
   bs::String m_title;
+  /* Window width */
   u32 m_width;
+  /* Window height */
   u32 m_height;
+
+  /* Window width, pre-fullscreen */
+  u32 m_widthPreFullscreen;
+  /* Window height, pre-fullscreen */
+  u32 m_heightPreFullscreen;
+
+  /* Whether app is fullscreen */
+  bool m_isFullscreen = false;
 };
 
 } // namespace wind

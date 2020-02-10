@@ -29,7 +29,7 @@
 #include "common.hpp"
 #include "math/field.hpp"
 
-#include <Math/BsVector3.h>
+#include <Scene/BsSceneManager.h>
 
 // ========================================================================== //
 // VectorField Declaration
@@ -37,44 +37,20 @@
 
 namespace wind {
 
-/* Class that represents a vector field */
-
-class VectorField : public Field<bs::Vector3> {
+/* Class that represents a density field. This field represents density at
+ * different discrete points in 3D-space */
+class DensityField : public Field<f32> {
 public:
-  enum class BorderKind {
-    /* Vectors are set to a default value outside the field */
-    DEFAULT,
-    /* Vectors have their component going out the side zeroed. Meaning vectors
-     * never point outside */
-    CONTAINED,
-    /* Vectors are zero outside the bounds */
-    BLOCKED
-
-  };
-
-public:
-  /* Construct a vector-field with the specified 'width', 'height' and
+  /* Construct an obstruction field with the specified 'width', 'height' and
    * 'depth' (in number of cells). The size of a cell (in meters) can also be
    * specified.  */
-  VectorField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
+  DensityField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
   /* \copydoc Field::debugDrawObject */
   void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
 
   /* \copydoc Field::getSafe */
-  bs::Vector3 getSafe(s32 x, s32 y, s32 z) override;
-
-  /* Set the kind of border condition to use */
-  void setBorder(BorderKind kind);
-
-  /* Set the default value to use when the border kind is 'DEFAULT' */
-  void setBorderDefaultValue(const bs::Vector3 &value);
-
-private:
-  /* Current border kind */
-  BorderKind m_borderKind = BorderKind::CONTAINED;
-  /* Border value for 'DEFAULT' border kind */
-  bs::Vector3 m_borderDefaultValue = bs::Vector3::ZERO;
+  f32 getSafe(s32 x, s32 y, s32 z) override;
 };
 
 } // namespace wind

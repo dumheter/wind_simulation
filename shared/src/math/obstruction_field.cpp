@@ -56,27 +56,36 @@ ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
 // -------------------------------------------------------------------------- //
 
 void ObstructionField::debugDrawObject(const bs::Vector3 &offset) {
-  bs::DebugDraw::instance().setColor(bs::Color::Blue);
+  bs::DebugDraw::instance().setColor(bs::Color::BansheeOrange);
 
   // Draw vectors
-  for (u32 z = 0; z < m_depth; z++) {
+  for (u32 z = 0; z < m_dim.depth; z++) {
     const f32 zPos = offset.z + (z * m_cellSize);
-    for (u32 y = 0; y < m_height; y++) {
+    for (u32 y = 0; y < m_dim.height; y++) {
       const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_width; x++) {
+      for (u32 x = 0; x < m_dim.width; x++) {
         const f32 xPos = offset.x + (x * m_cellSize);
         const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
                                yPos + (m_cellSize / 2.0f),
                                zPos + (m_cellSize / 2.0f));
-        const bool obstructed = Get(x, y, z);
+        const bool obstructed = get(x, y, z);
 
         if (obstructed) {
-          bs::DebugDraw::instance().drawSphere(base, m_cellSize * 0.05f);
+          bs::DebugDraw::instance().drawCube(base, bs::Vector3::ONE *
+                                                       (m_cellSize * 0.05f));
         }
       }
     }
   }
 }
+
+// -------------------------------------------------------------------------- //
+
+bool ObstructionField::getSafe(s32 x, s32 y, s32 z) {
+  return isInBounds(x, y, z) ? get(x, y, z) : false;
+}
+
+// -------------------------------------------------------------------------- //
 
 ObstructionField *
 ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
@@ -107,7 +116,7 @@ ObstructionField::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
         AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
                    Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
         if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
-          field->Get(x, y, z) = true;
+          field->get(x, y, z) = true;
         }
       }
     }

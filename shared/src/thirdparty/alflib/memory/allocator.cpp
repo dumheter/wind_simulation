@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2019 Filip Bjï¿½rklund
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,45 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "alflib/memory/allocator.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
-#include "math/field.hpp"
-
-#include <Scene/BsSceneManager.h>
+// Project headers
+#include "alflib/math/math.hpp"
 
 // ========================================================================== //
-// VectorField Declaration
+// DefaultAllocator Implementation
 // ========================================================================== //
 
-namespace wind {
+namespace alflib {
 
-/* Class that represents an obstruction field. This field represents whether
- * or not a cell has an obstruction in it. */
-class ObstructionField : public Field<bool> {
-public:
-  /* Construct an obstruction field with the specified 'width', 'height' and
-   * 'depth' (in number of cells). The size of a cell (in meters) can also be
-   * specified.  */
-  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
+void*
+DefaultAllocator::Alloc(u64 size, u32 alignment)
+{
+  if (size == 0) {
+    return nullptr;
+  }
 
-  /* Destruct field */
-  ~ObstructionField();
+#if defined(_WIN32)
+  return _aligned_malloc(size, alignment);
+#elif defined(__linux__) || defined(__APPLE__)
+  alignment = Max(DEFAULT_ALIGNMENT, alignment);
+  void* memory;
+  if (posix_memalign(&memory, alignment, size) != 0) {
+    return nullptr;
+  }
+  return memory;
+#endif
+}
 
-  /* \copydoc Field::debugDrawObject */
-  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
+// -------------------------------------------------------------------------- //
 
-  /* \copydoc Field::getSafe */
-  bool getSafe(s32 x, s32 y, s32 z) override;
+void
+DefaultAllocator::Free(void* memory)
+{
+#if defined(_WIN32)
+  _aligned_free(memory);
+#elif defined(__linux__) || defined(__APPLE__)
+  free(memory);
+#endif
+}
 
-public:
-  static ObstructionField *buildForScene(
-      const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,
-      const bs::Vector3 &position = bs::Vector3(), f32 cellSize = 1.0f);
-};
+// -------------------------------------------------------------------------- //
 
-} // namespace wind
+DefaultAllocator&
+DefaultAllocator::Instance()
+{
+  static DefaultAllocator allocator;
+  return allocator;
+}
+
+}

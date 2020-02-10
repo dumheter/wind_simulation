@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2019 Filip BjÃ¶rklund
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,45 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "alflib/core/assert.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
-#include "math/field.hpp"
-
-#include <Scene/BsSceneManager.h>
+// Project headers
+#include "alflib/core/dialog.hpp"
+#include "alflib/core/console.hpp"
+#include "alflib/debug/debugger.hpp"
+#include <iostream>
 
 // ========================================================================== //
-// VectorField Declaration
+// Functions
 // ========================================================================== //
 
-namespace wind {
+namespace alflib {
 
-/* Class that represents an obstruction field. This field represents whether
- * or not a cell has an obstruction in it. */
-class ObstructionField : public Field<bool> {
-public:
-  /* Construct an obstruction field with the specified 'width', 'height' and
-   * 'depth' (in number of cells). The size of a cell (in meters) can also be
-   * specified.  */
-  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
+void
+Assert(bool condition, const char8* file, u32 line, const String& message)
+{
+  // Return if the condition is true (holds)
+  if (condition) {
+    return;
+  }
 
-  /* Destruct field */
-  ~ObstructionField();
+  // Display message and abort
+  String output =
+    String("{}:{}: Failed with message: '{}'").Format(file, line, message);
 
-  /* \copydoc Field::debugDrawObject */
-  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
+  // Print to stdout and show dialog
+  Console::WriteLine(output);
+  std::cout << std::endl; // flushes the output
+  ShowErrorDialog("Assertion", output);
 
-  /* \copydoc Field::getSafe */
-  bool getSafe(s32 x, s32 y, s32 z) override;
+  // Break debugger then abort execution
+  BreakDebugger();
+  exit(-1);
+}
 
-public:
-  static ObstructionField *buildForScene(
-      const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,
-      const bs::Vector3 &position = bs::Vector3(), f32 cellSize = 1.0f);
-};
-
-} // namespace wind
+}

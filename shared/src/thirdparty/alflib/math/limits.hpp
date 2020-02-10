@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2019 Filip BjÃ¶rklund
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,42 +23,46 @@
 #pragma once
 
 // ========================================================================== //
-// Headers
+// Constants
 // ========================================================================== //
 
-#include "common.hpp"
-#include "math/field.hpp"
+namespace alflib {
 
-#include <Scene/BsSceneManager.h>
+/** Minimum value of 's8' **/
+static constexpr s8 S8_MIN = -128;
+/** Maximum value of 's8' **/
+static constexpr s8 S8_MAX = 127;
 
-// ========================================================================== //
-// VectorField Declaration
-// ========================================================================== //
+/** Maximum value of 'u8' **/
+static constexpr u8 U8_MAX = 255;
 
-namespace wind {
+/** Minimum value of 's16' **/
+static constexpr s16 S16_MIN = -32768;
+/** Maximum value of 's16' **/
+static constexpr s16 S16_MAX = 32767;
 
-/* Class that represents an obstruction field. This field represents whether
- * or not a cell has an obstruction in it. */
-class ObstructionField : public Field<bool> {
-public:
-  /* Construct an obstruction field with the specified 'width', 'height' and
-   * 'depth' (in number of cells). The size of a cell (in meters) can also be
-   * specified.  */
-  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
+/** Maximum value of 'u16' **/
+static constexpr u16 U16_MAX = 65535;
 
-  /* Destruct field */
-  ~ObstructionField();
+/** Minimum value of 's32' **/
+static constexpr s32 S32_MIN = -2147483648;
+/** Maximum value of 's32' **/
+static constexpr s32 S32_MAX = 2147483647;
 
-  /* \copydoc Field::debugDrawObject */
-  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
+/** Maximum value of 'u32' **/
+static constexpr u32 U32_MAX = 4294967295u;
 
-  /* \copydoc Field::getSafe */
-  bool getSafe(s32 x, s32 y, s32 z) override;
+/** Minimum value of 's64' **/
+static constexpr s64 S64_MIN = -9223372036854775807L - 1;
+/** Maximum value of 's64' **/
+static constexpr s64 S64_MAX = 9223372036854775807;
 
-public:
-  static ObstructionField *buildForScene(
-      const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,
-      const bs::Vector3 &position = bs::Vector3(), f32 cellSize = 1.0f);
-};
+/** Maximum value of 'u64' **/
+static constexpr u64 U64_MAX = 18446744073709551615ull;
 
-} // namespace wind
+/** Machine epsilon for 'f32' **/
+static constexpr f32 F32_EPSILON = 1.192093e-07f;
+/** Machine epsilon for 'f64' **/
+static constexpr f64 F64_EPSILON = 2.220446e-16;
+
+} // namespace alflib
