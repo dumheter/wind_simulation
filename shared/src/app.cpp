@@ -26,10 +26,12 @@
 // Headers
 // ========================================================================== //
 
-#include "Components/BsCCamera.h"
-#include "RenderAPI/BsRenderWindow.h"
-#include "Renderer/BsCamera.h"
 #include "microprofile/microprofile.h"
+
+#include <Components/BsCCamera.h>
+#include <RenderAPI/BsRenderAPI.h>
+#include <RenderAPI/BsRenderWindow.h>
+#include <Renderer/BsCamera.h>
 
 // ========================================================================== //
 // AppDelegate Declaration/Implementation
@@ -46,27 +48,24 @@ protected:
   void fixedUpdate() override {
     MICROPROFILE_SCOPEI("group", "timername", MP_YELLOW);
     Application::fixedUpdate();
-    App::g_app->OnFixedUpdate();
+    App::g_app->onFixedUpdate();
   }
 
-  void onStartUp() override {
-    Application::onStartUp();
-    App::g_app->OnStartup();
-  }
+  void onStartUp() override { Application::onStartUp(); }
 
   void onShutDown() override {
     Application::onShutDown();
-    App::g_app->OnShutdown();
+    App::g_app->onShutdown();
   }
 
   void preUpdate() override {
     Application::preUpdate();
-    App::g_app->OnPreUpdate();
+    App::g_app->onPreUpdate();
   }
 
   void postUpdate() override {
     Application::postUpdate();
-    App::g_app->OnPostUpdate();
+    App::g_app->onPostUpdate();
   }
 };
 
@@ -83,7 +82,8 @@ App *App::g_app = nullptr;
 // -------------------------------------------------------------------------- //
 
 App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
+    : m_title(info.title), m_width(info.width), m_height(info.height),
+      m_widthPreFullscreen(info.width), m_heightPreFullscreen(info.height) {
   using namespace bs;
 
   g_app = this;
@@ -98,14 +98,23 @@ App::App(const Info &info)
   appDesc.primaryWindowDesc.title = m_title;
   appDesc.primaryWindowDesc.hidden = true;
   appDesc.primaryWindowDesc.allowResize = true;
-  appDesc.primaryWindowDesc.videoMode = VideoMode(m_width, m_height);
+  appDesc.primaryWindowDesc.videoMode = bs::VideoMode(m_width, m_height);
+  appDesc.primaryWindowDesc.vsync = true;
   Application::startUp<AppDelegate>(appDesc);
+
+  Application::instance().getPrimaryWindow()->onResized.connect([=]() {
+    SPtr<RenderWindow> window = Application::instance().getPrimaryWindow();
+    m_width = window->getProperties().width;
+    m_height = window->getProperties().height;
+  });
 }
 
 // -------------------------------------------------------------------------- //
 
 void App::run() {
   using namespace bs;
+
+  onStartup();
 
   show();
   Application::instance().runMainLoop();
@@ -118,6 +127,53 @@ void App::hide() {
   using namespace bs;
   SPtr<RenderWindow> window = gApplication().getPrimaryWindow();
   window->hide();
+}
+
+// -------------------------------------------------------------------------- //
+
+void App::enterFullscreen(VideoMode videoMode, u32 monitorIdx) {
+  bs::SPtr<bs::RenderWindow> window =
+      bs::Application::instance().getPrimaryWindow();
+  m_widthPreFullscreen = window->getProperties().width;
+  m_heightPreFullscreen = window->getProperties().height;
+
+  bs::VideoMode bsVideoMode(videoMode.width, videoMode.height);
+
+  // Make sure the monitor index is valid
+  const bs::VideoModeInfo &vmi = bs::RenderAPI::getVideoModeInfo();
+  if (monitorIdx >= vmi.getNumOutputs()) {
+    monitorIdx = 0;
+    // TODO(Filip) Add logging warning
+  }
+
+  // Find if the requested mode exists
+  bool found = false;
+  const bs::VideoOutputInfo &voi = vmi.getOutputInfo(monitorIdx);
+  for (u32 j = 0; j < voi.getNumVideoModes(); j++) {
+    const bs::VideoMode &vm = voi.getVideoMode(j);
+    if (vm == bsVideoMode) {
+      found = true;
+      break;
+    }
+  }
+
+  // Otherwise pick one
+  if (!found) {
+    const bs::VideoOutputInfo &voi = vmi.getOutputInfo(monitorIdx);
+    bsVideoMode = voi.getVideoMode(voi.getNumVideoModes() - 1);
+  }
+
+  window->setFullscreen(bsVideoMode);
+  m_isFullscreen = true;
+}
+
+// -------------------------------------------------------------------------- //
+
+void App::exitFullscreen() {
+  bs::SPtr<bs::RenderWindow> window =
+      bs::Application::instance().getPrimaryWindow();
+  window->setWindowed(m_widthPreFullscreen, m_heightPreFullscreen);
+  m_isFullscreen = false;
 }
 
 // -------------------------------------------------------------------------- //

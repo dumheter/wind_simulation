@@ -27,7 +27,7 @@
 // ========================================================================== //
 
 #include "app.hpp"
-#include "math/obstruction_field.hpp"
+#include "sim/wind_sim.hpp"
 
 #include <BsPrerequisites.h>
 #include <Renderer/BsCamera.h>
@@ -45,8 +45,11 @@ public:
   /* Construct an editor */
   Editor();
 
-  /* \copydoc App::OnPreUpdate */
-  void OnPreUpdate() override;
+  /* \copydoc App::onStartup */
+  void onStartup() override;
+
+  /* \copydoc App::onPreUpdate */
+  void onPreUpdate() override;
 
 private:
   /* Setup the camera */
@@ -62,11 +65,28 @@ private:
   void registerControls();
 
 private:
+  /* Whether to draw scene */
+  bool m_drawScene = true;
+
+  /* Whether to run simulation */
+  bool m_runSim = false;
+
+  /* Debug type */
+  WindSimulation::FieldKind m_debugFieldKind =
+      WindSimulation::FieldKind::DENSITY;
+  /* Whether to draw debug data */
+  bool m_debugDraw = false;
+  /* Whether to draw debug data frame */
+  bool m_debugDrawFrame = false;
+
   /* Camera object */
   bs::HSceneObject m_camera;
 
-  /* Obstruction field */
-  ObstructionField *m_obstrField;
+  /* Root geometry node */
+  bs::HSceneObject m_geometry;
+
+  /* Wind simulation field */
+  WindSimulation *m_windSim;
 
 public:
   /* Editor window width */

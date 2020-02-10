@@ -46,11 +46,14 @@ public:
    * specified.  */
   ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  /* Destruct vector-field */
+  /* Destruct field */
   ~ObstructionField();
 
   /* \copydoc Field::debugDrawObject */
   void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
+
+  /* \copydoc Field::getSafe */
+  bool getSafe(s32 x, s32 y, s32 z) override;
 
 public:
   static ObstructionField *buildForScene(

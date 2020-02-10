@@ -49,16 +49,16 @@ void VectorField::debugDrawObject(const bs::Vector3 &offset) {
   bs::Vector<bs::Vector3> points;
 
   // Draw vectors
-  for (u32 z = 0; z < m_depth; z++) {
+  for (u32 z = 0; z < m_dim.depth; z++) {
     const f32 zPos = offset.z + (z * m_cellSize);
-    for (u32 y = 0; y < m_height; y++) {
+    for (u32 y = 0; y < m_dim.height; y++) {
       const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_width; x++) {
+      for (u32 x = 0; x < m_dim.width; x++) {
         const f32 xPos = offset.x + (x * m_cellSize);
         const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
                                yPos + (m_cellSize / 2.0f),
                                zPos + (m_cellSize / 2.0f));
-        const bs::Vector3 &vec = Get(x, y, z);
+        const bs::Vector3 &vec = get(x, y, z);
 
         const bs::Vector3 start = base - (vec * .1f);
         const bs::Vector3 end = base + (vec * .1f);
@@ -70,6 +70,55 @@ void VectorField::debugDrawObject(const bs::Vector3 &offset) {
 
   bs::DebugDraw::instance().setColor(bs::Color::Red);
   bs::DebugDraw::instance().drawLineList(points);
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::Vector3 VectorField::getSafe(s32 x, s32 y, s32 z) {
+  switch (m_borderKind) {
+    // Default border value
+  case BorderKind::DEFAULT: {
+    return isInBounds(x, y, z) ? get(x, y, z) : m_borderDefaultValue;
+  }
+    // Contained border vectors
+  case BorderKind::CONTAINED: {
+    bool rx = !isInBoundsX(x);
+    bool ry = !isInBoundsY(y);
+    bool rz = !isInBoundsZ(z);
+    x = Clamp(x, 0, s32(m_dim.width) - 1);
+    y = Clamp(y, 0, s32(m_dim.height) - 1);
+    z = Clamp(z, 0, s32(m_dim.depth) - 1);
+    bs::Vector3 &v = get(x, y, z);
+    if (rx) {
+      v.x = 0;
+    }
+    if (ry) {
+      v.y = 0;
+    }
+    if (rz) {
+      v.z = 0;
+    }
+    return v;
+  }
+    // Empty border value
+  case BorderKind::BLOCKED: {
+    return isInBounds(x, y, z) ? get(x, y, z) : bs::Vector3();
+  }
+  }
+
+  // CANNOT HAPPEN!
+  exit(-234);
+  return bs::Vector3::ZERO;
+}
+
+// -------------------------------------------------------------------------- //
+
+void VectorField::setBorder(BorderKind kind) { m_borderKind = kind; }
+
+// -------------------------------------------------------------------------- //
+
+void VectorField::setBorderDefaultValue(const bs::Vector3 &value) {
+  m_borderDefaultValue = value;
 }
 
 } // namespace wind
