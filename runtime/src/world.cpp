@@ -1,33 +1,33 @@
 #include "world.hpp"
-
-#include <alflib/core/assert.hpp>
 #include "BsFPSCamera.h"
-#include "Components/BsCBoxCollider.h"
-#include "Components/BsCCamera.h"
-#include "Components/BsCCharacterController.h"
-#include "Components/BsCPlaneCollider.h"
-#include "Components/BsCRenderable.h"
-#include "Components/BsCRigidbody.h"
-#include "GUI/BsCGUIWidget.h"
-#include "GUI/BsGUILabel.h"
-#include "GUI/BsGUILayout.h"
-#include "GUI/BsGUILayoutY.h"
-#include "GUI/BsGUIPanel.h"
-#include "Importer/BsImporter.h"
-#include "Input/BsInput.h"
-#include "Material/BsMaterial.h"
-#include "Physics/BsBoxCollider.h"
-#include "Physics/BsPhysicsMaterial.h"
-#include "Physics/BsPlaneCollider.h"
-#include "Physics/BsRigidbody.h"
-#include "Platform/BsCursor.h"
-#include "RenderAPI/BsRenderTarget.h"
-#include "RenderAPI/BsRenderWindow.h"
-#include "Resources/BsBuiltinResources.h"
-#include "Scene/BsSceneObject.h"
 #include "asset.hpp"
 #include "bsFPSWalker.h"
+
+#include <Components/BsCBoxCollider.h>
+#include <Components/BsCCamera.h>
+#include <Components/BsCCharacterController.h>
+#include <Components/BsCPlaneCollider.h>
+#include <Components/BsCRenderable.h>
+#include <Components/BsCRigidbody.h>
 #include <Components/BsCSkybox.h>
+#include <GUI/BsCGUIWidget.h>
+#include <GUI/BsGUILabel.h>
+#include <GUI/BsGUILayout.h>
+#include <GUI/BsGUILayoutY.h>
+#include <GUI/BsGUIPanel.h>
+#include <Importer/BsImporter.h>
+#include <Input/BsInput.h>
+#include <Material/BsMaterial.h>
+#include <Physics/BsBoxCollider.h>
+#include <Physics/BsPhysicsMaterial.h>
+#include <Physics/BsPlaneCollider.h>
+#include <Physics/BsRigidbody.h>
+#include <Platform/BsCursor.h>
+#include <RenderAPI/BsRenderTarget.h>
+#include <RenderAPI/BsRenderWindow.h>
+#include <Resources/BsBuiltinResources.h>
+#include <Scene/BsSceneObject.h>
+#include <alflib/core/assert.hpp>
 
 namespace wind {
 
@@ -37,8 +37,7 @@ World::World(const App::Info &info) : App(info) {
   setupPlayer();
 }
 
-void World::setupScene()
-{
+void World::setupScene() {
   using namespace bs;
   auto floorMaterial = createMaterial("res/textures/grid.png");
   auto cubeMaterial = createMaterial("res/textures/grid_2.png");
@@ -55,10 +54,10 @@ void World::setupScene()
   skyboxComp->setTexture(skyboxTex);
 }
 
-void World::setupPlayer()
-{
+void World::setupPlayer() {
   using namespace bs;
-  AlfAssert(m_players.emtpy(), "m_players must be empty before setting up the player");
+  AlfAssert(m_players.empty(),
+            "m_players must be empty before setting up the player");
 
   auto player = createPlayer();
   auto camera = createCamera(player);
@@ -66,21 +65,19 @@ void World::setupPlayer()
   m_players.push_back(std::move(player));
 }
 
-void World::reset()
-{
+void World::reset() {
   for (auto player : m_players) {
     player->destroy();
   }
-  m_players.Clear();
+  m_players.clear();
 }
 
-bs::HSceneObject getPlayer()
-{
+bs::HSceneObject World::getPlayer() {
   AlfAssert(!m_players.empty(), "must setupPlayer before getPlayer");
   return m_players[0];
 }
 
-    bs::HSceneObject World::createCamera(bs::HSceneObject player) {
+bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   using namespace bs;
   HSceneObject camera = SceneObject::create("Camera");
   camera->setParent(player);
