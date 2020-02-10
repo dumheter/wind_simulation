@@ -54,7 +54,8 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
         const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
                                yPos + (m_cellSize / 2.0f),
                                zPos + (m_cellSize / 2.0f));
-        const f32 density = get(x, y, z);
+        f32 density = get(x, y, z);
+        density = clamp(density, 0, 1.0f);
         bs::DebugDraw::instance().drawCube(
             base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
       }
@@ -65,9 +66,9 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
 // -------------------------------------------------------------------------- //
 
 f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
-  x = Clamp(x, 0, s32(m_dim.width) - 1);
-  y = Clamp(y, 0, s32(m_dim.height) - 1);
-  z = Clamp(z, 0, s32(m_dim.depth) - 1);
+  x = clamp(x, 0, s32(m_dim.width) - 1);
+  y = clamp(y, 0, s32(m_dim.height) - 1);
+  z = clamp(z, 0, s32(m_dim.depth) - 1);
   return get(x, y, z);
 }
 

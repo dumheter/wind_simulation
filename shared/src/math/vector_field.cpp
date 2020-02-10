@@ -75,6 +75,7 @@ void VectorField::debugDrawObject(const bs::Vector3 &offset) {
 // -------------------------------------------------------------------------- //
 
 bs::Vector3 VectorField::getSafe(s32 x, s32 y, s32 z) {
+
   switch (m_borderKind) {
     // Default border value
   case BorderKind::DEFAULT: {
@@ -82,27 +83,36 @@ bs::Vector3 VectorField::getSafe(s32 x, s32 y, s32 z) {
   }
     // Contained border vectors
   case BorderKind::CONTAINED: {
-    bool rx = !isInBoundsX(x);
-    bool ry = !isInBoundsY(y);
-    bool rz = !isInBoundsZ(z);
-    x = Clamp(x, 0, s32(m_dim.width) - 1);
-    y = Clamp(y, 0, s32(m_dim.height) - 1);
-    z = Clamp(z, 0, s32(m_dim.depth) - 1);
-    bs::Vector3 &v = get(x, y, z);
-    if (rx) {
+    s32 _x = clamp(x, 0, s32(m_dim.width) - 1);
+    s32 _y = clamp(y, 0, s32(m_dim.height) - 1);
+    s32 _z = clamp(z, 0, s32(m_dim.depth) - 1);
+    bs::Vector3 &v = get(_x, _y, _z);
+
+    if ((x < 0 && v.x < 0.0f) || (x >= s32(m_dim.width) && v.x > 0.0f)) {
       v.x = 0;
     }
-    if (ry) {
+    if ((y < 0 && v.y < 0.0f) || (y >= s32(m_dim.height) && v.y > 0.0f)) {
       v.y = 0;
     }
-    if (rz) {
+    if ((z < 0 && v.z < 0.0f) || (z >= s32(m_dim.depth) && v.z > 0.0f)) {
       v.z = 0;
     }
+
     return v;
   }
     // Empty border value
   case BorderKind::BLOCKED: {
     return isInBounds(x, y, z) ? get(x, y, z) : bs::Vector3();
+  }
+    // Edge value
+  case BorderKind::EDGE: {
+    s32 _x = clamp(x, 0, s32(m_dim.width) - 1);
+    s32 _y = clamp(y, 0, s32(m_dim.height) - 1);
+    s32 _z = clamp(z, 0, s32(m_dim.depth) - 1);
+    return get(_x, _y, _z);
+  }
+  default: {
+    break;
   }
   }
 

@@ -41,8 +41,16 @@ namespace wind {
 
 /* Clamp 'value' between two other values 'min' and 'max' */
 template <typename T, typename S, typename U>
-inline constexpr T Clamp(T value, S min, U max) {
+inline constexpr T clamp(T value, S min, U max) {
   return value < min ? min : value > max ? max : value;
 }
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline constexpr T max(T a, T b) { return a > b ? a : b; }
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline constexpr T min(T a, T b) { return a < b ? a : b; }
 
 } // namespace wind

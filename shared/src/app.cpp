@@ -32,6 +32,7 @@
 #include <RenderAPI/BsRenderAPI.h>
 #include <RenderAPI/BsRenderWindow.h>
 #include <Renderer/BsCamera.h>
+#include <Utility/BsTime.h>
 
 // ========================================================================== //
 // AppDelegate Declaration/Implementation
@@ -48,7 +49,8 @@ protected:
   void fixedUpdate() override {
     MICROPROFILE_SCOPEI("group", "timername", MP_YELLOW);
     Application::fixedUpdate();
-    App::g_app->onFixedUpdate();
+    f32 delta = bs::gTime().getFixedFrameDelta();
+    App::g_app->onFixedUpdate(delta);
   }
 
   void onStartUp() override { Application::onStartUp(); }
@@ -60,12 +62,14 @@ protected:
 
   void preUpdate() override {
     Application::preUpdate();
-    App::g_app->onPreUpdate();
+    f32 delta = bs::gTime().getFrameDelta();
+    App::g_app->onPreUpdate(delta);
   }
 
   void postUpdate() override {
     Application::postUpdate();
-    App::g_app->onPostUpdate();
+    f32 delta = bs::gTime().getFrameDelta();
+    App::g_app->onPostUpdate(delta);
   }
 };
 

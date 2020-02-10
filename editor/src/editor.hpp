@@ -49,7 +49,10 @@ public:
   void onStartup() override;
 
   /* \copydoc App::onPreUpdate */
-  void onPreUpdate() override;
+  void onPreUpdate(f32 delta) override;
+
+  /* \copydoc App::onFixedUpdate */
+  void onFixedUpdate(f32 delta) override;
 
 private:
   /* Setup the camera */

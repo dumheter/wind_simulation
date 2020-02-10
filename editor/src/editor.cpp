@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "asset.hpp"
+#include "log.hpp"
 #include "math/obstruction_field.hpp"
 #include "math/vector_field.hpp"
 
@@ -91,7 +92,7 @@ void Editor::onStartup() {
 
 // -------------------------------------------------------------------------- //
 
-void Editor::onPreUpdate() {
+void Editor::onPreUpdate(f32 delta) {
   using namespace bs;
 
   // Quit 'escape' or 'q'
@@ -108,17 +109,23 @@ void Editor::onPreUpdate() {
       enterFullscreen();
     }
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+void Editor::onFixedUpdate(f32 delta) {
+  using namespace bs;
 
   // Run simulation step
   if (m_runSim) {
-    m_windSim->step(gTime().getFrameDelta());
+    m_windSim->step(delta);
   }
 
   // Redraw each frame
   if (m_debugDraw) {
     m_windSim->debugDraw(m_debugFieldKind, Vector3(), m_debugDrawFrame);
   }
-}
+} // namespace wind
 
 // -------------------------------------------------------------------------- //
 
@@ -296,7 +303,7 @@ void Editor::setupGUI() {
 
   // Debug draw type
   {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("[DEBUG] Type"));
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Field type"));
     label->setPosition(4, height);
 
     Vector<HString> opts = {HString("Density"), HString("Vector"),
@@ -316,7 +323,7 @@ void Editor::setupGUI() {
 
   // Debug drawing
   {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("[DEBUG] Draw"));
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Draw"));
     label->setPosition(4, height);
 
     GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("Debug Draw"));
@@ -334,8 +341,7 @@ void Editor::setupGUI() {
 
   // Debug frame drawing
   {
-    GUILabel *label =
-        panel->addNewElement<GUILabel>(HString("[DEBUG] Draw frames"));
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Draw frames"));
     label->setPosition(4, height);
 
     GUIToggle *toggle =
@@ -354,8 +360,7 @@ void Editor::setupGUI() {
 
   // Debug vector direction
   {
-    GUILabel *label =
-        panel->addNewElement<GUILabel>(HString("[DEBUG] Vectors"));
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Vectors"));
     label->setPosition(4, height);
 
     GUISliderHorz *xSlider = panel->addNewElement<GUISliderHorz>();
@@ -364,10 +369,11 @@ void Editor::setupGUI() {
     xSlider->setRange(-1.0, 1.0f);
     xSlider->setValue(0.0f);
     xSlider->onChanged.connect([this](f32 value) {
-      bs::Vector3 vec = m_windSim->getVectorField()->get(1, 1, 1);
+      bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
       vec.x = value;
-      for (u32 i = 0; i < m_windSim->getVectorField()->getDataSize(); i++) {
-        m_windSim->getVectorField()->get(i) = vec;
+      for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++) {
+        m_windSim->getVelocityField()->get(i) = vec;
+        m_windSim->getVelocityFieldPrev()->get(i) = vec;
       }
     });
 
@@ -377,10 +383,11 @@ void Editor::setupGUI() {
     ySlider->setRange(-1.0, 1.0f);
     ySlider->setValue(0.0f);
     ySlider->onChanged.connect([this](f32 value) {
-      bs::Vector3 vec = m_windSim->getVectorField()->get(1, 1, 1);
+      bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
       vec.y = value;
-      for (u32 i = 0; i < m_windSim->getVectorField()->getDataSize(); i++) {
-        m_windSim->getVectorField()->get(i) = vec;
+      for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++) {
+        m_windSim->getVelocityField()->get(i) = vec;
+        m_windSim->getVelocityFieldPrev()->get(i) = vec;
       }
     });
 
@@ -390,10 +397,11 @@ void Editor::setupGUI() {
     zSlider->setRange(-1.0, 1.0f);
     zSlider->setValue(0.0f);
     zSlider->onChanged.connect([this](f32 value) {
-      bs::Vector3 vec = m_windSim->getVectorField()->get(1, 1, 1);
+      bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
       vec.z = value;
-      for (u32 i = 0; i < m_windSim->getVectorField()->getDataSize(); i++) {
-        m_windSim->getVectorField()->get(i) = vec;
+      for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++) {
+        m_windSim->getVelocityField()->get(i) = vec;
+        m_windSim->getVelocityFieldPrev()->get(i) = vec;
       }
     });
 
@@ -402,13 +410,104 @@ void Editor::setupGUI() {
 
   // Debug run simulation
   {
-    GUILabel *label =
-        panel->addNewElement<GUILabel>(HString("[DEBUG] Run simulation"));
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Run simulation"));
     label->setPosition(4, height);
 
     GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DebugRunSim"));
     toggle->setPosition(120, height);
-    toggle->onToggled.connect([this](bool t) { m_runSim = t; });
+    toggle->onToggled.connect([this](bool t) {
+      m_runSim = t;
+      logVerbose("Simulation {}", t ? "running" : "stopped");
+    });
+
+    height += toggle->getBounds().height + 2;
+  }
+
+  // Density source
+  {
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Density source"));
+    label->setPosition(4, height);
+
+    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DebugDenSrc"));
+    toggle->setPosition(120, height);
+    toggle->onToggled.connect([this](bool t) {
+      m_windSim->setDensitySourceActive(t);
+      logVerbose("Density sources: {}", t ? "ENABLED" : "DISABLED");
+    });
+
+    height += toggle->getBounds().height + 2;
+  }
+
+  // Density sink
+  {
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Density sink"));
+    label->setPosition(4, height);
+
+    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DebugDenSnk"));
+    toggle->setPosition(120, height);
+    toggle->onToggled.connect([this](bool t) {
+      m_windSim->setDensitySinkActive(t);
+      logVerbose("Density sinks: {}", t ? "ENABLED" : "DISABLED");
+    });
+
+    height += toggle->getBounds().height + 2;
+  }
+
+  // Sim density parts
+  {
+    {
+      GUILabel *label =
+          panel->addNewElement<GUILabel>(HString("Density diffusion:"));
+      label->setPosition(4, height);
+      GUIToggle *toggle =
+          panel->addNewElement<GUIToggle>(HString("DebugSimDensDif"));
+      toggle->setPosition(120, height);
+      toggle->onToggled.connect([this](bool t) {
+        m_windSim->setDensityDiffusionActive(t);
+        logVerbose("Density diffusion: {}", t ? "ENABLED" : "DISABLED");
+      });
+      toggle->toggleOn();
+    }
+
+    GUILabel *l1 = panel->addNewElement<GUILabel>(HString("advection:"));
+    l1->setPosition(150, height);
+    GUIToggle *toggle =
+        panel->addNewElement<GUIToggle>(HString("DebugSimDensAdv"));
+    toggle->setPosition(220, height);
+    toggle->onToggled.connect([this](bool t) {
+      m_windSim->setDensityAdvectionActive(t);
+      logVerbose("Density advection: {}", t ? "ENABLED" : "DISABLED");
+    });
+    toggle->toggleOn();
+    height += toggle->getBounds().height + 2;
+  }
+
+  // Sim velocity parts
+  {
+    {
+      GUILabel *label =
+          panel->addNewElement<GUILabel>(HString("Velocity diffusion:"));
+      label->setPosition(4, height);
+      GUIToggle *toggle =
+          panel->addNewElement<GUIToggle>(HString("DebugSimVelDif"));
+      toggle->setPosition(120, height);
+      toggle->onToggled.connect([this](bool t) {
+        m_windSim->setVelocityDiffusionActive(t);
+        logVerbose("Velocity diffusion: {}", t ? "ENABLED" : "DISABLED");
+      });
+      toggle->toggleOn();
+    }
+
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("advection:"));
+    label->setPosition(150, height);
+    GUIToggle *toggle =
+        panel->addNewElement<GUIToggle>(HString("DebugSimVelAdv"));
+    toggle->setPosition(220, height);
+    toggle->onToggled.connect([this](bool t) {
+      m_windSim->setVelocityAdvectionActive(t);
+      logVerbose("Velocity advection: {}", t ? "ENABLED" : "DISABLED");
+    });
+    toggle->toggleOn();
 
     height += toggle->getBounds().height + 2;
   }

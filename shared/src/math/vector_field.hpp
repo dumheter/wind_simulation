@@ -45,11 +45,12 @@ public:
     /* Vectors are set to a default value outside the field */
     DEFAULT,
     /* Vectors have their component going out the side zeroed. Meaning vectors
-     * never point outside */
+     * never point outside. (Zero derivatives) */
     CONTAINED,
     /* Vectors are zero outside the bounds */
-    BLOCKED
-
+    BLOCKED,
+    /* Closest edge value */
+    EDGE,
   };
 
 public:

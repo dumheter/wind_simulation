@@ -44,7 +44,7 @@ namespace wind {
  * The first buffer is the density buffer. This buffer contains the densities of
  * "fluid" (air) at the different positions.
  *
- * The second buffer is the vector field. This contains the wind direction and
+ * The second buffer is the velocity field. This contains the wind direction and
  * strength at the different positions.
  *
  * The third, and last, buffer is the obstruction field. This field has binary
@@ -54,14 +54,42 @@ namespace wind {
 class WindSimulation {
 public:
   /* Type of debug data to show */
-  enum class FieldKind { DENSITY, VECTOR, OBSTRUCTION };
+  enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 
 public:
   /* Destruct wind simulation along with data */
   ~WindSimulation();
 
-  /* Step the simulation with the specified delta time (dt) */
+  /* Step the simulation with the specified delta time (dt). Stepping the
+   * delta-time with the real frame-time means that the simulation should run in
+   * real-time */
   void step(f32 delta);
+
+  /* Enable or disable density sources */
+  void setDensitySourceActive(bool active) { m_densitySourceActive = active; }
+
+  /* Enable or disable density sinks */
+  void setDensitySinkActive(bool active) { m_densitySinkActive = active; }
+
+  /* Enable or disable diffusion simulation for the density field */
+  void setDensityDiffusionActive(bool active) {
+    m_densityDiffusionActive = active;
+  }
+
+  /* Enable or disable advection simulation for the density field */
+  void setDensityAdvectionActive(bool active) {
+    m_densityAdvectionActive = active;
+  }
+
+  /* Enable or disable diffusion simulation for the velocity field */
+  void setVelocityDiffusionActive(bool active) {
+    m_velocityDiffusionActive = active;
+  }
+
+  /* Enable or disable advection simulation for the velocity field */
+  void setVelocityAdvectionActive(bool active) {
+    m_velocityAdvectionActive = active;
+  }
 
   /* Draw debug information */
   void debugDraw(FieldKind kind,
@@ -69,19 +97,23 @@ public:
                  bool drawFrame = true);
 
   /* Returns the current density field */
-  DensityField *getDensityField() { return m_densityFields[m_bufferIndex]; }
+  DensityField *getDensityField() {
+    return m_densityFields[m_densityBufferIdx];
+  }
 
   /* Returns the current density field */
   DensityField *getDensityFieldPrev() {
-    return m_densityFields[(m_bufferIndex - 1) % BUFFER_COUNT];
+    return m_densityFields[(m_densityBufferIdx - 1) % BUFFER_COUNT];
   }
 
   /* Returns the current vector field */
-  VectorField *getVectorField() { return m_vectorFields[m_bufferIndex]; }
+  VectorField *getVelocityField() {
+    return m_velocityFields[m_densityBufferIdx];
+  }
 
   /* Returns the current vector field */
-  VectorField *getVectorFieldPrev() {
-    return m_vectorFields[(m_bufferIndex - 1) % BUFFER_COUNT];
+  VectorField *getVelocityFieldPrev() {
+    return m_velocityFields[(m_densityBufferIdx - 1) % BUFFER_COUNT];
   }
 
   /* Returns the obstruction field */
@@ -100,10 +132,21 @@ private:
   /* Run the density advection */
   void stepDensityAdvection(f32 delta);
 
-  /* Updates the density field according to the border conditions set */
-  void setDensityBorderCond();
+  /* Update density buffer index  */
+  void updateDensityBufferIndex(s32 value = 1) {
+    m_densityBufferIdx = (m_densityBufferIdx + value) % BUFFER_COUNT;
+  }
 
-  void doSomeStuff();
+  /* Run the velocity diffusion */
+  void stepVelocityDiffusion(f32 delta);
+
+  /* Run the velocity advection */
+  void stepVelocityAdvection(f32 delta);
+
+  /* Update density buffer index  */
+  void updateVelocityBufferIndex(s32 value = 1) {
+    m_velocityBufferIdx = (m_velocityBufferIdx + value) % BUFFER_COUNT;
+  }
 
 public:
   /* Construct a wind simulation from a scene. All data required is determined
@@ -116,21 +159,45 @@ private:
   /* Number of buffers flipped between in simulation */
   static constexpr u32 BUFFER_COUNT = 2;
 
+  /* Number of iterations in the gauss-seidel method */
+  static constexpr u32 GAUSS_SEIDEL_STEPS = 10;
+
 private:
   /* Dimensions */
-  u32 m_width, m_height, m_depth;
+  u32 m_width = 0, m_height = 0, m_depth = 0;
   /* Cell size in meters */
-  f32 m_cellSize;
+  f32 m_cellSize = 1.0f;
 
-  /* Current buffer index */
-  u32 m_bufferIndex = 0;
+  /* Current density buffer index */
+  u32 m_densityBufferIdx = 0;
+  /* Current velocity buffer index */
+  u32 m_velocityBufferIdx = 0;
+
+  /* Diffusion rate */
+  f32 m_diffusion = 0.3f;
+  /* Viscosity */
+  f32 m_viscosity = 0.3f;
 
   /* Density fields */
   DensityField *m_densityFields[BUFFER_COUNT];
-  /* Vector fields */
-  VectorField *m_vectorFields[BUFFER_COUNT];
+  /* Velocity fields */
+  VectorField *m_velocityFields[BUFFER_COUNT];
   /* Obstruction field */
   ObstructionField *m_obstructionField;
+
+  /* Whether density sources are active */
+  bool m_densitySourceActive = false;
+  /* Whether density sources are active */
+  bool m_densitySinkActive = false;
+
+  /* Whether density diffusion is enabled */
+  bool m_densityDiffusionActive = true;
+  /* Whether density advection is enabled */
+  bool m_densityAdvectionActive = true;
+  /* Whether velocity diffusion is enabled */
+  bool m_velocityDiffusionActive = true;
+  /* Whether velocity advection is enabled */
+  bool m_velocityAdvectionActive = true;
 };
 
 } // namespace wind
