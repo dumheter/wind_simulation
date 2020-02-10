@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include "editor.hpp"
+#include "log.hpp"
 
 // ========================================================================== //
 // Main
@@ -29,6 +30,7 @@
 int main() {
   using namespace wind;
 
+  fixConsole();
   Editor editor;
   editor.run();
 
