@@ -8,7 +8,6 @@
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
 #include "network/side.hpp"
-#include "world.hpp"
 #include <optional>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
@@ -19,6 +18,8 @@
 // ========================================================================== //
 
 namespace wind {
+
+class World;
 
 class Server : public ISteamNetworkingSocketsCallbacks {
 public:

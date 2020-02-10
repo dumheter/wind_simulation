@@ -1,10 +1,12 @@
 #pragma once
 
 #include "BsApplication.h"
+#include "BsFPSCamera.h"
 #include "app.hpp"
 #include "cnet_component.hpp"
 #include "network/client.hpp"
 #include "network/connection_id.hpp"
+#include "network/server.hpp"
 #include "utility/unique_id.hpp"
 #include <vector>
 
@@ -58,7 +60,11 @@ private:
   bs::HMaterial createMaterial(const bs::String &path);
   bs::HSceneObject createGUI(bs::HSceneObject camera);
 
+private:
   std::vector<HCNetComponent> m_netComps;
+  bool cursorMode = true;
+  bs::HFPSCamera m_fpsCamera;
+  Server m_server;
 };
 
 } // namespace wind

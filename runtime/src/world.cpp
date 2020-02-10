@@ -1,5 +1,4 @@
 #include "world.hpp"
-
 #include "BsFPSCamera.h"
 #include "Components/BsCBoxCollider.h"
 #include "Components/BsCCamera.h"
@@ -8,10 +7,15 @@
 #include "Components/BsCRenderable.h"
 #include "Components/BsCRigidbody.h"
 #include "GUI/BsCGUIWidget.h"
+#include "GUI/BsGUIButton.h"
+#include "GUI/BsGUIContent.h"
+#include "GUI/BsGUIInputBox.h"
 #include "GUI/BsGUILabel.h"
 #include "GUI/BsGUILayout.h"
+#include "GUI/BsGUILayoutX.h"
 #include "GUI/BsGUILayoutY.h"
 #include "GUI/BsGUIPanel.h"
+#include "GUI/BsGUIViewport.h"
 #include "Importer/BsImporter.h"
 #include "Input/BsInput.h"
 #include "Material/BsMaterial.h"
@@ -30,12 +34,14 @@
 #include "log.hpp"
 #include <Components/BsCSkybox.h>
 #include <alflib/core/assert.hpp>
+#include <regex>
 
 namespace wind {
 
-World::World(const App::Info &info) : App(info) {
+World::World(const App::Info &info) : App(info), m_server(this) {
   setupInput();
   setupScene();
+  setupMyPlayer();
 }
 
 void World::setupScene() {
@@ -128,6 +134,7 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
 
   HFPSCamera fpsCameraComp = camera->addComponent<FPSCamera>();
   fpsCameraComp->setCharacter(player);
+  m_fpsCamera = fpsCameraComp;
 
   Cursor::instance().hide();
   Cursor::instance().clipToWindow(*primaryWindow);
@@ -137,9 +144,25 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
 
 void World::setupInput() {
   using namespace bs;
-  gInput().onButtonUp.connect([this](const ButtonEvent &ev) {
+  gInput().onButtonUp.connect([](const ButtonEvent &ev) {
     if (ev.buttonCode == BC_ESCAPE) {
       gApplication().quitRequested();
+    }
+  });
+  gInput().onButtonDown.connect([this](const ButtonEvent &ev) {
+    if (ev.buttonCode == BC_TAB) {
+      if (cursorMode) {
+        cursorMode = !cursorMode;
+        m_fpsCamera->setEnabled(false);
+        Cursor::instance().show();
+        Cursor::instance().clipDisable();
+      } else {
+        cursorMode = !cursorMode;
+        m_fpsCamera->setEnabled(true);
+        Cursor::instance().hide();
+        SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
+        Cursor::instance().clipToWindow(*primaryWindow);
+      }
     }
   });
 
@@ -212,16 +235,44 @@ bs::HMaterial World::createMaterial(const bs::String &path) {
 
 bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   using namespace bs;
-  auto gui = SceneObject::create("GUI");
+
   auto cameraComp = camera->getComponent<CCamera>();
+
+  auto gui = SceneObject::create("GUI");
   HGUIWidget guiComp = gui->addComponent<CGUIWidget>(cameraComp);
   GUIPanel *mainPanel = guiComp->getPanel();
-  GUILayoutY *vertLayout = GUILayoutY::create();
+  GUILayoutY *layout = mainPanel->addNewElement<GUILayoutY>();
+  layout->setSize(200, 700);
+  layout->addNewElement<GUILabel>(HString{u8"Press the Escape key to quit"});
 
-  HString quitString(u8"Press the Escape key to quit");
+  {
+    GUILayoutX *l = layout->addNewElement<GUILayoutX>();
+    l->addNewElement<GUILabel>(HString{u8"port"});
+    GUIInputBox *portInput = l->addNewElement<GUIInputBox>();
+    portInput->setText("4040");
+    portInput->setFilter([](const String &str) {
+      return std::regex_match(str, std::regex("-?(\\d+)?"));
+    });
 
-  vertLayout->addNewElement<GUILabel>(quitString);
-  mainPanel->addElement(vertLayout);
+    GUIButton *startServerBtn =
+        l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
+    startServerBtn->onClick.connect([&] {
+      logVerbose("start server on {}", portInput->getText().c_str());
+    });
+  }
+
+  {
+    GUILayoutX *l = layout->addNewElement<GUILayoutX>();
+    l->addNewElement<GUILabel>(HString{u8"ip:port"});
+    GUIInputBox *input = l->addNewElement<GUIInputBox>();
+    input->setText("127.0.0.1:4040");
+
+    GUIButton *btn =
+        l->addNewElement<GUIButton>(GUIContent{HString{"connect"}});
+    btn->onClick.connect(
+        [&] { logVerbose("connect to {}", input->getText().c_str()); });
+  }
+
   return gui;
 }
 

@@ -6,22 +6,17 @@
 #include "Scene/BsSceneObject.h"
 
 namespace bs {
-/** Determines speed of camera rotation. */
+
 constexpr float ROTATION_SPEED = 3.0f;
 
-/** Determines range of movement for pitch rotation, in either direction. */
 constexpr Degree PITCH_RANGE = Degree(45.0f);
 
 FPSCamera::FPSCamera(const HSceneObject &parent) : Component(parent) {
-  // Set a name for the component, so we can find it later if needed
   setName("FPSCamera");
 
-  // Get handles for key bindings. Actual keys attached to these bindings will
-  // be registered during app start-up.
   mHorizontalAxis = VirtualAxis("Horizontal");
   mVerticalAxis = VirtualAxis("Vertical");
 
-  // Determine initial yaw and pitch
   Quaternion rotation = SO()->getTransform().getRotation();
 
   Radian pitch, yaw, roll;
@@ -34,14 +29,14 @@ FPSCamera::FPSCamera(const HSceneObject &parent) : Component(parent) {
 }
 
 void FPSCamera::update() {
-  // If camera is rotating, apply new pitch/yaw rotation values depending on the
-  // amount of rotation from the vertical/horizontal axes.
-  mYaw +=
-      Degree(gVirtualInput().getAxisValue(mHorizontalAxis) * ROTATION_SPEED);
-  mPitch +=
-      Degree(gVirtualInput().getAxisValue(mVerticalAxis) * ROTATION_SPEED);
+  if (m_enabled) {
+    mYaw +=
+        Degree(gVirtualInput().getAxisValue(mHorizontalAxis) * ROTATION_SPEED);
+    mPitch +=
+        Degree(gVirtualInput().getAxisValue(mVerticalAxis) * ROTATION_SPEED);
 
-  applyAngles();
+    applyAngles();
+  }
 }
 
 void FPSCamera::applyAngles() {

@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "log.hpp"
+#include "world.hpp"
 #include <microprofile/microprofile.h>
 
 namespace wind {
