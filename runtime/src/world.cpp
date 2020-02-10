@@ -248,16 +248,16 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   {
     GUILayoutX *l = layout->addNewElement<GUILayoutX>();
     l->addNewElement<GUILabel>(HString{u8"port"});
-    GUIInputBox *portInput = l->addNewElement<GUIInputBox>();
-    portInput->setText("4040");
-    portInput->setFilter([](const String &str) {
+    GUIInputBox *input = l->addNewElement<GUIInputBox>();
+    input->setText("4040");
+    input->setFilter([](const String &str) {
       return std::regex_match(str, std::regex("-?(\\d+)?"));
     });
 
     GUIButton *startServerBtn =
         l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
-    startServerBtn->onClick.connect([&] {
-      logVerbose("start server on {}", portInput->getText().c_str());
+    startServerBtn->onClick.connect([input] {
+      logVerbose("start server on {}", input->getText().c_str());
     });
   }
 
@@ -270,7 +270,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     GUIButton *btn =
         l->addNewElement<GUIButton>(GUIContent{HString{"connect"}});
     btn->onClick.connect(
-        [&] { logVerbose("connect to {}", input->getText().c_str()); });
+        [input] { logVerbose("connect to {}", input->getText().c_str()); });
   }
 
   return gui;
