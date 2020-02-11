@@ -9,7 +9,13 @@ namespace wind {
 
 class CMyPlayer : public bs::Component {
 public:
-  CMyPlayer(const bs::HSceneObject &parent, World *world);
+  CMyPlayer(bs::HSceneObject parent, World *world);
+
+  bool isConnected() const;
+
+  void connect(const char *address);
+
+  void disconnect();
 
   void update() override;
 

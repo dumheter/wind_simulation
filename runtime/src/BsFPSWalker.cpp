@@ -18,11 +18,10 @@ constexpr float TOP_SPEED = 7.0f;   // m/s
 constexpr float ACCELERATION = 1.5f;
 constexpr float FAST_MODE_MULTIPLIER = 2.0f;
 
-FPSWalker::FPSWalker(const HSceneObject &parent) : Component(parent) {
+FPSWalker::FPSWalker(const HSceneObject &parent, wind::HCNetComponent netComp)
+    : Component(parent), m_netComp(netComp) {
   setName("FPSWalker");
-
   mController = SO()->getComponent<CCharacterController>();
-
   mMoveForward = VirtualButton("Forward");
   mMoveBack = VirtualButton("Back");
   mMoveLeft = VirtualButton("Left");
@@ -41,6 +40,7 @@ void FPSWalker::update() {
   bool jumping = gVirtualInput().isButtonHeld(mSpace);
 
   const Transform &tfrm = SO()->getTransform();
+  m_netComp->getState().from(tfrm); // should be done last??
 
   Vector3 direction = Vector3::ZERO;
   if (goingForward)

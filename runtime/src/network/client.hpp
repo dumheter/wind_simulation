@@ -16,7 +16,7 @@ namespace wind {
 class World;
 
 class Client : public ISteamNetworkingSocketsCallbacks {
- public:
+public:
   Client(World *world);
   Client(World *world, ConnectionId activeConnection);
 
@@ -40,15 +40,14 @@ class Client : public ISteamNetworkingSocketsCallbacks {
 
   UniqueId getUid() const { return m_uid; }
 
-  SendResult PacketSend(const Packet &packet,
-                        const SendStrategy send_strategy);
+  SendResult PacketSend(const Packet &packet, const SendStrategy send_strategy);
 
-  ConnectionState GetConnectionState() { return m_connectionState; }
+  ConnectionState GetConnectionState() const { return m_connectionState; }
 
   ConnectionId getConnectionId() const { return m_connection; }
 
-  std::optional<SteamNetworkingQuickConnectionStatus> GetConnectionStatus()
-      const;
+  std::optional<SteamNetworkingQuickConnectionStatus>
+  GetConnectionStatus() const;
 
   bool operator==(const Client &other) const {
     return m_connection == other.m_connection;
@@ -56,7 +55,7 @@ class Client : public ISteamNetworkingSocketsCallbacks {
 
   bool operator!=(const Client &other) const { return !(*this == other); }
 
- private:
+private:
   void handlePacket();
 
   void PollSocketStateChanges();
@@ -64,11 +63,11 @@ class Client : public ISteamNetworkingSocketsCallbacks {
   bool PollIncomingPackets();
 
   virtual void OnSteamNetConnectionStatusChanged(
-      SteamNetConnectionStatusChangedCallback_t * status) override;
+      SteamNetConnectionStatusChangedCallback_t *status) override;
 
   void SetConnectionState(const ConnectionState connection_state);
 
- private:
+private:
   ConnectionId m_connection;
   ISteamNetworkingSockets *m_socketInterface;
   ConnectionState m_connectionState;

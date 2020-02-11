@@ -18,6 +18,8 @@ public:
 
   void update() override;
 
+  bs::HSceneObject getCamera() const { return SO(); }
+
 private:
   void applyAngles();
 

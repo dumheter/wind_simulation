@@ -3,8 +3,8 @@
 #include "BsApplication.h"
 #include "BsFPSCamera.h"
 #include "app.hpp"
+#include "cmyplayer.hpp"
 #include "cnet_component.hpp"
-#include "network/client.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
 #include "utility/unique_id.hpp"
@@ -36,7 +36,7 @@ public:
    * camera.
    * @pre m_players must be empty
    */
-  bs::HSceneObject setupMyPlayer();
+  void setupMyPlayer();
 
   bs::HSceneObject setupPlayer();
 
@@ -67,7 +67,7 @@ private:
   bool m_cursorMode = true;
   bs::HFPSCamera m_fpsCamera;
   Server m_server;
-  Client m_client;
+  HCMyPlayer m_player;
 };
 
 } // namespace wind

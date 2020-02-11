@@ -19,11 +19,14 @@ public:
    * Dont forget to add this component to the world.
    * world->addNetComp(...)
    */
-  CNetComponent(bs::HSceneObject parent);
+  CNetComponent(const bs::HSceneObject& parent);
 
   void onTransformChanged(bs::TransformChangedFlags flags) override;
 
   UniqueId getUniqueId() const { return m_state.getUniqueId(); }
+
+  const MoveableState &getState() const { return m_state; }
+  MoveableState &getState() { return m_state; }
 
   bool operator==(const CNetComponent &other) const {
     return getUniqueId() == other.getUniqueId();

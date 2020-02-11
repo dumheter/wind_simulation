@@ -4,11 +4,18 @@
 
 namespace wind {
 
-CMyPlayer::CMyPlayer(const bs::HSceneObject &parent, World *world)
+CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
     : Component(parent), m_client(world) {
   setName("CMyPlayer");
-  auto netcomp = SO()->addComponent<CNetComponent>();
 }
+
+bool CMyPlayer::isConnected() const {
+  return m_client.GetConnectionState() == ConnectionState::kConnected;
+}
+
+void CMyPlayer::connect(const char *address) { m_client.Connect(address); }
+
+void CMyPlayer::disconnect() { m_client.CloseConnection(); }
 
 void CMyPlayer::update() {}
 

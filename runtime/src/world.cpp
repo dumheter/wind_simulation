@@ -7,6 +7,7 @@
 #include "Components/BsCPlaneCollider.h"
 #include "Components/BsCRenderable.h"
 #include "Components/BsCRigidbody.h"
+#include "Components/BsCSphereCollider.h"
 #include "GUI/BsCGUIWidget.h"
 #include "GUI/BsGUIButton.h"
 #include "GUI/BsGUIContent.h"
@@ -41,11 +42,10 @@
 
 namespace wind {
 
-World::World(const App::Info &info)
-    : App(info), m_server(this), m_client(this) {
+World::World(const App::Info &info) : App(info), m_server(this) {
+  setupMyPlayer();
   setupInput();
   setupScene();
-  setupMyPlayer();
 }
 
 void World::onPreUpdate() {
@@ -71,22 +71,21 @@ void World::setupScene() {
   skyboxComp->setTexture(skyboxTex);
 }
 
-bs::HSceneObject World::setupMyPlayer() {
+void World::setupMyPlayer() {
   using namespace bs;
-  AlfAssert(m_netComps.empty(),
-            "m_netComps must be empty before setting up myplayer");
-
+  AlfAssert(m_netComps.empty(), "must be done first");
   HSceneObject player = SceneObject::create("Player");
+
   HCharacterController charController =
       player->addComponent<CCharacterController>();
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
-  player->addComponent<FPSWalker>();
+  auto netComp = player->addComponent<CNetComponent>();
+  player->addComponent<FPSWalker>(netComp);
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
-  auto cmyplayer = player->addComponent<CMyPlayer>(this);
-  // m_players.push_back(player);
-  return player;
+  m_player = player->addComponent<CMyPlayer>(this);
+  m_netComps.push_back(netComp);
 }
 
 bs::HSceneObject World::setupPlayer() {
@@ -110,12 +109,15 @@ bs::HSceneObject World::setupPlayer() {
   renderable->setMaterial(material);
   HCNetComponent netComp = player->addComponent<CNetComponent>();
   m_netComps.push_back(netComp);
+  int a = 0;
   return player;
 }
 
 void World::reset() {
-  for (auto netComp : m_netComps) {
-    netComp->destroy();
+  for (auto &netComp : m_netComps) {
+    if (netComp) {
+      netComp->destroy();
+    }
   }
   m_netComps.clear();
 }
@@ -159,7 +161,12 @@ void World::setupInput() {
       gApplication().quitRequested();
     }
   });
-  gInput().onButtonDown.connect([this](const ButtonEvent &ev) {
+
+  auto material = createMaterial("res/textures/grid_2.png");
+  auto physicsMaterial = createPhysicsMaterial();
+  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Sphere);
+  gInput().onButtonDown.connect([this, material, physicsMaterial,
+                                 mesh](const ButtonEvent &ev) {
     if (ev.buttonCode == BC_MOUSE_RIGHT) {
       if (m_cursorMode) {
         m_cursorMode = !m_cursorMode;
@@ -172,6 +179,26 @@ void World::setupInput() {
         Cursor::instance().hide();
         SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
         Cursor::instance().clipToWindow(*primaryWindow);
+      }
+    }
+    if (ev.buttonCode == BC_MOUSE_LEFT) {
+      if (m_player->isConnected() && m_cursorMode) {
+        HSceneObject sphere = SceneObject::create("Sphere");
+        HRenderable renderable = sphere->addComponent<CRenderable>();
+        renderable->setMesh(mesh);
+        renderable->setMaterial(material);
+        HSphereCollider collider = sphere->addComponent<CSphereCollider>();
+        collider->setMaterial(physicsMaterial);
+        collider->setMass(25.0f);
+        HRigidbody rigid = sphere->addComponent<CRigidbody>();
+        auto spawnPos = m_netComps[0]->getState().getPosition();
+        const auto &forward =
+            m_fpsCamera->getCamera()->getTransform().getForward();
+        spawnPos += forward * 0.5f;
+        spawnPos += Vector3(0.0f, 0.8f, 0.0f);
+        sphere->setPosition(spawnPos);
+        sphere->setScale(Vector3(0.3f, 0.3f, 0.3f));
+        rigid->addForce(forward * 40.0f, ForceMode::Velocity);
       }
     }
   });
@@ -208,6 +235,8 @@ bs::HSceneObject World::createCube(bs::HMaterial material,
   boxCollider->setMaterial(physicsMaterial);
   boxCollider->setMass(25.0f);
   HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
+  auto netComp = cube->addComponent<CNetComponent>();
+  m_netComps.push_back(netComp);
   return cube;
 }
 
@@ -283,19 +312,19 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     GUIButton *btn =
         l->addNewElement<GUIButton>(GUIContent{HString{"connect"}});
     btn->onClick.connect([input, this] {
-      if (m_client.GetConnectionState() == ConnectionState::kDisconnected) {
+      if (!m_player->isConnected()) {
         logVerbose("connect to {}", input->getText().c_str());
         auto &t = input->getText();
         if (t.find(":") != std::string::npos && t.size() > 8) {
-          m_client.Connect(input->getText().c_str());
+          m_player->connect(input->getText().c_str());
         }
       }
     });
     GUIButton *btn2 = l->addNewElement<GUIButton>(GUIContent{HString{"d/c"}});
     btn2->onClick.connect([input, this] {
-      logVerbose("diconnected");
-      if (m_client.GetConnectionState() == ConnectionState::kConnected) {
-        m_client.CloseConnection();
+      if (m_player->isConnected()) {
+        logVerbose("diconnected");
+        m_player->disconnect();
       }
     });
   }

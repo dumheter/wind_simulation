@@ -24,6 +24,12 @@ public:
 
   UniqueId getUniqueId() const { return m_id; }
 
+  bs::Vector3 getPosition() const { return m_position; }
+
+  bs::Vector3 getScale() const { return m_scale; }
+
+  bs::Quaternion getRotation() const { return m_rotation; }
+
   void from(const bs::Transform &transform);
 
   void from(bs::HSceneObject &so);
