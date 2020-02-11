@@ -207,9 +207,9 @@ private:
   u32 m_velocityBufferIdx = 0;
 
   /* Diffusion rate */
-  f32 m_diffusion = 0.3f;
+  f32 m_diffusion = 0.00001f;
   /* Viscosity */
-  f32 m_viscosity = 0.3f;
+  f32 m_viscosity = 0.0f;
 
   /* Density fields */
   DensityField *m_densityFields[BUFFER_COUNT];

@@ -88,29 +88,38 @@ void WindSimulation::stepDensity(f32 delta) {
   // Sources and sinks
   if (m_addDensitySource || m_addDensitySink) {
     if (m_addDensitySource) {
+      m_addDensitySource = false;
+
       P(0, 0, 0) = 1.0f;
       P(0, 1, 0) = 1.0f;
       P(0, 2, 0) = 1.0f;
       P(0, 3, 0) = 1.0f;
       P(0, 4, 0) = 1.0f;
-      m_addDensitySource = false;
     }
     if (m_addDensitySink) {
-      P(m_width - 1, 0, m_depth - 1) = 0.0f;
-      P(m_width - 1, 1, m_depth - 1) = 0.0f;
-      P(m_width - 1, 2, m_depth - 1) = 0.0f;
-      P(m_width - 1, 3, m_depth - 1) = 0.0f;
-      P(m_width - 1, 4, m_depth - 1) = 0.0f;
-      P(m_width - 1, 5, m_depth - 1) = 0.0f;
-
-      P(m_width - 2, 0, m_depth - 2) = 0.0f;
-      P(m_width - 2, 1, m_depth - 2) = 0.0f;
-      P(m_width - 2, 2, m_depth - 2) = 0.0f;
-      P(m_width - 2, 3, m_depth - 2) = 0.0f;
-      P(m_width - 2, 4, m_depth - 2) = 0.0f;
-      P(m_width - 2, 5, m_depth - 2) = 0.0f;
       m_addDensitySink = false;
+
+      // P(m_width - 1, 0, m_depth - 1) = 0.0f;
+      // P(m_width - 1, 1, m_depth - 1) = 0.0f;
+      // P(m_width - 1, 2, m_depth - 1) = 0.0f;
+      // P(m_width - 1, 3, m_depth - 1) = 0.0f;
+      // P(m_width - 1, 4, m_depth - 1) = 0.0f;
+      // P(m_width - 1, 5, m_depth - 1) = 0.0f;
+      //
+      // P(m_width - 2, 0, m_depth - 2) = 0.0f;
+      // P(m_width - 2, 1, m_depth - 2) = 0.0f;
+      // P(m_width - 2, 2, m_depth - 2) = 0.0f;
+      // P(m_width - 2, 3, m_depth - 2) = 0.0f;
+      // P(m_width - 2, 4, m_depth - 2) = 0.0f;
+      // P(m_width - 2, 5, m_depth - 2) = 0.0f;
+
+      for (s32 j = 0; j < m_height; j++) {
+        for (s32 i = 0; i < m_width; i++) {
+          P(i, j, m_depth - 1) = 0.0f;
+        }
+      }
     }
+
     updateDensityBufferIndex();
   }
 
@@ -125,6 +134,8 @@ void WindSimulation::stepDensity(f32 delta) {
     stepDensityAdvection(delta);
     updateDensityBufferIndex();
   }
+
+  // 1. 6.  11. 14
 }
 
 // -------------------------------------------------------------------------- //
@@ -159,7 +170,7 @@ void WindSimulation::init() {
     m_velocityFields[j]->setBorder(VectorField::BorderKind::CONTAINED);
     for (u32 i = 0; i < getVelocityField()->getDataSize(); i++) {
       VectorField::Pos pos = getVelocityField()->fromOffset(i);
-      m_velocityFields[j]->get(i) = bs::Vector3(1.0f, 0.2f, 1.0f);
+      m_velocityFields[j]->get(i) = bs::Vector3(0.8f, 0.1f, 0.6f);
     }
   }
 }
@@ -169,15 +180,16 @@ void WindSimulation::init() {
 void WindSimulation::stepDensityDiffusion(f32 delta) {
   F_DEF
 
-  f32 cubic = std::pow(f32(wind::max(wind::max(m_width, m_height),
-                                     wind::max(m_height, m_depth))),
-                       3);
+  f32 maxDim = f32(
+      wind::max(wind::max(m_width, m_height), wind::max(m_height, m_depth)));
+  f32 cubic = std::pow(maxDim, 3);
   f32 a = delta * m_diffusion * cubic;
   f32 c = 1.0f + 6.0f * a;
 
-  // Gauss seidel iterations
+  // Gauss-Seidel iterations
   for (u32 k = 0; k < GAUSS_SEIDEL_STEPS; k++) {
-    // For each cell
+
+    // Update cell from neighbors
     for (u32 k = 0; k < m_depth; k++) {
       for (u32 j = 0; j < m_height; j++) {
         for (u32 i = 0; i < m_width; i++) {
@@ -197,31 +209,39 @@ void WindSimulation::stepDensityAdvection(f32 delta) {
 
   f32 maxDim = f32(
       wind::max(wind::max(m_width, m_height), wind::max(m_height, m_depth)));
-  f32 dtx = delta * maxDim;
   f32 dty = delta * maxDim;
   f32 dtz = delta * maxDim;
+  f32 dtx = delta * maxDim;
 
   for (s32 k = 0; k < s32(m_depth); k++) {
     for (s32 j = 0; j < s32(m_height); j++) {
       for (s32 i = 0; i < s32(m_width); i++) {
-        bs::Vector3 &vel = V0(i, j, k);
+        // Calculate interpolation points (a0, a1), (b0, b1) and (c0, c1) by
+        // following the wind vector backwards from the cell, seeing where the
+        // density has flowed from.
+        bs::Vector3 &vel = V(i, j, k);
 
-        f32 iPrev = clamp(i - dtx * vel.x, 0.5f, m_width - 0.5f);
+        f32 clampLower = 0.5f;
+        f32 clampUpper = 0.5f;
+
+        f32 iPrev = clamp(i - dtx * vel.x, clampLower, m_width + clampUpper);
         s32 i0 = s32(std::floor(iPrev));
         s32 i1 = i0 + 1;
         f32 a1 = iPrev - i0, a0 = 1 - a1;
 
-        f32 jPrev = clamp(j - dty * vel.y, 0.5f, m_height - 0.5f);
+        f32 jPrev = clamp(j - dty * vel.y, clampLower, m_height + clampUpper);
         s32 j0 = s32(std::floor(jPrev));
         s32 j1 = j0 + 1;
         f32 b1 = jPrev - j0, b0 = 1 - b1;
 
-        f32 kPrev = clamp(k - dtz * vel.z, 0.5f, m_depth - 0.5f);
+        f32 kPrev = clamp(k - dtz * vel.z, clampLower, m_depth + clampUpper);
         s32 k0 = s32(std::floor(kPrev));
         s32 k1 = k0 + 1;
         f32 c1 = kPrev - k0, c0 = 1 - c1;
 
-#if 0
+        // Interpolate the densities (According to 'David H. Eberly' and
+        // 'Jos Stam' respectively)
+#if 1
         P(i, j, k) =
             c0 * (b0 * (a0 * P0_S(i0, j0, k0) + a1 * P0_S(i1, j0, k0)) +
                   b1 * (a0 * P0_S(i0, i1, k0) + a1 * P0_S(i1, j1, k0))) +

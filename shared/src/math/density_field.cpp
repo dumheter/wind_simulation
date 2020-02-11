@@ -66,13 +66,6 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
 // -------------------------------------------------------------------------- //
 
 f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
-  /*
-  s32 _x = clamp(x, 0, s32(m_dim.width) - 1);
-  s32 _y = clamp(y, 0, s32(m_dim.height) - 1);
-  s32 _z = clamp(z, 0, s32(m_dim.depth) - 1);
-  return get(_x, _y, _z);
-  */
-
   bool bx = !isInBoundsX(x);
   bool by = !isInBoundsY(y);
   bool bz = !isInBoundsZ(z);

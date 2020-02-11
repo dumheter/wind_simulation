@@ -436,33 +436,41 @@ void Editor::setupGUI() {
 
   // Density source
   {
-    GUILabel *label =
-        panel->addNewElement<GUILabel>(HString("Density source"));
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Density source"));
     label->setPosition(4, height);
 
-    GUIButton *button = panel->addNewElement<GUIButton>(HString("Add"));
+    {
+      GUIButton *button =
+          panel->addNewElement<GUIButton>(HString("Add Source"));
+      button->setWidth(90);
+      button->setPosition(120, height);
+      button->onClick.connect([this]() {
+        m_windSim->addDensitySource();
+        logVerbose("Added density sources");
+      });
+    }
+
+    {
+      GUIButton *button = panel->addNewElement<GUIButton>(HString("Add Sink"));
+      button->setWidth(90);
+      button->setPosition(214, height);
+      button->onClick.connect([this]() {
+        m_windSim->addDensitySink();
+        logVerbose("Added density sinks");
+      });
+    }
+
+    GUIButton *button = panel->addNewElement<GUIButton>(HString("Clear"));
     button->setWidth(90);
-    button->setPosition(120, height);
+    button->setPosition(308, height);
     button->onClick.connect([this]() {
-      m_windSim->addDensitySource();
-      logVerbose("Added density sources");
-    });
-
-    height += button->getBounds().height + 2;
-  }
-
-  // Density sink
-  {
-    GUILabel *label =
-        panel->addNewElement<GUILabel>(HString("Density sink"));
-    label->setPosition(4, height);
-
-    GUIButton *button = panel->addNewElement<GUIButton>(HString("Add"));
-    button->setWidth(90);
-    button->setPosition(120, height);
-    button->onClick.connect([this]() {
-      m_windSim->addDensitySink();
-      logVerbose("Added density sinks");
+      DensityField *p = m_windSim->getDensityField();
+      DensityField *p0 = m_windSim->getDensityFieldPrev();
+      for (u32 i = 0; i < p->getDataSize(); i++) {
+        p->get(i) = 0;
+        p0->get(i) = 0;
+      }
+      logVerbose("Cleared density");
     });
 
     height += button->getBounds().height + 2;
