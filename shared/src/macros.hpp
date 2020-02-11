@@ -23,44 +23,11 @@
 #pragma once
 
 // ========================================================================== //
-// Headers
+// Macros
 // ========================================================================== //
 
-#include "types.hpp"
-
-// ========================================================================== //
-// Dim3D Declaration
-// ========================================================================== //
-
-namespace wind {
-
-/* 3D dimensions structure*/
-struct Dim3D {
-  /* Width of the volume */
-  u32 width;
-  /* Height of the volume */
-  u32 height;
-  /* Depth of the volume */
-  u32 depth;
-};
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
-// ========================================================================== //
-
-namespace wind {
-
-inline bool operator==(const Dim3D &lhs, const Dim3D &rhs) {
-  return (lhs.width == rhs.width) && (lhs.height == rhs.height) &&
-         (lhs.depth == rhs.depth);
-}
-
-// -------------------------------------------------------------------------- //
-
-inline bool operator!=(const Dim3D &lhs, const Dim3D &rhs) {
-  return !(lhs == rhs);
-}
-
-} // namespace wind
+/* Macro to force a namespace class */
+#define WIND_NAMESPACE_CLASS(type)                                             \
+public:                                                                        \
+  type() = delete;                                                             \
+  ~type() = delete;

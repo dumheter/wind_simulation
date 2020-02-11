@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
+#include "math/math.hpp"
 
 // ========================================================================== //
 // VectorField Implementation
@@ -66,10 +66,42 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
 // -------------------------------------------------------------------------- //
 
 f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
-  x = clamp(x, 0, s32(m_dim.width) - 1);
-  y = clamp(y, 0, s32(m_dim.height) - 1);
-  z = clamp(z, 0, s32(m_dim.depth) - 1);
-  return get(x, y, z);
+  /*
+  s32 _x = clamp(x, 0, s32(m_dim.width) - 1);
+  s32 _y = clamp(y, 0, s32(m_dim.height) - 1);
+  s32 _z = clamp(z, 0, s32(m_dim.depth) - 1);
+  return get(_x, _y, _z);
+  */
+
+  bool bx = !isInBoundsX(x);
+  bool by = !isInBoundsY(y);
+  bool bz = !isInBoundsZ(z);
+
+  s32 _x = clamp(x, 0, s32(m_dim.width) - 1);
+  s32 _y = clamp(y, 0, s32(m_dim.height) - 1);
+  s32 _z = clamp(z, 0, s32(m_dim.depth) - 1);
+
+  if (bx && by && bz) { // X, Y and Z
+    f32 comb = getSafe(_x, y, z) + getSafe(x, _y, z) + getSafe(x, y, _z);
+    return 1.0f / 3.0f * comb;
+  } else if (bx && by) { // X and Y
+    f32 comb = getSafe(_x, y, z) + getSafe(x, _y, z);
+    return 1.0f / 2.0f * comb;
+  } else if (bx && bz) { // X and Z
+    f32 comb = getSafe(_x, y, z) + getSafe(x, y, _z);
+    return 1.0f / 2.0f * comb;
+  } else if (by && bz) { // Y and Z
+    f32 comb = getSafe(x, _y, z) + getSafe(x, y, _z);
+    return 1.0f / 2.0f * comb;
+  } else if (bx) { // X
+    return get(_x, y, z);
+  } else if (by) { // Y
+    return get(x, _y, z);
+  } else if (bz) { // Z
+    return get(x, y, _z);
+  } else { // None
+    return get(x, y, z);
+  }
 }
 
 } // namespace wind

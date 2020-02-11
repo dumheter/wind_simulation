@@ -28,10 +28,10 @@
 
 #include <tuple>
 
-#include "common.hpp"
+#include "types.hpp"
 
-#include "BsCorePrerequisites.h"
-#include "Resources/BsResource.h"
+#include <BsCorePrerequisites.h>
+#include <Resources/BsResource.h>
 
 // ========================================================================== //
 // Asset Declaration

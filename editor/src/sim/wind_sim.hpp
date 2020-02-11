@@ -50,6 +50,33 @@ namespace wind {
  * The third, and last, buffer is the obstruction field. This field has binary
  * cells, used to determine whether or not the cell is obstructed by objects in
  * the scene. This buffer is also not multi-buffered as it's static.
+ *
+ *
+ *
+ * To update the simulation of the wind, the 'step' function must be called.
+ * This function takes in the delta time (time between frames) that should be
+ * used to update the simulation for the correct timespan. Supplying the same
+ * delta time as that of the game means that the simulation will run in
+ * real-time.
+ *
+ * -----------------------------------------------------------------------------
+ *
+ * Algorithms are adapted from the 2003 paper by Jos Stam "Real-Time Fluid
+ * Dynamics for Games". The 3D extension by Blain Maguire
+ * (Link: https://github.com/BlainMaguire/3dfluid) has also been used.
+ *
+ * The implementation of field (Field) used by the wind simulation supports
+ * sampling cells outside the bounds using the 'getSafe' function. This means
+ * that unlike the two mentioned texts we do not need to set boundary conditions
+ * after every action, the values can instead simply be sampled outside the
+ * field. Depending on where outside the lie (face, edge, corner) the sampled
+ * value matches that set by the 'set_bnd' function in those texts.
+ *
+ * For the velocity fields (VectorField) the values sampled outside the
+ * boundaries can be changed by calling 'setBorderKind'
+ * (See wind::VectorField::BorderKind) for more information about the different
+ * border kinds.
+ *
  */
 class WindSimulation {
 public:
@@ -65,11 +92,17 @@ public:
    * real-time */
   void step(f32 delta);
 
-  /* Enable or disable density sources */
-  void setDensitySourceActive(bool active) { m_densitySourceActive = active; }
+  /* Step density simulation */
+  void stepDensity(f32 delta);
 
-  /* Enable or disable density sinks */
-  void setDensitySinkActive(bool active) { m_densitySinkActive = active; }
+  /* Step velocity simulation */
+  void stepVelocity(f32 delta);
+
+  /* Add density sources */
+  void addDensitySource() { m_addDensitySource = true; }
+
+  /* Add density sinks */
+  void addDensitySink() { m_addDensitySink = true; }
 
   /* Enable or disable diffusion simulation for the density field */
   void setDensityDiffusionActive(bool active) {
@@ -185,15 +218,16 @@ private:
   /* Obstruction field */
   ObstructionField *m_obstructionField;
 
-  /* Whether density sources are active */
-  bool m_densitySourceActive = false;
-  /* Whether density sources are active */
-  bool m_densitySinkActive = false;
+  /* Whether to add density sources */
+  bool m_addDensitySource = false;
+  /* Whether to add density sinks */
+  bool m_addDensitySink = false;
 
   /* Whether density diffusion is enabled */
   bool m_densityDiffusionActive = true;
   /* Whether density advection is enabled */
   bool m_densityAdvectionActive = true;
+
   /* Whether velocity diffusion is enabled */
   bool m_velocityDiffusionActive = true;
   /* Whether velocity advection is enabled */

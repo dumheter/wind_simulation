@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
+#include "types.hpp"
 
 #include <BsApplication.h>
 

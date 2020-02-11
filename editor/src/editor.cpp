@@ -109,6 +109,17 @@ void Editor::onPreUpdate(f32 delta) {
       enterFullscreen();
     }
   }
+
+  // Add source 'X'
+  if (gInput().isButtonHeld(ButtonCode::BC_X)) {
+    m_windSim->addDensitySource();
+    logVerbose("Added density sources");
+  }
+  // Add sink 'Z'
+  if (gInput().isButtonHeld(ButtonCode::BC_Z)) {
+    m_windSim->addDensitySink();
+    logVerbose("Added density sinks");
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -425,32 +436,36 @@ void Editor::setupGUI() {
 
   // Density source
   {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("Density source"));
+    GUILabel *label =
+        panel->addNewElement<GUILabel>(HString("Density source"));
     label->setPosition(4, height);
 
-    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DebugDenSrc"));
-    toggle->setPosition(120, height);
-    toggle->onToggled.connect([this](bool t) {
-      m_windSim->setDensitySourceActive(t);
-      logVerbose("Density sources: {}", t ? "ENABLED" : "DISABLED");
+    GUIButton *button = panel->addNewElement<GUIButton>(HString("Add"));
+    button->setWidth(90);
+    button->setPosition(120, height);
+    button->onClick.connect([this]() {
+      m_windSim->addDensitySource();
+      logVerbose("Added density sources");
     });
 
-    height += toggle->getBounds().height + 2;
+    height += button->getBounds().height + 2;
   }
 
   // Density sink
   {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("Density sink"));
+    GUILabel *label =
+        panel->addNewElement<GUILabel>(HString("Density sink"));
     label->setPosition(4, height);
 
-    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DebugDenSnk"));
-    toggle->setPosition(120, height);
-    toggle->onToggled.connect([this](bool t) {
-      m_windSim->setDensitySinkActive(t);
-      logVerbose("Density sinks: {}", t ? "ENABLED" : "DISABLED");
+    GUIButton *button = panel->addNewElement<GUIButton>(HString("Add"));
+    button->setWidth(90);
+    button->setPosition(120, height);
+    button->onClick.connect([this]() {
+      m_windSim->addDensitySink();
+      logVerbose("Added density sinks");
     });
 
-    height += toggle->getBounds().height + 2;
+    height += button->getBounds().height + 2;
   }
 
   // Sim density parts

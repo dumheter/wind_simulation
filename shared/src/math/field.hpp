@@ -26,8 +26,8 @@
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
 #include "math/dim.hpp"
+#include "types.hpp"
 
 #include <BsPrerequisites.h>
 #include <Debug/BsDebugDraw.h>
@@ -38,7 +38,18 @@
 
 namespace wind {
 
-/* Class that represents a 3D field of objects of type T */
+/* Class that represents a field 3-dimensional field of objects of the specified
+ * type 'T'. The field consists of 'width' by 'height' by 'depth' number of
+ * cells, where each cell stores a value of type 'T'.
+ *
+ * Sampling the field can be done in two ways. Either using the 'get' function
+ * that simply returns the value in a cell given the 'x', 'y' and 'z' values. Or
+ * the more complex way by using 'getSafe'. The 'getSafe' function can be used
+ * to query cells outside the field ('get' would (hopefully) crash). This means
+ * that 'getSafe' can be used to sample neighboring cells without the risk of
+ * ending up outside the valid data buffer range.
+ *
+ */
 template <typename T> class Field {
 public:
   /* Field position */

@@ -55,6 +55,10 @@ ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
 
 // -------------------------------------------------------------------------- //
 
+ObstructionField::~ObstructionField() { delete m_data; }
+
+// -------------------------------------------------------------------------- //
+
 void ObstructionField::debugDrawObject(const bs::Vector3 &offset) {
   bs::DebugDraw::instance().setColor(bs::Color::BansheeOrange);
 

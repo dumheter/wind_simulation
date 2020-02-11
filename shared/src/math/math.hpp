@@ -23,44 +23,25 @@
 #pragma once
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "types.hpp"
-
-// ========================================================================== //
-// Dim3D Declaration
-// ========================================================================== //
-
-namespace wind {
-
-/* 3D dimensions structure*/
-struct Dim3D {
-  /* Width of the volume */
-  u32 width;
-  /* Height of the volume */
-  u32 height;
-  /* Depth of the volume */
-  u32 depth;
-};
-
-} // namespace wind
-
-// ========================================================================== //
 // Functions
 // ========================================================================== //
 
 namespace wind {
 
-inline bool operator==(const Dim3D &lhs, const Dim3D &rhs) {
-  return (lhs.width == rhs.width) && (lhs.height == rhs.height) &&
-         (lhs.depth == rhs.depth);
+/* Clamp 'value' between two other values 'min' and 'max' */
+template <typename T, typename S, typename U>
+inline constexpr T clamp(T value, S min, U max) {
+  return value < min ? min : value > max ? max : value;
 }
 
 // -------------------------------------------------------------------------- //
 
-inline bool operator!=(const Dim3D &lhs, const Dim3D &rhs) {
-  return !(lhs == rhs);
-}
+/* Returns the maximum of two values */
+template <typename T> inline constexpr T max(T a, T b) { return a > b ? a : b; }
+
+// -------------------------------------------------------------------------- //
+
+/* Returns the minimum of two values */
+template <typename T> inline constexpr T min(T a, T b) { return a < b ? a : b; }
 
 } // namespace wind

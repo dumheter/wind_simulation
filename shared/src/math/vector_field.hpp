@@ -26,8 +26,8 @@
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
 #include "math/field.hpp"
+#include "types.hpp"
 
 #include <Math/BsVector3.h>
 
