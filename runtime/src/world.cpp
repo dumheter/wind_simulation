@@ -81,7 +81,7 @@ void World::setupMyPlayer() {
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
-  player->addComponent<FPSWalker>(netComp);
+  player->addComponent<FPSWalker>();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
@@ -116,7 +116,7 @@ bs::HSceneObject World::setupPlayer() {
 void World::reset() {
   for (auto &netComp : m_netComps) {
     if (netComp) {
-      netComp->destroy();
+      //netComp->destroy();
     }
   }
   m_netComps.clear();
@@ -189,13 +189,13 @@ void World::setupInput() {
         renderable->setMaterial(material);
         HSphereCollider collider = sphere->addComponent<CSphereCollider>();
         collider->setMaterial(physicsMaterial);
-        collider->setMass(25.0f);
+        collider->setMass(8.0f);
         HRigidbody rigid = sphere->addComponent<CRigidbody>();
         auto spawnPos = m_netComps[0]->getState().getPosition();
         const auto &forward =
             m_fpsCamera->getCamera()->getTransform().getForward();
-        spawnPos += forward * 0.5f;
-        spawnPos += Vector3(0.0f, 0.8f, 0.0f);
+        spawnPos += forward * 0.7f;
+        spawnPos += Vector3(0.0f, 1.0f, 0.0f);
         sphere->setPosition(spawnPos);
         sphere->setScale(Vector3(0.3f, 0.3f, 0.3f));
         rigid->addForce(forward * 40.0f, ForceMode::Velocity);
