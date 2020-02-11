@@ -17,6 +17,6 @@ void CMyPlayer::connect(const char *address) { m_client.Connect(address); }
 
 void CMyPlayer::disconnect() { m_client.CloseConnection(); }
 
-void CMyPlayer::update() {}
+void CMyPlayer::update() { m_client.Poll(); }
 
 } // namespace wind

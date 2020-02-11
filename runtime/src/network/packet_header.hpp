@@ -12,6 +12,7 @@ enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   kPlayerJoin = 0,
   kPlayerLeave,
   kPlayerUpdate,
+  kHello,
 };
 
 struct PacketHeader {

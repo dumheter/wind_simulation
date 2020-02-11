@@ -22,6 +22,11 @@ struct MemoryWriter {
   MemoryWriter(Packet *packet);
   ~MemoryWriter();
 
+  MemoryWriter(const MemoryWriter &other) = delete;
+  MemoryWriter &operator=(const MemoryWriter &other) = delete;
+  MemoryWriter(MemoryWriter &&other);
+  MemoryWriter &operator=(MemoryWriter &&other) noexcept;
+
   alflib::RawMemoryWriter *operator->() { return &mw_; }
   alflib::RawMemoryWriter *operator*() { return &mw_; }
 
@@ -171,9 +176,13 @@ public:
 
   void SetHeader(PacketHeaderTypes header) { SetHeader(PacketHeader{header}); }
 
+private:
   void SetHeader(const PacketHeader header);
 
+public:
   const PacketHeader *GetHeader() const;
+
+  PacketHeaderTypes GetHeaderType() const;
 
 private:
   ValueType *GetHeaderRaw();

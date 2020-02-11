@@ -127,6 +127,11 @@ const PacketHeader *Packet::GetHeader() const {
   return reinterpret_cast<const PacketHeader *>(&container_[0]);
 }
 
+PacketHeaderTypes Packet::GetHeaderType() const {
+  auto header = GetHeader();
+  return header->type;
+}
+
 Packet::ValueType *Packet::GetHeaderRaw() { return GetPacket(); }
 
 void Packet::ClearHeader() { std::memset(GetHeaderRaw(), 0, GetHeaderSize()); }
@@ -217,6 +222,25 @@ MemoryWriter::MemoryWriter(Packet *packet)
 MemoryWriter::~MemoryWriter() {
   AlfAssert(did_finalize, "memory writer was destructed without have "
                           "gotten a call to finalize, this is a bug");
+}
+
+MemoryWriter::MemoryWriter(MemoryWriter &&other)
+    : mw_(other.packet_->GetRawPayload(), other.packet_->GetPayloadCapacity()),
+      packet_(other.packet_), did_finalize(false) {
+  other.did_finalize = true;
+  other.packet_ = nullptr;
+}
+
+MemoryWriter &MemoryWriter::operator=(MemoryWriter &&other) noexcept {
+  if (this != &other) {
+    mw_ = alflib::RawMemoryWriter{other.packet_->GetRawPayload(),
+                                  other.packet_->GetPayloadCapacity()};
+    packet_ = other.packet_;
+    did_finalize = false;
+    other.did_finalize = true;
+    other.packet_ = nullptr;
+  }
+  return *this;
 }
 
 void MemoryWriter::Finalize() {

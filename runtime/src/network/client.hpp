@@ -40,6 +40,8 @@ public:
 
   UniqueId getUid() const { return m_uid; }
 
+  void generateUid() { m_uid = UniqueIdGenerator::next(); }
+
   SendResult PacketSend(const Packet &packet, const SendStrategy send_strategy);
 
   ConnectionState GetConnectionState() const { return m_connectionState; }

@@ -18,8 +18,7 @@ constexpr float TOP_SPEED = 7.0f;   // m/s
 constexpr float ACCELERATION = 1.5f;
 constexpr float FAST_MODE_MULTIPLIER = 2.0f;
 
-FPSWalker::FPSWalker(const HSceneObject &parent)
-    : Component(parent) {
+FPSWalker::FPSWalker(const HSceneObject &parent) : Component(parent) {
   setName("FPSWalker");
   mController = SO()->getComponent<CCharacterController>();
   mMoveForward = VirtualButton("Forward");

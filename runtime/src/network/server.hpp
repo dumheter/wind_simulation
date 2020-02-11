@@ -11,7 +11,7 @@
 #include <optional>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
-#include <vector>
+#include <unordered_map>
 
 // ========================================================================== //
 // Server Declaration
@@ -85,7 +85,8 @@ private:
 private:
   HSteamListenSocket m_socket;
   ISteamNetworkingSockets *m_socketInterface;
-  std::vector<Client> m_clients{};
+  HSteamNetPollGroup m_pollGroup;
+  std::unordered_map<ConnectionId, UniqueId> m_connections;
   World *m_world;
   Packet m_packet{10000};
   ConnectionState m_connectionState;

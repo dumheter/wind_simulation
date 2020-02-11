@@ -52,6 +52,8 @@ void World::onPreUpdate() {
   if (m_cursorMode) {
     Util::CenterCursor(bs::gApplication().getPrimaryWindow());
   }
+
+  m_server.Poll();
 }
 
 void World::setupScene() {
@@ -116,7 +118,7 @@ bs::HSceneObject World::setupPlayer() {
 void World::reset() {
   for (auto &netComp : m_netComps) {
     if (netComp) {
-      //netComp->destroy();
+      // netComp->destroy();
     }
   }
   m_netComps.clear();

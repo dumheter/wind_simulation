@@ -19,7 +19,7 @@ public:
    * Dont forget to add this component to the world.
    * world->addNetComp(...)
    */
-  CNetComponent(const bs::HSceneObject& parent);
+  CNetComponent(const bs::HSceneObject &parent);
 
   void onTransformChanged(bs::TransformChangedFlags flags) override;
 

@@ -1,5 +1,7 @@
 #include "net_common.hpp"
 #include "log.hpp"
+#include <steam/isteamnetworkingutils.h>
+#include <steam/steamnetworkingsockets.h>
 
 namespace wind::Common {
 
@@ -53,5 +55,25 @@ SendResult SendPacket(const Packet &packet, const SendStrategy send_strategy,
 
   return result;
 }
+
+static void DebugOutputCallback(ESteamNetworkingSocketsDebugOutputType type,
+                                const char *msg) {
+  logInfo("[STEAM:{}] {}", type, msg);
+}
+
+void InitNetwork() {
+  SteamDatagramErrMsg errMsg;
+  if (!GameNetworkingSockets_Init(nullptr, errMsg)) {
+    logError("failed to init network: [{}]", errMsg);
+  }
+  // auto detail_level = ESteamNetworkingSocketsDebugOutputType::
+  //   k_ESteamNetworkingSocketsDebugOutputType_Everything;
+  auto detail_level = ESteamNetworkingSocketsDebugOutputType::
+      k_ESteamNetworkingSocketsDebugOutputType_Important;
+  SteamNetworkingUtils()->SetDebugOutputFunction(detail_level,
+                                                 DebugOutputCallback);
+}
+
+void KillNetwork() { GameNetworkingSockets_Kill(); }
 
 } // namespace wind::Common

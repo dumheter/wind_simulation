@@ -30,7 +30,11 @@ SendResult SendPacket(const Packet &packet, const SendStrategy send_strategy,
                       const HSteamNetConnection connection,
                       ISteamNetworkingSockets *socket_interface);
 
-}
+void InitNetwork();
+
+void KillNetwork();
+
+} // namespace Common
 
 } // namespace wind
 
