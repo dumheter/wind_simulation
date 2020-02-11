@@ -34,11 +34,13 @@
 #include "log.hpp"
 #include <Components/BsCSkybox.h>
 #include <alflib/core/assert.hpp>
+#include <cstdlib>
 #include <regex>
 
 namespace wind {
 
-World::World(const App::Info &info) : App(info), m_server(this) {
+World::World(const App::Info &info)
+    : App(info), m_server(this), m_client(this) {
   setupInput();
   setupScene();
   setupMyPlayer();
@@ -112,7 +114,7 @@ void World::reset() {
 
 void World::onPlayerJoin(UniqueId playerUid) { logInfo("player joined TODO"); }
 
-void World::onPlayerLeave(UniqueId uid) {}
+void World::onPlayerLeave(UniqueId uid) { logInfo("player leave TODO"); }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   using namespace bs;
@@ -245,7 +247,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   layout->setSize(200, 700);
   layout->addNewElement<GUILabel>(HString{u8"Press the Escape key to quit"});
 
-  {
+  { // Start Server
     GUILayoutX *l = layout->addNewElement<GUILayoutX>();
     l->addNewElement<GUILabel>(HString{u8"port"});
     GUIInputBox *input = l->addNewElement<GUIInputBox>();
@@ -256,12 +258,15 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
 
     GUIButton *startServerBtn =
         l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
-    startServerBtn->onClick.connect([input] {
-      logVerbose("start server on {}", input->getText().c_str());
+    startServerBtn->onClick.connect([input, this] {
+      if (m_server.getConnectionState() == ConnectionState::kDisconnected) {
+        logVerbose("start server on {}", input->getText().c_str());
+        m_server.StartServer(std::atoi(input->getText().c_str()));
+      }
     });
   }
 
-  {
+  { // Client network
     GUILayoutX *l = layout->addNewElement<GUILayoutX>();
     l->addNewElement<GUILabel>(HString{u8"ip:port"});
     GUIInputBox *input = l->addNewElement<GUIInputBox>();
@@ -269,8 +274,22 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
 
     GUIButton *btn =
         l->addNewElement<GUIButton>(GUIContent{HString{"connect"}});
-    btn->onClick.connect(
-        [input] { logVerbose("connect to {}", input->getText().c_str()); });
+    btn->onClick.connect([input, this] {
+      if (m_client.GetConnectionState() == ConnectionState::kDisconnected) {
+        logVerbose("connect to {}", input->getText().c_str());
+        auto &t = input->getText();
+        if (t.find(":") != std::string::npos && t.size() > 8) {
+          m_client.Connect(input->getText().c_str());
+        }
+      }
+    });
+    GUIButton *btn2 = l->addNewElement<GUIButton>(GUIContent{HString{"d/c"}});
+    btn2->onClick.connect([input, this] {
+      logVerbose("diconnected");
+      if (m_client.GetConnectionState() == ConnectionState::kConnected) {
+        m_client.CloseConnection();
+      }
+    });
   }
 
   return gui;

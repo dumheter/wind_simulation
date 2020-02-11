@@ -64,6 +64,8 @@ public:
   std::optional<SteamNetworkingQuickConnectionStatus>
   GetConnectionStatus(const ConnectionId connection_id) const;
 
+  ConnectionState getConnectionState() const { return m_connectionState; }
+
 private:
   void PollSocketStateChanges();
 
@@ -86,6 +88,7 @@ private:
   std::vector<Client> m_clients{};
   World *m_world;
   Packet m_packet{10000};
+  ConnectionState m_connectionState;
 };
 } // namespace wind
 

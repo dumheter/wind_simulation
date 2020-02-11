@@ -27,13 +27,25 @@ bool Client::Poll() {
   return gotPacket;
 }
 
-void Client::Connect(const SteamNetworkingIPAddr &address) {
+bool Client::Connect(const SteamNetworkingIPAddr &address) {
   m_connection = m_socketInterface->ConnectByIPAddress(address, 0, nullptr);
-  if (m_connection == k_HSteamNetConnection_Invalid) {
-    logWarning("failed to connect");
-  } else {
+  if (m_connection != k_HSteamNetConnection_Invalid) {
     logVeryVerbose("connected");
+    m_connectionState = ConnectionState::kConnected;
+    return true;
+  } else {
+    logWarning("failed to connect");
+    return false;
   }
+}
+
+bool Client::Connect(const char *address) {
+  SteamNetworkingIPAddr addr{};
+  if (!addr.ParseString(address)) {
+    return false;
+  }
+
+  return Connect(addr);
 }
 
 void Client::CloseConnection() {
@@ -44,7 +56,7 @@ void Client::CloseConnection() {
     logVeryVerbose("closed connection");
   }
 
-  // m_player->destroy();
+  m_world->reset();
 }
 
 SendResult Client::PacketSend(const Packet &packet,

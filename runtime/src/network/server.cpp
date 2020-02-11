@@ -6,7 +6,7 @@
 namespace wind {
 
 Server::Server(World *world)
-    : m_socketInterface(SteamNetworkingSockets()), m_world(world) {}
+    : m_socketInterface(SteamNetworkingSockets()), m_world(world), m_connectionState(ConnectionState::kDisconnected) {}
 
 Server::~Server() {
   m_socketInterface->CloseListenSocket(m_socket);
@@ -31,9 +31,9 @@ void Server::StartServer(const u16 port) {
   m_socket = m_socketInterface->CreateListenSocketIP(addr, 0, nullptr);
   if (m_socket == k_HSteamListenSocket_Invalid) {
     logError("failed to create a listen socket on port {}", port);
-    std::exit(1);
   }
   logVerbose("listening on port {}.", port);
+  m_connectionState = ConnectionState::kConnected;
 }
 
 void Server::PacketBroadcast(const Packet &packet,

@@ -65,6 +65,7 @@ private:
   bool cursorMode = true;
   bs::HFPSCamera m_fpsCamera;
   Server m_server;
+  Client m_client;
 };
 
 } // namespace wind
