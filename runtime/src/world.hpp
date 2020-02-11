@@ -21,6 +21,8 @@ public:
    */
   void reset();
 
+  void onPreUpdate() override;
+
   /**
    * Add a player to our world.
    * @param connection An active connection to a client.
@@ -62,7 +64,7 @@ private:
 
 private:
   std::vector<HCNetComponent> m_netComps;
-  bool cursorMode = true;
+  bool m_cursorMode = true;
   bs::HFPSCamera m_fpsCamera;
   Server m_server;
   Client m_client;

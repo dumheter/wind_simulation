@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include "BsApplication.h"
 #include "BsFPSCamera.h"
 #include "Components/BsCBoxCollider.h"
 #include "Components/BsCCamera.h"
@@ -32,6 +33,7 @@
 #include "bsFPSWalker.h"
 #include "cmyplayer.hpp"
 #include "log.hpp"
+#include "util.hpp"
 #include <Components/BsCSkybox.h>
 #include <alflib/core/assert.hpp>
 #include <cstdlib>
@@ -44,6 +46,12 @@ World::World(const App::Info &info)
   setupInput();
   setupScene();
   setupMyPlayer();
+}
+
+void World::onPreUpdate() {
+  if (m_cursorMode) {
+    Util::CenterCursor(bs::gApplication().getPrimaryWindow());
+  }
 }
 
 void World::setupScene() {
@@ -152,14 +160,14 @@ void World::setupInput() {
     }
   });
   gInput().onButtonDown.connect([this](const ButtonEvent &ev) {
-    if (ev.buttonCode == BC_TAB) {
-      if (cursorMode) {
-        cursorMode = !cursorMode;
+    if (ev.buttonCode == BC_MOUSE_RIGHT) {
+      if (m_cursorMode) {
+        m_cursorMode = !m_cursorMode;
         m_fpsCamera->setEnabled(false);
         Cursor::instance().show();
         Cursor::instance().clipDisable();
       } else {
-        cursorMode = !cursorMode;
+        m_cursorMode = !m_cursorMode;
         m_fpsCamera->setEnabled(true);
         Cursor::instance().hide();
         SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
@@ -244,7 +252,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   HGUIWidget guiComp = gui->addComponent<CGUIWidget>(cameraComp);
   GUIPanel *mainPanel = guiComp->getPanel();
   GUILayoutY *layout = mainPanel->addNewElement<GUILayoutY>();
-  layout->setSize(200, 700);
+  layout->setSize(300, 700);
   layout->addNewElement<GUILabel>(HString{u8"Press the Escape key to quit"});
 
   { // Start Server
