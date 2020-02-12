@@ -49,7 +49,7 @@ public:
     CONTAINED,
     /* Vectors are zero outside the bounds */
     BLOCKED,
-    /* Closest edge value */
+    /* Closest valid cell value. Works similar to the density field */
     EDGE,
   };
 

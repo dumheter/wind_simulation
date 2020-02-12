@@ -56,8 +56,71 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
                                zPos + (m_cellSize / 2.0f));
         f32 density = get(x, y, z);
         density = clamp(density, 0, 1.0f);
+
+#if 0
         bs::DebugDraw::instance().drawCube(
             base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
+#else
+        f32 d000 = clamp(getSafe(x, y, z), 0.0f, 1.0f);
+        f32 d010 = clamp(getSafe(x, y + 1, z), 0.0f, 1.0f);
+        f32 d100 = clamp(getSafe(x + 1, y, z), 0.0f, 1.0f);
+        f32 d110 = clamp(getSafe(x + 1, y + 1, z), 0.0f, 1.0f);
+        f32 d001 = clamp(getSafe(x, y, z + 1), 0.0f, 1.0f);
+        f32 d011 = clamp(getSafe(x, y + 1, z + 1), 0.0f, 1.0f);
+        f32 d101 = clamp(getSafe(x + 1, y, z + 1), 0.0f, 1.0f);
+        f32 d111 = clamp(getSafe(x + 1, y + 1, z + 1), 0.0f, 1.0f);
+
+        f32 posOffset = 0.3f;
+        f32 negOffset = -0.3f;
+
+        // D000
+        bs::DebugDraw::instance().setColor(bs::Color(d000, d000, d000));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + negOffset, yPos + negOffset, zPos + negOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D010
+        bs::DebugDraw::instance().setColor(bs::Color(d010, d010, d010));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + negOffset, yPos + posOffset, zPos + negOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D100
+        bs::DebugDraw::instance().setColor(bs::Color(d100, d100, d100));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + posOffset, yPos + negOffset, zPos + negOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D110
+        bs::DebugDraw::instance().setColor(bs::Color(d110, d110, d110));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + posOffset, yPos + posOffset, zPos + negOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D001
+        bs::DebugDraw::instance().setColor(bs::Color(d001, d001, d001));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + negOffset, yPos + negOffset, zPos + posOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D011
+        bs::DebugDraw::instance().setColor(bs::Color(d011, d011, d011));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + negOffset, yPos + posOffset, zPos + posOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D101
+        bs::DebugDraw::instance().setColor(bs::Color(d101, d101, d101));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + posOffset, yPos + negOffset, zPos + posOffset),
+            bs::Vector3::ONE * 0.2f);
+
+        // D111
+        bs::DebugDraw::instance().setColor(bs::Color(d111, d111, d111));
+        bs::DebugDraw::instance().drawCube(
+            bs::Vector3(xPos + posOffset, yPos + posOffset, zPos + posOffset),
+            bs::Vector3::ONE * 0.2f);
+#endif
       }
     }
   }

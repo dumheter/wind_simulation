@@ -113,8 +113,8 @@ void WindSimulation::stepDensity(f32 delta) {
       // P(m_width - 2, 4, m_depth - 2) = 0.0f;
       // P(m_width - 2, 5, m_depth - 2) = 0.0f;
 
-      for (s32 j = 0; j < m_height; j++) {
-        for (s32 i = 0; i < m_width; i++) {
+      for (s32 j = 0; j < s32(m_height); j++) {
+        for (s32 i = 0; i < s32(m_width); i++) {
           P(i, j, m_depth - 1) = 0.0f;
         }
       }
@@ -132,7 +132,6 @@ void WindSimulation::stepDensity(f32 delta) {
   // Advection
   if (m_densityAdvectionActive) {
     stepDensityAdvection(delta);
-    updateDensityBufferIndex();
   }
 
   // 1. 6.  11. 14
@@ -141,17 +140,24 @@ void WindSimulation::stepDensity(f32 delta) {
 // -------------------------------------------------------------------------- //
 
 void WindSimulation::stepVelocity(f32 delta) {
+  // Sources and sinks
+
   // Diffusion
   if (m_velocityDiffusionActive) {
     stepVelocityDiffusion(delta);
     updateVelocityBufferIndex();
   }
 
+  // Projection
+  projectVelocity();
+
   // Advection
   if (m_velocityAdvectionActive) {
     stepVelocityAdvection(delta);
-    updateVelocityBufferIndex();
   }
+
+  // Projection
+  projectVelocity();
 }
 
 // -------------------------------------------------------------------------- //
@@ -170,7 +176,7 @@ void WindSimulation::init() {
     m_velocityFields[j]->setBorder(VectorField::BorderKind::CONTAINED);
     for (u32 i = 0; i < getVelocityField()->getDataSize(); i++) {
       VectorField::Pos pos = getVelocityField()->fromOffset(i);
-      m_velocityFields[j]->get(i) = bs::Vector3(0.8f, 0.1f, 0.6f);
+      m_velocityFields[j]->get(i) = bs::Vector3(0.8f, 0.1f, 0.6f) * 5.0f;
     }
   }
 }
@@ -186,10 +192,9 @@ void WindSimulation::stepDensityDiffusion(f32 delta) {
   f32 a = delta * m_diffusion * cubic;
   f32 c = 1.0f + 6.0f * a;
 
-  // Gauss-Seidel iterations
-  for (u32 k = 0; k < GAUSS_SEIDEL_STEPS; k++) {
-
-    // Update cell from neighbors
+  // Gauss-Seidel relaxation (GAUSS_SEIDEL_STEPS number of steps)
+  for (u32 _gs = 0; _gs < GAUSS_SEIDEL_STEPS; _gs++) {
+    // Diffuse with neighbors
     for (u32 k = 0; k < m_depth; k++) {
       for (u32 j = 0; j < m_height; j++) {
         for (u32 i = 0; i < m_width; i++) {
@@ -239,21 +244,12 @@ void WindSimulation::stepDensityAdvection(f32 delta) {
         s32 k1 = k0 + 1;
         f32 c1 = kPrev - k0, c0 = 1 - c1;
 
-        // Interpolate the densities (According to 'David H. Eberly' and
-        // 'Jos Stam' respectively)
-#if 1
-        P(i, j, k) =
-            c0 * (b0 * (a0 * P0_S(i0, j0, k0) + a1 * P0_S(i1, j0, k0)) +
-                  b1 * (a0 * P0_S(i0, i1, k0) + a1 * P0_S(i1, j1, k0))) +
-            c1 * (b0 * (a0 * P0_S(i0, j0, k1) + a1 * P0_S(i1, j0, k1)) +
-                  b1 * (a0 * P0_S(i0, i1, k1) + a1 * P0_S(i1, j1, k1)));
-#else
+        // Interpolate the densities
         P(i, j, k) =
             a0 * (b0 * c0 * P0_S(i0, j0, k0) + b1 * c0 * P0_S(i0, j1, k0) +
                   b0 * c1 * P0_S(i0, j0, k1) + b1 * c1 * P0_S(i0, j1, k1)) +
             a1 * (b0 * c0 * P0_S(i1, j0, k0) + b1 * c0 * P0_S(i1, j1, k0) +
                   b0 * c1 * P0_S(i1, j0, k1) + b1 * c1 * P0_S(i1, j1, k1));
-#endif
       }
     }
   }
@@ -264,28 +260,126 @@ void WindSimulation::stepDensityAdvection(f32 delta) {
 void WindSimulation::stepVelocityDiffusion(f32 delta) {
   F_DEF
 
-  for (u32 k = 0; k < m_depth; k++) {
-    for (u32 j = 0; j < m_height; j++) {
-      for (u32 i = 0; i < m_width; i++) {
-        V(i, j, k) = V0(i, j, k);
+  f32 maxDim = f32(
+      wind::max(wind::max(m_width, m_height), wind::max(m_height, m_depth)));
+  f32 cubic = std::pow(maxDim, 3);
+  f32 a = delta * m_viscosity * cubic;
+  f32 c = 1.0f + 6.0f * a;
+
+  // Gauss-Seidel relaxation (GAUSS_SEIDEL_STEPS number of steps)
+  for (u32 _gs = 0; _gs < GAUSS_SEIDEL_STEPS; _gs++) {
+    // Diffuse with neighbors
+    for (u32 k = 0; k < m_depth; k++) {
+      for (u32 j = 0; j < m_height; j++) {
+        for (u32 i = 0; i < m_width; i++) {
+          bs::Vector3 adj = V_S(i - 1, j, k) + V_S(i + 1, j, k) +
+                            V_S(i, j - 1, k) + V_S(i, j + 1, k) +
+                            V_S(i, j, k - 1) + V_S(i, j, k + 1);
+          V(i, j, k) = (V0(i, j, k) + a * adj) / c;
+        }
       }
     }
   }
 }
 
-// --------------------------------------------------------------------------
-// //
+// -------------------------------------------------------------------------- //
 
 void WindSimulation::stepVelocityAdvection(f32 delta) {
   F_DEF
 
-  for (u32 k = 0; k < m_depth; k++) {
-    for (u32 j = 0; j < m_height; j++) {
-      for (u32 i = 0; i < m_width; i++) {
-        V(i, j, k) = V0(i, j, k);
+  f32 maxDim = f32(
+      wind::max(wind::max(m_width, m_height), wind::max(m_height, m_depth)));
+  f32 dty = delta * maxDim;
+  f32 dtz = delta * maxDim;
+  f32 dtx = delta * maxDim;
+
+  for (s32 k = 0; k < s32(m_depth); k++) {
+    for (s32 j = 0; j < s32(m_height); j++) {
+      for (s32 i = 0; i < s32(m_width); i++) {
+        // Calculate interpolation points (a0, a1), (b0, b1) and (c0, c1) by
+        // following the wind vector backwards from the cell, seeing where the
+        // density has flowed from.
+        bs::Vector3 &vel = V(i, j, k);
+
+        f32 clampLower = 0.5f;
+        f32 clampUpper = 0.5f;
+
+        f32 iPrev = clamp(i - dtx * vel.x, clampLower, m_width + clampUpper);
+        s32 i0 = s32(std::floor(iPrev));
+        s32 i1 = i0 + 1;
+        f32 a1 = iPrev - i0, a0 = 1 - a1;
+
+        f32 jPrev = clamp(j - dty * vel.y, clampLower, m_height + clampUpper);
+        s32 j0 = s32(std::floor(jPrev));
+        s32 j1 = j0 + 1;
+        f32 b1 = jPrev - j0, b0 = 1 - b1;
+
+        f32 kPrev = clamp(k - dtz * vel.z, clampLower, m_depth + clampUpper);
+        s32 k0 = s32(std::floor(kPrev));
+        s32 k1 = k0 + 1;
+        f32 c1 = kPrev - k0, c0 = 1 - c1;
+
+        // Interpolate the densities
+        V(i, j, k) =
+            a0 * (b0 * c0 * V0_S(i0, j0, k0) + b1 * c0 * V0_S(i0, j1, k0) +
+                  b0 * c1 * V0_S(i0, j0, k1) + b1 * c1 * V0_S(i0, j1, k1)) +
+            a1 * (b0 * c0 * V0_S(i1, j0, k0) + b1 * c0 * V0_S(i1, j1, k0) +
+                  b0 * c1 * V0_S(i1, j0, k1) + b1 * c1 * V0_S(i1, j1, k1));
       }
     }
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+void WindSimulation::projectVelocity() {
+  F_DEF
+
+  // Step 1
+  for (s32 k = 0; k < s32(m_depth); k++) {
+    for (s32 j = 0; j < s32(m_height); j++) {
+      for (s32 i = 0; i < s32(m_width); i++) {
+        f32 mul = (V_S(i + 1, j, k).x - V_S(i - 1, j, k).x) / m_width +
+                  (V_S(i, j + 1, k).y - V_S(i, j - 1, k).y) / m_height +
+                  (V_S(i, j, k + 1).z - V_S(i, j, k - 1).z) / m_depth;
+        V0(i, j, k).y = -1.0f / 3.0f * mul;
+        V0(i, j, k).x = 0.0f;
+      }
+    }
+  }
+
+  v0->setBorder(VectorField::BorderKind::EDGE);
+
+  // Gauss-Seidel relaxation (GAUSS_SEIDEL_STEPS number of steps)
+  for (u32 _gs = 0; _gs < GAUSS_SEIDEL_STEPS; _gs++) {
+    // Diffuse with neighbors
+    for (u32 k = 0; k < m_depth; k++) {
+      for (u32 j = 0; j < m_height; j++) {
+        for (u32 i = 0; i < m_width; i++) {
+          f32 value =
+              (V0_S(i - 1, j, k).x + V0_S(i + 1, j, k).x + V0_S(i, j - 1, k).x +
+               V0_S(i, j + 1, k).x + V0_S(i, j, k - 1).x + V0_S(i, j, k + 1).x);
+          V0(i, j, k).x = (V0(i, j, k).y + 1.0f * value) / 6.0f;
+        }
+      }
+    }
+  }
+
+  // Step 2
+  for (s32 k = 0; k < s32(m_depth); k++) {
+    for (s32 j = 0; j < s32(m_height); j++) {
+      for (s32 i = 0; i < s32(m_width); i++) {
+        V(i, j, k).x -=
+            0.5f * m_width * (V0_S(i + 1, j, k).x - V0_S(i - 1, j, k).x);
+        V(i, j, k).y -=
+            0.5f * m_height * (V0_S(i + 1, j, k).x - V0_S(i - 1, j, k).x);
+        V(i, j, k).z -=
+            0.5f * m_depth * (V0_S(i + 1, j, k).x - V0_S(i - 1, j, k).x);
+      }
+    }
+  }
+
+  v0->setBorder(VectorField::BorderKind::CONTAINED);
 }
 
 // -------------------------------------------------------------------------- //

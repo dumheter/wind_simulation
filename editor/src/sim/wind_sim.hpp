@@ -176,6 +176,9 @@ private:
   /* Run the velocity advection */
   void stepVelocityAdvection(f32 delta);
 
+  /// Project velocity buffer
+  void projectVelocity();
+
   /* Update density buffer index  */
   void updateVelocityBufferIndex(s32 value = 1) {
     m_velocityBufferIdx = (m_velocityBufferIdx + value) % BUFFER_COUNT;
