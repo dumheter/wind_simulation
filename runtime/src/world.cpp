@@ -33,6 +33,7 @@
 #include "asset.hpp"
 #include "bsFPSWalker.h"
 #include "cmyplayer.hpp"
+#include "creator.hpp"
 #include "log.hpp"
 #include "util.hpp"
 #include <Components/BsCSkybox.h>
@@ -43,17 +44,14 @@
 
 namespace wind {
 
-World::World(const App::Info &info) : App(info), m_server(this) {
+World::World(const App::Info &info)
+    : App(info), m_server(this), m_creator(this) {
   using namespace bs;
-  m_matGrid = createMaterial("res/textures/grid.png");
-  m_matGrid2 = createMaterial("res/textures/grid_2.png");
-  m_physicsMatStd = createPhysicsMaterial();
-  m_meshBall = gBuiltinResources().getMesh(BuiltinMesh::Sphere);
 
   setupMyPlayer();
   setupInput();
 
-  auto floor = createFloor(m_matGrid, m_physicsMatStd);
+  m_creator.floor();
   const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
   HSceneObject skybox = SceneObject::create("Skybox");
   HSkybox skyboxComp = skybox->addComponent<CSkybox>();
@@ -75,15 +73,14 @@ void World::onFixedUpdate() {
 }
 
 void World::setupScene() {
-  using namespace bs;
-
   auto cubeState = MoveableState::generateNew();
-  cubeState.setPosition(Vector3(0.0f, 2.0f, -8.0f));
-  addCube(cubeState);
-  // cubeState = MoveableState::generateNew();
-  // cubeState.setPosition(Vector3(0.0f, 4.0f, -8.0f));
-  // cubeState.setRotation(Quaternion(Degree(0), Degree(45), Degree(0)));
-  // addCube(cubeState);
+  cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
+  m_creator.cube(cubeState);
+  cubeState = MoveableState::generateNew();
+  cubeState.setPosition(bs::Vector3(0.0f, 4.0f, -8.0f));
+  cubeState.setRotation(
+      bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
+  m_creator.cube(cubeState);
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -113,67 +110,13 @@ void World::setupMyPlayer() {
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
+  netComp->getState().setType(Creator::Types::kPlayer);
   player->addComponent<FPSWalker>();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
   auto [it, ok] = m_netComps.insert({UniqueId::kInvalid, netComp});
   AlfAssert(ok, "could not create my player");
-}
-
-void World::addPlayer(const MoveableState &moveableState) {
-  using namespace bs;
-  AlfAssert(!m_netComps.empty(),
-            "m_netComps must not be empty before setting up a player");
-
-  HSceneObject player = SceneObject::create("Player");
-  HCharacterController charController =
-      player->addComponent<CCharacterController>();
-  charController->setHeight(1.0f);
-  charController->setRadius(0.4f);
-  HRenderable renderable = player->addComponent<CRenderable>();
-  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
-  // HShader shader =
-  //     gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
-  renderable->setMesh(mesh);
-  renderable->setMaterial(m_matGrid2);
-  HCNetComponent netComp = player->addComponent<CNetComponent>(moveableState);
-  auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
-  AlfAssert(ok, "failed to add player");
-}
-
-void World::addCube(const MoveableState &moveableState) {
-  using namespace bs;
-  HSceneObject cube = SceneObject::create("Cube");
-
-  HRenderable renderable = cube->addComponent<CRenderable>();
-  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Box);
-  renderable->setMesh(mesh);
-  renderable->setMaterial(m_matGrid2);
-  HBoxCollider boxCollider = cube->addComponent<CBoxCollider>();
-  boxCollider->setMaterial(m_physicsMatStd);
-  boxCollider->setMass(25.0f);
-  HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
-  auto netComp = cube->addComponent<CNetComponent>(moveableState);
-  auto [it, ok] = m_netComps.insert({moveableState.getUniqueId(), netComp});
-  //cube->setPosition(moveableState.getPosition());
-  //cube->setRotation(moveableState.getRotation());
-  //cube->setScale(moveableState.getScale());
-  AlfAssert(ok, "failed to create cube, was the id unique?");
-}
-
-void World::addBall(const MoveableState &moveableState) {
-  using namespace bs;
-  HSceneObject sphere = SceneObject::create("Sphere");
-  HRenderable renderable = sphere->addComponent<CRenderable>();
-  renderable->setMesh(m_meshBall);
-  renderable->setMaterial(m_matGrid2);
-  HSphereCollider collider = sphere->addComponent<CSphereCollider>();
-  collider->setMaterial(m_physicsMatStd);
-  collider->setMass(8.0f);
-  HRigidbody rigid = sphere->addComponent<CRigidbody>();
-  sphere->addComponent<CNetComponent>(moveableState);
-  // rigid->addForce(forward * 40.0f, ForceMode::Velocity);
 }
 
 void World::applyMoveableState(const MoveableState &moveableState) {
@@ -192,10 +135,21 @@ void World::reset() {
 }
 
 void World::onPlayerJoin(const MoveableState &moveableState) {
-  addPlayer(moveableState);
+  logInfo("player {} joined", moveableState.getUniqueId().raw());
+  m_creator.player(moveableState);
 }
 
-void World::onPlayerLeave(UniqueId uid) { logInfo("player leave TODO"); }
+void World::onPlayerLeave(UniqueId uid) {
+  logInfo("player {} left", uid);
+
+  auto it = m_netComps.find(uid);
+  if (it != m_netComps.end()) {
+    it->second->destroy();
+    m_netComps.erase(it);
+  } else {
+    logWarning("player left, but couldn't find them");
+  }
+}
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   using namespace bs;
@@ -280,38 +234,6 @@ void World::setupInput() {
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseY));
-}
-
-bs::HSceneObject World::createFloor(bs::HMaterial material,
-                                    bs::HPhysicsMaterial physicsMaterial) {
-  using namespace bs;
-  HSceneObject floor = SceneObject::create("Floor");
-  HRenderable floorRenderable = floor->addComponent<CRenderable>();
-  HMesh planeMesh = gBuiltinResources().getMesh(BuiltinMesh::Quad);
-  floorRenderable->setMaterial(material);
-  floorRenderable->setMesh(planeMesh);
-  HPlaneCollider planeCollider = floor->addComponent<CPlaneCollider>();
-  planeCollider->setMaterial(physicsMaterial);
-  constexpr float kSize = 50.0f;
-  floor->setScale(Vector3(kSize, 1.0f, kSize));
-  material->setVec2("gUVTile", Vector2::ONE - (Vector2::ONE * -kSize));
-  return floor;
-}
-
-bs::HPhysicsMaterial World::createPhysicsMaterial() {
-  using namespace bs;
-  HPhysicsMaterial physicsMaterial = PhysicsMaterial::create(1.0f, 1.0f, 0.5f);
-  return physicsMaterial;
-}
-
-bs::HMaterial World::createMaterial(const bs::String &path) {
-  using namespace bs;
-  HShader shader =
-      gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
-  HMaterial material = Material::create(shader);
-  HTexture texture = Asset::loadTexture(path);
-  material->setTexture("gAlbedoTex", texture);
-  return material;
 }
 
 bs::HSceneObject World::createGUI(bs::HSceneObject camera) {

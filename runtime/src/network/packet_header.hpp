@@ -13,6 +13,8 @@ enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   kPlayerLeave,
   kPlayerTick,
   kServerTick,
+  kCreate,
+  kRequestCreate,
   kHello,
 };
 

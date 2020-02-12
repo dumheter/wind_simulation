@@ -20,7 +20,6 @@ Server::~Server() {
   for (auto [connection, uid] : m_connections) {
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
   }
-
   m_socketInterface->DestroyPollGroup(m_pollGroup);
   m_pollGroup = k_HSteamNetPollGroup_Invalid;
   m_socketInterface->CloseListenSocket(m_socket);
@@ -53,7 +52,9 @@ void Server::StartServer(const u16 port) {
 void Server::PacketBroadcast(const Packet &packet,
                              const SendStrategy send_strategy) {
   for (auto [connection, uid] : m_connections) {
-    Common::SendPacket(packet, send_strategy, connection, m_socketInterface);
+    if (Common::SendPacket(packet, send_strategy, connection, m_socketInterface) != SendResult::kSuccess) {
+      DisconnectConnection(connection);
+    }
   }
 }
 
@@ -62,7 +63,9 @@ void Server::PacketBroadcastExclude(const Packet &packet,
                                     const ConnectionId exclude_connection) {
   for (auto [connection, uid] : m_connections) {
     if (connection != exclude_connection) {
-      Common::SendPacket(packet, send_strategy, connection, m_socketInterface);
+      if (Common::SendPacket(packet, send_strategy, connection, m_socketInterface) != SendResult::kSuccess) {
+        DisconnectConnection(connection);
+      }
     }
   }
 }
@@ -88,7 +91,8 @@ void Server::broadcastServerTick(
     m_packet.ClearPayload();
     m_packet.SetHeader(PacketHeaderTypes::kServerTick);
     auto mw = m_packet.GetMemoryWriter();
-    mw->Write(netComps.size());
+    const u32 count = static_cast<u32>(netComps.size());
+    mw->Write(count);
     for (auto [uid, netComp] : netComps) {
       mw->Write(netComp->getState());
     }
@@ -203,7 +207,7 @@ void Server::OnSteamNetConnectionStatusChanged(
     auto [it, ok] = m_connections.insert({status->m_hConn, uid});
     if (!ok) {
       logWarning("failed to add connection to map");
-      m_socketInterface->CloseConnection(status->m_hConn, 0, nullptr, false);
+      DisconnectConnection(status->m_hConn);
       break;
     }
 
@@ -212,6 +216,12 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
+      auto &netComps = m_world->getNetComps();
+      const u32 count = static_cast<u32>(netComps.size());
+      mw->Write(count);
+      for (auto [uid, netComp] : netComps) {
+        mw->Write(netComp->getState());
+      }
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
     }
@@ -242,7 +252,7 @@ void Server::OnSteamNetConnectionStatusChanged(
   }
 }
 
-void Server::DisconnectConnection(const HSteamNetConnection connection) {
+void Server::DisconnectConnection(ConnectionId connection) {
   UniqueId leaveUid{};
 
   auto it = m_connections.find(connection);
@@ -250,6 +260,7 @@ void Server::DisconnectConnection(const HSteamNetConnection connection) {
     logVerbose("[server] disconnecting {}", it->first);
     leaveUid = it->second;
     m_connections.erase(it);
+    m_socketInterface->CloseConnection(connection, 0, nullptr, false);
   }
 
   if (leaveUid) {
@@ -265,4 +276,5 @@ void Server::DisconnectConnection(const HSteamNetConnection connection) {
                m_connections.size());
   }
 }
+
 } // namespace wind

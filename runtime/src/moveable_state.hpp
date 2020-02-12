@@ -9,6 +9,7 @@
 #include "utility/unique_id.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
+#include "creator.hpp"
 
 namespace wind {
 
@@ -16,7 +17,7 @@ class MoveableState {
 
 public:
   MoveableState()
-      : m_id(UniqueId::kInvalid), m_position(bs::Vector3::ONE),
+      : m_id(UniqueId::kInvalid), m_type(Creator::Types::kInvalid), m_position(bs::Vector3::ONE),
         m_scale(bs::Vector3::ONE), m_rotation(bs::Quaternion::IDENTITY) {}
 
   MoveableState(UniqueId id) : MoveableState() { m_id = id; }
@@ -28,6 +29,10 @@ public:
   UniqueId getUniqueId() const { return m_id; }
 
   void setUniqueId(UniqueId id) { m_id = id; }
+
+  Creator::Types getType() const { return m_type; }
+
+  void setType(Creator::Types type) { m_type = type; }
 
   bs::Vector3 getPosition() const { return m_position; }
 
@@ -60,6 +65,7 @@ public:
 
 private:
   UniqueId m_id;
+  Creator::Types m_type;
   bs::Vector3 m_position;
   bs::Vector3 m_scale;
   bs::Quaternion m_rotation;

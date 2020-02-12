@@ -10,8 +10,7 @@ void MoveableState::from(const bs::Transform &transform) {
 
 void MoveableState::from(bs::HSceneObject &so) { from(so->getTransform()); }
 
-void MoveableState::from(const MoveableState &other)
-{
+void MoveableState::from(const MoveableState &other) {
   m_position = other.m_position;
   m_rotation = other.m_rotation;
   m_scale = other.m_scale;
@@ -31,6 +30,7 @@ void MoveableState::to(bs::HSceneObject &so) const {
 
 bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
   mw.Write(m_id);
+  mw.Write(static_cast<u32>(m_type));
   mw.Write(m_position.x);
   mw.Write(m_position.y);
   mw.Write(m_position.z);
@@ -45,6 +45,7 @@ bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
 
 MoveableState MoveableState::FromBytes(alflib::RawMemoryReader &mr) {
   MoveableState ms{mr.Read<decltype(ms.m_id)>()};
+  ms.m_type = static_cast<Creator::Types>(mr.Read<u32>());
   ms.m_position.x = mr.Read<decltype(ms.m_position.x)>();
   ms.m_position.y = mr.Read<decltype(ms.m_position.y)>();
   ms.m_position.z = mr.Read<decltype(ms.m_position.z)>();

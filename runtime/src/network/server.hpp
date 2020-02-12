@@ -41,7 +41,7 @@ public:
   /**
    * Attempt to close the connection and remove it from our list of connections.
    */
-  void DisconnectConnection(const ConnectionId connection);
+  void DisconnectConnection(ConnectionId connection);
 
   /**
    * Broadcast a packet to all active connections.
@@ -81,12 +81,6 @@ private:
 
   virtual void OnSteamNetConnectionStatusChanged(
       SteamNetConnectionStatusChangedCallback_t *status) override;
-
-  /**
-   * Let steam sockets close the connection. Does not remove it from our
-   * list of active connections, use DisconnectConnection for that.
-   */
-  void CloseConnection(ConnectionId connection);
 
 private:
   HSteamListenSocket m_socket;

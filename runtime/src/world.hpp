@@ -5,6 +5,7 @@
 #include "app.hpp"
 #include "cmyplayer.hpp"
 #include "cnet_component.hpp"
+#include "creator.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
 #include "utility/unique_id.hpp"
@@ -40,12 +41,6 @@ public:
    */
   void setupMyPlayer();
 
-  void addPlayer(const MoveableState &moveableState);
-
-  void addCube(const MoveableState &moveableState);
-
-  void addBall(const MoveableState &moveableState);
-
   void applyMoveableState(const MoveableState &moveableState);
 
   /**
@@ -66,6 +61,12 @@ public:
 
   bool serverIsActive() const { return m_server.isActive(); }
 
+  std::unordered_map<UniqueId, HCNetComponent> &getNetComps() {
+    return m_netComps;
+  }
+
+  const Creator& getCreator() { return m_creator; }
+
 private:
   void setupInput();
 
@@ -83,11 +84,7 @@ private:
   bs::HFPSCamera m_fpsCamera;
   Server m_server;
   HCMyPlayer m_player;
-
-  bs::HMaterial m_matGrid;
-  bs::HMaterial m_matGrid2;
-  bs::HPhysicsMaterial m_physicsMatStd;
-  bs::HMesh m_meshBall;
+  Creator m_creator;
 };
 
 } // namespace wind

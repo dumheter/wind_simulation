@@ -97,6 +97,7 @@
     <ClCompile Include="src\cmyplayer.cpp" />
     <ClCompile Include="src\cnet_component.cpp" />
     <ClCompile Include="src\cplayer.cpp" />
+    <ClCompile Include="src\creator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\moveable_state.cpp" />
     <ClCompile Include="src\network\client.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="src\cmyplayer.hpp" />
     <ClInclude Include="src\cnet_component.hpp" />
     <ClInclude Include="src\cplayer.hpp" />
+    <ClInclude Include="src\creator.hpp" />
     <ClInclude Include="src\moveable_state.hpp" />
     <ClInclude Include="src\network\client.hpp" />
     <ClInclude Include="src\network\connection_id.hpp" />

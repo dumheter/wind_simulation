@@ -92,23 +92,36 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kServerTick) {
     if (!m_world->serverIsActive()) {
       auto mr = m_packet.GetMemoryReader();
-      auto count = mr.Read<std::size_t>();
+      const u32 count = mr.Read<u32>();
       MoveableState state;
-      for (decltype(count) i = 0; i < count; ++i) {
+      for (u32 i = 0; i < count; ++i) {
         state = mr.Read<MoveableState>();
         m_world->applyMoveableState(state);
       }
-      logVerbose("[client:p ServerTick] packet servertick, {}", count);
+      //logVerbose("[client:p ServerTick] packet servertick, {}", count);
     }
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
+  } else if (header == PacketHeaderTypes::kCreate) {
+    logWarning("[client:p Create] got a create packet");
+  } else if (header == PacketHeaderTypes::kRequestCreate) {
+    logWarning("[client:p RequestCreate] got a requestcreate packet");
   } else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
-    auto new_uid = mr.Read<UniqueId>();
-    m_world->netCompChangeUniqueId(m_uid, new_uid);
+    const auto new_uid = mr.Read<UniqueId>();
     logVerbose("[client:p Hello] changed uid from {} to {}", m_uid.raw(),
                new_uid.raw());
+    m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
+    if (!m_world->serverIsActive()) {
+      const u32 count = mr.Read<u32>();
+      logVerbose("\tStates: {}", count);
+      MoveableState state;
+      for (u32 i = 0; i < count; ++i) {
+        state = mr.Read<MoveableState>();
+        m_world->getCreator().create(state);
+      }
+    }
   }
 }
 

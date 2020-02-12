@@ -22,7 +22,7 @@ void CNetComponent::onCreated()
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
   SO()->setPosition(m_state.getPosition());
   SO()->setScale(m_state.getScale());
-  //SO()->setRotation(m_state.getRotation());
+  SO()->setRotation(m_state.getRotation());
   mNotifyFlags = bs::TCF_Transform;
 }
 
