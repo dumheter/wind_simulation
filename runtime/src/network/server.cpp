@@ -16,7 +16,6 @@ Server::Server(World *world)
 }
 
 Server::~Server() {
-
   for (auto [connection, uid] : m_connections) {
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
   }
@@ -173,7 +172,7 @@ void Server::handlePacket(Packet &packet) {
       mw->Write(count);
       mw->Write(netComp->getState());
       mw.Finalize();
-      PacketBroadcast(m_packet, SendStrategy::kReliable);
+      PacketBroadcast(m_packet, SendStrategy::kUnreliable);
     } else {
       logWarning("[server:p requestcreate] invalid type in state");
     }

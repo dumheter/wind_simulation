@@ -88,7 +88,9 @@ void Client::handlePacket() {
     auto state = MoveableState{uid};
     m_world->onPlayerJoin(state);
   } else if (header == PacketHeaderTypes::kPlayerLeave) {
-    logVerbose("[client:p PlayerLeave] packet playerleave TODO");
+    auto mr = m_packet.GetMemoryReader();
+    auto uid = mr.Read<UniqueId>();
+    m_world->onPlayerLeave(uid);
   } else if (header == PacketHeaderTypes::kServerTick) {
     if (!m_world->serverIsActive()) {
       auto mr = m_packet.GetMemoryReader();
@@ -98,7 +100,6 @@ void Client::handlePacket() {
         state = mr.Read<MoveableState>();
         m_world->applyMoveableState(state);
       }
-      // logVerbose("[client:p ServerTick] packet servertick, {}", count);
     }
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");

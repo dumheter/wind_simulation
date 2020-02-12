@@ -8,6 +8,7 @@
 #include "common.hpp"
 #include "moveable_state.hpp"
 #include "utility/unique_id.hpp"
+#include "creator.hpp"
 
 namespace wind {
 
@@ -30,9 +31,15 @@ public:
   UniqueId getUniqueId() const { return m_state.getUniqueId(); }
 
   const MoveableState &getState() const { return m_state; }
-  MoveableState &getState() { return m_state; }
 
+  /**
+   * Ignores both id and type.
+   */
   void setState(const MoveableState &moveableState);
+
+  void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
+
+  void setType(Creator::Types type) { m_state.setType(type); }
 
   bool operator==(const CNetComponent &other) const {
     return getUniqueId() == other.getUniqueId();

@@ -79,12 +79,10 @@ HCNetComponent Creator::player(const MoveableState &moveableState) const {
   charController->setRadius(0.4f);
   HRenderable renderable = player->addComponent<CRenderable>();
   HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
-  // HShader shader =
-  //     gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
   renderable->setMesh(mesh);
   renderable->setMaterial(m_matGrid2);
   HCNetComponent netComp = player->addComponent<CNetComponent>(moveableState);
-  netComp->getState().setType(Types::kPlayer);
+  netComp->setType(Types::kPlayer);
   auto [it, ok] =
       m_world->getNetComps().insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add player");
@@ -103,7 +101,7 @@ HCNetComponent Creator::cube(const MoveableState &moveableState) const {
   boxCollider->setMass(25.0f);
   HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
   auto netComp = cube->addComponent<CNetComponent>(moveableState);
-  netComp->getState().setType(Types::kCube);
+  netComp->setType(Types::kCube);
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create cube, was the id unique?");
@@ -123,7 +121,7 @@ HCNetComponent Creator::ball(const MoveableState &moveableState) const {
   HRigidbody rigid = sphere->addComponent<CRigidbody>();
   // rigid->addForce(forward * 40.0f, ForceMode::Velocity);
   auto netComp = sphere->addComponent<CNetComponent>(moveableState);
-  netComp->getState().setType(Types::kBall);
+  netComp->setType(Types::kBall);
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create cube, was the id unique?");

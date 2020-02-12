@@ -93,7 +93,7 @@ bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
   if (it != m_netComps.end()) {
     auto [_, ok] = m_netComps.insert({to, it->second});
     if (ok) {
-      it->second->getState().setUniqueId(to);
+      it->second->setUniqueId(to);
       m_netComps.erase(it);
       return true;
     }
@@ -110,7 +110,7 @@ void World::setupMyPlayer() {
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
-  netComp->getState().setType(Creator::Types::kPlayer);
+  netComp->setType(Creator::Types::kPlayer);
   player->addComponent<FPSWalker>();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
@@ -122,7 +122,7 @@ void World::setupMyPlayer() {
 void World::applyMoveableState(const MoveableState &moveableState) {
   auto it = m_netComps.find(moveableState.getUniqueId());
   if (it != m_netComps.end()) {
-    it->second->getState().from(moveableState);
+    it->second->setState(moveableState);
   } else {
     logError("failed to find netcomp with id {}",
              moveableState.getUniqueId().raw());
@@ -220,7 +220,7 @@ void World::setupInput() {
         auto mw = packet.GetMemoryWriter();
         mw->Write(state);
         mw.Finalize();
-        m_player->getClient().PacketSend(packet, SendStrategy::kReliable);
+        m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
       }
     }
   });
