@@ -10,6 +10,13 @@ void MoveableState::from(const bs::Transform &transform) {
 
 void MoveableState::from(bs::HSceneObject &so) { from(so->getTransform()); }
 
+void MoveableState::from(const MoveableState &other)
+{
+  m_position = other.m_position;
+  m_rotation = other.m_rotation;
+  m_scale = other.m_scale;
+}
+
 void MoveableState::to(bs::Transform &transform) const {
   transform.setPosition(m_position);
   transform.setRotation(m_rotation);

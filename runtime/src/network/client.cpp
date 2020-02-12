@@ -61,6 +61,7 @@ void Client::CloseConnection() {
     logVeryVerbose("[client] closed connection");
   }
   SetConnectionState(ConnectionState::kDisconnected);
+  m_uid = UniqueId::kInvalid;
 }
 
 SendResult Client::PacketSend(const Packet &packet,
@@ -78,21 +79,36 @@ Client::GetConnectionStatus() const {
 }
 
 void Client::handlePacket() {
-  logVerbose("[client] TODO handle packet");
-
-  switch (m_packet.GetHeaderType()) {
-  case PacketHeaderTypes::kPlayerJoin:
-    logVerbose("packet playerjoin TODO");
-    break;
-  case PacketHeaderTypes::kPlayerLeave:
-    logVerbose("packet playerleave TODO");
-    break;
-  case PacketHeaderTypes::kPlayerUpdate:
-    logVerbose("packet playerupdate TODO");
-    break;
-  case PacketHeaderTypes::kHello:
-    logVerbose("packet hello TODO");
-    break;
+  if (auto header = m_packet.GetHeaderType();
+      header == PacketHeaderTypes::kPlayerJoin) {
+    logVerbose("[client:p PlayerJoin] packet playerjoin");
+    auto mr = m_packet.GetMemoryReader();
+    // auto state = mr.Read<MoveableState>();
+    auto uid = mr.Read<UniqueId>();
+    auto state = MoveableState{uid};
+    m_world->onPlayerJoin(state);
+  } else if (header == PacketHeaderTypes::kPlayerLeave) {
+    logVerbose("[client:p PlayerLeave] packet playerleave TODO");
+  } else if (header == PacketHeaderTypes::kServerTick) {
+    if (!m_world->serverIsActive()) {
+      auto mr = m_packet.GetMemoryReader();
+      auto count = mr.Read<std::size_t>();
+      MoveableState state;
+      for (decltype(count) i = 0; i < count; ++i) {
+        state = mr.Read<MoveableState>();
+        m_world->applyMoveableState(state);
+      }
+      logVerbose("[client:p ServerTick] packet servertick, {}", count);
+    }
+  } else if (header == PacketHeaderTypes::kPlayerTick) {
+    logWarning("[client:p PlayerTick] got a playerTick packet");
+  } else if (header == PacketHeaderTypes::kHello) {
+    auto mr = m_packet.GetMemoryReader();
+    auto new_uid = mr.Read<UniqueId>();
+    m_world->netCompChangeUniqueId(m_uid, new_uid);
+    logVerbose("[client:p Hello] changed uid from {} to {}", m_uid.raw(),
+               new_uid.raw());
+    m_uid = new_uid;
   }
 }
 

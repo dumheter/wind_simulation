@@ -37,15 +37,27 @@
 #include "util.hpp"
 #include <Components/BsCSkybox.h>
 #include <alflib/core/assert.hpp>
+#include <chrono>
 #include <cstdlib>
 #include <regex>
 
 namespace wind {
 
 World::World(const App::Info &info) : App(info), m_server(this) {
+  using namespace bs;
+  m_matGrid = createMaterial("res/textures/grid.png");
+  m_matGrid2 = createMaterial("res/textures/grid_2.png");
+  m_physicsMatStd = createPhysicsMaterial();
+  m_meshBall = gBuiltinResources().getMesh(BuiltinMesh::Sphere);
+
   setupMyPlayer();
   setupInput();
-  setupScene();
+
+  auto floor = createFloor(m_matGrid, m_physicsMatStd);
+  const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
+  HSceneObject skybox = SceneObject::create("Skybox");
+  HSkybox skyboxComp = skybox->addComponent<CSkybox>();
+  skyboxComp->setTexture(skyboxTex);
 }
 
 void World::onPreUpdate() {
@@ -56,28 +68,46 @@ void World::onPreUpdate() {
   m_server.Poll();
 }
 
+void World::onFixedUpdate() {
+  using namespace std::chrono;
+
+  m_server.broadcastServerTick(m_netComps);
+}
+
 void World::setupScene() {
   using namespace bs;
-  auto floorMaterial = createMaterial("res/textures/grid.png");
-  auto cubeMaterial = createMaterial("res/textures/grid_2.png");
-  auto stdPhysicsMaterial = createPhysicsMaterial();
-  auto cube = createCube(cubeMaterial, stdPhysicsMaterial);
-  cube->setPosition(Vector3(0.0f, 2.0f, -8.0f));
-  auto cube2 = createCube(cubeMaterial, stdPhysicsMaterial);
-  cube2->setPosition(Vector3(0.0f, 4.0f, -8.0f));
-  cube2->setRotation(Quaternion(Degree(0), Degree(45), Degree(0)));
-  auto floor = createFloor(floorMaterial, stdPhysicsMaterial);
-  const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
-  HSceneObject skybox = SceneObject::create("Skybox");
-  HSkybox skyboxComp = skybox->addComponent<CSkybox>();
-  skyboxComp->setTexture(skyboxTex);
+
+  auto cubeState = MoveableState::generateNew();
+  cubeState.setPosition(Vector3(0.0f, 2.0f, -8.0f));
+  addCube(cubeState);
+  // cubeState = MoveableState::generateNew();
+  // cubeState.setPosition(Vector3(0.0f, 4.0f, -8.0f));
+  // cubeState.setRotation(Quaternion(Degree(0), Degree(45), Degree(0)));
+  // addCube(cubeState);
+}
+
+HCNetComponent World::getPlayerNetComp() {
+  auto uid = m_player->getUniqueId();
+  return m_netComps[uid];
+}
+
+bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
+  auto it = m_netComps.find(from);
+  if (it != m_netComps.end()) {
+    auto [_, ok] = m_netComps.insert({to, it->second});
+    if (ok) {
+      it->second->getState().setUniqueId(to);
+      m_netComps.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 void World::setupMyPlayer() {
   using namespace bs;
   AlfAssert(m_netComps.empty(), "must be done first");
-  HSceneObject player = SceneObject::create("Player");
-
+  HSceneObject player = SceneObject::create("MyPlayer");
   HCharacterController charController =
       player->addComponent<CCharacterController>();
   charController->setHeight(1.0f);
@@ -87,10 +117,11 @@ void World::setupMyPlayer() {
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
-  m_netComps.push_back(netComp);
+  auto [it, ok] = m_netComps.insert({UniqueId::kInvalid, netComp});
+  AlfAssert(ok, "could not create my player");
 }
 
-bs::HSceneObject World::setupPlayer() {
+void World::addPlayer(const MoveableState &moveableState) {
   using namespace bs;
   AlfAssert(!m_netComps.empty(),
             "m_netComps must not be empty before setting up a player");
@@ -102,29 +133,67 @@ bs::HSceneObject World::setupPlayer() {
   charController->setRadius(0.4f);
   HRenderable renderable = player->addComponent<CRenderable>();
   HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
-  HShader shader =
-      gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
-  HMaterial material = Material::create(shader);
-  HTexture texture = Asset::loadTexture("res/grid_2.png");
-  material->setTexture("gAlbedoTex", texture);
+  // HShader shader =
+  //     gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
   renderable->setMesh(mesh);
-  renderable->setMaterial(material);
-  HCNetComponent netComp = player->addComponent<CNetComponent>();
-  m_netComps.push_back(netComp);
-  int a = 0;
-  return player;
+  renderable->setMaterial(m_matGrid2);
+  HCNetComponent netComp = player->addComponent<CNetComponent>(moveableState);
+  auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
+  AlfAssert(ok, "failed to add player");
+}
+
+void World::addCube(const MoveableState &moveableState) {
+  using namespace bs;
+  HSceneObject cube = SceneObject::create("Cube");
+
+  HRenderable renderable = cube->addComponent<CRenderable>();
+  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Box);
+  renderable->setMesh(mesh);
+  renderable->setMaterial(m_matGrid2);
+  HBoxCollider boxCollider = cube->addComponent<CBoxCollider>();
+  boxCollider->setMaterial(m_physicsMatStd);
+  boxCollider->setMass(25.0f);
+  HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
+  auto netComp = cube->addComponent<CNetComponent>(moveableState);
+  auto [it, ok] = m_netComps.insert({moveableState.getUniqueId(), netComp});
+  //cube->setPosition(moveableState.getPosition());
+  //cube->setRotation(moveableState.getRotation());
+  //cube->setScale(moveableState.getScale());
+  AlfAssert(ok, "failed to create cube, was the id unique?");
+}
+
+void World::addBall(const MoveableState &moveableState) {
+  using namespace bs;
+  HSceneObject sphere = SceneObject::create("Sphere");
+  HRenderable renderable = sphere->addComponent<CRenderable>();
+  renderable->setMesh(m_meshBall);
+  renderable->setMaterial(m_matGrid2);
+  HSphereCollider collider = sphere->addComponent<CSphereCollider>();
+  collider->setMaterial(m_physicsMatStd);
+  collider->setMass(8.0f);
+  HRigidbody rigid = sphere->addComponent<CRigidbody>();
+  sphere->addComponent<CNetComponent>(moveableState);
+  // rigid->addForce(forward * 40.0f, ForceMode::Velocity);
+}
+
+void World::applyMoveableState(const MoveableState &moveableState) {
+  auto it = m_netComps.find(moveableState.getUniqueId());
+  if (it != m_netComps.end()) {
+    it->second->getState().from(moveableState);
+  } else {
+    logError("failed to find netcomp with id {}",
+             moveableState.getUniqueId().raw());
+  }
 }
 
 void World::reset() {
-  for (auto &netComp : m_netComps) {
-    if (netComp) {
-      // netComp->destroy();
-    }
-  }
-  m_netComps.clear();
+  // TODO
+  // m_netComps.clear();
 }
 
-void World::onPlayerJoin(UniqueId playerUid) { logInfo("player joined TODO"); }
+void World::onPlayerJoin(const MoveableState &moveableState) {
+  addPlayer(moveableState);
+}
 
 void World::onPlayerLeave(UniqueId uid) { logInfo("player leave TODO"); }
 
@@ -164,11 +233,7 @@ void World::setupInput() {
     }
   });
 
-  auto material = createMaterial("res/textures/grid_2.png");
-  auto physicsMaterial = createPhysicsMaterial();
-  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Sphere);
-  gInput().onButtonDown.connect([this, material, physicsMaterial,
-                                 mesh](const ButtonEvent &ev) {
+  gInput().onButtonDown.connect([this](const ButtonEvent &ev) {
     if (ev.buttonCode == BC_MOUSE_RIGHT) {
       if (m_cursorMode) {
         m_cursorMode = !m_cursorMode;
@@ -185,22 +250,14 @@ void World::setupInput() {
     }
     if (ev.buttonCode == BC_MOUSE_LEFT) {
       if (m_player->isConnected() && m_cursorMode) {
-        HSceneObject sphere = SceneObject::create("Sphere");
-        HRenderable renderable = sphere->addComponent<CRenderable>();
-        renderable->setMesh(mesh);
-        renderable->setMaterial(material);
-        HSphereCollider collider = sphere->addComponent<CSphereCollider>();
-        collider->setMaterial(physicsMaterial);
-        collider->setMass(8.0f);
-        HRigidbody rigid = sphere->addComponent<CRigidbody>();
-        auto spawnPos = m_netComps[0]->getState().getPosition();
-        const auto &forward =
-            m_fpsCamera->getCamera()->getTransform().getForward();
-        spawnPos += forward * 0.7f;
-        spawnPos += Vector3(0.0f, 1.0f, 0.0f);
-        sphere->setPosition(spawnPos);
-        sphere->setScale(Vector3(0.3f, 0.3f, 0.3f));
-        rigid->addForce(forward * 40.0f, ForceMode::Velocity);
+        // auto spawnPos = getPlayerNetComp()->getState().getPosition();
+        // const auto &forward =
+        //     m_fpsCamera->getCamera()->getTransform().getForward();
+        // spawnPos += forward * 0.7f;
+        // spawnPos += Vector3(0.0f, 1.0f, 0.0f);
+        // sphere->setPosition(spawnPos);
+        // sphere->setScale(Vector3(0.3f, 0.3f, 0.3f));
+        // addBall();
       }
     }
   });
@@ -223,23 +280,6 @@ void World::setupInput() {
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseY));
-}
-
-bs::HSceneObject World::createCube(bs::HMaterial material,
-                                   bs::HPhysicsMaterial physicsMaterial) {
-  using namespace bs;
-  HSceneObject cube = SceneObject::create("Cube");
-  HRenderable renderable = cube->addComponent<CRenderable>();
-  HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Box);
-  renderable->setMesh(mesh);
-  renderable->setMaterial(material);
-  HBoxCollider boxCollider = cube->addComponent<CBoxCollider>();
-  boxCollider->setMaterial(physicsMaterial);
-  boxCollider->setMass(25.0f);
-  HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
-  auto netComp = cube->addComponent<CNetComponent>();
-  m_netComps.push_back(netComp);
-  return cube;
 }
 
 bs::HSceneObject World::createFloor(bs::HMaterial material,
@@ -336,7 +376,8 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
 
 void World::addNetComp(HCNetComponent netComp) {
   logVerbose("net component with id [{}] added", netComp->getUniqueId());
-  m_netComps.push_back(netComp);
+  auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
+  AlfAssert(ok, "failed to add net comp");
 }
 
 } // namespace wind

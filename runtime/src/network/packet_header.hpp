@@ -11,7 +11,8 @@ using PacketHeaderTypesUnderlying = u32;
 enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   kPlayerJoin = 0,
   kPlayerLeave,
-  kPlayerUpdate,
+  kPlayerTick,
+  kServerTick,
   kHello,
 };
 

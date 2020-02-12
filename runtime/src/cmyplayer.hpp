@@ -7,9 +7,17 @@
 
 namespace wind {
 
+/**
+ * Component who is owner of the client. Makes sure it is run
+ * every update.
+ */
 class CMyPlayer : public bs::Component {
 public:
   CMyPlayer(bs::HSceneObject parent, World *world);
+
+  void setUniqueId(UniqueId uid) { m_client.setUid(uid); }
+
+  UniqueId getUniqueId() const { return m_client.getUid(); }
 
   bool isConnected() const;
 

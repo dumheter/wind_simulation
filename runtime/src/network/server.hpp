@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP_
 #define SERVER_HPP_
 
+#include "cnet_component.hpp"
 #include "common.hpp"
 #include "network/client.hpp"
 #include "network/connection_id.hpp"
@@ -65,6 +66,11 @@ public:
   GetConnectionStatus(const ConnectionId connection_id) const;
 
   ConnectionState getConnectionState() const { return m_connectionState; }
+
+  bool isActive() const { return m_connectionState == ConnectionState::kConnected; }
+
+  void broadcastServerTick(
+      const std::unordered_map<UniqueId, HCNetComponent> &netComps);
 
 private:
   void PollSocketStateChanges();

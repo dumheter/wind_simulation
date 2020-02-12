@@ -8,7 +8,7 @@
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
 #include "utility/unique_id.hpp"
-#include <vector>
+#include <unordered_map>
 
 namespace wind {
 
@@ -23,11 +23,13 @@ public:
 
   void onPreUpdate() override;
 
+  void onFixedUpdate() override;
+
   /**
    * Add a player to our world.
    * @param connection An active connection to a client.
    */
-  void onPlayerJoin(UniqueId playerUid);
+  void onPlayerJoin(const MoveableState &moveableState);
 
   void onPlayerLeave(UniqueId uid);
 
@@ -38,24 +40,37 @@ public:
    */
   void setupMyPlayer();
 
-  bs::HSceneObject setupPlayer();
+  void addPlayer(const MoveableState &moveableState);
+
+  void addCube(const MoveableState &moveableState);
+
+  void addBall(const MoveableState &moveableState);
+
+  void applyMoveableState(const MoveableState &moveableState);
 
   /**
    * Load the default scene.
    */
   void setupScene();
 
-  bs::HSceneObject getPlayer();
+  HCNetComponent getPlayerNetComp();
 
   void addNetComp(HCNetComponent netComp);
+
   void removeNetComp(HCNetComponent netComp);
+
+  /**
+   * @return If it could be changed successfully.
+   */
+  bool netCompChangeUniqueId(UniqueId from, UniqueId to);
+
+  bool serverIsActive() const { return m_server.isActive(); }
 
 private:
   void setupInput();
 
   bs::HSceneObject createCamera(bs::HSceneObject player);
-  bs::HSceneObject createCube(bs::HMaterial material,
-                              bs::HPhysicsMaterial physicsMaterial);
+
   bs::HSceneObject createFloor(bs::HMaterial material,
                                bs::HPhysicsMaterial physicsMaterial);
   bs::HPhysicsMaterial createPhysicsMaterial();
@@ -63,11 +78,16 @@ private:
   bs::HSceneObject createGUI(bs::HSceneObject camera);
 
 private:
-  std::vector<HCNetComponent> m_netComps;
+  std::unordered_map<UniqueId, HCNetComponent> m_netComps;
   bool m_cursorMode = true;
   bs::HFPSCamera m_fpsCamera;
   Server m_server;
   HCMyPlayer m_player;
+
+  bs::HMaterial m_matGrid;
+  bs::HMaterial m_matGrid2;
+  bs::HPhysicsMaterial m_physicsMatStd;
+  bs::HMesh m_meshBall;
 };
 
 } // namespace wind

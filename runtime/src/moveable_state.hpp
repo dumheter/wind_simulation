@@ -15,8 +15,11 @@ namespace wind {
 class MoveableState {
 
 public:
-  MoveableState(UniqueId id)
-      : m_id(id), m_position(), m_scale(), m_rotation(){};
+  MoveableState()
+      : m_id(UniqueId::kInvalid), m_position(bs::Vector3::ONE),
+        m_scale(bs::Vector3::ONE), m_rotation(bs::Quaternion::IDENTITY) {}
+
+  MoveableState(UniqueId id) : MoveableState() { m_id = id; }
 
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
@@ -24,15 +27,28 @@ public:
 
   UniqueId getUniqueId() const { return m_id; }
 
+  void setUniqueId(UniqueId id) { m_id = id; }
+
   bs::Vector3 getPosition() const { return m_position; }
+
+  void setPosition(bs::Vector3 position) { m_position = position; }
 
   bs::Vector3 getScale() const { return m_scale; }
 
+  void setScale(bs::Vector3 scale) { m_scale = scale; }
+
   bs::Quaternion getRotation() const { return m_rotation; }
+
+  void setRotation(bs::Quaternion rotation) { m_rotation = rotation; }
 
   void from(const bs::Transform &transform);
 
   void from(bs::HSceneObject &so);
+
+  /**
+   * Does not overwrite the unique id!
+   */
+  void from(const MoveableState &other);
 
   void to(bs::Transform &transform) const;
 

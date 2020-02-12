@@ -47,6 +47,7 @@ void Server::StartServer(const u16 port) {
   }
   logVerbose("[server] listening on port {}.", port);
   m_connectionState = ConnectionState::kConnected;
+  m_world->setupScene();
 }
 
 void Server::PacketBroadcast(const Packet &packet,
@@ -79,6 +80,21 @@ Server::GetConnectionStatus(const ConnectionId connection_id) const {
   const bool ok =
       m_socketInterface->GetQuickConnectionStatus(connection_id, &status);
   return ok ? std::optional(status) : std::nullopt;
+}
+
+void Server::broadcastServerTick(
+    const std::unordered_map<UniqueId, HCNetComponent> &netComps) {
+  if (netComps.size() > 1 && !m_connections.empty()) {
+    m_packet.ClearPayload();
+    m_packet.SetHeader(PacketHeaderTypes::kServerTick);
+    auto mw = m_packet.GetMemoryWriter();
+    mw->Write(netComps.size());
+    for (auto [uid, netComp] : netComps) {
+      mw->Write(netComp->getState());
+    }
+    mw.Finalize();
+    PacketBroadcast(m_packet, SendStrategy::kUnreliable);
+  }
 }
 
 void Server::PollSocketStateChanges() {
@@ -192,6 +208,7 @@ void Server::OnSteamNetConnectionStatusChanged(
     }
 
     {
+      m_packet.ClearPayload();
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
@@ -200,6 +217,7 @@ void Server::OnSteamNetConnectionStatusChanged(
     }
 
     {
+      m_packet.ClearPayload();
       m_packet.SetHeader(PacketHeaderTypes::kPlayerJoin);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
