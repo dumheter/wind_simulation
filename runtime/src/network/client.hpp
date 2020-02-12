@@ -57,6 +57,8 @@ public:
 
   bool operator!=(const Client &other) const { return !(*this == other); }
 
+  Packet &getPacket() { return m_packet; }
+
 private:
   void handlePacket();
 

@@ -65,7 +65,7 @@ public:
     return m_netComps;
   }
 
-  const Creator& getCreator() { return m_creator; }
+  const Creator &getCreator() { return m_creator; }
 
 private:
   void setupInput();

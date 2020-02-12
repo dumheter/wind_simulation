@@ -53,25 +53,23 @@ Creator::Creator(World *world) : m_world(world) {
   m_meshCube = gBuiltinResources().getMesh(BuiltinMesh::Box);
 }
 
-void Creator::create(const MoveableState &moveableState) const {
+HCNetComponent Creator::create(const MoveableState &moveableState) const {
   switch (moveableState.getType()) {
   case Types::kPlayer:
-    player(moveableState);
-    break;
+    return player(moveableState);
   case Types::kCube:
-    cube(moveableState);
-    break;
+    return cube(moveableState);
   case Types::kBall:
-    ball(moveableState);
-    break;
+    return ball(moveableState);
   default:
     logWarning("[creator] create called with invalid type. type {}, id {}",
                static_cast<u32>(moveableState.getType()),
                moveableState.getUniqueId().raw());
   }
+  return HCNetComponent{};
 }
 
-void Creator::player(const MoveableState &moveableState) const {
+HCNetComponent Creator::player(const MoveableState &moveableState) const {
   using namespace bs;
   logVerbose("creating a player {}", moveableState.getUniqueId().raw());
   HSceneObject player = SceneObject::create("Player");
@@ -90,9 +88,10 @@ void Creator::player(const MoveableState &moveableState) const {
   auto [it, ok] =
       m_world->getNetComps().insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add player");
+  return netComp;
 }
 
-void Creator::cube(const MoveableState &moveableState) const {
+HCNetComponent Creator::cube(const MoveableState &moveableState) const {
   using namespace bs;
   logVerbose("creating a cube {}", moveableState.getUniqueId().raw());
   HSceneObject cube = SceneObject::create("Cube");
@@ -108,9 +107,10 @@ void Creator::cube(const MoveableState &moveableState) const {
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create cube, was the id unique?");
+  return netComp;
 }
 
-void Creator::ball(const MoveableState &moveableState) const {
+HCNetComponent Creator::ball(const MoveableState &moveableState) const {
   using namespace bs;
   logVerbose("creating a ball {}", moveableState.getUniqueId().raw());
   HSceneObject sphere = SceneObject::create("Sphere");
@@ -127,6 +127,7 @@ void Creator::ball(const MoveableState &moveableState) const {
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create cube, was the id unique?");
+  return netComp;
 }
 
 void Creator::floor() const {

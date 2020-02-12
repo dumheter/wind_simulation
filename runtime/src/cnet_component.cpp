@@ -17,8 +17,7 @@ CNetComponent::CNetComponent(bs::HSceneObject parent,
   mNotifyFlags = bs::TCF_Transform;
 }
 
-void CNetComponent::onCreated()
-{
+void CNetComponent::onCreated() {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
   SO()->setPosition(m_state.getPosition());
   SO()->setScale(m_state.getScale());

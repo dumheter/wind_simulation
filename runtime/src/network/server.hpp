@@ -67,7 +67,9 @@ public:
 
   ConnectionState getConnectionState() const { return m_connectionState; }
 
-  bool isActive() const { return m_connectionState == ConnectionState::kConnected; }
+  bool isActive() const {
+    return m_connectionState == ConnectionState::kConnected;
+  }
 
   void broadcastServerTick(
       const std::unordered_map<UniqueId, HCNetComponent> &netComps);

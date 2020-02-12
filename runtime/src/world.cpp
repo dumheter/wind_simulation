@@ -204,14 +204,23 @@ void World::setupInput() {
     }
     if (ev.buttonCode == BC_MOUSE_LEFT) {
       if (m_player->isConnected() && m_cursorMode) {
-        // auto spawnPos = getPlayerNetComp()->getState().getPosition();
-        // const auto &forward =
-        //     m_fpsCamera->getCamera()->getTransform().getForward();
-        // spawnPos += forward * 0.7f;
-        // spawnPos += Vector3(0.0f, 1.0f, 0.0f);
-        // sphere->setPosition(spawnPos);
-        // sphere->setScale(Vector3(0.3f, 0.3f, 0.3f));
-        // addBall();
+        auto spawnPos = getPlayerNetComp()->getState().getPosition();
+        const auto &forward =
+            m_fpsCamera->getCamera()->getTransform().getForward();
+        spawnPos += forward * 0.7f;
+        spawnPos += Vector3(0.0f, 1.0f, 0.0f);
+        MoveableState state{};
+        state.setType(Creator::Types::kBall);
+        state.setPosition(spawnPos);
+        state.setScale(bs::Vector3(0.3f, 0.3f, 0.3f));
+
+        auto &packet = m_player->getClient().getPacket();
+        packet.ClearPayload();
+        packet.SetHeader(PacketHeaderTypes::kRequestCreate);
+        auto mw = packet.GetMemoryWriter();
+        mw->Write(state);
+        mw.Finalize();
+        m_player->getClient().PacketSend(packet, SendStrategy::kReliable);
       }
     }
   });

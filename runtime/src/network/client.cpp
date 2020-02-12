@@ -98,14 +98,23 @@ void Client::handlePacket() {
         state = mr.Read<MoveableState>();
         m_world->applyMoveableState(state);
       }
-      //logVerbose("[client:p ServerTick] packet servertick, {}", count);
+      // logVerbose("[client:p ServerTick] packet servertick, {}", count);
     }
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    logWarning("[client:p Create] got a create packet");
+    auto mr = m_packet.GetMemoryReader();
+    if (!m_world->serverIsActive()) {
+      const u32 count = mr.Read<u32>();
+      logWarning("[client:p Create] got a create packet with {} count", count);
+      MoveableState state;
+      for (u32 i = 0; i < count; ++i) {
+        state = mr.Read<MoveableState>();
+        m_world->getCreator().create(state);
+      }
+    }
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    logWarning("[client:p RequestCreate] got a requestcreate packet");
+    logError("[client:p RequestCreate] got a requestcreate packet");
   } else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
     const auto new_uid = mr.Read<UniqueId>();

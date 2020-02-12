@@ -52,7 +52,8 @@ void Server::StartServer(const u16 port) {
 void Server::PacketBroadcast(const Packet &packet,
                              const SendStrategy send_strategy) {
   for (auto [connection, uid] : m_connections) {
-    if (Common::SendPacket(packet, send_strategy, connection, m_socketInterface) != SendResult::kSuccess) {
+    if (Common::SendPacket(packet, send_strategy, connection,
+                           m_socketInterface) != SendResult::kSuccess) {
       DisconnectConnection(connection);
     }
   }
@@ -63,7 +64,8 @@ void Server::PacketBroadcastExclude(const Packet &packet,
                                     const ConnectionId exclude_connection) {
   for (auto [connection, uid] : m_connections) {
     if (connection != exclude_connection) {
-      if (Common::SendPacket(packet, send_strategy, connection, m_socketInterface) != SendResult::kSuccess) {
+      if (Common::SendPacket(packet, send_strategy, connection,
+                             m_socketInterface) != SendResult::kSuccess) {
         DisconnectConnection(connection);
       }
     }
@@ -155,7 +157,29 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
 }
 
 void Server::handlePacket(Packet &packet) {
-  logVerbose("[server] got packet: todo handle packet");
+  // logVerbose("[server] got packet: todo handle packet");
+  if (auto header = m_packet.GetHeaderType();
+      header == PacketHeaderTypes::kRequestCreate) {
+    logVerbose("[server:p requestcreate] ");
+    auto mr = m_packet.GetMemoryReader();
+    auto state = mr.Read<MoveableState>();
+    if (state.getType() != Creator::Types::kInvalid) {
+      state.setUniqueId(UniqueIdGenerator::next());
+      auto netComp = m_world->getCreator().create(state);
+      m_packet.ClearPayload();
+      m_packet.SetHeader(PacketHeaderTypes::kCreate);
+      auto mw = m_packet.GetMemoryWriter();
+      const u32 count = 1;
+      mw->Write(count);
+      mw->Write(netComp->getState());
+      mw.Finalize();
+      PacketBroadcast(m_packet, SendStrategy::kReliable);
+    } else {
+      logWarning("[server:p requestcreate] invalid type in state");
+    }
+  } else {
+    logVerbose("[server] got packet: todo handle packet");
+  }
 }
 
 void Server::OnSteamNetConnectionStatusChanged(

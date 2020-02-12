@@ -27,6 +27,8 @@ public:
 
   void update() override;
 
+  Client &getClient() { return m_client; }
+
 private:
   Client m_client;
 };
