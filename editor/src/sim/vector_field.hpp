@@ -26,40 +26,29 @@
 // Headers
 // ========================================================================== //
 
+#include "math/field.hpp"
+#include "types.hpp"
+
 #include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
 
 // ========================================================================== //
-// Types
-// ========================================================================== //
-
-namespace wind {
-
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
+// VectorField Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/* Clamp 'value' between two other values 'min' and 'max' */
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S min, U max) {
-  return value < min ? min : value > max ? max : value;
-}
+/* Class that represents a vector field */
 
-// -------------------------------------------------------------------------- //
+class VectorField : public Field<bs::Vector3> {
+public:
+  /* Construct a vector-field with the specified 'width', 'height' and
+   * 'depth' (in number of cells). The size of a cell (in meters) can also be
+   * specified.  */
+  VectorField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-/* Returns the maximum of two values */
-template <typename T> inline constexpr T max(T a, T b) { return a > b ? a : b; }
-
-// -------------------------------------------------------------------------- //
-
-/* Returns the minimum of two values */
-template <typename T> inline constexpr T min(T a, T b) { return a < b ? a : b; }
+  /* \copydoc Field::debugDrawObject */
+  void debugDrawObject(const Vec3F &offset = Vec3F(),
+                       const Vec3F &padding = Vec3F(0, 0, 0)) override;
+};
 
 } // namespace wind

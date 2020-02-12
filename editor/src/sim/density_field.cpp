@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "math/density_field.hpp"
+#include "sim/density_field.hpp"
 
 // ========================================================================== //
 // Headers
@@ -41,34 +41,39 @@ DensityField::DensityField(u32 width, u32 height, u32 depth, f32 cellsize)
 
 // -------------------------------------------------------------------------- //
 
-void DensityField::debugDrawObject(const bs::Vector3 &offset) {
+void DensityField::debugDrawObject(const Vec3F &offset, const Vec3F &padding) {
   bs::DebugDraw::instance().setColor(bs::Color::Blue);
 
+  u32 xPad = u32(padding.x);
+  u32 yPad = u32(padding.y);
+  u32 zPad = u32(padding.z);
+
   // Draw vectors
-  for (u32 z = 0; z < m_dim.depth; z++) {
+  for (u32 z = zPad; z < m_dim.depth - zPad; z++) {
     const f32 zPos = offset.z + (z * m_cellSize);
-    for (u32 y = 0; y < m_dim.height; y++) {
+    for (u32 y = yPad; y < m_dim.height - yPad; y++) {
       const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_dim.width; x++) {
+      for (u32 x = xPad; x < m_dim.width - xPad; x++) {
         const f32 xPos = offset.x + (x * m_cellSize);
-        const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
-                               yPos + (m_cellSize / 2.0f),
-                               zPos + (m_cellSize / 2.0f));
+        const Vec3F base =
+            Vec3F(xPos + (m_cellSize / 2.0f), yPos + (m_cellSize / 2.0f),
+                  zPos + (m_cellSize / 2.0f)) -
+            (padding * m_cellSize);
         f32 density = get(x, y, z);
         density = clamp(density, 0, 1.0f);
 
-#if 0
+#if 1
         bs::DebugDraw::instance().drawCube(
             base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
 #else
-        f32 d000 = clamp(getSafe(x, y, z), 0.0f, 1.0f);
-        f32 d010 = clamp(getSafe(x, y + 1, z), 0.0f, 1.0f);
-        f32 d100 = clamp(getSafe(x + 1, y, z), 0.0f, 1.0f);
-        f32 d110 = clamp(getSafe(x + 1, y + 1, z), 0.0f, 1.0f);
-        f32 d001 = clamp(getSafe(x, y, z + 1), 0.0f, 1.0f);
-        f32 d011 = clamp(getSafe(x, y + 1, z + 1), 0.0f, 1.0f);
-        f32 d101 = clamp(getSafe(x + 1, y, z + 1), 0.0f, 1.0f);
-        f32 d111 = clamp(getSafe(x + 1, y + 1, z + 1), 0.0f, 1.0f);
+        f32 d000 = clamp(getClamped(x, y, z), 0.0f, 1.0f);
+        f32 d010 = clamp(getClamped(x, y + 1, z), 0.0f, 1.0f);
+        f32 d100 = clamp(getClamped(x + 1, y, z), 0.0f, 1.0f);
+        f32 d110 = clamp(getClamped(x + 1, y + 1, z), 0.0f, 1.0f);
+        f32 d001 = clamp(getClamped(x, y, z + 1), 0.0f, 1.0f);
+        f32 d011 = clamp(getClamped(x, y + 1, z + 1), 0.0f, 1.0f);
+        f32 d101 = clamp(getClamped(x + 1, y, z + 1), 0.0f, 1.0f);
+        f32 d111 = clamp(getClamped(x + 1, y + 1, z + 1), 0.0f, 1.0f);
 
         f32 posOffset = 0.3f;
         f32 negOffset = -0.3f;
@@ -123,40 +128,6 @@ void DensityField::debugDrawObject(const bs::Vector3 &offset) {
 #endif
       }
     }
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
-  bool bx = !isInBoundsX(x);
-  bool by = !isInBoundsY(y);
-  bool bz = !isInBoundsZ(z);
-
-  s32 _x = clamp(x, 0, s32(m_dim.width) - 1);
-  s32 _y = clamp(y, 0, s32(m_dim.height) - 1);
-  s32 _z = clamp(z, 0, s32(m_dim.depth) - 1);
-
-  if (bx && by && bz) { // X, Y and Z
-    f32 comb = getSafe(_x, y, z) + getSafe(x, _y, z) + getSafe(x, y, _z);
-    return 1.0f / 3.0f * comb;
-  } else if (bx && by) { // X and Y
-    f32 comb = getSafe(_x, y, z) + getSafe(x, _y, z);
-    return 1.0f / 2.0f * comb;
-  } else if (bx && bz) { // X and Z
-    f32 comb = getSafe(_x, y, z) + getSafe(x, y, _z);
-    return 1.0f / 2.0f * comb;
-  } else if (by && bz) { // Y and Z
-    f32 comb = getSafe(x, _y, z) + getSafe(x, y, _z);
-    return 1.0f / 2.0f * comb;
-  } else if (bx) { // X
-    return get(_x, y, z);
-  } else if (by) { // Y
-    return get(x, _y, z);
-  } else if (bz) { // Z
-    return get(x, y, _z);
-  } else { // None
-    return get(x, y, z);
   }
 }
 

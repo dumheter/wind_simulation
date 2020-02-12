@@ -26,9 +26,10 @@
 // Headers
 // ========================================================================== //
 
-#include "math/density_field.hpp"
-#include "math/obstruction_field.hpp"
-#include "math/vector_field.hpp"
+#include "math/math.hpp"
+#include "sim/density_field.hpp"
+#include "sim/obstruction_field.hpp"
+#include "sim/vector_field.hpp"
 
 // ========================================================================== //
 // Editor Declaration
@@ -36,56 +37,63 @@
 
 namespace wind {
 
-/* Class representing the main wind simulation. The wind simulation works with
- * a couple of different buffers. The buffers that are updated are also
- * multi-buffered, meaning that they are flipped through. The one being written
- * to in the current timestep will be read from in a coming timestep.
- *
- * The first buffer is the density buffer. This buffer contains the densities of
- * "fluid" (air) at the different positions.
- *
- * The second buffer is the velocity field. This contains the wind direction and
- * strength at the different positions.
- *
- * The third, and last, buffer is the obstruction field. This field has binary
- * cells, used to determine whether or not the cell is obstructed by objects in
- * the scene. This buffer is also not multi-buffered as it's static.
- *
- *
- *
- * To update the simulation of the wind, the 'step' function must be called.
- * This function takes in the delta time (time between frames) that should be
- * used to update the simulation for the correct timespan. Supplying the same
- * delta time as that of the game means that the simulation will run in
- * real-time.
- *
- * -----------------------------------------------------------------------------
- *
- * Algorithms are adapted from the 2003 paper by Jos Stam "Real-Time Fluid
- * Dynamics for Games". The 3D extension by Blain Maguire
- * (Link: https://github.com/BlainMaguire/3dfluid) has also been used.
- *
- * The implementation of field (Field) used by the wind simulation supports
- * sampling cells outside the bounds using the 'getSafe' function. This means
- * that unlike the two mentioned texts we do not need to set boundary conditions
- * after every action, the values can instead simply be sampled outside the
- * field. Depending on where outside the lie (face, edge, corner) the sampled
- * value matches that set by the 'set_bnd' function in those texts.
- *
- * For the velocity fields (VectorField) the values sampled outside the
- * boundaries can be changed by calling 'setBorderKind'
- * (See wind::VectorField::BorderKind) for more information about the different
- * border kinds.
- *
- */
+/// Class representing the main wind simulation. The wind simulation works with
+/// a couple of different buffers. The buffers that are updated are also
+/// multi-buffered, meaning that they are flipped through. The one being written
+/// to in the current timestep will be read from in a coming timestep.
+///
+/// The first buffer is the density buffer. This buffer contains the densities
+/// of "fluid" (air) at the different positions.
+///
+/// The second buffer is the velocity field. This contains the wind direction
+/// and strength at the different positions.
+///
+/// The third, and last, buffer is the obstruction field. This field has binary
+/// cells, used to determine whether or not the cell is obstructed by objects in
+/// the scene. This buffer is also not multi-buffered as it's static.
+///
+///
+///
+/// To update the simulation of the wind, the 'step' function must be called.
+/// This function takes in the delta time (time between frames) that should be
+/// used to update the simulation for the correct timespan. Supplying the same
+/// delta time as that of the game means that the simulation will run in
+/// real-time.
+///
+/// -----------------------------------------------------------------------------
+///
+/// Algorithms are adapted from the 2003 paper by Jos Stam "Real-Time Fluid
+/// Dynamics for Games". The 3D extension by Blain Maguire
+/// (Link: https://github.com/BlainMaguire/3dfluid) has also been used.
+///
+/// The implementation of field (Field) used by the wind simulation supports
+/// sampling cells outside the bounds using the 'getSafe' function. This means
+/// that unlike the two mentioned texts we do not need to set boundary
+/// conditions after every action, the values can instead simply be sampled
+/// outside the field. Depending on where outside the lie (face, edge, corner)
+/// the sampled value matches that set by the 'set_bnd' function in those texts.
+///
+/// For the velocity fields (VectorField) the values sampled outside the
+/// boundaries can be changed by calling 'setBorderKind'
+/// (See wind::VectorField::BorderKind) for more information about the different
+/// border kinds.
+///
+///
 class WindSimulation {
 public:
   /* Type of debug data to show */
   enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 
 public:
-  /* Destruct wind simulation along with data */
+  /// Private constructor
+  WindSimulation(u32 width, u32 height, u32 depth, f32 cellSize = 1.0f);
+
+  /// Destruct wind simulation along with data
   ~WindSimulation();
+
+  ///
+  void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
+                     const bs::Vector3 &position = bs::Vector3());
 
   /* Step the simulation with the specified delta time (dt). Stepping the
    * delta-time with the real frame-time means that the simulation should run in
@@ -97,6 +105,11 @@ public:
 
   /* Step velocity simulation */
   void stepVelocity(f32 delta);
+
+  /* Draw debug information */
+  void debugDraw(FieldKind kind,
+                 const bs::Vector3 &offset = bs::Vector3(0, 0, 0),
+                 bool drawFrame = true);
 
   /* Add density sources */
   void addDensitySource() { m_addDensitySource = true; }
@@ -124,78 +137,11 @@ public:
     m_velocityAdvectionActive = active;
   }
 
-  /* Draw debug information */
-  void debugDraw(FieldKind kind,
-                 const bs::Vector3 &offset = bs::Vector3(0, 0, 0),
-                 bool drawFrame = true);
-
-  /* Returns the current density field */
-  DensityField *getDensityField() {
-    return m_densityFields[m_densityBufferIdx];
-  }
-
-  /* Returns the current density field */
-  DensityField *getDensityFieldPrev() {
-    return m_densityFields[(m_densityBufferIdx - 1) % BUFFER_COUNT];
-  }
-
-  /* Returns the current vector field */
-  VectorField *getVelocityField() {
-    return m_velocityFields[m_densityBufferIdx];
-  }
-
-  /* Returns the current vector field */
-  VectorField *getVelocityFieldPrev() {
-    return m_velocityFields[(m_densityBufferIdx - 1) % BUFFER_COUNT];
-  }
-
-  /* Returns the obstruction field */
-  ObstructionField *getObstructionField() { return m_obstructionField; }
-
-private:
-  /* Private constructor */
-  WindSimulation() = default;
-
-  /* Initialize the simulation data */
-  void init();
-
-  /* Run the density diffusion */
-  void stepDensityDiffusion(f32 delta);
-
-  /* Run the density advection */
-  void stepDensityAdvection(f32 delta);
-
-  /* Update density buffer index  */
-  void updateDensityBufferIndex(s32 value = 1) {
-    m_densityBufferIdx = (m_densityBufferIdx + value) % BUFFER_COUNT;
-  }
-
-  /* Run the velocity diffusion */
-  void stepVelocityDiffusion(f32 delta);
-
-  /* Run the velocity advection */
-  void stepVelocityAdvection(f32 delta);
-
-  /// Project velocity buffer
-  void projectVelocity();
-
-  /* Update density buffer index  */
-  void updateVelocityBufferIndex(s32 value = 1) {
-    m_velocityBufferIdx = (m_velocityBufferIdx + value) % BUFFER_COUNT;
-  }
-
-public:
-  /* Construct a wind simulation from a scene. All data required is determined
-   * from the objects in the scene */
-  static WindSimulation *createFromScene(
-      const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,
-      const bs::Vector3 &position = bs::Vector3(), f32 cellSize = 1.0);
-
 private:
   /* Number of buffers flipped between in simulation */
   static constexpr u32 BUFFER_COUNT = 2;
 
-  /* Number of iterations in the gauss-seidel method */
+  /* Number of iterations in the Gauss-Seidel method */
   static constexpr u32 GAUSS_SEIDEL_STEPS = 10;
 
 private:
@@ -210,16 +156,20 @@ private:
   u32 m_velocityBufferIdx = 0;
 
   /* Diffusion rate */
-  f32 m_diffusion = 0.00001f;
+  f32 m_diffusion = 0.001f;
   /* Viscosity */
   f32 m_viscosity = 0.0f;
 
-  /* Density fields */
-  DensityField *m_densityFields[BUFFER_COUNT];
-  /* Velocity fields */
-  VectorField *m_velocityFields[BUFFER_COUNT];
+  /// Density fields (current)
+  DensityField *m_d = nullptr;
+  /// Density fields (previous )
+  DensityField *m_d0 = nullptr;
+  /// Velocity field (current)
+  VectorField *m_v = nullptr;
+  /// Velocity field (previous)
+  VectorField *m_v0 = nullptr;
   /* Obstruction field */
-  ObstructionField *m_obstructionField;
+  ObstructionField *m_o = nullptr;
 
   /* Whether to add density sources */
   bool m_addDensitySource = false;
