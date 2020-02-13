@@ -241,6 +241,9 @@ void World::onPlayerInput(UniqueId uid, PlayerInput input,
     if (maybeRot) {
       it->second->applyRotation(*maybeRot);
     }
+    // TODO
+    //it->second->resetNewInputFlag();
+    //m_netComps[uid]->resetChanged();
   }
 }
 

@@ -5,11 +5,15 @@
 #include "Scene/BsComponent.h"
 #include "player_input.hpp"
 
+namespace wind {
+class World;
+}
+
 namespace bs {
 
 class FPSWalker : public Component {
 public:
-  FPSWalker(const HSceneObject &parent);
+  FPSWalker(const HSceneObject &parent, wind::World *world);
 
   void update() override;
 
@@ -19,19 +23,25 @@ public:
 
   bool hasNewInput() const { return m_hasNewInput; }
 
-  wind::PlayerInput getPlayerInput() { m_hasNewInput = false; return m_lastInput; }
+  void resetNewInputFlag() { m_hasNewInput = false; }
+
+  wind::PlayerInput getPlayerInput() {
+    m_hasNewInput = false;
+    return m_lastInput;
+  }
 
   void setInput(wind::PlayerInput input) { m_lastInput = input; }
 
-  void applyRotation(const bs::Quaternion& rotation);
+  void applyRotation(const bs::Quaternion &rotation);
 
- private:
+private:
   wind::PlayerInput getInput();
 
   void applyInput(wind::PlayerInput input);
 
 private:
   HCharacterController mController;
+  wind::World *m_world;
 
   float mCurrentSpeed = 0.0f;
 

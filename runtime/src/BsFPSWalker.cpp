@@ -12,6 +12,7 @@
 #include "Scene/BsSceneObject.h"
 #include "Utility/BsTime.h"
 #include "log.hpp"
+#include "world.hpp"
 
 namespace bs {
 constexpr float START_SPEED = 4.0f; // m/s
@@ -19,7 +20,8 @@ constexpr float TOP_SPEED = 7.0f;   // m/s
 constexpr float ACCELERATION = 1.5f;
 constexpr float FAST_MODE_MULTIPLIER = 2.0f;
 
-FPSWalker::FPSWalker(const HSceneObject &parent) : Component(parent) {
+FPSWalker::FPSWalker(const HSceneObject &parent, wind::World *world)
+    : Component(parent), m_world(world) {
   setName("FPSWalker");
   mController = SO()->getComponent<CCharacterController>();
   mMoveForward = VirtualButton("Forward");
@@ -53,8 +55,7 @@ void FPSWalker::update() {
   }
 }
 
-void FPSWalker::applyRotation(const bs::Quaternion &rotation)
-{
+void FPSWalker::applyRotation(const bs::Quaternion &rotation) {
   SO()->setRotation(rotation);
 }
 
@@ -111,6 +112,9 @@ void FPSWalker::applyInput(wind::PlayerInput input) {
       !input.inputs.jump ? Vector3() : Vector3(0.0f, 20.0f, 0.0f);
 
   mController->move((velocity + gravity + jump) * frameDelta);
-
+  // auto netComp = m_world->getPlayerNetComp();
+  // if (netComp) {
+  //   netComp->resetChanged();
+  // }
 }
 } // namespace bs

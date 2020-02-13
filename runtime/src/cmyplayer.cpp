@@ -11,7 +11,7 @@ namespace wind {
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
     : Component(parent), m_client(world), m_world(world) {
   setName("CMyPlayer");
-  m_fpsWalker = SO()->addComponent<bs::FPSWalker>();
+  m_fpsWalker = SO()->addComponent<bs::FPSWalker>(world);
   m_fpsWalker->makeActive();
   m_lastRotation = SO()->getTransform().getRotation();
 }
@@ -32,25 +32,22 @@ void CMyPlayer::fixedUpdate() {
     auto rotation = SO()->getTransform().getRotation();
     const u8 rotChanged = m_lastRotation != rotation;
     if (rotChanged || m_fpsWalker->hasNewInput()) {
-        auto &packet = m_client.getPacket();
-        packet.ClearPayload();
-        packet.SetHeader(PacketHeaderTypes::kPlayerTick);
-        auto mw = packet.GetMemoryWriter();
-        mw->Write(m_fpsWalker->getPlayerInput());
-        mw->Write(rotChanged);
-        if (rotChanged) {
-          mw->Write(rotation.x);
-          mw->Write(rotation.y);
-          mw->Write(rotation.z);
-          mw->Write(rotation.w);
-          m_lastRotation = rotation;
-        }
-        mw.Finalize();
-        m_client.PacketSend(packet, SendStrategy::kUnreliableNoDelay);
-        logInfo("[client] sent PlayerTick");
-        auto netComp = m_world->getPlayerNetComp();
-        netComp->resetChanged();
+      auto &packet = m_client.getPacket();
+      packet.ClearPayload();
+      packet.SetHeader(PacketHeaderTypes::kPlayerTick);
+      auto mw = packet.GetMemoryWriter();
+      mw->Write(m_fpsWalker->getPlayerInput());
+      mw->Write(rotChanged);
+      if (rotChanged) {
+        mw->Write(rotation.x);
+        mw->Write(rotation.y);
+        mw->Write(rotation.z);
+        mw->Write(rotation.w);
+        m_lastRotation = rotation;
       }
+      mw.Finalize();
+      m_client.PacketSend(packet, SendStrategy::kUnreliableNoDelay);
+    }
   }
 }
 

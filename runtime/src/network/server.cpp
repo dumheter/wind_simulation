@@ -126,7 +126,6 @@ void Server::broadcastServerTick(
         if (netComp->hasChanged()) {
           mw->Write(netComp->getState());
           netComp->resetChanged();
-          logVerbose("[server] tick {}", uid.raw());
         }
       }
       mw.Finalize();
@@ -191,15 +190,11 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
 void Server::handlePacket(Packet &packet) {
   if (auto header = m_packet.GetHeaderType();
       header == PacketHeaderTypes::kPlayerTick) {
-    static int wow = 0;
-    ++wow;
-    logInfo("[server] PlayerTick {}", wow);
     auto mr = m_packet.GetMemoryReader();
     auto input = mr.Read<PlayerInput>();
     const u8 rotChanged = mr.Read<u8>();
     std::optional<bs::Quaternion> maybeRot = std::nullopt;
     if (rotChanged) {
-      logVerbose("[server] rot changed");
       maybeRot = std::make_optional<bs::Quaternion>(
           mr.Read<float>(), mr.Read<float>(), mr.Read<float>(),
           mr.Read<float>());
