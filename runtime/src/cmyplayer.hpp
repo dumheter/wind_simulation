@@ -1,16 +1,16 @@
 #ifndef CMYPLAYER_HPP_
 #define CMYPLAYER_HPP_
 
+#include "BsFPSWalker.h"
 #include "BsPrerequisites.h"
+#include "Math/BsQuaternion.h"
 #include "Scene/BsComponent.h"
 #include "network/client.hpp"
 
 namespace wind {
 
-/**
- * Component who is owner of the client. Makes sure it is run
- * every update.
- */
+class World;
+
 class CMyPlayer : public bs::Component {
 public:
   CMyPlayer(bs::HSceneObject parent, World *world);
@@ -27,10 +27,15 @@ public:
 
   void update() override;
 
+  void fixedUpdate() override;
+
   Client &getClient() { return m_client; }
 
 private:
+  World *m_world;
   Client m_client;
+  bs::HFPSWalker m_fpsWalker;
+  bs::Quaternion m_lastRotation;
 };
 
 using HCMyPlayer = bs::GameObjectHandle<CMyPlayer>;

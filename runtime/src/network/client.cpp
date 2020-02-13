@@ -98,7 +98,11 @@ void Client::handlePacket() {
       MoveableState state;
       for (u32 i = 0; i < count; ++i) {
         state = mr.Read<MoveableState>();
-        m_world->applyMoveableState(state);
+        if (state.getUniqueId() != m_uid) {
+          m_world->applyMoveableState(state);
+        } else {
+          m_world->applyMyMoveableState(state);
+        }
       }
     }
   } else if (header == PacketHeaderTypes::kPlayerTick) {

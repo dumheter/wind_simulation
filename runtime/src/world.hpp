@@ -8,6 +8,7 @@
 #include "creator.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
+#include "player_input.hpp"
 #include "utility/unique_id.hpp"
 #include <unordered_map>
 
@@ -34,6 +35,8 @@ public:
 
   void onPlayerLeave(UniqueId uid);
 
+  void onPlayerInput(UniqueId uid, PlayerInput input, std::optional<bs::Quaternion> maybeRot);
+
   /**
    * Build the player entity, camera and attach gui to the
    * camera.
@@ -42,6 +45,12 @@ public:
   void setupMyPlayer();
 
   void applyMoveableState(const MoveableState &moveableState);
+
+  /**
+   * We only apply the moveable state to our player if we have diverged too much.
+   * @pre moveableState should represent myplayer's moveable state.
+   */
+  void applyMyMoveableState(const MoveableState &moveableState);
 
   /**
    * Load the default scene.
@@ -65,6 +74,10 @@ public:
     return m_netComps;
   }
 
+  std::unordered_map<UniqueId, bs::HFPSWalker> &getWalkers() {
+    return m_walkers;
+  }
+
   const Creator &getCreator() { return m_creator; }
 
 private:
@@ -80,6 +93,7 @@ private:
 
 private:
   std::unordered_map<UniqueId, HCNetComponent> m_netComps;
+  std::unordered_map<UniqueId, bs::HFPSWalker> m_walkers;
   bool m_cursorMode = true;
   bs::HFPSCamera m_fpsCamera;
   Server m_server;

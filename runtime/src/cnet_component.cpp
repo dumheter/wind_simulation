@@ -38,4 +38,12 @@ void CNetComponent::setState(const MoveableState &moveableState) {
   mNotifyFlags = bs::TCF_Transform;
 }
 
+void CNetComponent::setPosition(bs::Vector3 position)
+{
+  mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
+  m_state.setPosition(position);
+  SO()->setPosition(m_state.getPosition());
+  mNotifyFlags = bs::TCF_Transform;
+}
+
 } // namespace wind

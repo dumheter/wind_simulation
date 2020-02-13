@@ -81,11 +81,15 @@ HCNetComponent Creator::player(const MoveableState &moveableState) const {
   HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
   renderable->setMesh(mesh);
   renderable->setMaterial(m_matGrid2);
+  auto fpsWalker = player->addComponent<FPSWalker>();
   HCNetComponent netComp = player->addComponent<CNetComponent>(moveableState);
   netComp->setType(Types::kPlayer);
   auto [it, ok] =
       m_world->getNetComps().insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add player");
+  auto [it2, ok2] =
+      m_world->getWalkers().insert({netComp->getUniqueId(), fpsWalker});
+  AlfAssert(ok2, "failed to add player");
   return netComp;
 }
 

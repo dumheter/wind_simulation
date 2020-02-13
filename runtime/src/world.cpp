@@ -31,7 +31,6 @@
 #include "Resources/BsBuiltinResources.h"
 #include "Scene/BsSceneObject.h"
 #include "asset.hpp"
-#include "bsFPSWalker.h"
 #include "cmyplayer.hpp"
 #include "creator.hpp"
 #include "log.hpp"
@@ -91,6 +90,15 @@ HCNetComponent World::getPlayerNetComp() {
 bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
   auto it = m_netComps.find(from);
   if (it != m_netComps.end()) {
+    if (it->second->getState().getType() == Creator::Types::kPlayer) {
+      auto cit = m_walkers.find(from);
+      if (cit != m_walkers.end()) {
+        auto [_, ok] = m_walkers.insert({to, cit->second});
+        if (ok) {
+          m_walkers.erase(cit);
+        }
+      }
+    }
     auto [_, ok] = m_netComps.insert({to, it->second});
     if (ok) {
       it->second->setUniqueId(to);
@@ -111,7 +119,6 @@ void World::setupMyPlayer() {
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
   netComp->setType(Creator::Types::kPlayer);
-  player->addComponent<FPSWalker>();
   auto camera = createCamera(player);
   auto gui = createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
@@ -129,6 +136,24 @@ void World::applyMoveableState(const MoveableState &moveableState) {
   }
 }
 
+void World::applyMyMoveableState(const MoveableState &moveableState) {
+  auto it = m_netComps.find(moveableState.getUniqueId());
+  if (it != m_netComps.end()) {
+    const auto myPos = it->second->getState().getPosition();
+    const auto newPos = moveableState.getPosition();
+    constexpr float kDivergeMax = 2.0f;
+    if (std::fabs(myPos.x - newPos.x) > kDivergeMax ||
+        std::fabs(myPos.y - newPos.y) > kDivergeMax ||
+        std::fabs(myPos.z - newPos.z) > kDivergeMax) {
+      logVerbose("[client] state diverged, correcting");
+      it->second->setPosition(newPos);
+    }
+  } else {
+    logError("failed to find netcomp with id {}",
+             moveableState.getUniqueId().raw());
+  }
+}
+
 void World::reset() {
   // TODO
   // m_netComps.clear();
@@ -140,14 +165,36 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
 }
 
 void World::onPlayerLeave(UniqueId uid) {
-  logInfo("player {} left", uid);
+  logInfo("player {} left", uid.raw());
 
-  auto it = m_netComps.find(uid);
-  if (it != m_netComps.end()) {
-    it->second->destroy();
-    m_netComps.erase(it);
-  } else {
-    logWarning("player left, but couldn't find them");
+  {
+    auto it = m_netComps.find(uid);
+    if (it != m_netComps.end()) {
+      //it->second->destroy();
+      m_netComps.erase(it);
+    } else {
+      logWarning("(netComps) player left, but couldn't find them");
+    }
+  }
+
+  {
+    auto it = m_walkers.find(uid);
+    if (it != m_walkers.end()) {
+      m_walkers.erase(it);
+    } else {
+      logWarning("(characters) player left, but couldn't find them");
+    }
+  }
+}
+
+void World::onPlayerInput(UniqueId uid, PlayerInput input,
+                          std::optional<bs::Quaternion> maybeRot) {
+  auto it = m_walkers.find(uid);
+  if (it != m_walkers.end()) {
+    it->second->setInput(input);
+    if (maybeRot) {
+      it->second->applyRotation(*maybeRot);
+    }
   }
 }
 

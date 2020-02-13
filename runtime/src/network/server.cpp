@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "log.hpp"
+#include "player_input.hpp"
 #include "world.hpp"
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
@@ -156,9 +157,22 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
 }
 
 void Server::handlePacket(Packet &packet) {
-  // logVerbose("[server] got packet: todo handle packet");
   if (auto header = m_packet.GetHeaderType();
-      header == PacketHeaderTypes::kRequestCreate) {
+      header == PacketHeaderTypes::kPlayerTick) {
+    auto mr = m_packet.GetMemoryReader();
+    auto input = mr.Read<PlayerInput>();
+    const u8 rotChanged = mr.Read<u8>();
+    std::optional<bs::Quaternion> maybeRot = std::nullopt;
+    if (rotChanged) {
+      logVerbose("[server] rot changed");
+      maybeRot = std::make_optional<bs::Quaternion>(
+          mr.Read<float>(), mr.Read<float>(), mr.Read<float>(),
+          mr.Read<float>());
+    }
+    const auto from = m_packet.GetFromConnection();
+    const auto uid = m_connections[from];
+    m_world->onPlayerInput(uid, input, maybeRot);
+  } else if (header == PacketHeaderTypes::kRequestCreate) {
     logVerbose("[server:p requestcreate] ");
     auto mr = m_packet.GetMemoryReader();
     auto state = mr.Read<MoveableState>();

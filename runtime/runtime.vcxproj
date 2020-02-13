@@ -106,6 +106,7 @@
     <ClCompile Include="src\network\packet.cpp" />
     <ClCompile Include="src\network\server.cpp" />
     <ClCompile Include="src\network\side.cpp" />
+    <ClCompile Include="src\player_input.cpp" />
     <ClCompile Include="src\world.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +125,7 @@
     <ClInclude Include="src\network\packet_header.hpp" />
     <ClInclude Include="src\network\server.hpp" />
     <ClInclude Include="src\network\side.hpp" />
+    <ClInclude Include="src\player_input.hpp" />
     <ClInclude Include="src\utility\unique_id.hpp" />
     <ClInclude Include="src\world.hpp" />
   </ItemGroup>

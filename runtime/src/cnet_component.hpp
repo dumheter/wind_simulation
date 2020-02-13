@@ -41,6 +41,8 @@ public:
 
   void setType(Creator::Types type) { m_state.setType(type); }
 
+  void setPosition(bs::Vector3 position);
+
   bool operator==(const CNetComponent &other) const {
     return getUniqueId() == other.getUniqueId();
   }
