@@ -126,7 +126,7 @@ void Editor::onFixedUpdate(f32 delta) {
 
   // Run simulation step
   if (m_runSim) {
-    m_windSim->step(delta);
+    m_windSim->step(delta * m_simSpeed);
   }
 
   // Redraw each frame
@@ -261,54 +261,6 @@ void Editor::setupGUI() {
     height += button->getBounds().height + 2;
   }
 
-  // Fullscreen toggle
-  {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("Fullscreen"));
-    label->setPosition(4, height);
-
-    // Monitor selection
-    Vector<HString> opts = {HString("Primary"), HString("Secondary"),
-                            HString("Tertiary")};
-    GUIListBox *listBox = panel->addNewElement<GUIListBox>(opts);
-    listBox->setPosition(136, height);
-    listBox->setWidth(100);
-
-    GUIToggle *toggle =
-        panel->addNewElement<GUIToggle>(HString("FullscreenToggle"));
-    toggle->setPosition(120, height);
-    toggle->onToggled.connect([this, listBox](bool t) {
-      if (t) {
-        auto selection = listBox->getElementStates();
-        u32 idx = 0;
-        for (u32 i = 0; i < selection.size(); i++) {
-          if (selection[i]) {
-            idx = i;
-          }
-        }
-        enterFullscreen(VideoMode(), idx);
-      } else {
-        exitFullscreen();
-      }
-    });
-
-    height += listBox->getBounds().height + 2;
-  }
-
-  // Scene enabling
-  {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("Draw scene"));
-    label->setPosition(4, height);
-
-    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DrawScene"));
-    toggle->setPosition(120, height);
-    toggle->onToggled.connect([this](bool t) {
-      m_drawScene = t;
-      m_geometry->setActive(m_drawScene);
-    });
-
-    height += toggle->getBounds().height + 2;
-  }
-
   // Debug draw type
   {
     GUILabel *label = panel->addNewElement<GUILabel>(HString("Field type"));
@@ -366,59 +318,6 @@ void Editor::setupGUI() {
     height += toggle->getBounds().height + 2;
   }
 
-  // Debug vector direction
-  {
-    GUILabel *label = panel->addNewElement<GUILabel>(HString("Vectors"));
-    label->setPosition(4, height);
-
-    GUISliderHorz *xSlider = panel->addNewElement<GUISliderHorz>();
-    xSlider->setPosition(120, height);
-    xSlider->setWidth(50);
-    xSlider->setRange(-1.0, 1.0f);
-    xSlider->setValue(0.0f);
-    xSlider->onChanged.connect([this](f32 value) {
-      // bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
-      // vec.x = value;
-      // for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++)
-      // {
-      //  m_windSim->getVelocityField()->get(i) = vec;
-      //  m_windSim->getVelocityFieldPrev()->get(i) = vec;
-      //}
-    });
-
-    GUISliderHorz *ySlider = panel->addNewElement<GUISliderHorz>();
-    ySlider->setPosition(172, height);
-    ySlider->setWidth(50);
-    ySlider->setRange(-1.0, 1.0f);
-    ySlider->setValue(0.0f);
-    ySlider->onChanged.connect([this](f32 value) {
-      // bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
-      // vec.y = value;
-      // for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++)
-      // {
-      //  m_windSim->getVelocityField()->get(i) = vec;
-      //  m_windSim->getVelocityFieldPrev()->get(i) = vec;
-      //}
-    });
-
-    GUISliderHorz *zSlider = panel->addNewElement<GUISliderHorz>();
-    zSlider->setPosition(224, height);
-    zSlider->setWidth(50);
-    zSlider->setRange(-1.0, 1.0f);
-    zSlider->setValue(0.0f);
-    zSlider->onChanged.connect([this](f32 value) {
-      // bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
-      // vec.z = value;
-      // for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++)
-      // {
-      //  m_windSim->getVelocityField()->get(i) = vec;
-      //  m_windSim->getVelocityFieldPrev()->get(i) = vec;
-      //}
-    });
-
-    height += xSlider->getBounds().height + 2;
-  }
-
   // Debug run simulation
   {
     GUILabel *label = panel->addNewElement<GUILabel>(HString("Run simulation"));
@@ -429,6 +328,21 @@ void Editor::setupGUI() {
     toggle->onToggled.connect([this](bool t) {
       m_runSim = t;
       logVerbose("Simulation {}", t ? "running" : "stopped");
+    });
+
+    GUILabel *label1 = panel->addNewElement<GUILabel>(HString("(1.0)"));
+    label1->setPosition(244, height);
+
+    GUISliderHorz *slider = panel->addNewElement<GUISliderHorz>();
+    slider->setPosition(142, height);
+    slider->setWidth(100);
+    slider->setRange(0.0, 10.0f);
+    slider->setValue(1.0f);
+    slider->onChanged.connect([this, label1](f32 value) {
+      m_simSpeed = value;
+      std::stringstream sstr;
+      sstr << "(" << std::fixed << std::setprecision(2) << value << ")";
+      label1->setContent(GUIContent(HString(sstr.str().c_str())));
     });
 
     height += toggle->getBounds().height + 2;

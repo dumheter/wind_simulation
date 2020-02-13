@@ -73,6 +73,8 @@ private:
 
   /* Whether to run simulation */
   bool m_runSim = false;
+  /// Speed at which simulation is running
+  f32 m_simSpeed = 1.0f;
 
   /* Debug type */
   WindSimulation::FieldKind m_debugFieldKind =

@@ -155,14 +155,17 @@ void WindSimulation::stepDensity(f32 delta) {
     m_d->get(m_width - 3, 5, m_depth - 3) = 0.0f;
   }
 
-  DensityField::swap(m_d, m_d0);
-
   // Diffusion
-  diffuse(m_d, m_d0, Edge::NONE, m_diffusion, delta);
+  if (m_densityDiffusionActive) {
+    DensityField::swap(m_d, m_d0);
+    diffuse(m_d, m_d0, Edge::NONE, m_diffusion, delta);
+  }
 
   // Advection
-  DensityField::swap(m_d, m_d0);
-  advect(m_d, m_d0, m_v, Edge::NONE, delta);
+  if (m_densityAdvectionActive) {
+    DensityField::swap(m_d, m_d0);
+    advect(m_d, m_d0, m_v, Edge::NONE, delta);
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -184,22 +187,26 @@ void WindSimulation::stepVelocity(f32 delta) {
   }
 
   // Diffusion
-  VectorField::Comp::swap(m_v0->getX(), m_v->getX());
-  diffuse(m_v->getX(), m_v0->getX(), Edge::X_EDGE, m_viscosity, delta);
-  VectorField::Comp::swap(m_v0->getY(), m_v->getY());
-  diffuse(m_v->getY(), m_v0->getY(), Edge::Y_EDGE, m_viscosity, delta);
-  VectorField::Comp::swap(m_v0->getZ(), m_v->getZ());
-  diffuse(m_v->getZ(), m_v0->getZ(), Edge::Z_EDGE, m_viscosity, delta);
-  project(m_v->getX(), m_v->getY(), m_v->getZ(), m_v0->getX(), m_v0->getY());
+  if (m_velocityDiffusionActive) {
+    VectorField::Comp::swap(m_v0->getX(), m_v->getX());
+    diffuse(m_v->getX(), m_v0->getX(), Edge::X_EDGE, m_viscosity, delta);
+    VectorField::Comp::swap(m_v0->getY(), m_v->getY());
+    diffuse(m_v->getY(), m_v0->getY(), Edge::Y_EDGE, m_viscosity, delta);
+    VectorField::Comp::swap(m_v0->getZ(), m_v->getZ());
+    diffuse(m_v->getZ(), m_v0->getZ(), Edge::Z_EDGE, m_viscosity, delta);
+    project(m_v->getX(), m_v->getY(), m_v->getZ(), m_v0->getX(), m_v0->getY());
+  }
 
   // Advection
-  VectorField::Comp::swap(m_v0->getX(), m_v->getX());
-  VectorField::Comp::swap(m_v0->getY(), m_v->getY());
-  VectorField::Comp::swap(m_v0->getZ(), m_v->getZ());
-  advect(m_v->getX(), m_v0->getX(), m_v0, Edge::X_EDGE, delta);
-  advect(m_v->getY(), m_v0->getY(), m_v0, Edge::Y_EDGE, delta);
-  advect(m_v->getZ(), m_v0->getZ(), m_v0, Edge::Z_EDGE, delta);
-  project(m_v->getX(), m_v->getY(), m_v->getZ(), m_v0->getX(), m_v0->getY());
+  if (m_velocityAdvectionActive) {
+    VectorField::Comp::swap(m_v0->getX(), m_v->getX());
+    VectorField::Comp::swap(m_v0->getY(), m_v->getY());
+    VectorField::Comp::swap(m_v0->getZ(), m_v->getZ());
+    advect(m_v->getX(), m_v0->getX(), m_v0, Edge::X_EDGE, delta);
+    advect(m_v->getY(), m_v0->getY(), m_v0, Edge::Y_EDGE, delta);
+    advect(m_v->getZ(), m_v0->getZ(), m_v0, Edge::Z_EDGE, delta);
+    project(m_v->getX(), m_v->getY(), m_v->getZ(), m_v0->getX(), m_v0->getY());
+  }
 }
 
 // -------------------------------------------------------------------------- //
