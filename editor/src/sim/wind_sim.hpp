@@ -63,9 +63,14 @@ namespace wind {
 /// -----------------------------------------------------------------------------
 ///
 /// Algorithms are adapted from the 2003 paper by Jos Stam "Real-Time Fluid
-/// Dynamics for Games". The 3D extension by Blain Maguire
-/// (Link: https://github.com/BlainMaguire/3dfluid) has also been used as
-/// inspiration.
+/// Dynamics for Games". This solution in this paper only applies to two
+/// dimensions but can be extended to three dimensions.
+///
+/// For the extension to three dimensions the implementation by Blain Maguire
+/// (Link: https://github.com/BlainMaguire/3dfluid) has been used as
+/// inspiration. The book "Game Physics" by David H. Eberly was also used to
+/// verify the solution in three dimensions. In the book the solution is
+/// presented in chapter 5.6 "Implementing the simplified 3d model".
 ///
 class WindSimulation {
 public:
