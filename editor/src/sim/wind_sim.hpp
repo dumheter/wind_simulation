@@ -86,7 +86,7 @@ public:
 
 public:
   /// Private constructor
-  WindSimulation(u32 width, u32 height, u32 depth, f32 cellSize = 1.0f);
+  WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize = 1.0f);
 
   /// Destruct wind simulation along with data
   ~WindSimulation();
@@ -110,6 +110,14 @@ public:
   void debugDraw(FieldKind kind,
                  const bs::Vector3 &offset = bs::Vector3(0, 0, 0),
                  bool drawFrame = true);
+
+  DensityField *D() { return m_d; }
+
+  DensityField *D0() { return m_d0; }
+
+  VectorField *V() { return m_v; }
+
+  VectorField *V0() { return m_v0; }
 
   /* Add density sources */
   void addDensitySource() { m_addDensitySource = true; }
@@ -138,15 +146,40 @@ public:
   }
 
 private:
-  /* Number of buffers flipped between in simulation */
-  static constexpr u32 BUFFER_COUNT = 2;
+  /// Step density diffusion
+  void stepDensityDiffusion(f32 delta);
 
+  /// Step density advection
+  void stepDensityAdvection(f32 delta);
+
+  /// Step velocity diffusion
+  void stepVelocityDiffusion(f32 delta);
+
+  /// Step velocity advection
+  void stepVelocityAdvection(f32 delta);
+
+  /// Project velocity
+  void projectVelocity();
+
+  /// Set density boundary conditions
+  void setDensityBoundary(DensityField *field);
+
+  /// Set velocity boundary conditions
+  void setVelocityBoundary(VectorField *field);
+
+  ///
+  void setProjectBoundaryX(VectorField *field);
+
+  ///
+  void setProjectBoundaryY(VectorField *field);
+
+private:
   /* Number of iterations in the Gauss-Seidel method */
   static constexpr u32 GAUSS_SEIDEL_STEPS = 10;
 
 private:
   /* Dimensions */
-  u32 m_width = 0, m_height = 0, m_depth = 0;
+  s32 m_width = 0, m_height = 0, m_depth = 0;
   /* Cell size in meters */
   f32 m_cellSize = 1.0f;
 

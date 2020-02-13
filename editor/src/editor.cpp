@@ -464,13 +464,13 @@ void Editor::setupGUI() {
     button->setWidth(90);
     button->setPosition(308, height);
     button->onClick.connect([this]() {
-      // DensityField *p = m_windSim->getDensityField();
-      // DensityField *p0 = m_windSim->getDensityFieldPrev();
-      // for (u32 i = 0; i < p->getDataSize(); i++) {
-      //  p->get(i) = 0;
-      //  p0->get(i) = 0;
-      //}
-      // logVerbose("Cleared density");
+      DensityField *d = m_windSim->D();
+      DensityField *d0 = m_windSim->D0();
+      for (u32 i = 0; i < d->getDataSize(); i++) {
+        d->get(i) = 0;
+        d0->get(i) = 0;
+      }
+      logVerbose("Cleared density");
     });
 
     height += button->getBounds().height + 2;

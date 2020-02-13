@@ -62,7 +62,7 @@ void DensityField::debugDrawObject(const Vec3F &offset, const Vec3F &padding) {
         f32 density = get(x, y, z);
         density = clamp(density, 0, 1.0f);
 
-#if 1
+#if 0
         bs::DebugDraw::instance().drawCube(
             base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
 #else

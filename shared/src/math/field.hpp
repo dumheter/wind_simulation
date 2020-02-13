@@ -148,6 +148,10 @@ public:
    * dimension */
   static void swap(Field &field0, Field &field1);
 
+  /* Swap the data of two fields. This requires the fields to be of the same
+   * dimension */
+  static void swap(Field *field0, Field *field1);
+
 protected:
   /* Dimensions */
   Dim3D m_dim;
@@ -342,9 +346,21 @@ template <typename T> inline void Field<T>::swap(Field &field0, Field &field1) {
          field0.m_dim.height == field1.m_dim.height &&
          field0.m_dim.depth == field1.m_dim.depth &&
          "Swapping field data requires the fields to be of the same size");
-  bs::Vector3 *tmp = field0.m_field;
-  field0.m_field = field1.m_field;
-  field1.m_field = tmp;
+  T *tmp = field0.m_data;
+  field0.m_data = field1.m_data;
+  field1.m_data = tmp;
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline void Field<T>::swap(Field *field0, Field *field1) {
+  assert(field0->m_dim.width == field1->m_dim.width &&
+         field0->m_dim.height == field1->m_dim.height &&
+         field0->m_dim.depth == field1->m_dim.depth &&
+         "Swapping field data requires the fields to be of the same size");
+  T *tmp = field0->m_data;
+  field0->m_data = field1->m_data;
+  field1->m_data = tmp;
 }
 
 } // namespace wind
