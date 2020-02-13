@@ -2,8 +2,9 @@
 #include "Scene/BsSceneObject.h"
 #include "bsFPSWalker.h"
 #include "cnet_component.hpp"
-#include "world.hpp"
 #include "common.hpp"
+#include "log.hpp"
+#include "world.hpp"
 
 namespace wind {
 
@@ -27,25 +28,29 @@ void CMyPlayer::update() { m_client.Poll(); }
 
 void CMyPlayer::fixedUpdate() {
   if (!m_world->serverIsActive() &&
-      m_client.GetConnectionState() == ConnectionState::kConnected &&
-      m_fpsWalker->hasNewInput()) {
-    auto &packet = m_client.getPacket();
-    packet.ClearPayload();
-    packet.SetHeader(PacketHeaderTypes::kPlayerTick);
-    auto mw = packet.GetMemoryWriter();
-    mw->Write(m_fpsWalker->getPlayerInput());
+      m_client.GetConnectionState() == ConnectionState::kConnected) {
     auto rotation = SO()->getTransform().getRotation();
     const u8 rotChanged = m_lastRotation != rotation;
-    mw->Write(rotChanged);
-    if (rotChanged) {
-      mw->Write(rotation.x);
-      mw->Write(rotation.y);
-      mw->Write(rotation.z);
-      mw->Write(rotation.w);
-      m_lastRotation = rotation;
-    }
-    mw.Finalize();
-    m_client.PacketSend(packet, SendStrategy::kUnreliableNoDelay);
+    if (rotChanged || m_fpsWalker->hasNewInput()) {
+        auto &packet = m_client.getPacket();
+        packet.ClearPayload();
+        packet.SetHeader(PacketHeaderTypes::kPlayerTick);
+        auto mw = packet.GetMemoryWriter();
+        mw->Write(m_fpsWalker->getPlayerInput());
+        mw->Write(rotChanged);
+        if (rotChanged) {
+          mw->Write(rotation.x);
+          mw->Write(rotation.y);
+          mw->Write(rotation.z);
+          mw->Write(rotation.w);
+          m_lastRotation = rotation;
+        }
+        mw.Finalize();
+        m_client.PacketSend(packet, SendStrategy::kUnreliableNoDelay);
+        logInfo("[client] sent PlayerTick");
+        auto netComp = m_world->getPlayerNetComp();
+        netComp->resetChanged();
+      }
   }
 }
 

@@ -111,5 +111,6 @@ void FPSWalker::applyInput(wind::PlayerInput input) {
       !input.inputs.jump ? Vector3() : Vector3(0.0f, 20.0f, 0.0f);
 
   mController->move((velocity + gravity + jump) * frameDelta);
+
 }
 } // namespace bs

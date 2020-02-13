@@ -19,7 +19,7 @@ public:
 
   bool hasNewInput() const { return m_hasNewInput; }
 
-  wind::PlayerInput getPlayerInput() const { return m_lastInput; }
+  wind::PlayerInput getPlayerInput() { m_hasNewInput = false; return m_lastInput; }
 
   void setInput(wind::PlayerInput input) { m_lastInput = input; }
 
@@ -44,7 +44,7 @@ private:
   VirtualButton mGravity;
 
   bool m_gravity = true;
-  wind::PlayerInput m_lastInput;
+  wind::PlayerInput m_lastInput{};
   bool m_hasNewInput;
   bool m_isActive = false;
 };

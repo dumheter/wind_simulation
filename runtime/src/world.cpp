@@ -39,6 +39,8 @@
 #include <alflib/core/assert.hpp>
 #include <chrono>
 #include <cstdlib>
+
+#include <microprofile/microprofile.h>
 #include <regex>
 
 namespace wind {
@@ -56,6 +58,7 @@ void NetDebugInfo::setup(bs::GUILayoutY *layout) {
 }
 
 void NetDebugInfo::update(const Client &client) {
+  MICROPROFILE_SCOPEI("netdebuginfo", "update", MP_GREEN3);
   auto status = client.GetConnectionStatus();
   if (!status) {
     return;
@@ -98,6 +101,8 @@ World::World(const App::Info &info)
 }
 
 void World::onPreUpdate() {
+  MicroProfileFlip(nullptr);
+  MICROPROFILE_SCOPEI("world", "onPreUpdate", MP_BLUE2);
   if (m_cursorMode) {
     Util::CenterCursor(bs::gApplication().getPrimaryWindow());
   }
@@ -106,7 +111,7 @@ void World::onPreUpdate() {
 }
 
 void World::onFixedUpdate() {
-  using namespace std::chrono;
+  MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
   m_server.broadcastServerTick(m_netComps);
   m_netDebugInfo.update(m_player->getClient());

@@ -1,4 +1,6 @@
 #include "cnet_component.hpp"
+#include "Components/BsCRigidbody.h"
+#include "Physics/BsRigidbody.h"
 #include "log.hpp"
 #include "world.hpp"
 
@@ -19,6 +21,7 @@ CNetComponent::CNetComponent(bs::HSceneObject parent,
 
 void CNetComponent::onCreated() {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
+  m_hasChanged = true;
   SO()->setPosition(m_state.getPosition());
   SO()->setScale(m_state.getScale());
   SO()->setRotation(m_state.getRotation());
@@ -26,11 +29,13 @@ void CNetComponent::onCreated() {
 }
 
 void CNetComponent::onTransformChanged(bs::TransformChangedFlags flags) {
+  m_hasChanged = true;
   m_state.from(SO()->getTransform());
 }
 
 void CNetComponent::setState(const MoveableState &moveableState) {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
+  m_hasChanged = true;
   m_state = moveableState;
   SO()->setPosition(m_state.getPosition());
   SO()->setScale(m_state.getScale());
@@ -38,9 +43,9 @@ void CNetComponent::setState(const MoveableState &moveableState) {
   mNotifyFlags = bs::TCF_Transform;
 }
 
-void CNetComponent::setPosition(bs::Vector3 position)
-{
+void CNetComponent::setPosition(bs::Vector3 position) {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
+  m_hasChanged = true;
   m_state.setPosition(position);
   SO()->setPosition(m_state.getPosition());
   mNotifyFlags = bs::TCF_Transform;

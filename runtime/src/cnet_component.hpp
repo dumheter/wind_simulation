@@ -43,6 +43,10 @@ public:
 
   void setPosition(bs::Vector3 position);
 
+  bool hasChanged() const { return m_hasChanged; }
+
+  void resetChanged() { m_hasChanged = false; }
+
   bool operator==(const CNetComponent &other) const {
     return getUniqueId() == other.getUniqueId();
   }
@@ -52,6 +56,7 @@ public:
   }
 
 private:
+  bool m_hasChanged;
   MoveableState m_state;
 };
 

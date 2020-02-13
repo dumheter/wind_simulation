@@ -104,6 +104,7 @@ HCNetComponent Creator::cube(const MoveableState &moveableState) const {
   boxCollider->setMaterial(m_physicsMatStd);
   boxCollider->setMass(25.0f);
   HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
+  boxRigidbody->setSleepThreshold(0.1f);
   auto netComp = cube->addComponent<CNetComponent>(moveableState);
   netComp->setType(Types::kCube);
   auto [it, ok] =
@@ -123,6 +124,7 @@ HCNetComponent Creator::ball(const MoveableState &moveableState) const {
   collider->setMaterial(m_physicsMatStd);
   collider->setMass(8.0f);
   HRigidbody rigid = sphere->addComponent<CRigidbody>();
+  rigid->setSleepThreshold(0.1f);
   // rigid->addForce(forward * 40.0f, ForceMode::Velocity);
   auto netComp = sphere->addComponent<CNetComponent>(moveableState);
   netComp->setType(Types::kBall);

@@ -343,7 +343,7 @@ typedef void (*MicroProfileOnFreeze)(int nFrozen);
 // #endif
 
 #ifndef MICROPROFILE_WEBSERVER_PORT
-#define MICROPROFILE_WEBSERVER_PORT 1338
+#define MICROPROFILE_WEBSERVER_PORT 4080
 #endif
 
 #ifndef MICROPROFILE_WEBSERVER

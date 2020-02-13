@@ -29,9 +29,12 @@ void Server::Poll() {
   if (m_connectionState == ConnectionState::kConnected) {
     MICROPROFILE_SCOPEI("server", "poll", MP_YELLOW);
     PollSocketStateChanges();
-    const bool got_packet = PollIncomingPacket(m_packet);
-    if (got_packet) {
-      handlePacket(m_packet);
+    bool got_packet = true;
+    while (got_packet) {
+      got_packet = PollIncomingPacket(m_packet);
+      if (got_packet) {
+        handlePacket(m_packet);
+      }
     }
   }
 }
@@ -105,17 +108,30 @@ Server::GetConnectionStatus(const ConnectionId connection_id) const {
 
 void Server::broadcastServerTick(
     const std::unordered_map<UniqueId, HCNetComponent> &netComps) {
+  MICROPROFILE_SCOPEI("server", "broadcastServerTick", MP_YELLOW2);
   if (netComps.size() > 1 && !m_connections.empty()) {
-    m_packet.ClearPayload();
-    m_packet.SetHeader(PacketHeaderTypes::kServerTick);
-    auto mw = m_packet.GetMemoryWriter();
-    const u32 count = static_cast<u32>(netComps.size());
-    mw->Write(count);
+    u32 count = 0;
     for (auto [uid, netComp] : netComps) {
-      mw->Write(netComp->getState());
+      if (netComp->hasChanged()) {
+        ++count;
+      }
     }
-    mw.Finalize();
-    PacketBroadcastUnreliableFast(m_packet);
+    if (count > 0) {
+      m_packet.ClearPayload();
+      m_packet.SetHeader(PacketHeaderTypes::kServerTick);
+      auto mw = m_packet.GetMemoryWriter();
+
+      mw->Write(count);
+      for (auto [uid, netComp] : netComps) {
+        if (netComp->hasChanged()) {
+          mw->Write(netComp->getState());
+          netComp->resetChanged();
+          logVerbose("[server] tick {}", uid.raw());
+        }
+      }
+      mw.Finalize();
+      PacketBroadcastUnreliableFast(m_packet);
+    }
   }
 }
 
@@ -175,6 +191,9 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
 void Server::handlePacket(Packet &packet) {
   if (auto header = m_packet.GetHeaderType();
       header == PacketHeaderTypes::kPlayerTick) {
+    static int wow = 0;
+    ++wow;
+    logInfo("[server] PlayerTick {}", wow);
     auto mr = m_packet.GetMemoryReader();
     auto input = mr.Read<PlayerInput>();
     const u8 rotChanged = mr.Read<u8>();
