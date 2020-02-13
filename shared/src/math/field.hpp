@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "math/dim.hpp"
+#include "math/math.hpp"
 #include "types.hpp"
 
 #include <BsPrerequisites.h>
@@ -65,14 +66,24 @@ public:
   ~Field();
 
   /* Virtual function responsible for drawing the objects in the field */
-  virtual void debugDrawObject(const bs::Vector3 &offset = bs::Vector3(0, 0,
-                                                                       0)) = 0;
+  virtual void debugDrawObject(const Vec3F &offset = Vec3F(0, 0, 0),
+                               const Vec3F &padding = Vec3F(0, 0, 0)){};
 
-  /* Draw lines to help with debugging the field. This is called only once to
-   * produce all the lines required for the 'DebugDraw' class. After
-   * clearing 'DebugDraw' this function needs to be called again */
-  void debugDraw(const bs::Vector3 &offset = bs::Vector3(0, 0, 0),
-                 bool drawFrame = true);
+  /// Draw lines to help with debugging the field. This is called only once to
+  /// produce all the lines required for the 'DebugDraw' class. After
+  /// clearing 'DebugDraw' this function needs to be called again
+  ///
+  /// \param offset Offset to draw the field at. Padding is subtracted from the
+  /// offset.
+  /// \param padding Padding on each side. Setting to (1,1,1) means that each
+  /// side is padded with one cell each, giving a total of two extra cells on
+  /// each axis
+  void debugDraw(const Vec3F &offset = Vec3F(0, 0, 0), bool drawFrame = true,
+                 const Vec3F &padding = Vec3F(0, 0, 0));
+
+  /// Draw the frame of the field using lines
+  void debugDrawFrame(const Vec3F &offset = Vec3F(0, 0, 0),
+                      const Vec3F &padding = Vec3F(0, 0, 0));
 
   /* Convert position (x, y, z) to a data offset */
   u32 fromPos(s32 x, s32 y, s32 z);
@@ -122,15 +133,16 @@ public:
   /* Returns the reference to a vector in the vector field */
   const T &get(s32 x, s32 y, s32 z) const;
 
-  /* Returns the value at a position. Safety are added such that points outside
-   * the field returns a special value. This value depends on the type of
-   * field */
-  virtual T getSafe(s32 x, s32 y, s32 z) = 0;
+  /// Returns a reference to the object in the field at the specified position
+  /// (x, y, z). The position is clamped to be valid in the field.
+  T &getClamped(s32 x, s32 y, s32 z);
 
-  /* Returns the value at a position. Safety are added such that points outside
-   * the field returns a special value. This value depends on the type of
-   * field */
-  T getSafe(const Pos &pos) { return getSafe(pos.x, pos.y, pos.z); }
+  /// Returns a reference to the object in the field at the specified position
+  /// (x, y, z). The position is clamped to be valid in the field.
+  const T &getClamped(s32 x, s32 y, s32 z) const;
+
+  /// Returns the cell size of the field cells
+  f32 getCellSize() { return m_cellSize; }
 
   /* Returns the size of the data buffer in number of elements */
   u32 getDataSize() { return m_dataSize; }
@@ -142,6 +154,10 @@ public:
   /* Swap the data of two fields. This requires the fields to be of the same
    * dimension */
   static void swap(Field &field0, Field &field1);
+
+  /* Swap the data of two fields. This requires the fields to be of the same
+   * dimension */
+  static void swap(Field *field0, Field *field1);
 
 protected:
   /* Dimensions */
@@ -178,54 +194,64 @@ template <typename T> inline Field<T>::~Field() { delete m_data; }
 // -------------------------------------------------------------------------- //
 
 template <typename T>
-void Field<T>::debugDraw(const bs::Vector3 &offset, bool drawFrame) {
-  debugDrawObject(offset);
+void Field<T>::debugDraw(const Vec3F &offset, bool drawFrame,
+                         const Vec3F &padding) {
+  debugDrawObject(offset, padding);
 
   // Draw frame
   if (drawFrame) {
-    bs::Vector<bs::Vector3> points;
-
-    points.clear();
-
-    // Draw lines parallell with the x-axis
-    const f32 xStart = offset.x;
-    const f32 xEnd = xStart + (m_cellSize * m_dim.width);
-    for (u32 z = 0; z < m_dim.depth + 1; z++) {
-      const f32 zPos = offset.z + (z * m_cellSize);
-      for (u32 y = 0; y < m_dim.height + 1; y++) {
-        const f32 yPos = offset.y + (y * m_cellSize);
-        points.push_back(bs::Vector3(xStart, yPos, zPos));
-        points.push_back(bs::Vector3(xEnd, yPos, zPos));
-      }
-    }
-
-    // Draw lines parallell with the x-axis
-    const f32 yStart = offset.y;
-    const f32 yEnd = yStart + (m_cellSize * m_dim.height);
-    for (u32 z = 0; z < m_dim.depth + 1; z++) {
-      const f32 zPos = offset.z + (z * m_cellSize);
-      for (u32 x = 0; x < m_dim.width + 1; x++) {
-        const f32 xPos = offset.x + (x * m_cellSize);
-        points.push_back(bs::Vector3(xPos, yStart, zPos));
-        points.push_back(bs::Vector3(xPos, yEnd, zPos));
-      }
-    }
-
-    // Draw lines parallell with the x-axis
-    const f32 zStart = offset.z;
-    const f32 zEnd = zStart + (m_cellSize * m_dim.depth);
-    for (u32 y = 0; y < m_dim.height + 1; y++) {
-      const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_dim.width + 1; x++) {
-        const f32 xPos = offset.x + (x * m_cellSize);
-        points.push_back(bs::Vector3(xPos, yPos, zStart));
-        points.push_back(bs::Vector3(xPos, yPos, zEnd));
-      }
-    }
-
-    bs::DebugDraw::instance().setColor(bs::Color::White);
-    bs::DebugDraw::instance().drawLineList(points);
+    debugDrawFrame(offset, padding);
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T>
+void wind::Field<T>::debugDrawFrame(const Vec3F &offset, const Vec3F &padding) {
+  u32 xPad = 2 * u32(padding.x);
+  u32 yPad = 2 * u32(padding.y);
+  u32 zPad = 2 * u32(padding.z);
+
+  bs::Vector<bs::Vector3> points;
+
+  // Draw lines parallel with the x-axis
+  const f32 xStart = offset.x;
+  const f32 xEnd = xStart + (m_cellSize * (m_dim.width - xPad));
+  for (u32 z = 0; z < m_dim.depth + 1 - zPad; z++) {
+    const f32 zPos = offset.z + (z * m_cellSize);
+    for (u32 y = 0; y < m_dim.height + 1 - yPad; y++) {
+      const f32 yPos = offset.y + (y * m_cellSize);
+      points.emplace_back(bs::Vector3(xStart, yPos, zPos));
+      points.emplace_back(bs::Vector3(xEnd, yPos, zPos));
+    }
+  }
+
+  // Draw lines parallel with the y-axis
+  const f32 yStart = offset.y;
+  const f32 yEnd = yStart + (m_cellSize * (m_dim.height - yPad));
+  for (u32 z = 0; z < m_dim.depth + 1 - zPad; z++) {
+    const f32 zPos = offset.z + (z * m_cellSize);
+    for (u32 x = 0; x < m_dim.width + 1 - xPad; x++) {
+      const f32 xPos = offset.x + (x * m_cellSize);
+      points.emplace_back(bs::Vector3(xPos, yStart, zPos));
+      points.emplace_back(bs::Vector3(xPos, yEnd, zPos));
+    }
+  }
+
+  // Draw lines parallel with the z-axis
+  const f32 zStart = offset.z;
+  const f32 zEnd = zStart + (m_cellSize * (m_dim.depth - zPad));
+  for (u32 y = 0; y < m_dim.height + 1 - yPad; y++) {
+    const f32 yPos = offset.y + (y * m_cellSize);
+    for (u32 x = 0; x < m_dim.width + 1 - xPad; x++) {
+      const f32 xPos = offset.x + (x * m_cellSize);
+      points.emplace_back(bs::Vector3(xPos, yPos, zStart));
+      points.emplace_back(bs::Vector3(xPos, yPos, zEnd));
+    }
+  }
+
+  bs::DebugDraw::instance().setColor(bs::Color::White);
+  bs::DebugDraw::instance().drawLineList(points);
 }
 
 // -------------------------------------------------------------------------- //
@@ -310,14 +336,43 @@ template <typename T> const T &Field<T>::get(s32 x, s32 y, s32 z) const {
 
 // -------------------------------------------------------------------------- //
 
+template <typename T> T &wind::Field<T>::getClamped(s32 x, s32 y, s32 z) {
+  x = clamp(x, 0, s32(m_dim.width) - 1);
+  y = clamp(y, 0, s32(m_dim.height) - 1);
+  z = clamp(z, 0, s32(m_dim.depth) - 1);
+  return get(x, y, z);
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T>
+const T &wind::Field<T>::getClamped(s32 x, s32 y, s32 z) const {
+  return get(clamp(x, 0, m_dim.width - 1), clamp(y, 0, m_dim.height - 1),
+             clamp(z, 0, m_dim.depth - 1));
+}
+
+// -------------------------------------------------------------------------- //
+
 template <typename T> inline void Field<T>::swap(Field &field0, Field &field1) {
   assert(field0.m_dim.width == field1.m_dim.width &&
          field0.m_dim.height == field1.m_dim.height &&
          field0.m_dim.depth == field1.m_dim.depth &&
          "Swapping field data requires the fields to be of the same size");
-  bs::Vector3 *tmp = field0.m_field;
-  field0.m_field = field1.m_field;
-  field1.m_field = tmp;
+  T *tmp = field0.m_data;
+  field0.m_data = field1.m_data;
+  field1.m_data = tmp;
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T> inline void Field<T>::swap(Field *field0, Field *field1) {
+  assert(field0->m_dim.width == field1->m_dim.width &&
+         field0->m_dim.height == field1->m_dim.height &&
+         field0->m_dim.depth == field1->m_dim.depth &&
+         "Swapping field data requires the fields to be of the same size");
+  T *tmp = field0->m_data;
+  field0->m_data = field1->m_data;
+  field1->m_data = tmp;
 }
 
 } // namespace wind

@@ -29,7 +29,7 @@
 #include "math/field.hpp"
 #include "types.hpp"
 
-#include <Scene/BsSceneManager.h>
+#include <Math/BsVector3.h>
 
 // ========================================================================== //
 // VectorField Declaration
@@ -47,10 +47,8 @@ public:
   DensityField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
   /* \copydoc Field::debugDrawObject */
-  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
-
-  /* \copydoc Field::getSafe */
-  f32 getSafe(s32 x, s32 y, s32 z) override;
+  void debugDrawObject(const Vec3F &offset = Vec3F(),
+                       const Vec3F &padding = Vec3F(0, 0, 0)) override;
 };
 
 } // namespace wind

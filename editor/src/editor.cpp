@@ -28,8 +28,6 @@
 
 #include "asset.hpp"
 #include "log.hpp"
-#include "math/obstruction_field.hpp"
-#include "math/vector_field.hpp"
 
 #include <BsCameraFlyer.h>
 #include <Components/BsCBoxCollider.h>
@@ -84,10 +82,9 @@ void Editor::onStartup() {
   setupGUI();
 
   // Create simulation
-  m_windSim = WindSimulation::createFromScene(
-      SceneManager::instance().getMainScene(),
-      Vector3(GROUND_PLANE_SCALE * 2.0f, 6, GROUND_PLANE_SCALE * 2.0f),
-      Vector3(), 0.5f);
+  m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
+                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.5f);
+  m_windSim->buildForScene(SceneManager::instance().getMainScene());
 }
 
 // -------------------------------------------------------------------------- //
@@ -101,7 +98,7 @@ void Editor::onPreUpdate(f32 delta) {
     gApplication().quitRequested();
   }
 
-  // Fullscreen toggle 'F'
+  // Full-screen toggle 'F'
   if (gInput().isButtonDown(ButtonCode::BC_F)) {
     if (isFullscreen()) {
       exitFullscreen();
@@ -380,12 +377,13 @@ void Editor::setupGUI() {
     xSlider->setRange(-1.0, 1.0f);
     xSlider->setValue(0.0f);
     xSlider->onChanged.connect([this](f32 value) {
-      bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
-      vec.x = value;
-      for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++) {
-        m_windSim->getVelocityField()->get(i) = vec;
-        m_windSim->getVelocityFieldPrev()->get(i) = vec;
-      }
+      // bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
+      // vec.x = value;
+      // for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++)
+      // {
+      //  m_windSim->getVelocityField()->get(i) = vec;
+      //  m_windSim->getVelocityFieldPrev()->get(i) = vec;
+      //}
     });
 
     GUISliderHorz *ySlider = panel->addNewElement<GUISliderHorz>();
@@ -394,12 +392,13 @@ void Editor::setupGUI() {
     ySlider->setRange(-1.0, 1.0f);
     ySlider->setValue(0.0f);
     ySlider->onChanged.connect([this](f32 value) {
-      bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
-      vec.y = value;
-      for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++) {
-        m_windSim->getVelocityField()->get(i) = vec;
-        m_windSim->getVelocityFieldPrev()->get(i) = vec;
-      }
+      // bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
+      // vec.y = value;
+      // for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++)
+      // {
+      //  m_windSim->getVelocityField()->get(i) = vec;
+      //  m_windSim->getVelocityFieldPrev()->get(i) = vec;
+      //}
     });
 
     GUISliderHorz *zSlider = panel->addNewElement<GUISliderHorz>();
@@ -408,12 +407,13 @@ void Editor::setupGUI() {
     zSlider->setRange(-1.0, 1.0f);
     zSlider->setValue(0.0f);
     zSlider->onChanged.connect([this](f32 value) {
-      bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
-      vec.z = value;
-      for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++) {
-        m_windSim->getVelocityField()->get(i) = vec;
-        m_windSim->getVelocityFieldPrev()->get(i) = vec;
-      }
+      // bs::Vector3 vec = m_windSim->getVelocityField()->get(1, 1, 1);
+      // vec.z = value;
+      // for (u32 i = 0; i < m_windSim->getVelocityField()->getDataSize(); i++)
+      // {
+      //  m_windSim->getVelocityField()->get(i) = vec;
+      //  m_windSim->getVelocityFieldPrev()->get(i) = vec;
+      //}
     });
 
     height += xSlider->getBounds().height + 2;
@@ -464,11 +464,15 @@ void Editor::setupGUI() {
     button->setWidth(90);
     button->setPosition(308, height);
     button->onClick.connect([this]() {
-      DensityField *p = m_windSim->getDensityField();
-      DensityField *p0 = m_windSim->getDensityFieldPrev();
-      for (u32 i = 0; i < p->getDataSize(); i++) {
-        p->get(i) = 0;
-        p0->get(i) = 0;
+      DensityField *d = m_windSim->D();
+      DensityField *d0 = m_windSim->D0();
+      VectorField *v = m_windSim->V();
+      VectorField *v0 = m_windSim->V0();
+      for (u32 i = 0; i < d->getDataSize(); i++) {
+        d->get(i) = 0;
+        d0->get(i) = 0;
+        v->set(i, Vec3F(0.4f, 0.05f, 0.3f));
+        v0->set(i, Vec3F(0.4f, 0.05f, 0.3f));
       }
       logVerbose("Cleared density");
     });

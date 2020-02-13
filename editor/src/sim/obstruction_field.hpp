@@ -37,28 +37,25 @@
 
 namespace wind {
 
-/* Class that represents an obstruction field. This field represents whether
- * or not a cell has an obstruction in it. */
+/// Class that represents an obstruction field. This field represents whether
+/// or not a cell has an obstruction in it.
 class ObstructionField : public Field<bool> {
 public:
-  /* Construct an obstruction field with the specified 'width', 'height' and
-   * 'depth' (in number of cells). The size of a cell (in meters) can also be
-   * specified.  */
+  // Construct an obstruction field with the specified 'width', 'height' and
+  // 'depth' (in number of cells). The size of a cell (in meters) can also be
+  // specified.
   ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  /* Destruct field */
+  /// Destruct field
   ~ObstructionField();
 
-  /* \copydoc Field::debugDrawObject */
-  void debugDrawObject(const bs::Vector3 &offset = bs::Vector3()) override;
+  ///
+  void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
+                     const bs::Vector3 &position = bs::Vector3());
 
-  /* \copydoc Field::getSafe */
-  bool getSafe(s32 x, s32 y, s32 z) override;
-
-public:
-  static ObstructionField *buildForScene(
-      const bs::SPtr<bs::SceneInstance> &scene, const bs::Vector3 &extent,
-      const bs::Vector3 &position = bs::Vector3(), f32 cellSize = 1.0f);
+  /// \copydoc Field::debugDrawObject
+  void debugDrawObject(const Vec3F &offset = Vec3F(),
+                       const Vec3F &padding = Vec3F(0, 0, 0)) override;
 };
 
 } // namespace wind
