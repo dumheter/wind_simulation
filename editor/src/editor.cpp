@@ -466,9 +466,13 @@ void Editor::setupGUI() {
     button->onClick.connect([this]() {
       DensityField *d = m_windSim->D();
       DensityField *d0 = m_windSim->D0();
+      VectorField *v = m_windSim->V();
+      VectorField *v0 = m_windSim->V0();
       for (u32 i = 0; i < d->getDataSize(); i++) {
         d->get(i) = 0;
         d0->get(i) = 0;
+        v->set(i, Vec3F(0.4f, 0.05f, 0.3f));
+        v0->set(i, Vec3F(0.4f, 0.05f, 0.3f));
       }
       logVerbose("Cleared density");
     });

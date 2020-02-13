@@ -36,18 +36,20 @@
 
 namespace wind {
 
-VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellsize)
-    : Field(width, height, depth, cellsize) {
+VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize) {
   using namespace bs;
 
-  for (u32 i = 0; i < m_dataSize; i++) {
-    m_data[i] = bs::Vector3(0, 1, 1);
-  }
+  m_x = new Comp(width, height, depth, cellSize);
+  m_y = new Comp(width, height, depth, cellSize);
+  m_z = new Comp(width, height, depth, cellSize);
+  m_dim = m_x->getDim();
+  m_cellSize = m_x->getCellSize();
 }
 
 // -------------------------------------------------------------------------- //
 
-void VectorField::debugDrawObject(const Vec3F &offset, const Vec3F &padding) {
+void VectorField::debugDraw(const Vec3F &offset, bool drawFrame,
+                            const Vec3F &padding) {
   bs::Vector<bs::Vector3> points;
 
   u32 xPad = u32(padding.x);
@@ -76,6 +78,11 @@ void VectorField::debugDrawObject(const Vec3F &offset, const Vec3F &padding) {
 
   bs::DebugDraw::instance().setColor(bs::Color::Red);
   bs::DebugDraw::instance().drawLineList(points);
+
+  // Draw frame
+  if (drawFrame) {
+    m_x->debugDrawFrame();
+  }
 }
 
 } // namespace wind

@@ -84,6 +84,9 @@ public:
   /* Type of debug data to show */
   enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 
+  /// Volume edges
+  enum class Edge { NONE = 0, X_EDGE = 1, Y_EDGE = 2, Z_EDGE = 3 };
+
 public:
   /// Private constructor
   WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize = 1.0f);
@@ -146,36 +149,26 @@ public:
   }
 
 private:
-  /// Step density diffusion
-  void stepDensityDiffusion(f32 delta);
+  /// Gauss-Seidel relaxation
+  void gaussSeidel(Field<f32> *f, Field<f32> *f0, Edge edge, f32 a, f32 c);
 
-  /// Step density advection
-  void stepDensityAdvection(f32 delta);
+  /// Run diffusion
+  void diffuse(Field<f32> *f, Field<f32> *f0, Edge edge, f32 coeff, f32 delta);
 
-  /// Step velocity diffusion
-  void stepVelocityDiffusion(f32 delta);
-
-  /// Step velocity advection
-  void stepVelocityAdvection(f32 delta);
+  /// Run advection
+  void advect(Field<f32> *f, Field<f32> *f0, VectorField *vecField, Edge edge,
+              f32 delta);
 
   /// Project velocity
-  void projectVelocity();
+  void project(Field<f32> *u, Field<f32> *v, Field<f32> *w, Field<f32> *prj,
+               Field<f32> *div);
 
-  /// Set density boundary conditions
-  void setDensityBoundary(DensityField *field);
-
-  /// Set velocity boundary conditions
-  void setVelocityBoundary(VectorField *field);
-
-  ///
-  void setProjectBoundaryX(VectorField *field);
-
-  ///
-  void setProjectBoundaryY(VectorField *field);
+  /// Set boundary condition
+  void setBoundary(Field<f32> *field, Edge edge = Edge::NONE);
 
 private:
   /* Number of iterations in the Gauss-Seidel method */
-  static constexpr u32 GAUSS_SEIDEL_STEPS = 10;
+  static constexpr u32 GAUSS_SEIDEL_STEPS = 10u;
 
 private:
   /* Dimensions */

@@ -46,7 +46,7 @@ using Vec3I = ::bs::Vector3I;
 
 namespace wind {
 
-/* Clamp 'value' between two other values 'min' and 'max' */
+/// Clamp 'value' between two other values 'min' and 'max'
 template <typename T, typename S, typename U>
 inline constexpr T clamp(T value, S min, U max) {
   return value < min ? min : value > max ? max : value;
@@ -54,12 +54,19 @@ inline constexpr T clamp(T value, S min, U max) {
 
 // -------------------------------------------------------------------------- //
 
-/* Returns the maximum of two values */
+/// Returns the maximum of two values
 template <typename T> inline constexpr T max(T a, T b) { return a > b ? a : b; }
 
 // -------------------------------------------------------------------------- //
 
-/* Returns the minimum of two values */
+/// Returns the maximum of two values
+template <typename T> inline constexpr T max(T a, T b, T c) {
+  return wind::max(a, wind::max(b, c));
+}
+
+// -------------------------------------------------------------------------- //
+
+/// Returns the minimum of two values
 template <typename T> inline constexpr T min(T a, T b) { return a < b ? a : b; }
 
 } // namespace wind

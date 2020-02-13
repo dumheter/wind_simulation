@@ -67,7 +67,7 @@ public:
 
   /* Virtual function responsible for drawing the objects in the field */
   virtual void debugDrawObject(const Vec3F &offset = Vec3F(0, 0, 0),
-                               const Vec3F &padding = Vec3F(0, 0, 0)) = 0;
+                               const Vec3F &padding = Vec3F(0, 0, 0)){};
 
   /// Draw lines to help with debugging the field. This is called only once to
   /// produce all the lines required for the 'DebugDraw' class. After
@@ -80,6 +80,10 @@ public:
   /// each axis
   void debugDraw(const Vec3F &offset = Vec3F(0, 0, 0), bool drawFrame = true,
                  const Vec3F &padding = Vec3F(0, 0, 0));
+
+  /// Draw the frame of the field using lines
+  void debugDrawFrame(const Vec3F &offset = Vec3F(0, 0, 0),
+                      const Vec3F &padding = Vec3F(0, 0, 0));
 
   /* Convert position (x, y, z) to a data offset */
   u32 fromPos(s32 x, s32 y, s32 z);
@@ -137,6 +141,9 @@ public:
   /// (x, y, z). The position is clamped to be valid in the field.
   const T &getClamped(s32 x, s32 y, s32 z) const;
 
+  /// Returns the cell size of the field cells
+  f32 getCellSize() { return m_cellSize; }
+
   /* Returns the size of the data buffer in number of elements */
   u32 getDataSize() { return m_dataSize; }
 
@@ -191,55 +198,60 @@ void Field<T>::debugDraw(const Vec3F &offset, bool drawFrame,
                          const Vec3F &padding) {
   debugDrawObject(offset, padding);
 
+  // Draw frame
+  if (drawFrame) {
+    debugDrawFrame(offset, padding);
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+template <typename T>
+void wind::Field<T>::debugDrawFrame(const Vec3F &offset, const Vec3F &padding) {
   u32 xPad = 2 * u32(padding.x);
   u32 yPad = 2 * u32(padding.y);
   u32 zPad = 2 * u32(padding.z);
 
-  // Draw frame
-  if (drawFrame) {
-    bs::Vector<bs::Vector3> points;
+  bs::Vector<bs::Vector3> points;
 
-    points.clear();
-
-    // Draw lines parallell with the x-axis
-    const f32 xStart = offset.x;
-    const f32 xEnd = xStart + (m_cellSize * (m_dim.width - xPad));
-    for (u32 z = 0; z < m_dim.depth + 1 - zPad; z++) {
-      const f32 zPos = offset.z + (z * m_cellSize);
-      for (u32 y = 0; y < m_dim.height + 1 - yPad; y++) {
-        const f32 yPos = offset.y + (y * m_cellSize);
-        points.push_back(bs::Vector3(xStart, yPos, zPos));
-        points.push_back(bs::Vector3(xEnd, yPos, zPos));
-      }
-    }
-
-    // Draw lines parallell with the y-axis
-    const f32 yStart = offset.y;
-    const f32 yEnd = yStart + (m_cellSize * (m_dim.height - yPad));
-    for (u32 z = 0; z < m_dim.depth + 1 - zPad; z++) {
-      const f32 zPos = offset.z + (z * m_cellSize);
-      for (u32 x = 0; x < m_dim.width + 1 - xPad; x++) {
-        const f32 xPos = offset.x + (x * m_cellSize);
-        points.push_back(bs::Vector3(xPos, yStart, zPos));
-        points.push_back(bs::Vector3(xPos, yEnd, zPos));
-      }
-    }
-
-    // Draw lines parallell with the z-axis
-    const f32 zStart = offset.z;
-    const f32 zEnd = zStart + (m_cellSize * (m_dim.depth - zPad));
+  // Draw lines parallel with the x-axis
+  const f32 xStart = offset.x;
+  const f32 xEnd = xStart + (m_cellSize * (m_dim.width - xPad));
+  for (u32 z = 0; z < m_dim.depth + 1 - zPad; z++) {
+    const f32 zPos = offset.z + (z * m_cellSize);
     for (u32 y = 0; y < m_dim.height + 1 - yPad; y++) {
       const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_dim.width + 1 - xPad; x++) {
-        const f32 xPos = offset.x + (x * m_cellSize);
-        points.push_back(bs::Vector3(xPos, yPos, zStart));
-        points.push_back(bs::Vector3(xPos, yPos, zEnd));
-      }
+      points.emplace_back(bs::Vector3(xStart, yPos, zPos));
+      points.emplace_back(bs::Vector3(xEnd, yPos, zPos));
     }
-
-    bs::DebugDraw::instance().setColor(bs::Color::White);
-    bs::DebugDraw::instance().drawLineList(points);
   }
+
+  // Draw lines parallel with the y-axis
+  const f32 yStart = offset.y;
+  const f32 yEnd = yStart + (m_cellSize * (m_dim.height - yPad));
+  for (u32 z = 0; z < m_dim.depth + 1 - zPad; z++) {
+    const f32 zPos = offset.z + (z * m_cellSize);
+    for (u32 x = 0; x < m_dim.width + 1 - xPad; x++) {
+      const f32 xPos = offset.x + (x * m_cellSize);
+      points.emplace_back(bs::Vector3(xPos, yStart, zPos));
+      points.emplace_back(bs::Vector3(xPos, yEnd, zPos));
+    }
+  }
+
+  // Draw lines parallel with the z-axis
+  const f32 zStart = offset.z;
+  const f32 zEnd = zStart + (m_cellSize * (m_dim.depth - zPad));
+  for (u32 y = 0; y < m_dim.height + 1 - yPad; y++) {
+    const f32 yPos = offset.y + (y * m_cellSize);
+    for (u32 x = 0; x < m_dim.width + 1 - xPad; x++) {
+      const f32 xPos = offset.x + (x * m_cellSize);
+      points.emplace_back(bs::Vector3(xPos, yPos, zStart));
+      points.emplace_back(bs::Vector3(xPos, yPos, zEnd));
+    }
+  }
+
+  bs::DebugDraw::instance().setColor(bs::Color::White);
+  bs::DebugDraw::instance().drawLineList(points);
 }
 
 // -------------------------------------------------------------------------- //
