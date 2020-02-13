@@ -30,6 +30,7 @@ public:
   void fixedUpdate() override;
 
   Client &getClient() { return m_client; }
+  const Client &getClient() const { return m_client; }
 
 private:
   World *m_world;

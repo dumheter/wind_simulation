@@ -59,6 +59,22 @@ void Server::PacketBroadcast(const Packet &packet,
   }
 }
 
+void Server::PacketBroadcastUnreliableFast(const Packet &packet) {
+  SendStrategy strat = SendStrategy::kUnreliable;
+  u32 i = 0;
+  const u32 size = static_cast<u32>(m_connections.size());
+  for (auto [connection, uid] : m_connections) {
+    if (i == size - 1) {
+      strat = SendStrategy::kUnreliableNoDelay;
+    }
+    if (Common::SendPacket(packet, strat, connection, m_socketInterface) !=
+        SendResult::kSuccess) {
+      DisconnectConnection(connection);
+    }
+    ++i;
+  }
+}
+
 void Server::PacketBroadcastExclude(const Packet &packet,
                                     const SendStrategy send_strategy,
                                     const ConnectionId exclude_connection) {
@@ -99,7 +115,7 @@ void Server::broadcastServerTick(
       mw->Write(netComp->getState());
     }
     mw.Finalize();
-    PacketBroadcast(m_packet, SendStrategy::kUnreliable);
+    PacketBroadcastUnreliableFast(m_packet);
   }
 }
 
@@ -186,7 +202,7 @@ void Server::handlePacket(Packet &packet) {
       mw->Write(count);
       mw->Write(netComp->getState());
       mw.Finalize();
-      PacketBroadcast(m_packet, SendStrategy::kUnreliable);
+      PacketBroadcastUnreliableFast(m_packet);
     } else {
       logWarning("[server:p requestcreate] invalid type in state");
     }

@@ -45,7 +45,7 @@ void CMyPlayer::fixedUpdate() {
       m_lastRotation = rotation;
     }
     mw.Finalize();
-    m_client.PacketSend(packet, SendStrategy::kUnreliable);
+    m_client.PacketSend(packet, SendStrategy::kUnreliableNoDelay);
   }
 }
 

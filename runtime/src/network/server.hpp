@@ -23,7 +23,7 @@ namespace wind {
 class World;
 
 class Server : public ISteamNetworkingSocketsCallbacks {
-public:
+ public:
   Server(World *world);
 
   virtual ~Server() final;
@@ -48,6 +48,8 @@ public:
    */
   void PacketBroadcast(const Packet &packet, const SendStrategy send_strategy);
 
+  void PacketBroadcastUnreliableFast(const Packet &packet);
+
   /**
    * Broadcast, but exclude the single connection given.
    */
@@ -62,8 +64,8 @@ public:
                            const SendStrategy send_strategy,
                            const ConnectionId target_connection);
 
-  std::optional<SteamNetworkingQuickConnectionStatus>
-  GetConnectionStatus(const ConnectionId connection_id) const;
+  std::optional<SteamNetworkingQuickConnectionStatus> GetConnectionStatus(
+      const ConnectionId connection_id) const;
 
   ConnectionState getConnectionState() const { return m_connectionState; }
 
@@ -74,17 +76,17 @@ public:
   void broadcastServerTick(
       const std::unordered_map<UniqueId, HCNetComponent> &netComps);
 
-private:
+ private:
   void PollSocketStateChanges();
 
-  bool PollIncomingPacket(Packet &packet_out);
+  bool PollIncomingPacket(Packet & packet_out);
 
-  void handlePacket(Packet &packet);
+  void handlePacket(Packet & packet);
 
   virtual void OnSteamNetConnectionStatusChanged(
-      SteamNetConnectionStatusChangedCallback_t *status) override;
+      SteamNetConnectionStatusChangedCallback_t * status) override;
 
-private:
+ private:
   HSteamListenSocket m_socket;
   ISteamNetworkingSockets *m_socketInterface;
   HSteamNetPollGroup m_pollGroup;

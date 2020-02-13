@@ -2,6 +2,7 @@
 
 #include "BsApplication.h"
 #include "BsFPSCamera.h"
+#include "GUI/BsGUILabel.h"
 #include "app.hpp"
 #include "cmyplayer.hpp"
 #include "cnet_component.hpp"
@@ -13,6 +14,34 @@
 #include <unordered_map>
 
 namespace wind {
+
+class NetDebugInfo {
+public:
+  void setup(bs::GUILayoutY *layout);
+
+  void update(const Client &client);
+
+private:
+  bs::GUILabel *hCQL;
+  bs::GUILabel * hCQR;
+  bs::GUILabel * hBSCE;
+  bs::GUILabel * hping;
+  bs::GUILabel * houtBytes;
+  bs::GUILabel * houtPackets;
+  bs::GUILabel * hinBytes;
+  bs::GUILabel * hinPackets;
+  bs::GUILabel * hqueueTime;
+
+  bs::String CQL;
+  bs::String CQR;
+  bs::String BSCE;
+  bs::String ping;
+  bs::String outBytes;
+  bs::String outPackets;
+  bs::String inBytes;
+  bs::String inPackets;
+  bs::String queueTime;
+};
 
 class World : public App {
 public:
@@ -35,7 +64,8 @@ public:
 
   void onPlayerLeave(UniqueId uid);
 
-  void onPlayerInput(UniqueId uid, PlayerInput input, std::optional<bs::Quaternion> maybeRot);
+  void onPlayerInput(UniqueId uid, PlayerInput input,
+                     std::optional<bs::Quaternion> maybeRot);
 
   /**
    * Build the player entity, camera and attach gui to the
@@ -47,7 +77,8 @@ public:
   void applyMoveableState(const MoveableState &moveableState);
 
   /**
-   * We only apply the moveable state to our player if we have diverged too much.
+   * We only apply the moveable state to our player if we have diverged too
+   * much.
    * @pre moveableState should represent myplayer's moveable state.
    */
   void applyMyMoveableState(const MoveableState &moveableState);
@@ -99,6 +130,7 @@ private:
   Server m_server;
   HCMyPlayer m_player;
   Creator m_creator;
+  NetDebugInfo m_netDebugInfo{};
 };
 
 } // namespace wind

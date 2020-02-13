@@ -43,6 +43,46 @@
 
 namespace wind {
 
+void NetDebugInfo::setup(bs::GUILayoutY *layout) {
+  hCQL = layout->addNewElement<bs::GUILabel>(bs::HString(CQL));
+  hCQR = layout->addNewElement<bs::GUILabel>(bs::HString(CQR));
+  hBSCE = layout->addNewElement<bs::GUILabel>(bs::HString(BSCE));
+  hping = layout->addNewElement<bs::GUILabel>(bs::HString(ping));
+  houtBytes = layout->addNewElement<bs::GUILabel>(bs::HString(outBytes));
+  houtPackets = layout->addNewElement<bs::GUILabel>(bs::HString(outPackets));
+  hinBytes = layout->addNewElement<bs::GUILabel>(bs::HString(inBytes));
+  hinPackets = layout->addNewElement<bs::GUILabel>(bs::HString(inPackets));
+  hqueueTime = layout->addNewElement<bs::GUILabel>(bs::HString(queueTime));
+}
+
+void NetDebugInfo::update(const Client &client) {
+  auto status = client.GetConnectionStatus();
+  if (!status) {
+    return;
+  }
+
+  CQL = fmt::format("CQL {:.2f}", status->m_flConnectionQualityLocal);
+  CQR = fmt::format("CQR {:.2f}", status->m_flConnectionQualityRemote);
+  BSCE =
+      fmt::format("b/s cap estimation {}", status->m_nSendRateBytesPerSecond);
+  ping = fmt::format("ping {}", status->m_nPing);
+  outBytes = fmt::format("out b/s {:.2f}", status->m_flOutBytesPerSec);
+  outPackets = fmt::format("out p/s {:.2f}", status->m_flOutPacketsPerSec);
+  inBytes = fmt::format("in  b/s {}", status->m_flInBytesPerSec);
+  inPackets = fmt::format("in  p/s {}", status->m_flInPacketsPerSec);
+  queueTime = fmt::format("q time {}us", status->m_usecQueueTime);
+
+  hCQL->setContent(bs::HString(CQL));
+  hCQR->setContent(bs::HString(CQR));
+  hBSCE->setContent(bs::HString(BSCE));
+  hping->setContent(bs::HString(ping));
+  houtBytes->setContent(bs::HString(outBytes));
+  houtPackets->setContent(bs::HString(outPackets));
+  hinBytes->setContent(bs::HString(inBytes));
+  hinPackets->setContent(bs::HString(inPackets));
+  hqueueTime->setContent(bs::HString(queueTime));
+}
+
 World::World(const App::Info &info)
     : App(info), m_server(this), m_creator(this) {
   using namespace bs;
@@ -69,6 +109,7 @@ void World::onFixedUpdate() {
   using namespace std::chrono;
 
   m_server.broadcastServerTick(m_netComps);
+  m_netDebugInfo.update(m_player->getClient());
 }
 
 void World::setupScene() {
@@ -170,7 +211,7 @@ void World::onPlayerLeave(UniqueId uid) {
   {
     auto it = m_netComps.find(uid);
     if (it != m_netComps.end()) {
-      //it->second->destroy();
+      // it->second->destroy();
       m_netComps.erase(it);
     } else {
       logWarning("(netComps) player left, but couldn't find them");
@@ -347,6 +388,10 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
         m_player->disconnect();
       }
     });
+  }
+
+  { // network info
+    m_netDebugInfo.setup(layout);
   }
 
   return gui;
