@@ -132,6 +132,15 @@ void WindSimulation::step(f32 delta) {
 
 // -------------------------------------------------------------------------- //
 
+void WindSimulation::stepN(f32 delta, u32 steps) {
+  for (u32 i = 0; i < steps; i++) {
+    stepDensity(delta);
+    stepVelocity(delta);
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
 void WindSimulation::stepDensity(f32 delta) {
 
   // Source/Sink

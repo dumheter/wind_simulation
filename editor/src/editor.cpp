@@ -126,6 +126,12 @@ void Editor::onFixedUpdate(f32 delta) {
 
   // Run simulation step
   if (m_runSim) {
+    if (m_simSteps == 1) {
+      m_runSim = false;
+      m_runToggle->toggleOff();
+      logVerbose("Finished simulating steps");
+    }
+    m_simSteps--;
     m_windSim->step(delta * m_simSpeed);
   }
 
@@ -318,14 +324,14 @@ void Editor::setupGUI() {
     height += toggle->getBounds().height + 2;
   }
 
-  // Debug run simulation
+  // Run simulation
   {
     GUILabel *label = panel->addNewElement<GUILabel>(HString("Run simulation"));
     label->setPosition(4, height);
 
-    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DebugRunSim"));
-    toggle->setPosition(120, height);
-    toggle->onToggled.connect([this](bool t) {
+    m_runToggle = panel->addNewElement<GUIToggle>(HString("DebugRunSim"));
+    m_runToggle->setPosition(120, height);
+    m_runToggle->onToggled.connect([this](bool t) {
       m_runSim = t;
       logVerbose("Simulation {}", t ? "running" : "stopped");
     });
@@ -345,7 +351,41 @@ void Editor::setupGUI() {
       label1->setContent(GUIContent(HString(sstr.str().c_str())));
     });
 
-    height += toggle->getBounds().height + 2;
+    height += m_runToggle->getBounds().height + 2;
+  }
+
+  // Run simulation N steps
+  {
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Run N steps"));
+    label->setPosition(4, height);
+
+    GUIInputBox *input = panel->addNewElement<GUIInputBox>();
+    input->setWidth(50);
+    input->setPosition(120, height);
+    input->setFilter([](const String &str) {
+      for (char c : str) {
+        if (!std::isdigit(c)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    GUIButton *button = panel->addNewElement<GUIButton>(HString("Run"));
+    button->setWidth(20);
+    button->setPosition(172, height);
+    button->onClick.connect([this, input]() {
+      const String &s = input->getText();
+      u32 num = std::stoul(s.c_str());
+      if (num > 0) {
+        m_simSteps = num;
+        m_runSim = true;
+        m_runToggle->toggleOn();
+        logVerbose("Starting to run simulation for {} steps", num);
+      }
+    });
+
+    height += button->getBounds().height + 2;
   }
 
   // Density source
