@@ -28,6 +28,11 @@ public:
 
   void onTransformChanged(bs::TransformChangedFlags flags) override;
 
+  /**
+   * Must have a rigidbody component on the parent.
+   */
+  void addForce(bs::Vector3 force, bs::ForceMode mode);
+
   UniqueId getUniqueId() const { return m_state.getUniqueId(); }
 
   const MoveableState &getState() const { return m_state; }

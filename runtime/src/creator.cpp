@@ -21,6 +21,7 @@
 #include "Importer/BsImporter.h"
 #include "Input/BsInput.h"
 #include "Material/BsMaterial.h"
+#include "Mesh/BsMesh.h"
 #include "Physics/BsBoxCollider.h"
 #include "Physics/BsPhysicsMaterial.h"
 #include "Physics/BsPlaneCollider.h"
@@ -73,6 +74,7 @@ HCNetComponent Creator::player(const MoveableState &moveableState) const {
   using namespace bs;
   logVerbose("creating a player {}", moveableState.getUniqueId().raw());
   HSceneObject player = SceneObject::create("Player");
+  player->setScale(Vector3(0.3f, 3.0f, 0.3f));
   HCharacterController charController =
       player->addComponent<CCharacterController>();
   charController->setHeight(1.0f);
@@ -117,16 +119,19 @@ HCNetComponent Creator::ball(const MoveableState &moveableState) const {
   using namespace bs;
   logVerbose("creating a ball {}", moveableState.getUniqueId().raw());
   HSceneObject sphere = SceneObject::create("Sphere");
+  sphere->setScale(Vector3(0.3f, 0.3f, 0.3f));
   HRenderable renderable = sphere->addComponent<CRenderable>();
-  renderable->setMesh(m_meshBall);
+  renderable->setMesh(m_meshCube);
   renderable->setMaterial(m_matGrid2);
-  HSphereCollider collider = sphere->addComponent<CSphereCollider>();
+  auto collider = sphere->addComponent<CBoxCollider>();
   collider->setMaterial(m_physicsMatStd);
   collider->setMass(8.0f);
   HRigidbody rigid = sphere->addComponent<CRigidbody>();
   rigid->setSleepThreshold(0.1f);
   // rigid->addForce(forward * 40.0f, ForceMode::Velocity);
   auto netComp = sphere->addComponent<CNetComponent>(moveableState);
+  netComp->addForce(sphere->getTransform().getForward() * 30.0f,
+                    ForceMode::Velocity);
   netComp->setType(Types::kBall);
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});

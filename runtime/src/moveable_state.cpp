@@ -5,27 +5,34 @@ namespace wind {
 void MoveableState::from(const bs::Transform &transform) {
   m_position = transform.getPosition();
   m_rotation = transform.getRotation();
-  m_scale = transform.getScale();
 }
 
-void MoveableState::from(bs::HSceneObject &so) { from(so->getTransform()); }
+void MoveableState::from(bs::HSceneObject so) {
+  from(so->getTransform());
+  auto rigid = so->getComponent<bs::CRigidbody>();
+  if (rigid) {
+    from(rigid);
+  }
+}
 
 void MoveableState::from(const MoveableState &other) {
   m_position = other.m_position;
   m_rotation = other.m_rotation;
-  m_scale = other.m_scale;
+}
+void MoveableState::from(bs::HRigidbody rigid)
+{
+  m_vel = rigid->getVelocity();
+  m_angVel = rigid->getAngularVelocity();
 }
 
 void MoveableState::to(bs::Transform &transform) const {
   transform.setPosition(m_position);
   transform.setRotation(m_rotation);
-  transform.setScale(m_scale);
 }
 
 void MoveableState::to(bs::HSceneObject &so) const {
   so->setPosition(m_position);
   so->setRotation(m_rotation);
-  so->setScale(m_scale);
 }
 
 bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
@@ -34,9 +41,12 @@ bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
   mw.Write(m_position.x);
   mw.Write(m_position.y);
   mw.Write(m_position.z);
-  mw.Write(m_scale.x);
-  mw.Write(m_scale.y);
-  mw.Write(m_scale.z);
+  mw.Write(m_vel.x);
+  mw.Write(m_vel.y);
+  mw.Write(m_vel.z);
+  mw.Write(m_angVel.x);
+  mw.Write(m_angVel.y);
+  mw.Write(m_angVel.z);
   mw.Write(m_rotation.x);
   mw.Write(m_rotation.y);
   mw.Write(m_rotation.z);
@@ -49,9 +59,12 @@ MoveableState MoveableState::FromBytes(alflib::RawMemoryReader &mr) {
   ms.m_position.x = mr.Read<decltype(ms.m_position.x)>();
   ms.m_position.y = mr.Read<decltype(ms.m_position.y)>();
   ms.m_position.z = mr.Read<decltype(ms.m_position.z)>();
-  ms.m_scale.x = mr.Read<decltype(ms.m_scale.x)>();
-  ms.m_scale.y = mr.Read<decltype(ms.m_scale.y)>();
-  ms.m_scale.z = mr.Read<decltype(ms.m_scale.z)>();
+  ms.m_vel.x = mr.Read<decltype(ms.m_vel.x)>();
+  ms.m_vel.y = mr.Read<decltype(ms.m_vel.y)>();
+  ms.m_vel.z = mr.Read<decltype(ms.m_vel.z)>();
+  ms.m_angVel.x = mr.Read<decltype(ms.m_angVel.x)>();
+  ms.m_angVel.y = mr.Read<decltype(ms.m_angVel.y)>();
+  ms.m_angVel.z = mr.Read<decltype(ms.m_angVel.z)>();
   ms.m_rotation.x = mr.Read<decltype(ms.m_rotation.x)>();
   ms.m_rotation.y = mr.Read<decltype(ms.m_rotation.y)>();
   ms.m_rotation.z = mr.Read<decltype(ms.m_rotation.z)>();
