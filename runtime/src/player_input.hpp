@@ -42,7 +42,9 @@ struct PlayerCameraInput {
   bool operator==(const PlayerCameraInput &other) const {
     return radian == other.radian;
   }
-  bool operator!=(const PlayerCameraInput &other) const { return !(*this == other); }
+  bool operator!=(const PlayerCameraInput &other) const {
+    return !(*this == other);
+  }
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const { return mw.Write(radian); }
 

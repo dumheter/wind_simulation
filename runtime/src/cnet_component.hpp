@@ -6,9 +6,9 @@
 #include "Scene/BsGameObjectHandle.h"
 #include "Scene/BsSceneObject.h"
 #include "common.hpp"
+#include "creator.hpp"
 #include "moveable_state.hpp"
 #include "utility/unique_id.hpp"
-#include "creator.hpp"
 
 namespace wind {
 

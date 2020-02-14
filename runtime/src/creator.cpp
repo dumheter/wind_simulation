@@ -79,7 +79,7 @@ HCNetComponent Creator::player(const MoveableState &moveableState) const {
   charController->setRadius(0.4f);
   HRenderable renderable = player->addComponent<CRenderable>();
   HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
- renderable->setMesh(mesh);
+  renderable->setMesh(mesh);
   renderable->setMaterial(m_matGrid2);
   auto fpsWalker = player->addComponent<FPSWalker>(m_world);
   HCNetComponent netComp = player->addComponent<CNetComponent>(moveableState);

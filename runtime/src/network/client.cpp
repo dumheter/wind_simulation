@@ -21,7 +21,7 @@ Client::~Client() { CloseConnection(); }
 
 bool Client::Poll() {
   if (m_connectionState == ConnectionState::kConnected) {
-    MICROPROFILE_SCOPEI("client", "poll", MP_YELLOW);
+    MICROPROFILE_SCOPEI("client", "poll", MP_BISQUE);
     PollSocketStateChanges();
     const bool gotPacket = PollIncomingPackets();
     if (gotPacket) {
@@ -55,7 +55,6 @@ bool Client::Connect(const char *address) {
 
 void Client::CloseConnection() {
   if (m_connection != k_HSteamNetConnection_Invalid) {
-
     m_socketInterface->CloseConnection(m_connection, 0, nullptr, false);
     m_connection = k_HSteamNetConnection_Invalid;
     logVeryVerbose("[client] closed connection");
@@ -66,6 +65,7 @@ void Client::CloseConnection() {
 
 SendResult Client::PacketSend(const Packet &packet,
                               const SendStrategy send_strategy) {
+  MICROPROFILE_SCOPEI("client", "packetSend", MP_BISQUE1);
   return Common::SendPacket(packet, send_strategy, m_connection,
                             m_socketInterface);
 }
@@ -79,6 +79,7 @@ Client::GetConnectionStatus() const {
 }
 
 void Client::handlePacket() {
+  MICROPROFILE_SCOPEI("client", "handlePacket", MP_BISQUE2);
   if (auto header = m_packet.GetHeaderType();
       header == PacketHeaderTypes::kPlayerJoin) {
     logVerbose("[client:p PlayerJoin] packet playerjoin");
@@ -140,13 +141,13 @@ void Client::handlePacket() {
 }
 
 void Client::PollSocketStateChanges() {
-  MICROPROFILE_SCOPEI("client", "poll socket state changes", MP_YELLOW);
+  MICROPROFILE_SCOPEI("client", "poll socket state changes", MP_BISQUE1);
 
   m_socketInterface->RunCallbacks(this);
 }
 
 bool Client::PollIncomingPackets() {
-  MICROPROFILE_SCOPEI("client", "poll incoming packets", MP_YELLOW);
+  MICROPROFILE_SCOPEI("client", "poll incoming packets", MP_BISQUE1);
 
   ISteamNetworkingMessage *msg = nullptr;
   const int msg_count =

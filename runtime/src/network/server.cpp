@@ -54,6 +54,7 @@ void Server::StartServer(const u16 port) {
 
 void Server::PacketBroadcast(const Packet &packet,
                              const SendStrategy send_strategy) {
+  MICROPROFILE_SCOPEI("server", "broadcast", MP_YELLOW2);
   for (auto [connection, uid] : m_connections) {
     if (Common::SendPacket(packet, send_strategy, connection,
                            m_socketInterface) != SendResult::kSuccess) {
@@ -63,6 +64,7 @@ void Server::PacketBroadcast(const Packet &packet,
 }
 
 void Server::PacketBroadcastUnreliableFast(const Packet &packet) {
+  MICROPROFILE_SCOPEI("server", "broadcastFast", MP_YELLOW3);
   SendStrategy strat = SendStrategy::kUnreliable;
   u32 i = 0;
   const u32 size = static_cast<u32>(m_connections.size());
@@ -81,6 +83,7 @@ void Server::PacketBroadcastUnreliableFast(const Packet &packet) {
 void Server::PacketBroadcastExclude(const Packet &packet,
                                     const SendStrategy send_strategy,
                                     const ConnectionId exclude_connection) {
+  MICROPROFILE_SCOPEI("server", "broadcastExclude", MP_YELLOW3);
   for (auto [connection, uid] : m_connections) {
     if (connection != exclude_connection) {
       if (Common::SendPacket(packet, send_strategy, connection,
@@ -188,6 +191,7 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
 }
 
 void Server::handlePacket(Packet &packet) {
+  MICROPROFILE_SCOPEI("server", "handlePacket", MP_YELLOW4);
   if (auto header = m_packet.GetHeaderType();
       header == PacketHeaderTypes::kPlayerTick) {
     auto mr = m_packet.GetMemoryReader();

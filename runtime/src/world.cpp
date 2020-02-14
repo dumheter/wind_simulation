@@ -173,6 +173,7 @@ void World::setupMyPlayer() {
 }
 
 void World::applyMoveableState(const MoveableState &moveableState) {
+  MICROPROFILE_SCOPEI("world", "appylMoveableState", MP_TURQUOISE);
   auto it = m_netComps.find(moveableState.getUniqueId());
   if (it != m_netComps.end()) {
     it->second->setState(moveableState);
@@ -183,6 +184,7 @@ void World::applyMoveableState(const MoveableState &moveableState) {
 }
 
 void World::applyMyMoveableState(const MoveableState &moveableState) {
+  MICROPROFILE_SCOPEI("world", "appylMyMoveableState", MP_TURQUOISE1);
   auto it = m_netComps.find(moveableState.getUniqueId());
   if (it != m_netComps.end()) {
     const auto myPos = it->second->getState().getPosition();
@@ -235,6 +237,7 @@ void World::onPlayerLeave(UniqueId uid) {
 
 void World::onPlayerInput(UniqueId uid, PlayerInput input,
                           std::optional<bs::Quaternion> maybeRot) {
+  MICROPROFILE_SCOPEI("world", "onPlayerInput", MP_TURQUOISE2);
   auto it = m_walkers.find(uid);
   if (it != m_walkers.end()) {
     it->second->setInput(input);
@@ -242,8 +245,8 @@ void World::onPlayerInput(UniqueId uid, PlayerInput input,
       it->second->applyRotation(*maybeRot);
     }
     // TODO
-    //it->second->resetNewInputFlag();
-    //m_netComps[uid]->resetChanged();
+    // it->second->resetNewInputFlag();
+    // m_netComps[uid]->resetChanged();
   }
 }
 

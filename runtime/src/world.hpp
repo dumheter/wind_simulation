@@ -23,14 +23,14 @@ public:
 
 private:
   bs::GUILabel *hCQL;
-  bs::GUILabel * hCQR;
-  bs::GUILabel * hBSCE;
-  bs::GUILabel * hping;
-  bs::GUILabel * houtBytes;
-  bs::GUILabel * houtPackets;
-  bs::GUILabel * hinBytes;
-  bs::GUILabel * hinPackets;
-  bs::GUILabel * hqueueTime;
+  bs::GUILabel *hCQR;
+  bs::GUILabel *hBSCE;
+  bs::GUILabel *hping;
+  bs::GUILabel *houtBytes;
+  bs::GUILabel *houtPackets;
+  bs::GUILabel *hinBytes;
+  bs::GUILabel *hinPackets;
+  bs::GUILabel *hqueueTime;
 
   bs::String CQL;
   bs::String CQR;
