@@ -47,26 +47,33 @@ public:
 
 protected:
   void fixedUpdate() override {
-    MICROPROFILE_SCOPEI("group", "timername", MP_YELLOW);
+    MICROPROFILE_SCOPEI("App", "onFixedUpdate", MP_GREEN);
     Application::fixedUpdate();
     f32 delta = bs::gTime().getFixedFrameDelta();
     App::g_app->onFixedUpdate(delta);
   }
 
-  void onStartUp() override { Application::onStartUp(); }
+  void onStartUp() override {
+    MICROPROFILE_SCOPEI("App", "onStartup", MP_GREEN);
+    Application::onStartUp();
+  }
 
   void onShutDown() override {
+    MICROPROFILE_SCOPEI("App", "onShutdown", MP_GREEN);
     Application::onShutDown();
     App::g_app->onShutdown();
   }
 
   void preUpdate() override {
+    MicroProfileFlip(nullptr);
+    MICROPROFILE_SCOPEI("App", "onPreUpdate", MP_GREEN);
     Application::preUpdate();
     f32 delta = bs::gTime().getFrameDelta();
     App::g_app->onPreUpdate(delta);
   }
 
   void postUpdate() override {
+    MICROPROFILE_SCOPEI("App", "onPostUpdate", MP_GREEN);
     Application::postUpdate();
     f32 delta = bs::gTime().getFrameDelta();
     App::g_app->onPostUpdate(delta);
@@ -92,6 +99,7 @@ App::App(const Info &info)
 
   g_app = this;
 
+  // Create application
   START_UP_DESC appDesc;
   appDesc.renderAPI = "bsfD3D11RenderAPI";
   appDesc.renderer = "bsfRenderBeast";
@@ -106,11 +114,15 @@ App::App(const Info &info)
   appDesc.primaryWindowDesc.vsync = true;
   Application::startUp<AppDelegate>(appDesc);
 
+  // Connect resize callback
   Application::instance().getPrimaryWindow()->onResized.connect([=]() {
     SPtr<RenderWindow> window = Application::instance().getPrimaryWindow();
     m_width = window->getProperties().width;
     m_height = window->getProperties().height;
   });
+
+  // Initialize MicroProfile
+  MicroProfileInit();
 }
 
 // -------------------------------------------------------------------------- //

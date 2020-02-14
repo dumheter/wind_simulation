@@ -28,6 +28,7 @@
 
 #include "asset.hpp"
 #include "log.hpp"
+#include "microprofile/microprofile.h"
 
 #include <BsCameraFlyer.h>
 #include <Components/BsCBoxCollider.h>
@@ -83,7 +84,7 @@ void Editor::onStartup() {
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
-                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.5f);
+                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.1f);
   m_windSim->buildForScene(SceneManager::instance().getMainScene());
 }
 
@@ -107,15 +108,26 @@ void Editor::onPreUpdate(f32 delta) {
     }
   }
 
-  // Add source 'X'
+  // Add density source 'X'
   if (gInput().isButtonHeld(ButtonCode::BC_X)) {
     m_windSim->addDensitySource();
     logVerbose("Added density sources");
   }
-  // Add sink 'Z'
+  // Add density sink 'Z'
   if (gInput().isButtonHeld(ButtonCode::BC_Z)) {
     m_windSim->addDensitySink();
     logVerbose("Added density sinks");
+  }
+
+  // Add velocity source 'V'
+  if (gInput().isButtonHeld(ButtonCode::BC_V)) {
+    m_windSim->addVelocitySource();
+    logVerbose("Added velocity sources");
+  }
+  // Add velocity sink 'C'
+  if (gInput().isButtonHeld(ButtonCode::BC_C)) {
+    m_windSim->addVelocitySink();
+    logVerbose("Added velocity sinks");
   }
 }
 
@@ -126,6 +138,7 @@ void Editor::onFixedUpdate(f32 delta) {
 
   // Run simulation step
   if (m_runSim) {
+    MICROPROFILE_SCOPEI("Sim", "step", MP_ORANGE1);
     if (m_simSteps == 1) {
       m_runSim = false;
       m_runToggle->toggleOff();
@@ -137,7 +150,8 @@ void Editor::onFixedUpdate(f32 delta) {
 
   // Redraw each frame
   if (m_debugDraw) {
-    m_windSim->debugDraw(m_debugFieldKind, Vector3(), m_debugDrawFrame);
+    MICROPROFILE_SCOPEI("Sim", "draw", MP_ORANGE1);
+    m_windSim->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
   }
 } // namespace wind
 
@@ -158,8 +172,8 @@ void Editor::setupCamera() {
   // Camera
   m_camera = SceneObject::create("Camera");
   m_camera->setPosition(
-      Vector3(GROUND_PLANE_SCALE, 2.5f, GROUND_PLANE_SCALE - 4.0f) * 0.65f);
-  m_camera->lookAt(Vector3(.0f, 1.5f, .0f));
+      Vec3F(GROUND_PLANE_SCALE, 2.5f, GROUND_PLANE_SCALE - 4.0f) * 0.65f);
+  m_camera->lookAt(Vec3F(.0f, 1.5f, .0f));
   HCamera cameraComp = m_camera->addComponent<CCamera>();
   cameraComp->getViewport()->setTarget(window);
   cameraComp->setNearClipDistance(0.005f);
@@ -196,8 +210,8 @@ void Editor::setupScene() {
   const HMesh planeMesh = gBuiltinResources().getMesh(BuiltinMesh::Quad);
 
   HSceneObject plane = m_geometry->create("Plane");
-  plane->setScale(Vector3(GROUND_PLANE_SCALE, 1.0f, GROUND_PLANE_SCALE));
-  plane->move(Vector3(GROUND_PLANE_SCALE, .4f, GROUND_PLANE_SCALE));
+  plane->setScale(Vec3F(GROUND_PLANE_SCALE, 1.0f, GROUND_PLANE_SCALE));
+  plane->move(Vec3F(GROUND_PLANE_SCALE, .4f, GROUND_PLANE_SCALE));
   HRenderable planeRenderable = plane->addComponent<CRenderable>();
   planeRenderable->setMesh(planeMesh);
   planeRenderable->setMaterial(planeMat);
@@ -206,12 +220,15 @@ void Editor::setupScene() {
   planeCollider->setMaterial(planePhysMat);
   planeCollider->setMass(0.0f);
 
-  // Setup box
+// Setup box
+#if 1
   HMaterial boxMat = Material::create(shader);
   boxMat->setTexture("gAlbedoTex", texGrid2);
   const HMesh boxMesh = gBuiltinResources().getMesh(BuiltinMesh::Box);
   HSceneObject box = m_geometry->create("Box");
-  box->setPosition(Vector3(2.0f, 3.0f, 2.0f));
+  // box->setPosition(Vec3F(2.0f, 3.0f, 2.0f));
+  box->setPosition(Vec3F(6.0f, 3.0f, 4.0f));
+  box->setScale(Vec3F(1.0f, 10.0f, 1.5f));
   HRenderable boxRenderable = box->addComponent<CRenderable>();
   boxRenderable->setMesh(boxMesh);
   boxRenderable->setMaterial(boxMat);
@@ -220,14 +237,16 @@ void Editor::setupScene() {
   boxCollider->setMaterial(boxPhysMat);
   boxCollider->setMass(25.0f);
   // HRigidbody boxRigidbody = box->addComponent<CRigidbody>();
+#endif
 
-  // Bunny
+#if 0
+// Bunny
   auto [bunnyMesh, bunnyPhysMesh] =
       Asset::loadMeshWithPhysics("res/models/stanford-bunny.fbx", 0.006f);
   HMaterial bunnyMat = Material::create(shader);
   bunnyMat->setTexture("gAlbedoTex", texGrid2);
   HSceneObject bunny = m_geometry->create("Bunny");
-  bunny->setPosition(Vector3(5, 3, 4));
+  bunny->setPosition(Vec3F(5, 3, 4));
   HRenderable bunnyRenderable = bunny->addComponent<CRenderable>();
   bunnyRenderable->setMesh(bunnyMesh);
   bunnyRenderable->setMaterial(bunnyMat);
@@ -236,6 +255,7 @@ void Editor::setupScene() {
   bunnyCollider->setMaterial(bunnyPhysMat);
   bunnyCollider->setMass(15.0f);
   bunnyCollider->setMesh(bunnyPhysMesh);
+#endif
 #endif
 }
 
@@ -281,7 +301,7 @@ void Editor::setupGUI() {
       m_debugFieldKind = static_cast<WindSimulation::FieldKind>(idx);
       DebugDraw::instance().clear();
       if (m_debugDraw) {
-        m_windSim->debugDraw(m_debugFieldKind, Vector3(), m_debugDrawFrame);
+        m_windSim->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
       }
     });
     height += listBox->getBounds().height + 2;
@@ -298,7 +318,7 @@ void Editor::setupGUI() {
       DebugDraw::instance().clear();
       m_debugDraw = t;
       if (m_debugDraw) {
-        m_windSim->debugDraw(m_debugFieldKind, Vector3(), m_debugDrawFrame);
+        m_windSim->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
       }
     });
 
@@ -317,7 +337,7 @@ void Editor::setupGUI() {
       DebugDraw::instance().clear();
       m_debugDrawFrame = t;
       if (m_debugDraw) {
-        m_windSim->debugDraw(m_debugFieldKind, Vector3(), m_debugDrawFrame);
+        m_windSim->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
       }
     });
 
@@ -388,7 +408,7 @@ void Editor::setupGUI() {
     height += button->getBounds().height + 2;
   }
 
-  // Density source
+  // Density
   {
     GUILabel *label = panel->addNewElement<GUILabel>(HString("Density source"));
     label->setPosition(4, height);
@@ -420,15 +440,54 @@ void Editor::setupGUI() {
     button->onClick.connect([this]() {
       DensityField *d = m_windSim->D();
       DensityField *d0 = m_windSim->D0();
-      VectorField *v = m_windSim->V();
-      VectorField *v0 = m_windSim->V0();
       for (u32 i = 0; i < d->getDataSize(); i++) {
         d->get(i) = 0;
         d0->get(i) = 0;
+      }
+      logVerbose("Cleared density");
+    });
+
+    height += button->getBounds().height + 2;
+  }
+
+  // Velocity
+  {
+    GUILabel *label =
+        panel->addNewElement<GUILabel>(HString("Velocity source"));
+    label->setPosition(4, height);
+
+    {
+      GUIButton *button =
+          panel->addNewElement<GUIButton>(HString("Add Source"));
+      button->setWidth(90);
+      button->setPosition(120, height);
+      button->onClick.connect([this]() {
+        m_windSim->addVelocitySource();
+        logVerbose("Added velocity sources");
+      });
+    }
+
+    {
+      GUIButton *button = panel->addNewElement<GUIButton>(HString("Add Sink"));
+      button->setWidth(90);
+      button->setPosition(214, height);
+      button->onClick.connect([this]() {
+        m_windSim->addVelocitySink();
+        logVerbose("Added velocity sinks");
+      });
+    }
+
+    GUIButton *button = panel->addNewElement<GUIButton>(HString("Clear"));
+    button->setWidth(90);
+    button->setPosition(308, height);
+    button->onClick.connect([this]() {
+      VectorField *v = m_windSim->V();
+      VectorField *v0 = m_windSim->V0();
+      for (u32 i = 0; i < v->getDataSize(); i++) {
         v->set(i, Vec3F(0.4f, 0.05f, 0.3f));
         v0->set(i, Vec3F(0.4f, 0.05f, 0.3f));
       }
-      logVerbose("Cleared density");
+      logVerbose("Cleared velocity");
     });
 
     height += button->getBounds().height + 2;

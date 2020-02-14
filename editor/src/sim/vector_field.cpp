@@ -48,9 +48,14 @@ VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize) {
 
 // -------------------------------------------------------------------------- //
 
-void VectorField::debugDraw(const Vec3F &offset, bool drawFrame,
+void VectorField::debugDraw(const Vec3F &offset,
+                            ObstructionField *obstructionField, bool drawFrame,
                             const Vec3F &padding) {
   bs::Vector<bs::Vector3> points;
+  bs::Vector<bs::Vector3> pointsHead;
+
+  bs::Vector<bs::Vector3> points0;
+  bs::Vector<bs::Vector3> pointsHead0;
 
   u32 xPad = u32(padding.x);
   u32 yPad = u32(padding.y);
@@ -68,16 +73,35 @@ void VectorField::debugDraw(const Vec3F &offset, bool drawFrame,
                   zPos + (m_cellSize / 2.0f)) -
             (padding * m_cellSize);
         const bs::Vector3 &vec = get(x, y, z);
-        const bs::Vector3 start = base - (vec * .1f);
-        const bs::Vector3 end = base + (vec * .1f);
-        points.push_back(start);
-        points.push_back(end);
+        const bs::Vector3 first = base + (vec * .2f);
+        const bs::Vector3 second = first + (vec * .05f);
+
+        if (obstructionField->get(x, y, z)) {
+          points0.push_back(base);
+          points0.push_back(first);
+          pointsHead0.push_back(first);
+          pointsHead0.push_back(second);
+        } else {
+          points.push_back(base);
+          points.push_back(first);
+          pointsHead.push_back(first);
+          pointsHead.push_back(second);
+        }
       }
     }
   }
 
+  // Draw normal vectors
   bs::DebugDraw::instance().setColor(bs::Color::Red);
   bs::DebugDraw::instance().drawLineList(points);
+  bs::DebugDraw::instance().setColor(bs::Color::Blue);
+  bs::DebugDraw::instance().drawLineList(pointsHead);
+
+  // Draw obstructed vectors
+  bs::DebugDraw::instance().setColor(bs::Color(1.0f, 1.0f, 0.0f));
+  bs::DebugDraw::instance().drawLineList(points0);
+  bs::DebugDraw::instance().setColor(bs::Color::Green);
+  bs::DebugDraw::instance().drawLineList(pointsHead0);
 
   // Draw frame
   if (drawFrame) {

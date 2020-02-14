@@ -78,7 +78,7 @@ public:
   enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 
   /// Enumeration that specifies edges of the simulation
-  enum class Edge { NONE, X_EDGE, Y_EDGE, Z_EDGE };
+  enum class EdgeKind { DENSITY, VELOCITY_X, VELOCITY_Y, VELOCITY_Z };
 
 public:
   /// Private constructor
@@ -141,6 +141,12 @@ public:
     m_densityAdvectionActive = active;
   }
 
+  /// Add density sources
+  void addVelocitySource() { m_addVelocitySource = true; }
+
+  /// Add density sinks
+  void addVelocitySink() { m_addVelocitySink = true; }
+
   /// Enable or disable diffusion simulation for the velocity field
   void setVelocityDiffusionActive(bool active) {
     m_velocityDiffusionActive = active;
@@ -153,21 +159,22 @@ public:
 
 private:
   /// Gauss-Seidel relaxation
-  void gaussSeidel(Field<f32> *f, Field<f32> *f0, Edge edge, f32 a, f32 c);
+  void gaussSeidel(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 a, f32 c);
 
   /// Run diffusion
-  void diffuse(Field<f32> *f, Field<f32> *f0, Edge edge, f32 coeff, f32 delta);
+  void diffuse(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 coeff,
+               f32 delta);
 
   /// Run advection
-  void advect(Field<f32> *f, Field<f32> *f0, VectorField *vecField, Edge edge,
-              f32 delta);
+  void advect(Field<f32> *f, Field<f32> *f0, VectorField *vecField,
+              EdgeKind edge, f32 delta);
 
   /// Project velocity
   void project(Field<f32> *u, Field<f32> *v, Field<f32> *w, Field<f32> *prj,
                Field<f32> *div);
 
   /// Set boundary condition
-  void setBoundary(Field<f32> *field, Edge edge = Edge::NONE);
+  void setBoundary(Field<f32> *field, EdgeKind edge);
 
 private:
   /// Number of iterations in the Gauss-Seidel method
@@ -204,12 +211,15 @@ private:
   bool m_addDensitySource = false;
   /// Whether to add density sinks
   bool m_addDensitySink = false;
-
   /// Whether density diffusion is enabled
   bool m_densityDiffusionActive = true;
   /// Whether density advection is enabled
   bool m_densityAdvectionActive = true;
 
+  /// Whether to add velocity sources
+  bool m_addVelocitySource = false;
+  /// Whether to add velocity sinks
+  bool m_addVelocitySink = false;
   /// Whether velocity diffusion is enabled
   bool m_velocityDiffusionActive = true;
   /// Whether velocity advection is enabled

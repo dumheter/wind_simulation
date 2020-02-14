@@ -33,36 +33,6 @@
 #include "math/math.hpp"
 
 // ========================================================================== //
-// Macros
-// ========================================================================== //
-
-/* Macro to define field variables required for the other macros */
-#define F_DEF                                                                  \
-  DensityField *p = getDensityField();                                         \
-  DensityField *p0 = getDensityFieldPrev();                                    \
-  VectorField *v = getVelocityField();                                         \
-  VectorField *v0 = getVelocityFieldPrev();                                    \
-  m_depthbstructionField *o0 = getm_depthbstructionField();
-
-/* Density buffer access */
-#define P(x, y, z) p->get(x, y, z)
-/* Density buffer (old) access */
-#define P0(x, y, z) p0->get(x, y, z)
-/* Density buffer access (Safe) */
-#define P_S(x, y, z) p->getSafe(x, y, z)
-/* Density buffer (old) access (Safe) */
-#define P0_S(x, y, z) p0->getSafe(x, y, z)
-
-/* Velocity buffer access */
-#define V(x, y, z) v->get(x, y, z)
-/* Velocity buffer (old) access */
-#define V0(x, y, z) v0->get(x, y, z)
-/* Velocity buffer access (Safe) */
-#define V_S(x, y, z) v->getSafe(x, y, z)
-/* Velocity buffer (old) access (Safe) */
-#define V0_S(x, y, z) v0->getSafe(x, y, z)
-
-// ========================================================================== //
 // Editor Declaration
 // ========================================================================== //
 
@@ -86,15 +56,19 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
   // Clear
   for (u32 i = 0; i < m_d->getDataSize(); i++) {
     m_d->get(i) = 0.0f;
+    m_d0->get(i) = 0.0f;
     m_v->set(i, Vec3F());
+    m_v0->set(i, Vec3F());
     m_o->get(i) = false;
   }
 
   // Initialize
   for (u32 i = 0; i < m_d->getDataSize(); i++) {
+    m_d->get(i) = 0.0f;
     m_d0->get(i) = 0.0f;
-    m_v0->set(i, Vec3F(0.8f, 0.1f, 0.6f));
   }
+  m_v->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
+  m_v0->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
 
   // Postconditions
   assert(m_d->getDim() == m_v->getDim() &&
@@ -117,10 +91,19 @@ WindSimulation::~WindSimulation() {
 
 void WindSimulation::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
                                    const bs::Vector3 &position) {
-  /// Build obstructions for the specified scene. Take the padding into
-  /// consideration by subtracting it from the position that the collisions are
-  /// calculated at.
+  // Build obstructions for the specified scene. Take the padding into
+  // consideration by subtracting it from the position that the collisions are
+  // calculated at.
   m_o->buildForScene(scene, position - Vec3F(1, 1, 1) * m_cellSize);
+
+  // Set boundaries to allow seeing blocked vectors in the view before any
+  // simulation takes place.
+  setBoundary(m_v->getX(), EdgeKind::VELOCITY_X);
+  setBoundary(m_v->getY(), EdgeKind::VELOCITY_Y);
+  setBoundary(m_v->getZ(), EdgeKind::VELOCITY_Z);
+  setBoundary(m_v0->getX(), EdgeKind::VELOCITY_X);
+  setBoundary(m_v0->getY(), EdgeKind::VELOCITY_Y);
+  setBoundary(m_v0->getZ(), EdgeKind::VELOCITY_Z);
 }
 
 // -------------------------------------------------------------------------- //
@@ -142,7 +125,6 @@ void WindSimulation::stepN(f32 delta, u32 steps) {
 // -------------------------------------------------------------------------- //
 
 void WindSimulation::stepDensity(f32 delta) {
-
   // Source/Sink
   for (u32 i = 0; i < m_d->getDataSize(); i++) {
     m_d->get(i) += delta * m_d0->get(i);
@@ -167,13 +149,13 @@ void WindSimulation::stepDensity(f32 delta) {
   // Diffusion
   if (m_densityDiffusionActive) {
     DensityField::swap(m_d, m_d0);
-    diffuse(m_d, m_d0, Edge::NONE, m_diffusion, delta);
+    diffuse(m_d, m_d0, EdgeKind::DENSITY, m_diffusion, delta);
   }
 
   // Advection
   if (m_densityAdvectionActive) {
     DensityField::swap(m_d, m_d0);
-    advect(m_d, m_d0, m_v, Edge::NONE, delta);
+    advect(m_d, m_d0, m_v, EdgeKind::DENSITY, delta);
   }
 }
 
@@ -186,23 +168,37 @@ void WindSimulation::stepVelocity(f32 delta) {
     Vec3F newValue = oldValue += delta * m_v0->get(i);
     m_v->set(i, newValue);
   }
-  if (false) {
-    // m_addVelocitySource = false;
-    m_v->get(1, 1, 1) = Vec3F();
-    m_v->get(1, 2, 1) = Vec3F();
-    m_v->get(1, 3, 1) = Vec3F();
-    m_v->get(1, 4, 1) = Vec3F();
-    m_v->get(1, 5, 1) = Vec3F();
+  // if (m_addVelocitySource) {
+  //  m_addVelocitySource = false;
+
+  if (false) { // Left-side source
+    for (s32 z = 2; z < 7; z++) {
+      for (s32 y = 2; y < 7; y++) {
+        m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+        m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+      }
+    }
+  } else { // Center source
+    for (s32 z = 14; z < 18; z++) {
+      for (s32 y = 10; y < 14; y++) {
+        m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+        m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+      }
+    }
   }
+  //}
 
   // Diffusion
   if (m_velocityDiffusionActive) {
     VectorField::Comp::swap(m_v0->getX(), m_v->getX());
-    diffuse(m_v->getX(), m_v0->getX(), Edge::X_EDGE, m_viscosity, delta);
+    diffuse(m_v->getX(), m_v0->getX(), EdgeKind::VELOCITY_X, m_viscosity,
+            delta);
     VectorField::Comp::swap(m_v0->getY(), m_v->getY());
-    diffuse(m_v->getY(), m_v0->getY(), Edge::Y_EDGE, m_viscosity, delta);
+    diffuse(m_v->getY(), m_v0->getY(), EdgeKind::VELOCITY_Y, m_viscosity,
+            delta);
     VectorField::Comp::swap(m_v0->getZ(), m_v->getZ());
-    diffuse(m_v->getZ(), m_v0->getZ(), Edge::Z_EDGE, m_viscosity, delta);
+    diffuse(m_v->getZ(), m_v0->getZ(), EdgeKind::VELOCITY_Z, m_viscosity,
+            delta);
     project(m_v->getX(), m_v->getY(), m_v->getZ(), m_v0->getX(), m_v0->getY());
   }
 
@@ -211,9 +207,9 @@ void WindSimulation::stepVelocity(f32 delta) {
     VectorField::Comp::swap(m_v0->getX(), m_v->getX());
     VectorField::Comp::swap(m_v0->getY(), m_v->getY());
     VectorField::Comp::swap(m_v0->getZ(), m_v->getZ());
-    advect(m_v->getX(), m_v0->getX(), m_v0, Edge::X_EDGE, delta);
-    advect(m_v->getY(), m_v0->getY(), m_v0, Edge::Y_EDGE, delta);
-    advect(m_v->getZ(), m_v0->getZ(), m_v0, Edge::Z_EDGE, delta);
+    advect(m_v->getX(), m_v0->getX(), m_v0, EdgeKind::VELOCITY_X, delta);
+    advect(m_v->getY(), m_v0->getY(), m_v0, EdgeKind::VELOCITY_Y, delta);
+    advect(m_v->getZ(), m_v0->getZ(), m_v0, EdgeKind::VELOCITY_Z, delta);
     project(m_v->getX(), m_v->getY(), m_v->getZ(), m_v0->getX(), m_v0->getY());
   }
 }
@@ -231,7 +227,7 @@ void WindSimulation::debugDraw(FieldKind kind, const bs::Vector3 &offset,
     break;
   }
   case FieldKind::VELOCITY: {
-    m_v->debugDraw(offset, drawFrame, Vec3F(1, 1, 1));
+    m_v->debugDraw(offset, m_o, drawFrame, Vec3F(1, 1, 1));
     break;
   }
   case FieldKind::OBSTRUCTION: {
@@ -245,7 +241,7 @@ void WindSimulation::debugDraw(FieldKind kind, const bs::Vector3 &offset,
 
 // -------------------------------------------------------------------------- //
 
-void WindSimulation::gaussSeidel(Field<f32> *f, Field<f32> *f0, Edge edge,
+void WindSimulation::gaussSeidel(Field<f32> *f, Field<f32> *f0, EdgeKind edge,
                                  f32 a, f32 c) {
   // Gauss-Seidel relaxation
   for (u32 l = 0; l < GAUSS_SEIDEL_STEPS; l++) {
@@ -266,7 +262,7 @@ void WindSimulation::gaussSeidel(Field<f32> *f, Field<f32> *f0, Edge edge,
 
 // -------------------------------------------------------------------------- //
 
-void WindSimulation::diffuse(Field<f32> *f, Field<f32> *f0, Edge edge,
+void WindSimulation::diffuse(Field<f32> *f, Field<f32> *f0, EdgeKind edge,
                              f32 coeff, f32 delta) {
   s32 maxDim = wind::max(m_width, m_height, m_depth);
   s32 cubic = maxDim * maxDim * maxDim;
@@ -278,7 +274,7 @@ void WindSimulation::diffuse(Field<f32> *f, Field<f32> *f0, Edge edge,
 // -------------------------------------------------------------------------- //
 
 void WindSimulation::advect(Field<f32> *f, Field<f32> *f0,
-                            VectorField *vecField, Edge edge, f32 delta) {
+                            VectorField *vecField, EdgeKind edge, f32 delta) {
   s32 maxDim = wind::max(m_width, m_height, m_depth);
   f32 deltaX = delta * maxDim;
   f32 deltaY = delta * maxDim;
@@ -338,10 +334,10 @@ void WindSimulation::project(Field<f32> *u, Field<f32> *v, Field<f32> *w,
     }
   }
 
-  setBoundary(div, Edge::NONE);
-  setBoundary(prj, Edge::NONE);
+  setBoundary(div, EdgeKind::DENSITY);
+  setBoundary(prj, EdgeKind::DENSITY);
 
-  gaussSeidel(prj, div, Edge::NONE, 1.0f, 6.0f);
+  gaussSeidel(prj, div, EdgeKind::DENSITY, 1.0f, 6.0f);
 
   for (s32 k = 1; k <= m_depth; k++) {
     for (s32 j = 1; j <= m_height; j++) {
@@ -356,17 +352,62 @@ void WindSimulation::project(Field<f32> *u, Field<f32> *v, Field<f32> *w,
     }
   }
 
-  setBoundary(u, Edge::X_EDGE);
-  setBoundary(v, Edge::Y_EDGE);
-  setBoundary(w, Edge::Z_EDGE);
+  setBoundary(u, EdgeKind::VELOCITY_X);
+  setBoundary(v, EdgeKind::VELOCITY_Y);
+  setBoundary(w, EdgeKind::VELOCITY_Z);
 }
 
 // -------------------------------------------------------------------------- //
 
-void WindSimulation::setBoundary(Field<f32> *f, Edge edge) {
-  bool isX = edge == Edge::X_EDGE;
-  bool isY = edge == Edge::Y_EDGE;
-  bool isZ = edge == Edge::Z_EDGE;
+void WindSimulation::setBoundary(Field<f32> *f, EdgeKind edge) {
+  bool isX = edge == EdgeKind::VELOCITY_X;
+  bool isY = edge == EdgeKind::VELOCITY_Y;
+  bool isZ = edge == EdgeKind::VELOCITY_Z;
+
+  // Obstructions
+  for (s32 i = 1; i <= m_width; i++) {
+    for (s32 j = 1; j <= m_height; j++) {
+      for (s32 k = 1; k <= m_depth; k++) {
+
+        if (i == 23 && j == 12 && k == 16) {
+          int y = 0;
+        }
+
+        if (m_o->get(i, j, k)) {
+          // Summarize negative contributions of neighboring cells
+          f32 sum = 0;
+
+          // X dir
+          if (!m_o->get(i - 1, j, k)) {
+            sum += f->get(i - 1, j, k);
+          }
+          if (!m_o->get(i + 1, j, k)) {
+            sum += f->get(i + 1, j, k);
+          }
+
+          // Y dir
+          if (!m_o->get(i, j - 1, k)) {
+            sum += f->get(i, j - 1, k);
+          }
+          if (!m_o->get(i, j + 1, k)) {
+            sum += f->get(i, j + 1, k);
+          }
+
+          // Y dir
+          if (!m_o->get(i, j, k - 1)) {
+            sum += f->get(i, j, k - 1);
+          }
+          if (!m_o->get(i, j, k + 1)) {
+            sum += f->get(i, j, k + 1);
+          }
+
+          f->get(i, j, k) = -sum;
+          // f32 d = f->get(i, j, k);
+          // int y = 0;
+        }
+      }
+    }
+  }
 
   // X-Y faces
   for (s32 i = 1; i <= m_width; i++) {
