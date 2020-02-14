@@ -63,29 +63,22 @@ namespace wind {
 /// -----------------------------------------------------------------------------
 ///
 /// Algorithms are adapted from the 2003 paper by Jos Stam "Real-Time Fluid
-/// Dynamics for Games". The 3D extension by Blain Maguire
-/// (Link: https://github.com/BlainMaguire/3dfluid) has also been used.
+/// Dynamics for Games". This solution in this paper only applies to two
+/// dimensions but can be extended to three dimensions.
 ///
-/// The implementation of field (Field) used by the wind simulation supports
-/// sampling cells outside the bounds using the 'getSafe' function. This means
-/// that unlike the two mentioned texts we do not need to set boundary
-/// conditions after every action, the values can instead simply be sampled
-/// outside the field. Depending on where outside the lie (face, edge, corner)
-/// the sampled value matches that set by the 'set_bnd' function in those texts.
-///
-/// For the velocity fields (VectorField) the values sampled outside the
-/// boundaries can be changed by calling 'setBorderKind'
-/// (See wind::VectorField::BorderKind) for more information about the different
-/// border kinds.
-///
+/// For the extension to three dimensions the implementation by Blain Maguire
+/// (Link: https://github.com/BlainMaguire/3dfluid) has been used as
+/// inspiration. The book "Game Physics" by David H. Eberly was also used to
+/// verify the solution in three dimensions. In the book the solution is
+/// presented in chapter 5.6 "Implementing the simplified 3d model".
 ///
 class WindSimulation {
 public:
-  /* Type of debug data to show */
+  /// Enumeration of the different fields that make up the simulation.
   enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 
-  /// Volume edges
-  enum class Edge { NONE = 0, X_EDGE = 1, Y_EDGE = 2, Z_EDGE = 3 };
+  /// Enumeration that specifies edges of the simulation
+  enum class EdgeKind { DENSITY, VELOCITY_X, VELOCITY_Y, VELOCITY_Z };
 
 public:
   /// Private constructor
@@ -94,96 +87,113 @@ public:
   /// Destruct wind simulation along with data
   ~WindSimulation();
 
-  ///
+  /// Build the obstruction field of the simulation for the specified scene. The
+  /// position is used to specify at what position the simulation should check
+  /// the scenery.
   void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
                      const bs::Vector3 &position = bs::Vector3());
 
-  /* Step the simulation with the specified delta time (dt). Stepping the
-   * delta-time with the real frame-time means that the simulation should run in
-   * real-time */
+  /// Step the simulation with the specified delta time (dt). Stepping the
+  /// delta-time with the real frame-time means that the simulation should run
+  /// in real-time
   void step(f32 delta);
 
-  /* Step density simulation */
+  /// Run the simulation for 'steps' number of steps. For each step the
+  /// simulation is run with the specified delta time.
+  void stepN(f32 delta, u32 steps);
+
+  /// Step density simulation
   void stepDensity(f32 delta);
 
-  /* Step velocity simulation */
+  /// Step velocity simulation
   void stepVelocity(f32 delta);
 
-  /* Draw debug information */
+  /// Draw debug information
   void debugDraw(FieldKind kind,
                  const bs::Vector3 &offset = bs::Vector3(0, 0, 0),
                  bool drawFrame = true);
 
+  /// Returns the density field for the current step in the simulation
   DensityField *D() { return m_d; }
 
+  /// Returns the density field for the previous step in the simulation
   DensityField *D0() { return m_d0; }
 
+  /// Returns the velocity field for the current step in the simulation
   VectorField *V() { return m_v; }
 
+  /// Returns the velocity field for the previous step in the simulation
   VectorField *V0() { return m_v0; }
 
-  /* Add density sources */
+  /// Add density sources
   void addDensitySource() { m_addDensitySource = true; }
 
-  /* Add density sinks */
+  /// Add density sinks
   void addDensitySink() { m_addDensitySink = true; }
 
-  /* Enable or disable diffusion simulation for the density field */
+  /// Enable or disable diffusion simulation for the density field
   void setDensityDiffusionActive(bool active) {
     m_densityDiffusionActive = active;
   }
 
-  /* Enable or disable advection simulation for the density field */
+  /// Enable or disable advection simulation for the density field
   void setDensityAdvectionActive(bool active) {
     m_densityAdvectionActive = active;
   }
 
-  /* Enable or disable diffusion simulation for the velocity field */
+  /// Add density sources
+  void addVelocitySource() { m_addVelocitySource = true; }
+
+  /// Add density sinks
+  void addVelocitySink() { m_addVelocitySink = true; }
+
+  /// Enable or disable diffusion simulation for the velocity field
   void setVelocityDiffusionActive(bool active) {
     m_velocityDiffusionActive = active;
   }
 
-  /* Enable or disable advection simulation for the velocity field */
+  /// Enable or disable advection simulation for the velocity field
   void setVelocityAdvectionActive(bool active) {
     m_velocityAdvectionActive = active;
   }
 
 private:
   /// Gauss-Seidel relaxation
-  void gaussSeidel(Field<f32> *f, Field<f32> *f0, Edge edge, f32 a, f32 c);
+  void gaussSeidel(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 a, f32 c);
 
   /// Run diffusion
-  void diffuse(Field<f32> *f, Field<f32> *f0, Edge edge, f32 coeff, f32 delta);
+  void diffuse(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 coeff,
+               f32 delta);
 
   /// Run advection
-  void advect(Field<f32> *f, Field<f32> *f0, VectorField *vecField, Edge edge,
-              f32 delta);
+  void advect(Field<f32> *f, Field<f32> *f0, VectorField *vecField,
+              EdgeKind edge, f32 delta);
 
   /// Project velocity
   void project(Field<f32> *u, Field<f32> *v, Field<f32> *w, Field<f32> *prj,
                Field<f32> *div);
 
   /// Set boundary condition
-  void setBoundary(Field<f32> *field, Edge edge = Edge::NONE);
+  void setBoundary(Field<f32> *field, EdgeKind edge);
 
 private:
-  /* Number of iterations in the Gauss-Seidel method */
+  /// Number of iterations in the Gauss-Seidel method
   static constexpr u32 GAUSS_SEIDEL_STEPS = 10u;
 
 private:
-  /* Dimensions */
+  /// Dimensions
   s32 m_width = 0, m_height = 0, m_depth = 0;
-  /* Cell size in meters */
+  /// Cell size in meters
   f32 m_cellSize = 1.0f;
 
-  /* Current density buffer index */
+  /// Current density buffer index
   u32 m_densityBufferIdx = 0;
-  /* Current velocity buffer index */
+  /// Current velocity buffer index
   u32 m_velocityBufferIdx = 0;
 
-  /* Diffusion rate */
+  /// Diffusion rate
   f32 m_diffusion = 0.001f;
-  /* Viscosity */
+  /// Viscosity
   f32 m_viscosity = 0.0f;
 
   /// Density fields (current)
@@ -197,19 +207,22 @@ private:
   /* Obstruction field */
   ObstructionField *m_o = nullptr;
 
-  /* Whether to add density sources */
+  /// Whether to add density sources
   bool m_addDensitySource = false;
-  /* Whether to add density sinks */
+  /// Whether to add density sinks
   bool m_addDensitySink = false;
-
-  /* Whether density diffusion is enabled */
+  /// Whether density diffusion is enabled
   bool m_densityDiffusionActive = true;
-  /* Whether density advection is enabled */
+  /// Whether density advection is enabled
   bool m_densityAdvectionActive = true;
 
-  /* Whether velocity diffusion is enabled */
+  /// Whether to add velocity sources
+  bool m_addVelocitySource = false;
+  /// Whether to add velocity sinks
+  bool m_addVelocitySink = false;
+  /// Whether velocity diffusion is enabled
   bool m_velocityDiffusionActive = true;
-  /* Whether velocity advection is enabled */
+  /// Whether velocity advection is enabled
   bool m_velocityAdvectionActive = true;
 };
 

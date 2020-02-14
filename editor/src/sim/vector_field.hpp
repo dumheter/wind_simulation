@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "math/field.hpp"
+#include "sim/obstruction_field.hpp"
 #include "types.hpp"
 
 #include <Math/BsVector3.h>
@@ -50,7 +51,7 @@ public:
   VectorField(u32 width, u32 height, u32 depth, f32 cellSize = 1.0f);
 
   ///
-  void debugDraw(const Vec3F &offset = Vec3F(), bool drawFrame = false,
+  void debugDraw(const Vec3F &offset = Vec3F(), ObstructionField* obstructionField = nullptr, bool drawFrame = false,
                  const Vec3F &padding = Vec3F(0, 0, 0));
 
   /// Returns the X component of the vector field
