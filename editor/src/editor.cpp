@@ -84,7 +84,7 @@ void Editor::onStartup() {
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
-                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.1f);
+                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.25f);
   m_windSim->buildForScene(SceneManager::instance().getMainScene());
 }
 
