@@ -74,12 +74,16 @@ HCNetComponent Creator::player(const MoveableState &moveableState) const {
   using namespace bs;
   logVerbose("creating a player {}", moveableState.getUniqueId().raw());
   HSceneObject player = SceneObject::create("Player");
-  player->setScale(Vector3(0.3f, 3.0f, 0.3f));
+
   HCharacterController charController =
       player->addComponent<CCharacterController>();
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
-  HRenderable renderable = player->addComponent<CRenderable>();
+  auto prep = SceneObject::create("playerRep");
+  prep->setParent(player);
+  HRenderable renderable = prep->addComponent<CRenderable>();
+  prep->setScale(Vector3(0.3f, 1.8f, 0.3f));
+  prep->setPosition(Vector3(0.0f, -1.0f, 0.0f));
   HMesh mesh = gBuiltinResources().getMesh(BuiltinMesh::Cylinder);
   renderable->setMesh(mesh);
   renderable->setMaterial(m_matGrid2);
