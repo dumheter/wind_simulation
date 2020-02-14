@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
+#include "types.hpp"
 
 #include <BsApplication.h>
 
@@ -96,13 +96,13 @@ public:
   virtual void onShutdown() {}
 
   /* Pre-update callback */
-  virtual void onPreUpdate() {}
+  virtual void onPreUpdate(f32 delta) {}
 
   /* Post-update callback */
-  virtual void onPostUpdate() {}
+  virtual void onPostUpdate(f32 delta) {}
 
   /* Fixed-update callback */
-  virtual void onFixedUpdate() {}
+  virtual void onFixedUpdate(f32 delta) {}
 
 private:
   static App *g_app;

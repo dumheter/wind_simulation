@@ -26,41 +26,24 @@
 // Headers
 // ========================================================================== //
 
+#include "macros.hpp"
 #include "types.hpp"
 
+#include <RenderAPI/BsRenderWindow.h>
+
 // ========================================================================== //
-// Dim3D Declaration
+// Util Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/* 3D dimensions structure*/
-struct Dim3D {
-  /* Width of the volume */
-  u32 width;
-  /* Height of the volume */
-  u32 height;
-  /* Depth of the volume */
-  u32 depth;
+class Util {
+  WIND_NAMESPACE_CLASS(Util);
+
+public:
+  /* Center the cursor in the middle of a window. Specifying nullptr as the
+   * window is the same as specifying the primary window */
+  static void CenterCursor(bs::SPtr<bs::RenderWindow> window = nullptr);
 };
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
-// ========================================================================== //
-
-namespace wind {
-
-inline bool operator==(const Dim3D &lhs, const Dim3D &rhs) {
-  return (lhs.width == rhs.width) && (lhs.height == rhs.height) &&
-         (lhs.depth == rhs.depth);
-}
-
-// -------------------------------------------------------------------------- //
-
-inline bool operator!=(const Dim3D &lhs, const Dim3D &rhs) {
-  return !(lhs == rhs);
-}
 
 } // namespace wind

@@ -49,7 +49,10 @@ public:
   void onStartup() override;
 
   /* \copydoc App::onPreUpdate */
-  void onPreUpdate() override;
+  void onPreUpdate(f32 delta) override;
+
+  /* \copydoc App::onFixedUpdate */
+  void onFixedUpdate(f32 delta) override;
 
 private:
   /* Setup the camera */
@@ -70,6 +73,8 @@ private:
 
   /* Whether to run simulation */
   bool m_runSim = false;
+  /// Speed at which simulation is running
+  f32 m_simSpeed = 1.0f;
 
   /* Debug type */
   WindSimulation::FieldKind m_debugFieldKind =

@@ -20,55 +20,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "math/density_field.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "common.hpp"
+#include <cstdint>
 
 // ========================================================================== //
-// VectorField Implementation
+// Types
 // ========================================================================== //
 
 namespace wind {
 
-DensityField::DensityField(u32 width, u32 height, u32 depth, f32 cellsize)
-    : Field(width, height, depth, cellsize) {
-  using namespace bs;
-}
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
 
-// -------------------------------------------------------------------------- //
+using s8 = int8_t;
+using s16 = int16_t;
+using s32 = int32_t;
+using s64 = int64_t;
 
-void DensityField::debugDrawObject(const bs::Vector3 &offset) {
-  bs::DebugDraw::instance().setColor(bs::Color::Blue);
-
-  // Draw vectors
-  for (u32 z = 0; z < m_dim.depth; z++) {
-    const f32 zPos = offset.z + (z * m_cellSize);
-    for (u32 y = 0; y < m_dim.height; y++) {
-      const f32 yPos = offset.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_dim.width; x++) {
-        const f32 xPos = offset.x + (x * m_cellSize);
-        const bs::Vector3 base(xPos + (m_cellSize / 2.0f),
-                               yPos + (m_cellSize / 2.0f),
-                               zPos + (m_cellSize / 2.0f));
-        const f32 density = get(x, y, z);
-        bs::DebugDraw::instance().drawCube(
-            base, bs::Vector3::ONE * (density * m_cellSize * 0.9f * 0.5f));
-      }
-    }
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-f32 DensityField::getSafe(s32 x, s32 y, s32 z) {
-  x = Clamp(x, 0, s32(m_dim.width) - 1);
-  y = Clamp(y, 0, s32(m_dim.height) - 1);
-  z = Clamp(z, 0, s32(m_dim.depth) - 1);
-  return get(x, y, z);
-}
+using f32 = float;
+using f64 = double;
 
 } // namespace wind
