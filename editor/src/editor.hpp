@@ -55,6 +55,8 @@ public:
   /* \copydoc App::onFixedUpdate */
   void onFixedUpdate(f32 delta) override;
 
+  void onTick() override;
+
 private:
   /* Setup the camera */
   void setupCamera();

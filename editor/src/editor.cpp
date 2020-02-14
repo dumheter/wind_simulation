@@ -69,7 +69,8 @@
 
 namespace wind {
 
-Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT}) {}
+Editor::Editor()
+    : App(App::MakeInfo("Editor", WINDOW_WIDTH, WINDOW_HEIGHT, 20)) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -154,6 +155,10 @@ void Editor::onFixedUpdate(f32 delta) {
     m_windSim->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
   }
 } // namespace wind
+
+// -------------------------------------------------------------------------- //
+
+void Editor::onTick() { logWarning("Tick"); }
 
 // -------------------------------------------------------------------------- //
 
