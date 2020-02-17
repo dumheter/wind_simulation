@@ -93,10 +93,16 @@
   <ItemGroup>
     <ClCompile Include="src\editor.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\sim\density_field.cpp" />
+    <ClCompile Include="src\sim\obstruction_field.cpp" />
+    <ClCompile Include="src\sim\vector_field.cpp" />
     <ClCompile Include="src\sim\wind_sim.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\editor.hpp" />
+    <ClInclude Include="src\sim\density_field.hpp" />
+    <ClInclude Include="src\sim\obstruction_field.hpp" />
+    <ClInclude Include="src\sim\vector_field.hpp" />
     <ClInclude Include="src\sim\wind_sim.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -30,6 +30,7 @@
 #include "sim/wind_sim.hpp"
 
 #include <BsPrerequisites.h>
+#include <GUI/BsGUIToggle.h>
 #include <Renderer/BsCamera.h>
 #include <Scene/BsSceneObject.h>
 
@@ -49,7 +50,10 @@ public:
   void onStartup() override;
 
   /* \copydoc App::onPreUpdate */
-  void onPreUpdate() override;
+  void onPreUpdate(f32 delta) override;
+
+  /* \copydoc App::onFixedUpdate */
+  void onFixedUpdate(f32 delta) override;
 
 private:
   /* Setup the camera */
@@ -70,6 +74,11 @@ private:
 
   /* Whether to run simulation */
   bool m_runSim = false;
+  /// Speed at which simulation is running
+  f32 m_simSpeed = 1.0f;
+  /// Number of steps to the run the simulation for. With this set to 0 and the
+  /// m_runSim flag set to true, the simulation will run continuously
+  s32 m_simSteps = 0;
 
   /* Debug type */
   WindSimulation::FieldKind m_debugFieldKind =
@@ -84,6 +93,9 @@ private:
 
   /* Root geometry node */
   bs::HSceneObject m_geometry;
+
+  /// Run toggle button
+  bs::GUIToggle *m_runToggle;
 
   /* Wind simulation field */
   WindSimulation *m_windSim;
