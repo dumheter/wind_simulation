@@ -36,7 +36,7 @@
 #include "cmyplayer.hpp"
 #include "log.hpp"
 #include "moveable_state.hpp"
-#include "util.hpp"
+#include "utility/util.hpp"
 #include "world.hpp"
 #include <Components/BsCSkybox.h>
 #include <alflib/core/assert.hpp>

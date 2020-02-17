@@ -2,13 +2,13 @@
 #define SERVER_HPP_
 
 #include "cnet_component.hpp"
-#include "common.hpp"
 #include "network/client.hpp"
 #include "network/connection_id.hpp"
 #include "network/connection_state.hpp"
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
 #include "network/side.hpp"
+#include "types.hpp"
 #include <optional>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>

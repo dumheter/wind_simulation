@@ -1,8 +1,8 @@
 #ifndef NET_COMMON_HPP_
 #define NET_COMMON_HPP_
 
-#include "common.hpp"
 #include "network/packet.hpp"
+#include "types.hpp"
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 

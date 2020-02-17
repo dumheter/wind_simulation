@@ -19,8 +19,7 @@ void MoveableState::from(const MoveableState &other) {
   m_position = other.m_position;
   m_rotation = other.m_rotation;
 }
-void MoveableState::from(bs::HRigidbody rigid)
-{
+void MoveableState::from(bs::HRigidbody rigid) {
   m_vel = rigid->getVelocity();
   m_angVel = rigid->getAngularVelocity();
 }

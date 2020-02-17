@@ -34,7 +34,7 @@
 #include "cmyplayer.hpp"
 #include "creator.hpp"
 #include "log.hpp"
-#include "util.hpp"
+#include "utility/util.hpp"
 #include <Components/BsCSkybox.h>
 #include <alflib/core/assert.hpp>
 #include <chrono>
@@ -102,7 +102,7 @@ World::World(const App::Info &info)
   skyboxComp->setTexture(skyboxTex);
 }
 
-void World::onPreUpdate() {
+void World::onPreUpdate(f32) {
   MicroProfileFlip(nullptr);
   MICROPROFILE_SCOPEI("world", "onPreUpdate", MP_BLUE2);
   if (m_cursorMode) {
@@ -112,7 +112,7 @@ void World::onPreUpdate() {
   m_server.Poll();
 }
 
-void World::onFixedUpdate() {
+void World::onFixedUpdate(f32) {
   MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
   m_netDebugInfo.update(m_player->getClient());

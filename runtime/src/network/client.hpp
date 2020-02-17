@@ -2,10 +2,10 @@
 #define CLIENT_HPP_
 
 #include "BsApplication.h"
-#include "common.hpp"
 #include "network/connection_state.hpp"
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
+#include "types.hpp"
 #include "utility/unique_id.hpp"
 #include <optional>
 #include <steam/isteamnetworkingutils.h>

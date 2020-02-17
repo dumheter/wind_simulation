@@ -52,9 +52,9 @@ public:
    */
   void reset();
 
-  void onPreUpdate() override;
+  void onPreUpdate(f32) override;
 
-  void onFixedUpdate() override;
+  void onFixedUpdate(f32) override;
 
   /**
    * Add a player to our world.

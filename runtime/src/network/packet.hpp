@@ -1,9 +1,9 @@
 #ifndef PACKET_HPP_
 #define PACKET_HPP_
 
-#include "common.hpp"
 #include "network/connection_id.hpp"
 #include "network/packet_header.hpp"
+#include "types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 #include <vector>

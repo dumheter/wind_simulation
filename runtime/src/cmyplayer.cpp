@@ -2,8 +2,8 @@
 #include "Scene/BsSceneObject.h"
 #include "bsFPSWalker.h"
 #include "cnet_component.hpp"
-#include "common.hpp"
 #include "log.hpp"
+#include "types.hpp"
 #include "world.hpp"
 
 namespace wind {

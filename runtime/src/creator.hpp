@@ -2,7 +2,7 @@
 #define CREATOR_HPP_
 
 #include "BsPrerequisites.h"
-#include "common.hpp"
+#include "types.hpp"
 
 namespace wind {
 

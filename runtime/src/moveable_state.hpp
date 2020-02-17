@@ -7,8 +7,8 @@
 #include "Math/BsVector3.h"
 #include "Scene/BsSceneObject.h"
 #include "Scene/BsTransform.h"
-#include "common.hpp"
 #include "creator.hpp"
+#include "types.hpp"
 #include "utility/unique_id.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>

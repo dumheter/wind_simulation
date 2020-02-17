@@ -1,7 +1,7 @@
 #ifndef PACKET_HEADER_HPP_
 #define PACKET_HEADER_HPP_
 
-#include "common.hpp"
+#include "types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 
