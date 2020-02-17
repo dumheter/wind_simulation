@@ -146,19 +146,23 @@ void World::onFixedUpdate() {
 }
 
 void World::setupScene() {
+  logVeryVerbose("[world:setupScene] loading scene");
   auto cubeState = MoveableState::generateNew();
   cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
   m_creator.cube(cubeState);
   cubeState = MoveableState::generateNew();
-  cubeState.setPosition(bs::Vector3(0.0f, 4.0f, -8.0f));
+  cubeState.setPosition(bs::Vector3(0.0f, 5.0f, -8.0f));
   cubeState.setRotation(
       bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
   m_creator.cube(cubeState);
 }
 
 HCNetComponent World::getPlayerNetComp() {
-  auto uid = m_player->getUniqueId();
-  return m_netComps[uid];
+  if (m_player) {
+    auto uid = m_player->getUniqueId();
+    return m_netComps[uid];
+  }
+  return HCNetComponent{};
 }
 
 bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
@@ -275,6 +279,29 @@ void World::onPlayerInput(UniqueId uid, PlayerInput input,
     // TODO
     // it->second->resetNewInputFlag();
     // m_netComps[uid]->resetChanged();
+  }
+}
+
+void World::onDisconnect() {
+  logVerbose("[world] onDisconnect, clearing the world of {} netComps",
+             m_netComps.size());
+
+  auto myNetComp = getPlayerNetComp();
+  if (myNetComp) {
+
+    const auto myUid = myNetComp->getUniqueId();
+
+    for (auto [uid, netComp] : m_netComps) {
+      if (netComp && uid != myUid) {
+        netComp->SODestroy();
+      }
+    }
+
+    m_netComps.clear();
+    m_walkers.clear();
+    myNetComp->setUniqueId(UniqueId::kInvalid);
+    m_netComps.insert({UniqueId::kInvalid, myNetComp});
+    m_walkers.insert({UniqueId::kInvalid, m_player->getWalker()});
   }
 }
 
@@ -424,7 +451,6 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     GUIButton *btn2 = l->addNewElement<GUIButton>(GUIContent{HString{"d/c"}});
     btn2->onClick.connect([input, this] {
       if (m_player->isConnected()) {
-        logVerbose("diconnected");
         m_player->disconnect();
       }
     });

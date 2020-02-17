@@ -32,6 +32,8 @@ public:
   Client &getClient() { return m_client; }
   const Client &getClient() const { return m_client; }
 
+  bs::HFPSWalker getWalker() { return m_fpsWalker; }
+
 private:
   World *m_world;
   Client m_client;

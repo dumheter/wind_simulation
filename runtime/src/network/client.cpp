@@ -9,18 +9,20 @@ Client::Client(World *world)
     : m_connection(k_HSteamNetConnection_Invalid),
       m_socketInterface(SteamNetworkingSockets()),
       m_connectionState(ConnectionState::kDisconnected), m_world(world),
-      m_uid(UniqueId::kInvalid) {}
+      m_uid(UniqueId::kInvalid) {
+}
 
 Client::Client(World *world, ConnectionId activeConnection)
     : m_connection(activeConnection),
       m_socketInterface(SteamNetworkingSockets()),
       m_connectionState(ConnectionState::kConnected), m_world(world),
-      m_uid(UniqueId::kInvalid) {}
+      m_uid(UniqueId::kInvalid) {
+}
 
 Client::~Client() { CloseConnection(); }
 
 bool Client::Poll() {
-  if (m_connectionState == ConnectionState::kConnected) {
+  if (m_connectionState != ConnectionState::kDisconnected) {
     MICROPROFILE_SCOPEI("client", "poll", MP_BISQUE);
     PollSocketStateChanges();
     const bool gotPacket = PollIncomingPackets();
@@ -35,8 +37,8 @@ bool Client::Poll() {
 bool Client::Connect(const SteamNetworkingIPAddr &address) {
   m_connection = m_socketInterface->ConnectByIPAddress(address, 0, nullptr);
   if (m_connection != k_HSteamNetConnection_Invalid) {
-    logVeryVerbose("[client] connected");
-    m_connectionState = ConnectionState::kConnected;
+    logVeryVerbose("[client] connect initiated");
+    SetConnectionState(ConnectionState::kConnecting);
     return true;
   } else {
     logWarning("[client] failed to connect");
@@ -57,9 +59,10 @@ void Client::CloseConnection() {
   if (m_connection != k_HSteamNetConnection_Invalid) {
     m_socketInterface->CloseConnection(m_connection, 0, nullptr, false);
     m_connection = k_HSteamNetConnection_Invalid;
-    logVeryVerbose("[client] closed connection");
+    logVerbose("[client] closed connection");
   }
   SetConnectionState(ConnectionState::kDisconnected);
+  m_world->onDisconnect();
   m_uid = UniqueId::kInvalid;
 }
 
@@ -210,7 +213,12 @@ void Client::OnSteamNetConnectionStatusChanged(
   }
 
   case k_ESteamNetworkingConnectionState_Connected: {
-    SetConnectionState(ConnectionState::kConnected);
+    if (ConnectionState::kConnecting == m_connectionState) {
+      SetConnectionState(ConnectionState::kConnected);
+      if (m_world->serverIsActive()) {
+        m_world->setupScene();
+      }
+    }
     break;
   }
 
@@ -220,10 +228,19 @@ void Client::OnSteamNetConnectionStatusChanged(
   }
 }
 
-void Client::SetConnectionState(const ConnectionState connection_state) {
+void Client::SetConnectionState(ConnectionState connection_state) {
   m_connectionState = connection_state;
-  logInfo("[client] {}", connection_state == ConnectionState::kConnected
-                             ? "connected"
-                             : "disconnected");
+  constexpr auto conStr = [](ConnectionState state) {
+    switch (state) {
+    case ConnectionState::kConnected:
+      return "connected";
+    case ConnectionState::kDisconnected:
+      return "disconnected";
+    case ConnectionState::kConnecting:
+      return "connecting";
+    }
+    return "internal error";
+  };
+  logInfo("[client] state: {}", conStr(connection_state));
 }
 } // namespace wind

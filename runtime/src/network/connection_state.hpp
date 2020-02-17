@@ -2,7 +2,7 @@
 #define CONNECTION_STATE_HPP_
 
 namespace wind {
-enum class ConnectionState : bool { kConnected = true, kDisconnected = false };
+enum class ConnectionState { kConnected, kDisconnected, kConnecting };
 }
 
 #endif // CONNECTION_STATE_HPP_

@@ -67,6 +67,8 @@ public:
   void onPlayerInput(UniqueId uid, PlayerInput input,
                      std::optional<bs::Quaternion> maybeRot);
 
+  void onDisconnect();
+
   /**
    * Build the player entity, camera and attach gui to the
    * camera.

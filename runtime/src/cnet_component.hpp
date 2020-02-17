@@ -26,6 +26,8 @@ public:
 
   void onCreated() override;
 
+  void SODestroy() { SO()->destroy(); }
+
   void onTransformChanged(bs::TransformChangedFlags flags) override;
 
   /**

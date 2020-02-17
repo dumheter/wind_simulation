@@ -20,7 +20,8 @@ class MoveableState {
 public:
   MoveableState()
       : m_id(UniqueId::kInvalid), m_type(Creator::Types::kInvalid),
-        m_position(bs::Vector3::ONE), m_rotation(bs::Quaternion::IDENTITY) {}
+        m_position(bs::Vector3::ONE), m_vel(), m_angVel(),
+        m_rotation(bs::Quaternion::IDENTITY) {}
 
   MoveableState(UniqueId id) : MoveableState() { m_id = id; }
 

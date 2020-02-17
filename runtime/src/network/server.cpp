@@ -49,7 +49,7 @@ void Server::StartServer(const u16 port) {
   }
   logVerbose("[server] listening on port {}.", port);
   m_connectionState = ConnectionState::kConnected;
-  m_world->setupScene();
+  //m_world->setupScene();
 }
 
 void Server::PacketBroadcast(const Packet &packet,
