@@ -51,4 +51,13 @@ void CMyPlayer::fixedUpdate() {
   }
 }
 
+void CMyPlayer::lookupId(UniqueId uid) {
+  auto &packet = m_client.getPacket();
+  packet.ClearPayload();
+  packet.SetHeader(PacketHeaderTypes::kLookup);
+  auto mw = packet.GetMemoryWriter();
+  mw->Write(uid);
+  mw.Finalize();
+  m_client.PacketSend(packet, SendStrategy::kUnreliable);
+}
 } // namespace wind

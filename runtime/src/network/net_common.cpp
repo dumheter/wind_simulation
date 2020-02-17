@@ -9,7 +9,7 @@ SendResult SendPacket(const Packet &packet, const SendStrategy send_strategy,
                       const HSteamNetConnection connection,
                       ISteamNetworkingSockets *socket_interface) {
   const EResult res = socket_interface->SendMessageToConnection(
-      connection, packet.GetPacket(), packet.GetPacketSize(),
+      connection, packet.GetPacket(), static_cast<u32>(packet.GetPacketSize()),
       static_cast<int>(send_strategy), nullptr);
 
   SendResult result = SendResult::kSuccess;

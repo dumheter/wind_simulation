@@ -7,6 +7,11 @@
 
 namespace wind {
 
+/**
+ * When adding a new packet type:
+ *   1. Handle them both in client and server.
+ *   2. Write the producer.
+ */
 using PacketHeaderTypesUnderlying = u32;
 enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   kPlayerJoin = 0,
@@ -15,6 +20,8 @@ enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   kServerTick,
   kCreate,
   kRequestCreate,
+  kLookup,
+  kLookupResponse,
   kHello,
 };
 

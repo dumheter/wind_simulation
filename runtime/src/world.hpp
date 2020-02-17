@@ -107,7 +107,15 @@ public:
     return m_netComps;
   }
 
+  const std::unordered_map<UniqueId, HCNetComponent> &getNetComps() const {
+    return m_netComps;
+  }
+
   std::unordered_map<UniqueId, bs::HFPSWalker> &getWalkers() {
+    return m_walkers;
+  }
+
+  const std::unordered_map<UniqueId, bs::HFPSWalker> &getWalkers() const {
     return m_walkers;
   }
 
@@ -127,7 +135,7 @@ private:
 private:
   std::unordered_map<UniqueId, HCNetComponent> m_netComps;
   std::unordered_map<UniqueId, bs::HFPSWalker> m_walkers;
-  bool m_cursorMode = true;
+  bool m_cursorMode = false;
   bs::HFPSCamera m_fpsCamera;
   Server m_server;
   HCMyPlayer m_player;

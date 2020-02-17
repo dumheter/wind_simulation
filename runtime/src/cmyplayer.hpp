@@ -34,6 +34,8 @@ public:
 
   bs::HFPSWalker getWalker() { return m_fpsWalker; }
 
+  void lookupId(UniqueId uid);
+
 private:
   World *m_world;
   Client m_client;

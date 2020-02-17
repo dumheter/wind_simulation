@@ -9,15 +9,13 @@ Client::Client(World *world)
     : m_connection(k_HSteamNetConnection_Invalid),
       m_socketInterface(SteamNetworkingSockets()),
       m_connectionState(ConnectionState::kDisconnected), m_world(world),
-      m_uid(UniqueId::kInvalid) {
-}
+      m_uid(UniqueId::kInvalid) {}
 
 Client::Client(World *world, ConnectionId activeConnection)
     : m_connection(activeConnection),
       m_socketInterface(SteamNetworkingSockets()),
       m_connectionState(ConnectionState::kConnected), m_world(world),
-      m_uid(UniqueId::kInvalid) {
-}
+      m_uid(UniqueId::kInvalid) {}
 
 Client::~Client() { CloseConnection(); }
 
@@ -124,6 +122,20 @@ void Client::handlePacket() {
     }
   } else if (header == PacketHeaderTypes::kRequestCreate) {
     logError("[client:p RequestCreate] got a requestcreate packet");
+  } else if (header == PacketHeaderTypes::kLookup) {
+    logError("[client:p Lookup] got a lookup packet");
+  } else if (header == PacketHeaderTypes::kLookupResponse) {
+    auto mr = m_packet.GetMemoryReader();
+    if (!m_world->serverIsActive()) {
+      const u32 count = mr.Read<u32>();
+      logInfo("[client:p LookupResponse] got a lookup response with {} count",
+              count);
+      MoveableState state;
+      for (u32 i = 0; i < count; ++i) {
+        state = mr.Read<MoveableState>();
+        m_world->getCreator().create(state);
+      }
+    }
   } else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
     const auto new_uid = mr.Read<UniqueId>();

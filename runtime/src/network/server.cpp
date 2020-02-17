@@ -224,10 +224,27 @@ void Server::handlePacket(Packet &packet) {
     } else {
       logWarning("[server:p requestcreate] invalid type in state");
     }
+  } else if (header == PacketHeaderTypes::kLookup) {
+    auto mr = m_packet.GetMemoryReader();
+    const auto from = packet.GetFromConnection();
+    auto uid = mr.Read<UniqueId>();
+    logVerbose("[server:p lookup] for uid {}", uid.raw());
+    const auto it = m_world->getNetComps().find(uid);
+    if (it != m_world->getNetComps().end()) {
+      m_packet.ClearPayload();
+      m_packet.SetHeader(PacketHeaderTypes::kLookupResponse);
+      auto mw = m_packet.GetMemoryWriter();
+      const u32 count = 1;
+      mw->Write(count);
+      mw->Write(it->second->getState());
+      mw.Finalize();
+      PacketUnicast(m_packet, SendStrategy::kReliable, from);
+    } else
+      logWarning("[server:p lookup] failed to find uid");
   } else {
     logVerbose("[server] got packet: todo handle packet");
   }
-}
+} // namespace wind
 
 void Server::OnSteamNetConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t *status) {

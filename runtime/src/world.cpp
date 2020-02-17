@@ -86,6 +86,8 @@ void NetDebugInfo::update(const Client &client) {
   hqueueTime->setContent(bs::HString(queueTime));
 }
 
+// ============================================================ //
+
 World::World(const App::Info &info)
     : App(info), m_server(this), m_creator(this) {
   using namespace bs;
@@ -210,8 +212,9 @@ void World::applyMoveableState(const MoveableState &moveableState) {
   if (it != m_netComps.end()) {
     it->second->setState(moveableState);
   } else {
-    logError("failed to find netcomp with id {}",
-             moveableState.getUniqueId().raw());
+    logVerbose("failed to find netcomp with id {}",
+               moveableState.getUniqueId().raw());
+    m_player->lookupId(moveableState.getUniqueId());
   }
 }
 
@@ -229,7 +232,7 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
       it->second->setPosition(newPos);
     }
   } else {
-    logError("failed to find netcomp with id {}",
+    logError("[world:applyMyMoveableState] failed to find netcomp with id {}",
              moveableState.getUniqueId().raw());
   }
 }
@@ -327,8 +330,9 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   fpsCameraComp->setCharacter(player);
   m_fpsCamera = fpsCameraComp;
 
-  Cursor::instance().hide();
-  Cursor::instance().clipToWindow(*primaryWindow);
+  m_fpsCamera->setEnabled(false);
+  Cursor::instance().show();
+  Cursor::instance().clipDisable();
 
   return camera;
 }
