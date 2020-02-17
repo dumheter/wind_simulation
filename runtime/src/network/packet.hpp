@@ -1,12 +1,12 @@
 #ifndef PACKET_HPP_
 #define PACKET_HPP_
 
-#include "common.hpp"
-#include "network/packet_header.hpp"
 #include "network/connection_id.hpp"
-#include <vector>
+#include "network/packet_header.hpp"
+#include "types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
+#include <vector>
 
 namespace wind {
 
@@ -18,13 +18,17 @@ using ContainerValueType = u8;
 
 class Packet;
 
-struct MemoryWriter
-{
-  MemoryWriter(Packet* packet);
+struct MemoryWriter {
+  MemoryWriter(Packet *packet);
   ~MemoryWriter();
 
-  alflib::RawMemoryWriter* operator->() { return &mw_; }
-  alflib::RawMemoryWriter* operator*() { return &mw_; }
+  MemoryWriter(const MemoryWriter &other) = delete;
+  MemoryWriter &operator=(const MemoryWriter &other) = delete;
+  MemoryWriter(MemoryWriter &&other);
+  MemoryWriter &operator=(MemoryWriter &&other) noexcept;
+
+  alflib::RawMemoryWriter *operator->() { return &mw_; }
+  alflib::RawMemoryWriter *operator*() { return &mw_; }
 
   /**
    * Will update the packet's payload size, realizing the writes.
@@ -33,7 +37,7 @@ struct MemoryWriter
 
 private:
   alflib::RawMemoryWriter mw_;
-  Packet* packet_;
+  Packet *packet_;
   bool did_finalize;
 };
 
@@ -41,13 +45,12 @@ private:
 // Payload Iterator
 // ============================================================ //
 
-struct PayloadIterator
-{
+struct PayloadIterator {
   /**
    * Use to construct an iterator pointing to the start of the payload.
    * @param payload Pointer to the payload
    */
-  explicit PayloadIterator(ContainerValueType* payload);
+  explicit PayloadIterator(ContainerValueType *payload);
 
   /**
    * To construct an end iterator, set pos to one step beyond the end of the
@@ -55,28 +58,27 @@ struct PayloadIterator
    * @param payload Pointer to the payload
    * @param pos Where in the payload we are.
    */
-  PayloadIterator(ContainerValueType* payload, const std::size_t pos);
+  PayloadIterator(ContainerValueType *payload, const std::size_t pos);
 
-  bool operator!=(const PayloadIterator& other) const;
+  bool operator!=(const PayloadIterator &other) const;
 
-  const ContainerValueType& operator*() const { return payload_[pos_]; }
+  const ContainerValueType &operator*() const { return payload_[pos_]; }
 
-  ContainerValueType& operator*() { return payload_[pos_]; }
+  ContainerValueType &operator*() { return payload_[pos_]; }
 
-  PayloadIterator& operator++();
+  PayloadIterator &operator++();
 
-  PayloadIterator& operator--();
+  PayloadIterator &operator--();
 
 private:
   std::size_t pos_;
-  ContainerValueType* payload_;
+  ContainerValueType *payload_;
 };
 
 /**
  * A packet consists of a header and a payload, stored in contiguous memory.
  */
-class Packet
-{
+class Packet {
 public:
   using ValueType = ContainerValueType;
 
@@ -97,25 +99,25 @@ public:
    * @param data_count How many bytes to copy over. Must be more than
    * GetHeaderSize().
    */
-  Packet(const ValueType* data, const std::size_t data_count);
+  Packet(const ValueType *data, const std::size_t data_count);
 
   /**
    * Copy data into payload, will write 0's to header.
    */
-  Packet(const char8* data, const std::size_t data_count);
+  Packet(const char8 *data, const std::size_t data_count);
 
   /**
    * Write string into payload, and write 0's to header
    */
-  Packet(const alflib::String& string);
+  Packet(const alflib::String &string);
 
-  Packet(const Packet& other);
+  Packet(const Packet &other);
 
-  Packet& operator=(const Packet& other);
+  Packet &operator=(const Packet &other);
 
-  Packet(Packet&& other) noexcept;
+  Packet(Packet &&other) noexcept;
 
-  Packet& operator=(Packet&& other) noexcept;
+  Packet &operator=(Packet &&other) noexcept;
 
   // ============================================================ //
   // Packet / General
@@ -124,8 +126,7 @@ public:
   /**
    * Get how many bytes are unused in the packet.
    */
-  std::size_t GetBytesLeft() const
-  {
+  std::size_t GetBytesLeft() const {
     return GetPacketCapacity() - GetPacketSize();
   }
 
@@ -145,17 +146,17 @@ public:
    */
   std::size_t GetPacketSize() const;
 
-  const ValueType* GetPacket() const { return &container_[0]; }
+  const ValueType *GetPacket() const { return &container_[0]; }
 
 private:
-  ValueType* GetPacket() { return &container_[0]; }
+  ValueType *GetPacket() { return &container_[0]; }
 
 public:
   /**
    * Simply take a data source, and write that into our container.
    * @return False if data_count is too large for our packet.
    */
-  bool SetPacket(const ValueType* data, const std::size_t data_count);
+  bool SetPacket(const ValueType *data, const std::size_t data_count);
 
   /**
    * Get where the packet came from. This is set by the user.
@@ -173,12 +174,18 @@ public:
 public:
   std::size_t GetHeaderSize() const;
 
-  void SetHeader(const PacketHeader header);
-
-  const PacketHeader* GetHeader() const;
+  void SetHeader(PacketHeaderTypes header) { SetHeader(PacketHeader{header}); }
 
 private:
-  ValueType* GetHeaderRaw();
+  void SetHeader(const PacketHeader header);
+
+public:
+  const PacketHeader *GetHeader() const;
+
+  PacketHeaderTypes GetHeaderType() const;
+
+private:
+  ValueType *GetHeaderRaw();
 
 public:
   /**
@@ -217,16 +224,16 @@ public:
   /**
    * @return If we could write the entire data into payload.
    */
-  bool SetPayload(const ValueType* data, const std::size_t data_count);
-  bool SetPayload(const char8* str, const std::size_t str_len);
+  bool SetPayload(const ValueType *data, const std::size_t data_count);
+  bool SetPayload(const char8 *str, const std::size_t str_len);
 
-  const ValueType* GetPayload() const;
+  const ValueType *GetPayload() const;
 
-  ValueType* GetPayload();
+  ValueType *GetPayload();
 
 private:
   friend MemoryWriter;
-  ValueType* GetRawPayload();
+  ValueType *GetRawPayload();
 
 public:
   PayloadIterator begin();
@@ -281,6 +288,6 @@ private:
   PacketContainer container_;
 };
 
-}
+} // namespace wind
 
 #endif // PACKET_HPP_
