@@ -35,7 +35,6 @@ void MoveableState::from(const MoveableState &other) {
 void MoveableState::from(bs::HRigidbody rigid) {
   m_vel = rigid->getVelocity();
   m_angVel = rigid->getAngularVelocity();
-  setSleeping(rigid->isSleeping());
 }
 
 void MoveableState::to(bs::Transform &transform) const {
@@ -59,7 +58,7 @@ bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
   mw.Write(m_rotation.z);
   mw.Write(m_rotation.w);
   auto res = mw.Write(m_flag);
-  if (getRigid() && !getSleeping()) {
+  if (getRigid()) {
     mw.Write(m_vel.x);
     mw.Write(m_vel.y);
     mw.Write(m_vel.z);
@@ -81,7 +80,7 @@ MoveableState MoveableState::FromBytes(alflib::RawMemoryReader &mr) {
   ms.m_rotation.z = mr.Read<decltype(ms.m_rotation.z)>();
   ms.m_rotation.w = mr.Read<decltype(ms.m_rotation.w)>();
   ms.m_flag = mr.Read<decltype(ms.m_flag)>();
-  if (ms.getRigid() && !ms.getSleeping()) {
+  if (ms.getRigid()) {
     ms.m_vel.x = mr.Read<decltype(ms.m_vel.x)>();
     ms.m_vel.y = mr.Read<decltype(ms.m_vel.y)>();
     ms.m_vel.z = mr.Read<decltype(ms.m_vel.z)>();

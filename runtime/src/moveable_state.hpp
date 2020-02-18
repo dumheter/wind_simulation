@@ -73,19 +73,12 @@ public:
 private:
   using Bitfield = u8;
   static constexpr Bitfield kFlagRigid = 0;
-  static constexpr Bitfield kFlagSleeping = 1;
 
 public:
   bool getRigid() const { return bitCheck(m_flag, kFlagRigid); }
 
   void setRigid(bool isRigid) {
     bitSet(m_flag, kFlagRigid, (Bitfield)isRigid);
-  }
-
-  bool getSleeping() const { return bitCheck(m_flag, kFlagSleeping); }
-
-  void setSleeping(bool isSleeping) {
-    bitSet(m_flag, kFlagSleeping, (Bitfield)isSleeping);
   }
 
   static MoveableState FromBytes(alflib::RawMemoryReader &mr);

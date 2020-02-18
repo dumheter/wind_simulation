@@ -54,12 +54,6 @@ public:
 
   void resetChanged() { m_hasChanged = false; }
 
-  /**
-   * There is no callback for when sleeping is changed, so we
-   * have to manually update it if we want to know it.
-   */
-  void updateSleeping();
-
   bool operator==(const CNetComponent &other) const {
     return getUniqueId() == other.getUniqueId();
   }

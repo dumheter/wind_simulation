@@ -313,11 +313,6 @@ void Server::OnSteamNetConnectionStatusChanged(
       mw->Write(count);
       // m_world->updateRigidbodys();
       for (auto [uid, netComp] : netComps) {
-        // need to manually update sleeping, not done auto.
-        auto b = netComp->getState().getSleeping();
-        netComp->updateSleeping();
-        logVerbose("[hello] uid {}, {} -> {}", uid.raw(), b,
-                   netComp->getState().getSleeping());
         mw->Write(netComp->getState());
       }
       mw.Finalize();
