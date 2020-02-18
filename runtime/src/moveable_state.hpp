@@ -10,9 +10,9 @@
 #include "creator.hpp"
 #include "types.hpp"
 #include "utility/unique_id.hpp"
+#include "utility/util.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
-#include "utility/util.hpp"
 
 namespace wind {
 
@@ -21,9 +21,7 @@ class MoveableState {
 public:
   MoveableState();
 
-  MoveableState(UniqueId id) : MoveableState() {
-    m_id = id;
-  }
+  MoveableState(UniqueId id) : MoveableState() { m_id = id; }
 
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
@@ -77,9 +75,7 @@ private:
 public:
   bool getRigid() const { return bitCheck(m_flag, kFlagRigid); }
 
-  void setRigid(bool isRigid) {
-    bitSet(m_flag, kFlagRigid, (Bitfield)isRigid);
-  }
+  void setRigid(bool isRigid) { bitSet(m_flag, kFlagRigid, (Bitfield)isRigid); }
 
   static MoveableState FromBytes(alflib::RawMemoryReader &mr);
 
