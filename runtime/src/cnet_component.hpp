@@ -46,13 +46,19 @@ public:
 
   void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
 
-  void setType(Creator::Types type) { m_state.setType(type); }
+  void setType(Creator::Types type);
 
   void setPosition(bs::Vector3 position);
 
   bool hasChanged() const { return m_hasChanged; }
 
   void resetChanged() { m_hasChanged = false; }
+
+  /**
+   * There is no callback for when sleeping is changed, so we
+   * have to manually update it if we want to know it.
+   */
+  void updateSleeping();
 
   bool operator==(const CNetComponent &other) const {
     return getUniqueId() == other.getUniqueId();

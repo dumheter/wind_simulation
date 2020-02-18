@@ -135,12 +135,16 @@ void World::onFixedUpdate(f32) {
       state.setType(Creator::Types::kBall);
       state.setPosition(spawnPos);
       state.setRotation(m_fpsCamera->getCamera()->getTransform().getRotation());
+      bs::Vector3 force{forward * 30.0f};
 
       auto &packet = m_player->getClient().getPacket();
       packet.ClearPayload();
       packet.SetHeader(PacketHeaderTypes::kRequestCreate);
       auto mw = packet.GetMemoryWriter();
       mw->Write(state);
+      mw->Write(force.x);
+      mw->Write(force.y);
+      mw->Write(force.z);
       mw.Finalize();
       m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
     }
@@ -339,7 +343,7 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
 
 void World::setupInput() {
   using namespace bs;
-  gInput().onButtonUp.connect([](const ButtonEvent &ev) {
+  gInput().onButtonUp.connect([this](const ButtonEvent &ev) {
     if (ev.buttonCode == BC_ESCAPE) {
       gApplication().quitRequested();
     }
@@ -372,12 +376,15 @@ void World::setupInput() {
         state.setPosition(spawnPos);
         state.setRotation(
             m_fpsCamera->getCamera()->getTransform().getRotation());
-
+        bs::Vector3 force{forward * 30.0f};
         auto &packet = m_player->getClient().getPacket();
         packet.ClearPayload();
         packet.SetHeader(PacketHeaderTypes::kRequestCreate);
         auto mw = packet.GetMemoryWriter();
         mw->Write(state);
+        mw->Write(force.x);
+        mw->Write(force.y);
+        mw->Write(force.z);
         mw.Finalize();
         m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
       }

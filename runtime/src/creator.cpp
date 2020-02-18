@@ -134,8 +134,6 @@ HCNetComponent Creator::ball(const MoveableState &moveableState) const {
   rigid->setSleepThreshold(0.1f);
   // rigid->addForce(forward * 40.0f, ForceMode::Velocity);
   auto netComp = sphere->addComponent<CNetComponent>(moveableState);
-  netComp->addForce(sphere->getTransform().getForward() * 30.0f,
-                    ForceMode::Velocity);
   netComp->setType(Types::kBall);
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});

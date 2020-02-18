@@ -210,9 +210,12 @@ void Server::handlePacket(Packet &packet) {
     logVerbose("[server:p requestcreate] ");
     auto mr = m_packet.GetMemoryReader();
     auto state = mr.Read<MoveableState>();
+    const bs::Vector3 force{mr.Read<float>(), mr.Read<float>(),
+                            mr.Read<float>()};
     if (state.getType() != Creator::Types::kInvalid) {
       state.setUniqueId(UniqueIdGenerator::next());
       auto netComp = m_world->getCreator().create(state);
+      netComp->addForce(force, bs::ForceMode::Velocity);
       m_packet.ClearPayload();
       m_packet.SetHeader(PacketHeaderTypes::kCreate);
       auto mw = m_packet.GetMemoryWriter();
@@ -242,7 +245,8 @@ void Server::handlePacket(Packet &packet) {
     } else
       logWarning("[server:p lookup] failed to find uid");
   } else {
-    logVerbose("[server] got packet: todo handle packet");
+    logVerbose("[server] got unknown packet {}",
+               static_cast<u32>(m_packet.GetHeaderType()));
   }
 } // namespace wind
 
@@ -307,7 +311,13 @@ void Server::OnSteamNetConnectionStatusChanged(
       auto &netComps = m_world->getNetComps();
       const u32 count = static_cast<u32>(netComps.size());
       mw->Write(count);
+      // m_world->updateRigidbodys();
       for (auto [uid, netComp] : netComps) {
+        // need to manually update sleeping, not done auto.
+        auto b = netComp->getState().getSleeping();
+        netComp->updateSleeping();
+        logVerbose("[hello] uid {}, {} -> {}", uid.raw(), b,
+                   netComp->getState().getSleeping());
         mw->Write(netComp->getState());
       }
       mw.Finalize();

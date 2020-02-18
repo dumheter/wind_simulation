@@ -28,6 +28,9 @@ void CNetComponent::onCreated() {
   if (rigid) {
     rigid->setVelocity(m_state.getVel());
     rigid->setAngularVelocity(m_state.getAngVel());
+    if (rigid->isSleeping() != m_state.getSleeping()) {
+      m_state.getSleeping() ? rigid->sleep() : rigid->wakeUp();
+    }
   }
   mNotifyFlags = bs::TCF_Transform;
 }
@@ -54,8 +57,18 @@ void CNetComponent::setState(const MoveableState &moveableState) {
   if (rigid) {
     rigid->setVelocity(m_state.getVel());
     rigid->setAngularVelocity(m_state.getAngVel());
+    if (rigid->isSleeping() != m_state.getSleeping()) {
+      m_state.getSleeping() ? rigid->sleep() : rigid->wakeUp();
+    }
   }
   mNotifyFlags = bs::TCF_Transform;
+}
+
+void CNetComponent::setType(Creator::Types type) {
+  m_state.setType(type);
+  if (type != Creator::Types::kPlayer && type != Creator::Types::kInvalid) {
+    m_state.setRigid(true);
+  }
 }
 
 void CNetComponent::setPosition(bs::Vector3 position) {
@@ -64,6 +77,13 @@ void CNetComponent::setPosition(bs::Vector3 position) {
   m_state.setPosition(position);
   SO()->setPosition(m_state.getPosition());
   mNotifyFlags = bs::TCF_Transform;
+}
+
+void CNetComponent::updateSleeping() {
+  auto rigid = SO()->getComponent<bs::CRigidbody>();
+  if (rigid) {
+    m_state.setSleeping(rigid->isSleeping());
+  }
 }
 
 } // namespace wind

@@ -12,18 +12,18 @@
 #include "utility/unique_id.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
+#include "utility/util.hpp"
 
 namespace wind {
 
 class MoveableState {
 
 public:
-  MoveableState()
-      : m_id(UniqueId::kInvalid), m_type(Creator::Types::kInvalid),
-        m_position(bs::Vector3::ONE), m_vel(), m_angVel(),
-        m_rotation(bs::Quaternion::IDENTITY) {}
+  MoveableState();
 
-  MoveableState(UniqueId id) : MoveableState() { m_id = id; }
+  MoveableState(UniqueId id) : MoveableState() {
+    m_id = id;
+  }
 
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
@@ -70,11 +70,30 @@ public:
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
 
+private:
+  using Bitfield = u8;
+  static constexpr Bitfield kFlagRigid = 0;
+  static constexpr Bitfield kFlagSleeping = 1;
+
+public:
+  bool getRigid() const { return bitCheck(m_flag, kFlagRigid); }
+
+  void setRigid(bool isRigid) {
+    bitSet(m_flag, kFlagRigid, (Bitfield)isRigid);
+  }
+
+  bool getSleeping() const { return bitCheck(m_flag, kFlagSleeping); }
+
+  void setSleeping(bool isSleeping) {
+    bitSet(m_flag, kFlagSleeping, (Bitfield)isSleeping);
+  }
+
   static MoveableState FromBytes(alflib::RawMemoryReader &mr);
 
 private:
   UniqueId m_id;
   Creator::Types m_type;
+  Bitfield m_flag;
   bs::Vector3 m_position;
   bs::Vector3 m_vel;
   bs::Vector3 m_angVel;

@@ -46,4 +46,19 @@ public:
   static void CenterCursor(bs::SPtr<bs::RenderWindow> window = nullptr);
 };
 
+/**
+ * Set the @bitPos in the @store to @bitValue.
+ */
+template <typename T>
+inline constexpr void bitSet(T &store, T bitPos, T bitValue) {
+  store ^= (-bitValue ^ store) & (T{1} << bitPos);
+}
+
+/**
+ * Check what value bit @bitPos has in @store.
+ */
+template <typename T> inline constexpr T bitCheck(const T &store, T bitPos) {
+  return (store >> bitPos) & T{1};
+}
+
 } // namespace wind
