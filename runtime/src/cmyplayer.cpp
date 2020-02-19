@@ -9,7 +9,8 @@
 namespace wind {
 
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
-    : Component(parent), m_client(world), m_world(world) {
+    : Component(parent), m_client(world), m_world(world),
+      m_weapon(Creator::Types::kBall) {
   setName("CMyPlayer");
   m_fpsWalker = SO()->addComponent<bs::FPSWalker>(world);
   m_fpsWalker->makeActive();

@@ -11,6 +11,7 @@
 #include "network/server.hpp"
 #include "player_input.hpp"
 #include "utility/unique_id.hpp"
+#include <GUI/BsGUITexture.h>
 #include <unordered_map>
 
 namespace wind {
@@ -55,6 +56,8 @@ public:
   void onPreUpdate(f32) override;
 
   void onFixedUpdate(f32) override;
+
+  void onWindowResize() override;
 
   /**
    * Add a player to our world.
@@ -121,7 +124,7 @@ public:
 
   const Creator &getCreator() const { return m_creator; }
 
-  const bs::HFPSCamera& getFpsCamera() const { return m_fpsCamera; }
+  const bs::HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
 
 private:
   void setupInput();
@@ -134,6 +137,9 @@ private:
   bs::HMaterial createMaterial(const bs::String &path);
   bs::HSceneObject createGUI(bs::HSceneObject camera);
 
+  /* Give full window width and height. */
+  void updateAimPosition(u32 width, u32 height);
+
 private:
   std::unordered_map<UniqueId, HCNetComponent> m_netComps;
   std::unordered_map<UniqueId, bs::HFPSWalker> m_walkers;
@@ -143,6 +149,7 @@ private:
   HCMyPlayer m_player;
   Creator m_creator;
   NetDebugInfo m_netDebugInfo{};
+  bs::GUITexture *m_aim;
 };
 
 } // namespace wind

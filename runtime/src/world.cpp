@@ -36,10 +36,10 @@
 #include "log.hpp"
 #include "utility/util.hpp"
 #include <Components/BsCSkybox.h>
+#include <Image/BsSpriteTexture.h>
 #include <alflib/core/assert.hpp>
 #include <chrono>
 #include <cstdlib>
-
 #include <microprofile/microprofile.h>
 #include <regex>
 
@@ -88,6 +88,10 @@ void NetDebugInfo::update(const Client &client) {
 
 // ============================================================ //
 
+constexpr u32 kAimDiameter = 8;
+
+// ============================================================ //
+
 World::World(const App::Info &info)
     : App(info), m_server(this), m_creator(this) {
   using namespace bs;
@@ -131,6 +135,8 @@ void World::onFixedUpdate(f32) {
     m_server.broadcastServerTick(m_netComps);
   }
 }
+
+void World::onWindowResize() { updateAimPosition(m_width, m_height); }
 
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
@@ -344,8 +350,7 @@ void World::setupInput() {
         SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
         Cursor::instance().clipToWindow(*primaryWindow);
       }
-    }
-    else if (ev.buttonCode == BC_MOUSE_LEFT) {
+    } else if (ev.buttonCode == BC_MOUSE_LEFT) {
       if (m_player->isConnected() && m_cursorMode) {
         m_player->onShoot();
       }
@@ -440,7 +445,20 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     m_netDebugInfo.setup(layout);
   }
 
+  { // aim dot
+    HTexture dotTex = gImporter().import<Texture>("res/textures/dot.png");
+    HSpriteTexture dotSprite = SpriteTexture::create(dotTex);
+    m_aim = GUITexture::create(dotSprite);
+    m_aim->setSize(kAimDiameter, kAimDiameter);
+    updateAimPosition(m_width, m_height);
+    mainPanel->addElement(m_aim);
+  }
+
   return gui;
+}
+
+void World::updateAimPosition(u32 width, u32 height) {
+  m_aim->setPosition(width / 2 - kAimDiameter / 2, height / 2 - kAimDiameter / 2);
 }
 
 void World::addNetComp(HCNetComponent netComp) {

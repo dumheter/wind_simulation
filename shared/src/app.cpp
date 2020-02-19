@@ -119,6 +119,7 @@ App::App(const Info &info)
     SPtr<RenderWindow> window = Application::instance().getPrimaryWindow();
     m_width = window->getProperties().width;
     m_height = window->getProperties().height;
+    g_app->onWindowResize();
   });
 
   // Initialize MicroProfile
