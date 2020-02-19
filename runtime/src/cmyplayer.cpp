@@ -51,6 +51,32 @@ void CMyPlayer::fixedUpdate() {
   }
 }
 
+void CMyPlayer::onShoot() {
+  auto spawnPos = m_world->getPlayerNetComp()->getState().getPosition();
+  const auto &forward =
+      m_world->getFpsCamera()->getCamera()->getTransform().getForward();
+  spawnPos += forward * 0.7f;
+  spawnPos += bs::Vector3(0.0f, 1.0f, 0.0f);
+  MoveableState state{};
+  state.setType(m_weapon);
+  state.setPosition(spawnPos);
+  state.setRotation(
+      m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
+  const bs::Vector3 force{forward * 30.0f};
+  auto &packet = m_client.getPacket();
+  packet.ClearPayload();
+  packet.SetHeader(PacketHeaderTypes::kRequestCreate);
+  auto mw = packet.GetMemoryWriter();
+  mw->Write(state);
+  mw->Write(force.x);
+  mw->Write(force.y);
+  mw->Write(force.z);
+  mw.Finalize();
+  m_client.PacketSend(packet, SendStrategy::kUnreliable);
+}
+
+void CMyPlayer::setWeapon(Creator::Types weapon) { m_weapon = weapon; }
+
 void CMyPlayer::lookupId(UniqueId uid) {
   auto &packet = m_client.getPacket();
   packet.ClearPayload();

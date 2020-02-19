@@ -108,7 +108,7 @@ HCNetComponent Creator::cube(const MoveableState &moveableState) const {
   renderable->setMaterial(m_matGrid2);
   HBoxCollider boxCollider = cube->addComponent<CBoxCollider>();
   boxCollider->setMaterial(m_physicsMatStd);
-  boxCollider->setMass(25.0f);
+  boxCollider->setMass(40.0f);
   HRigidbody boxRigidbody = cube->addComponent<CRigidbody>();
   boxRigidbody->setSleepThreshold(0.1f);
   auto netComp = cube->addComponent<CNetComponent>(moveableState);

@@ -113,41 +113,22 @@ void World::onPreUpdate(f32) {
 }
 
 void World::onFixedUpdate(f32) {
+  using namespace bs;
   MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
   m_netDebugInfo.update(m_player->getClient());
 
   static u32 i = 0;
+
+  if (gInput().isButtonHeld(BC_MOUSE_MIDDLE)) {
+    if (m_player->isConnected() && m_cursorMode) {
+      m_player->onShoot();
+    }
+  }
+
   if (++i > 2) {
     i = 0;
     m_server.broadcastServerTick(m_netComps);
-  }
-
-  using namespace bs;
-  if (gInput().isButtonHeld(BC_MOUSE_MIDDLE)) {
-    if (m_player->isConnected() && m_cursorMode) {
-      auto spawnPos = getPlayerNetComp()->getState().getPosition();
-      const auto &forward =
-          m_fpsCamera->getCamera()->getTransform().getForward();
-      spawnPos += forward * 0.7f;
-      spawnPos += Vector3(0.0f, 1.0f, 0.0f);
-      MoveableState state{};
-      state.setType(Creator::Types::kBall);
-      state.setPosition(spawnPos);
-      state.setRotation(m_fpsCamera->getCamera()->getTransform().getRotation());
-      bs::Vector3 force{forward * 30.0f};
-
-      auto &packet = m_player->getClient().getPacket();
-      packet.ClearPayload();
-      packet.SetHeader(PacketHeaderTypes::kRequestCreate);
-      auto mw = packet.GetMemoryWriter();
-      mw->Write(state);
-      mw->Write(force.x);
-      mw->Write(force.y);
-      mw->Write(force.z);
-      mw.Finalize();
-      m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
-    }
   }
 }
 
@@ -364,29 +345,17 @@ void World::setupInput() {
         Cursor::instance().clipToWindow(*primaryWindow);
       }
     }
-    if (ev.buttonCode == BC_MOUSE_LEFT) {
+    else if (ev.buttonCode == BC_MOUSE_LEFT) {
       if (m_player->isConnected() && m_cursorMode) {
-        auto spawnPos = getPlayerNetComp()->getState().getPosition();
-        const auto &forward =
-            m_fpsCamera->getCamera()->getTransform().getForward();
-        spawnPos += forward * 0.7f;
-        spawnPos += Vector3(0.0f, 1.0f, 0.0f);
-        MoveableState state{};
-        state.setType(Creator::Types::kBall);
-        state.setPosition(spawnPos);
-        state.setRotation(
-            m_fpsCamera->getCamera()->getTransform().getRotation());
-        bs::Vector3 force{forward * 30.0f};
-        auto &packet = m_player->getClient().getPacket();
-        packet.ClearPayload();
-        packet.SetHeader(PacketHeaderTypes::kRequestCreate);
-        auto mw = packet.GetMemoryWriter();
-        mw->Write(state);
-        mw->Write(force.x);
-        mw->Write(force.y);
-        mw->Write(force.z);
-        mw.Finalize();
-        m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
+        m_player->onShoot();
+      }
+    } else if (ev.buttonCode == BC_1) {
+      if (m_player->isConnected() && m_cursorMode) {
+        m_player->setWeapon(Creator::Types::kBall);
+      }
+    } else if (ev.buttonCode == BC_2) {
+      if (m_player->isConnected() && m_cursorMode) {
+        m_player->setWeapon(Creator::Types::kCube);
       }
     }
   });

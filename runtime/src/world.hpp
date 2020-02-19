@@ -119,7 +119,9 @@ public:
     return m_walkers;
   }
 
-  const Creator &getCreator() { return m_creator; }
+  const Creator &getCreator() const { return m_creator; }
+
+  const bs::HFPSCamera& getFpsCamera() const { return m_fpsCamera; }
 
 private:
   void setupInput();
