@@ -101,11 +101,19 @@ void Editor::onPreUpdate(f32 delta) {
   }
 
   // Full-screen toggle 'F'
-  if (gInput().isButtonDown(ButtonCode::BC_F)) {
-    if (isFullscreen()) {
-      exitFullscreen();
-    } else {
-      enterFullscreen();
+  if (gInput().isButtonDown(ButtonCode::BC_LCONTROL)) {
+    if (gInput().isButtonDown(ButtonCode::BC_F1)) {
+      if (isFullscreen()) {
+        exitFullscreen();
+      } else {
+        enterFullscreen(App::VideoMode{0, 0}, 0);
+      }
+    } else if (gInput().isButtonDown(ButtonCode::BC_F2)) {
+      if (isFullscreen()) {
+        exitFullscreen();
+      } else {
+        enterFullscreen(App::VideoMode{0, 0}, 1);
+      }
     }
   }
 
