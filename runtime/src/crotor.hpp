@@ -7,9 +7,9 @@
 #include "RTTI/BsMathRTTI.h"
 #include "Reflection/BsRTTIPlain.h"
 #include "Reflection/BsRTTIType.h"
+#include "rtti_types.hpp"
 #include "Scene/BsComponent.h"
 #include "types.hpp"
-#include "rtti_types.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {

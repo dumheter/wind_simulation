@@ -3,13 +3,14 @@
 #include "bsFPSWalker.h"
 #include "cnet_component.hpp"
 #include "log.hpp"
+#include "network/client.hpp"
 #include "types.hpp"
 #include "world.hpp"
 
 namespace wind {
 
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
-    : Component(parent), m_client(world), m_world(world),
+    : Component(parent), m_client(std::make_unique<Client>(world)), m_world(world),
       m_weapon(Creator::Types::kBall) {
   setName("CMyPlayer");
   m_fpsWalker = SO()->addComponent<bs::FPSWalker>(world);
@@ -17,23 +18,31 @@ CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
   m_lastRotation = SO()->getTransform().getRotation();
 }
 
-bool CMyPlayer::isConnected() const {
-  return m_client.GetConnectionState() == ConnectionState::kConnected;
+void CMyPlayer::setUniqueId(UniqueId uid) {
+  m_client->setUid(uid);
 }
 
-void CMyPlayer::connect(const char *address) { m_client.Connect(address); }
+UniqueId CMyPlayer::getUniqueId() const {
+  return m_client->getUid();
+}
 
-void CMyPlayer::disconnect() { m_client.CloseConnection(); }
+bool CMyPlayer::isConnected() const {
+  return m_client->GetConnectionState() == ConnectionState::kConnected;
+}
 
-void CMyPlayer::update() { m_client.Poll(); }
+void CMyPlayer::connect(const char *address) { m_client->Connect(address); }
+
+void CMyPlayer::disconnect() { m_client->CloseConnection(); }
+
+void CMyPlayer::update() { m_client->Poll(); }
 
 void CMyPlayer::fixedUpdate() {
   if (!m_world->serverIsActive() &&
-      m_client.GetConnectionState() == ConnectionState::kConnected) {
+      m_client->GetConnectionState() == ConnectionState::kConnected) {
     auto rotation = SO()->getTransform().getRotation();
     const u8 rotChanged = m_lastRotation != rotation;
     if (rotChanged || m_fpsWalker->hasNewInput()) {
-      auto &packet = m_client.getPacket();
+      auto &packet = m_client->getPacket();
       packet.ClearPayload();
       packet.SetHeader(PacketHeaderTypes::kPlayerTick);
       auto mw = packet.GetMemoryWriter();
@@ -47,7 +56,7 @@ void CMyPlayer::fixedUpdate() {
         m_lastRotation = rotation;
       }
       mw.Finalize();
-      m_client.PacketSend(packet, SendStrategy::kUnreliableNoDelay);
+      m_client->PacketSend(packet, SendStrategy::kUnreliableNoDelay);
     }
   }
 }
@@ -64,7 +73,7 @@ void CMyPlayer::onShoot() {
   state.setRotation(
       m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
   const bs::Vector3 force{forward * 30.0f};
-  auto &packet = m_client.getPacket();
+  auto &packet = m_client->getPacket();
   packet.ClearPayload();
   packet.SetHeader(PacketHeaderTypes::kRequestCreate);
   auto mw = packet.GetMemoryWriter();
@@ -73,18 +82,23 @@ void CMyPlayer::onShoot() {
   mw->Write(force.y);
   mw->Write(force.z);
   mw.Finalize();
-  m_client.PacketSend(packet, SendStrategy::kUnreliable);
+  m_client->PacketSend(packet, SendStrategy::kUnreliable);
 }
 
 void CMyPlayer::setWeapon(Creator::Types weapon) { m_weapon = weapon; }
 
 void CMyPlayer::lookupId(UniqueId uid) {
-  auto &packet = m_client.getPacket();
+  auto &packet = m_client->getPacket();
   packet.ClearPayload();
   packet.SetHeader(PacketHeaderTypes::kLookup);
   auto mw = packet.GetMemoryWriter();
   mw->Write(uid);
   mw.Finalize();
-  m_client.PacketSend(packet, SendStrategy::kUnreliable);
+  m_client->PacketSend(packet, SendStrategy::kUnreliable);
 }
+
+bs::RTTITypeBase *CMyPlayer::getRTTIStatic() { return CMyPlayerRTTI::instance(); }
+
+bs::RTTITypeBase *CMyPlayer::getRTTI() const { return getRTTIStatic(); }
+
 } // namespace wind
