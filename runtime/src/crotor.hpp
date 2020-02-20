@@ -9,6 +9,7 @@
 #include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
 #include "types.hpp"
+#include "rtti_types.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {
@@ -47,7 +48,7 @@ public:
     static bs::String name = "CRotor";
     return name;
   }
-  bs::UINT32 getRTTIId() override { return 10001; }
+  bs::UINT32 getRTTIId() override { return TID_CRotor; }
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
     return bs::SceneObject::createEmptyComponent<CRotor>();
   }

@@ -17,6 +17,7 @@
 #include "GUI/BsGUILayoutX.h"
 #include "GUI/BsGUILayoutY.h"
 #include "GUI/BsGUIPanel.h"
+#include "GUI/BsGUISlider.h"
 #include "GUI/BsGUIViewport.h"
 #include "Importer/BsImporter.h"
 #include "Input/BsInput.h"
@@ -367,14 +368,6 @@ void World::setupInput() {
       if (m_player->isConnected() && m_cursorMode) {
         m_player->setWeapon(Creator::Types::kCube);
       }
-    } else if (ev.buttonCode == BC_3) {
-      auto list = gSceneManager().findComponents<CRotor>(true);
-      logVerbose("list {}", list.size());
-      for (auto &elem : list) {
-        logVerbose("\tname {}, type name {}, type id {}", elem->getName(),
-                   elem->getTypeName(), elem->getTypeId());
-      }
-      list[0]->getRTTI()->getRTTIName();
     }
   });
 
@@ -456,6 +449,17 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
 
   { // network info
     m_netDebugInfo.setup(layout);
+  }
+
+  { // rotor slider
+    auto slider = GUISliderHorz::create();
+    layout->addElement(slider);
+    slider->onChanged.connect([](f32 percent) {
+      auto rotors = gSceneManager().findComponents<CRotor>(true);
+      for (auto &rotor : rotors) {
+        rotor->setRotation(percent * 1000);
+      }
+    });
   }
 
   { // aim dot
