@@ -9,7 +9,7 @@ namespace bs {
 
 constexpr float ROTATION_SPEED = 3.0f;
 
-constexpr Degree PITCH_RANGE = Degree(45.0f);
+constexpr Degree PITCH_RANGE = Degree(30.0f);
 
 FPSCamera::FPSCamera(const HSceneObject &parent) : Component(parent) {
   setName("FPSCamera");

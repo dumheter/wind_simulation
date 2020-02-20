@@ -7,6 +7,7 @@
 #include "cmyplayer.hpp"
 #include "cnet_component.hpp"
 #include "creator.hpp"
+#include "crotor.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
 #include "player_input.hpp"

@@ -29,6 +29,7 @@
 #include "RenderAPI/BsRenderTarget.h"
 #include "RenderAPI/BsRenderWindow.h"
 #include "Resources/BsBuiltinResources.h"
+#include "Scene/BsSceneManager.h"
 #include "Scene/BsSceneObject.h"
 #include "asset.hpp"
 #include "cmyplayer.hpp"
@@ -148,6 +149,10 @@ void World::setupScene() {
   cubeState.setRotation(
       bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
   m_creator.cube(cubeState);
+
+  auto rotorState = MoveableState::generateNew();
+  rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
+  m_creator.rotor(rotorState);
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -362,6 +367,14 @@ void World::setupInput() {
       if (m_player->isConnected() && m_cursorMode) {
         m_player->setWeapon(Creator::Types::kCube);
       }
+    } else if (ev.buttonCode == BC_3) {
+      auto list = gSceneManager().findComponents<CRotor>(true);
+      logVerbose("list {}", list.size());
+      for (auto &elem : list) {
+        logVerbose("\tname {}, type name {}, type id {}", elem->getName(),
+                   elem->getTypeName(), elem->getTypeId());
+      }
+      list[0]->getRTTI()->getRTTIName();
     }
   });
 
@@ -458,7 +471,8 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
 }
 
 void World::updateAimPosition(u32 width, u32 height) {
-  m_aim->setPosition(width / 2 - kAimDiameter / 2, height / 2 - kAimDiameter / 2);
+  m_aim->setPosition(width / 2 - kAimDiameter / 2,
+                     height / 2 - kAimDiameter / 2);
 }
 
 void World::addNetComp(HCNetComponent netComp) {

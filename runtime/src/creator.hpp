@@ -19,6 +19,7 @@ public:
     kPlayer,
     kCube,
     kBall,
+    kRotor
   };
 
   Creator(World *world);
@@ -35,6 +36,8 @@ public:
 
   HCNetComponent ball(const MoveableState &moveableState) const;
 
+  HCNetComponent rotor(const MoveableState &moveableState) const;
+
   void floor() const;
 
 private:
@@ -48,6 +51,7 @@ private:
   bs::HPhysicsMaterial m_physicsMatStd;
   bs::HMesh m_meshBall;
   bs::HMesh m_meshCube;
+  bs::HMesh m_meshRotor;
 };
 } // namespace wind
 
