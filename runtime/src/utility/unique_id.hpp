@@ -17,28 +17,12 @@ using UniqueIdType = u64;
  */
 class UniqueId {
 public:
-  UniqueId() : m_uniqueId(kInvalid) {}
+  UniqueId() = default;
+  // UniqueId() : m_uniqueId(kInvalid) {}
 
   UniqueId(UniqueIdType uniqueId) : m_uniqueId(uniqueId) {}
 
   operator bool() const { return m_uniqueId != kInvalid; }
-
-  UniqueId(const UniqueId &other) : m_uniqueId(other.m_uniqueId) {}
-  UniqueId &operator=(const UniqueId &other) {
-    m_uniqueId = other.m_uniqueId;
-    return *this;
-  }
-
-  UniqueId(UniqueId &&other) : m_uniqueId(other.m_uniqueId) {
-    other.m_uniqueId = 0;
-  }
-  UniqueId &operator=(UniqueId &&other) {
-    if (this != &other) {
-      m_uniqueId = other.m_uniqueId;
-      other.m_uniqueId = 0;
-    }
-    return *this;
-  }
 
   bool operator==(const UniqueId &other) const {
     return m_uniqueId == other.m_uniqueId;

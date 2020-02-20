@@ -79,7 +79,7 @@ public:
 
   static MoveableState FromBytes(alflib::RawMemoryReader &mr);
 
-private:
+public: // public for RTTI
   UniqueId m_id;
   Creator::Types m_type;
   Bitfield m_flag;
@@ -88,6 +88,7 @@ private:
   bs::Vector3 m_angVel;
   bs::Quaternion m_rotation;
 };
+
 } // namespace wind
 
 #endif // MOVEABLE_STATE_HPP_

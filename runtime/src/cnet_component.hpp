@@ -81,10 +81,18 @@ private:
 
 using HCNetComponent = bs::GameObjectHandle<CNetComponent>;
 
-class CNetComponentRTTI : public bs::RTTIType<CNetComponent, bs::Component, CNetComponentRTTI> {
+class CNetComponentRTTI
+    : public bs::RTTIType<CNetComponent, bs::Component, CNetComponentRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_hasChanged, m_hasChanged, 0)
+  BS_RTTI_MEMBER_PLAIN(m_hasChanged, 0)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_id, m_state.m_id, 1)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_type, m_state.m_type, 2)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_flag, m_state.m_flag, 3)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_position, m_state.m_position, 4)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_vel, m_state.m_vel, 5)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_angVel, m_state.m_angVel, 6)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_state.m_rotation, 7)
   BS_END_RTTI_MEMBERS
 
 public:
