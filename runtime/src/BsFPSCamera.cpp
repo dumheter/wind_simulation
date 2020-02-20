@@ -67,4 +67,8 @@ void FPSCamera::applyAngles() {
   }
 }
 
+bs::RTTITypeBase *FPSCamera::getRTTIStatic() { return FPSCameraRTTI::instance(); }
+
+bs::RTTITypeBase *FPSCamera::getRTTI() const { return getRTTIStatic(); }
+
 } // namespace bs

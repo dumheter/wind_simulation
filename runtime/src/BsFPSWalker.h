@@ -2,8 +2,13 @@
 
 #include "BsPrerequisites.h"
 #include "Input/BsVirtualInput.h"
+#include "Private/RTTI/BsGameObjectRTTI.h"
+#include "RTTI/BsMathRTTI.h"
+#include "Reflection/BsRTTIPlain.h"
+#include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
 #include "player_input.hpp"
+#include "rtti_types.hpp"
 
 namespace wind {
 class World;
@@ -34,6 +39,13 @@ public:
 
   void applyRotation(const bs::Quaternion &rotation);
 
+  friend class FPSWalkerRTTI;
+
+  static bs::RTTITypeBase *getRTTIStatic();
+  bs::RTTITypeBase *getRTTI() const override;
+
+  FPSWalker() = default; // serialization
+
 private:
   wind::PlayerInput getInput();
 
@@ -60,4 +72,23 @@ private:
 };
 
 using HFPSWalker = GameObjectHandle<FPSWalker>;
+
+class FPSWalkerRTTI
+    : public bs::RTTIType<FPSWalker, bs::Component, FPSWalkerRTTI> {
+private:
+  BS_BEGIN_RTTI_MEMBERS
+  // BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_rotation, 0)
+  BS_END_RTTI_MEMBERS
+
+public:
+  const bs::String &getRTTIName() override {
+    static bs::String name = "FPSWalker";
+    return name;
+  }
+  bs::UINT32 getRTTIId() override { return wind::TID_FPSWalker; }
+  bs::SPtr<bs::IReflectable> newRTTIObject() override {
+    return bs::SceneObject::createEmptyComponent<FPSWalker>();
+  }
+};
+
 } // namespace bs

@@ -117,4 +117,9 @@ void FPSWalker::applyInput(wind::PlayerInput input) {
   //   netComp->resetChanged();
   // }
 }
+
+bs::RTTITypeBase *FPSWalker::getRTTIStatic() { return FPSWalkerRTTI::instance(); }
+
+bs::RTTITypeBase *FPSWalker::getRTTI() const { return getRTTIStatic(); }
+
 } // namespace bs
