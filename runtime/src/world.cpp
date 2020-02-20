@@ -452,12 +452,11 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   }
 
   { // rotor slider
-    auto slider = GUISliderHorz::create();
-    layout->addElement(slider);
+    auto slider = layout->addNewElement<GUISliderHorz>();
     slider->onChanged.connect([](f32 percent) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
-        rotor->setRotation(percent * 1000);
+        rotor->setRotation(percent * percent * 1000);
       }
     });
   }
