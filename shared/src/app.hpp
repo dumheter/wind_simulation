@@ -36,16 +36,21 @@
 
 namespace wind {
 
-/* Application class */
+/// Application class
 class App {
   friend class AppDelegate;
 
 public:
-  /* App information */
+  /// App information
   struct Info {
+    /// Application and main window title
     bs::String title;
+    /// Width of window
     u32 width = 1280;
+    /// Height of window
     u32 height = 720;
+    /// Ticks per second
+    u32 tps = 20;
   };
 
   /* Video mode */
@@ -104,6 +109,13 @@ public:
   /* Fixed-update callback */
   virtual void onFixedUpdate(f32 delta) {}
 
+  /// Tick callback
+  virtual void onTick() {}
+
+public:
+  /// Make an application information structure
+  static Info MakeInfo(const bs::String &title, u32 width, u32 height, u32 tps);
+
 private:
   static App *g_app;
 
@@ -114,6 +126,11 @@ private:
   u32 m_width;
   /* Window height */
   u32 m_height;
+
+  /// TPS
+  u32 m_tps;
+  /// Number of updates to skip
+  u32 m_tpsSkip = 0;
 
   /* Window width, pre-fullscreen */
   u32 m_widthPreFullscreen;

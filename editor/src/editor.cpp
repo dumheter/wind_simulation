@@ -69,7 +69,8 @@
 
 namespace wind {
 
-Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT}) {}
+Editor::Editor()
+    : App(App::MakeInfo("Editor", WINDOW_WIDTH, WINDOW_HEIGHT, 20)) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -100,11 +101,19 @@ void Editor::onPreUpdate(f32 delta) {
   }
 
   // Full-screen toggle 'F'
-  if (gInput().isButtonDown(ButtonCode::BC_F)) {
-    if (isFullscreen()) {
-      exitFullscreen();
-    } else {
-      enterFullscreen();
+  if (gInput().isButtonDown(ButtonCode::BC_LCONTROL)) {
+    if (gInput().isButtonDown(ButtonCode::BC_F1)) {
+      if (isFullscreen()) {
+        exitFullscreen();
+      } else {
+        enterFullscreen(App::VideoMode{0, 0}, 0);
+      }
+    } else if (gInput().isButtonDown(ButtonCode::BC_F2)) {
+      if (isFullscreen()) {
+        exitFullscreen();
+      } else {
+        enterFullscreen(App::VideoMode{0, 0}, 1);
+      }
     }
   }
 
@@ -154,6 +163,10 @@ void Editor::onFixedUpdate(f32 delta) {
     m_windSim->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
   }
 } // namespace wind
+
+// -------------------------------------------------------------------------- //
+
+void Editor::onTick() { logWarning("Tick"); }
 
 // -------------------------------------------------------------------------- //
 
