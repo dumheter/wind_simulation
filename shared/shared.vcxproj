@@ -210,6 +210,7 @@
     <ClInclude Include="src\thirdparty\stb\stb_truetype.h" />
     <ClInclude Include="src\thirdparty\stb\stb_voxel_render.h" />
     <ClInclude Include="src\thirdparty\stb\stretchy_buffer.h" />
+    <ClInclude Include="src\utility\bsprinter.hpp" />
     <ClInclude Include="src\utility\util.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
