@@ -127,6 +127,8 @@ public:
 
   const bs::HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
 
+  bool getCursorMode() const { return m_cursorMode; }
+
 private:
   void setupInput();
 

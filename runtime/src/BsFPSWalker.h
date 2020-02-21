@@ -42,6 +42,7 @@ public:
   friend class FPSWalkerRTTI;
 
   static bs::RTTITypeBase *getRTTIStatic();
+
   bs::RTTITypeBase *getRTTI() const override;
 
   FPSWalker() = default; // serialization

@@ -3,6 +3,7 @@
 
 #include "BsFPSWalker.h"
 #include "BsPrerequisites.h"
+#include "Input/BsVirtualInput.h"
 #include "Math/BsQuaternion.h"
 #include "Private/RTTI/BsGameObjectRTTI.h"
 #include "RTTI/BsMathRTTI.h"
@@ -60,6 +61,8 @@ private:
   bs::HFPSWalker m_fpsWalker;
   bs::Quaternion m_lastRotation;
   Creator::Types m_weapon;
+  bs::VirtualButton m_fire1;
+  bs::VirtualButton m_fire2;
 };
 
 using HCMyPlayer = bs::GameObjectHandle<CMyPlayer>;

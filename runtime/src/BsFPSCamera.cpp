@@ -16,6 +16,10 @@ FPSCamera::FPSCamera(const HSceneObject &parent) : Component(parent) {
 
   mHorizontalAxis = VirtualAxis("Horizontal");
   mVerticalAxis = VirtualAxis("Vertical");
+  mUp = VirtualButton("AUp");
+  mDown = VirtualButton("ADown");
+  mLeft = VirtualButton("ALeft");
+  mRight = VirtualButton("ARight");
 
   Quaternion rotation = SO()->getTransform().getRotation();
 
@@ -34,9 +38,15 @@ void FPSCamera::update() {
         Degree(gVirtualInput().getAxisValue(mHorizontalAxis) * ROTATION_SPEED);
     mPitch +=
         Degree(gVirtualInput().getAxisValue(mVerticalAxis) * ROTATION_SPEED);
-
-    applyAngles();
   }
+
+  constexpr float kArrowRotSpeed = 1.5f;
+  mPitch += Degree(gVirtualInput().isButtonHeld(mUp) * kArrowRotSpeed);
+  mPitch -= Degree(gVirtualInput().isButtonHeld(mDown) * kArrowRotSpeed);
+  mYaw += Degree(gVirtualInput().isButtonHeld(mLeft) * kArrowRotSpeed);
+  mYaw -= Degree(gVirtualInput().isButtonHeld(mRight) * kArrowRotSpeed);
+
+  applyAngles();
 }
 
 void FPSCamera::applyAngles() {
@@ -67,7 +77,9 @@ void FPSCamera::applyAngles() {
   }
 }
 
-bs::RTTITypeBase *FPSCamera::getRTTIStatic() { return FPSCameraRTTI::instance(); }
+bs::RTTITypeBase *FPSCamera::getRTTIStatic() {
+  return FPSCameraRTTI::instance();
+}
 
 bs::RTTITypeBase *FPSCamera::getRTTI() const { return getRTTIStatic(); }
 

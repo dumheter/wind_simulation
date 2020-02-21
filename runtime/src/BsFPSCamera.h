@@ -28,6 +28,7 @@ public:
   friend class FPSCameraRTTI;
 
   static bs::RTTITypeBase *getRTTIStatic();
+
   bs::RTTITypeBase *getRTTI() const override;
 
   FPSCamera() = default; // serialization
@@ -35,6 +36,11 @@ public:
 private:
   void applyAngles();
 
+ private:
+  VirtualButton mUp;
+  VirtualButton mDown;
+  VirtualButton mLeft;
+  VirtualButton mRight;
   HSceneObject mCharacterSO;
   Degree mPitch = Degree(0.0f);
   Degree mYaw = Degree(0.0f);
@@ -49,7 +55,7 @@ class FPSCameraRTTI
     : public bs::RTTIType<FPSCamera, bs::Component, FPSCameraRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
-  // BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_rotation, 0)
+  BS_RTTI_MEMBER_PLAIN(m_enabled, 0)
   BS_END_RTTI_MEMBERS
 
 public:

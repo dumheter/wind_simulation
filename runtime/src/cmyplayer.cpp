@@ -10,21 +10,19 @@
 namespace wind {
 
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
-    : Component(parent), m_client(std::make_unique<Client>(world)), m_world(world),
-      m_weapon(Creator::Types::kBall) {
+    : Component(parent), m_client(std::make_unique<Client>(world)),
+      m_world(world), m_weapon(Creator::Types::kInvalid) {
   setName("CMyPlayer");
   m_fpsWalker = SO()->addComponent<bs::FPSWalker>(world);
   m_fpsWalker->makeActive();
   m_lastRotation = SO()->getTransform().getRotation();
+  m_fire1 = bs::VirtualButton("Fire1");
+  m_fire2 = bs::VirtualButton("Fire2");
 }
 
-void CMyPlayer::setUniqueId(UniqueId uid) {
-  m_client->setUid(uid);
-}
+void CMyPlayer::setUniqueId(UniqueId uid) { m_client->setUid(uid); }
 
-UniqueId CMyPlayer::getUniqueId() const {
-  return m_client->getUid();
-}
+UniqueId CMyPlayer::getUniqueId() const { return m_client->getUid(); }
 
 bool CMyPlayer::isConnected() const {
   return m_client->GetConnectionState() == ConnectionState::kConnected;
@@ -34,7 +32,16 @@ void CMyPlayer::connect(const char *address) { m_client->Connect(address); }
 
 void CMyPlayer::disconnect() { m_client->CloseConnection(); }
 
-void CMyPlayer::update() { m_client->Poll(); }
+void CMyPlayer::update() {
+  m_client->Poll();
+
+  if (bs::gVirtualInput().isButtonDown(m_fire1) ||
+      bs::gVirtualInput().isButtonHeld(m_fire2)) {
+    if (isConnected()) {
+      onShoot();
+    }
+  }
+}
 
 void CMyPlayer::fixedUpdate() {
   if (!m_world->serverIsActive() &&
@@ -62,6 +69,9 @@ void CMyPlayer::fixedUpdate() {
 }
 
 void CMyPlayer::onShoot() {
+  if (m_weapon == Creator::Types::kInvalid) {
+    return;
+  }
   auto spawnPos = m_world->getPlayerNetComp()->getState().getPosition();
   const auto &forward =
       m_world->getFpsCamera()->getCamera()->getTransform().getForward();
@@ -97,7 +107,9 @@ void CMyPlayer::lookupId(UniqueId uid) {
   m_client->PacketSend(packet, SendStrategy::kUnreliable);
 }
 
-bs::RTTITypeBase *CMyPlayer::getRTTIStatic() { return CMyPlayerRTTI::instance(); }
+bs::RTTITypeBase *CMyPlayer::getRTTIStatic() {
+  return CMyPlayerRTTI::instance();
+}
 
 bs::RTTITypeBase *CMyPlayer::getRTTI() const { return getRTTIStatic(); }
 

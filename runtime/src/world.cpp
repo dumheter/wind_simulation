@@ -126,12 +126,6 @@ void World::onFixedUpdate(f32) {
 
   static u32 i = 0;
 
-  if (gInput().isButtonHeld(BC_MOUSE_MIDDLE)) {
-    if (m_player->isConnected() && m_cursorMode) {
-      m_player->onShoot();
-    }
-  }
-
   if (++i > 2) {
     i = 0;
     m_server.broadcastServerTick(m_netComps);
@@ -356,15 +350,15 @@ void World::setupInput() {
         SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
         Cursor::instance().clipToWindow(*primaryWindow);
       }
-    } else if (ev.buttonCode == BC_MOUSE_LEFT) {
-      if (m_player->isConnected() && m_cursorMode) {
-        m_player->onShoot();
-      }
     } else if (ev.buttonCode == BC_1) {
+      if (m_player->isConnected() && m_cursorMode) {
+        m_player->setWeapon(Creator::Types::kInvalid);
+      }
+    } else if (ev.buttonCode == BC_2) {
       if (m_player->isConnected() && m_cursorMode) {
         m_player->setWeapon(Creator::Types::kBall);
       }
-    } else if (ev.buttonCode == BC_2) {
+    } else if (ev.buttonCode == BC_3) {
       if (m_player->isConnected() && m_cursorMode) {
         m_player->setWeapon(Creator::Types::kCube);
       }
@@ -376,15 +370,18 @@ void World::setupInput() {
   inputConfig->registerButton("Back", BC_S);
   inputConfig->registerButton("Left", BC_A);
   inputConfig->registerButton("Right", BC_D);
-  inputConfig->registerButton("Forward", BC_UP);
-  inputConfig->registerButton("Back", BC_DOWN);
-  inputConfig->registerButton("Left", BC_LEFT);
-  inputConfig->registerButton("Right", BC_RIGHT);
+  inputConfig->registerButton("AUp", BC_UP);
+  inputConfig->registerButton("ADown", BC_DOWN);
+  inputConfig->registerButton("ALeft", BC_LEFT);
+  inputConfig->registerButton("ARight", BC_RIGHT);
   inputConfig->registerButton("FastMove", BC_LSHIFT);
-  inputConfig->registerButton("RotateObj", BC_MOUSE_LEFT);
-  inputConfig->registerButton("RotateCam", BC_MOUSE_RIGHT);
+  inputConfig->registerButton("Fire1", BC_MOUSE_LEFT);
+  inputConfig->registerButton("MRight", BC_MOUSE_RIGHT);
+  inputConfig->registerButton("Fire2", BC_MOUSE_MIDDLE);
   inputConfig->registerButton("Space", BC_SPACE);
   inputConfig->registerButton("Gravity", BC_Q);
+  inputConfig->registerButton("Fire1", BC_E);
+  inputConfig->registerButton("Fire2", BC_R);
   inputConfig->registerAxis("Horizontal",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",
