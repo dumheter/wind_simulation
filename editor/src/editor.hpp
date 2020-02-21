@@ -32,6 +32,7 @@
 #include <BsPrerequisites.h>
 #include <GUI/BsGUIToggle.h>
 #include <Renderer/BsCamera.h>
+#include <Scene/BsSceneManager.h>
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
@@ -40,41 +41,53 @@
 
 namespace wind {
 
-/* Main Editor class */
+class UI;
+
+/// Main Editor class
 class Editor final : public App {
 public:
-  /* Construct an editor */
+  /// Construct an editor
   Editor();
 
-  /* \copydoc App::onStartup */
+  /// Destruct editor
+  ~Editor();
+
+  /// \copydoc App::onStartup
   void onStartup() override;
 
-  /* \copydoc App::onPreUpdate */
+  /// \copydoc App::onPreUpdate
   void onPreUpdate(f32 delta) override;
 
-  /* \copydoc App::onFixedUpdate */
+  /// \copydoc App::onFixedUpdate
   void onFixedUpdate(f32 delta) override;
 
-  void onTick() override;
+  /// Enable running the simulation
+  void simEnable() { m_runSim = true; }
+
+  /// Disable running the simulation
+  void simDisable() { m_runSim = true; }
+
+  /// Set the simulation speed
+  void setSimSpeed(f32 speed) { m_simSpeed = speed; }
+
+  /// Set number of simulation steps to run for
+  void setSimNumSteps(u32 numSteps) { m_simSteps = numSteps; }
+
+  /// Returns a pointer to the wind simulation
+  WindSimulation *getSim() const { return m_windSim; }
+
+  /// Returns the main camera used to render the scenes in the editor.
+  bs::HSceneObject getCamera() { return m_camera; }
 
 private:
-  /* Setup the camera */
-  void setupCamera();
-
-  /* Setup the editor scene */
-  void setupScene();
-
-  /* Setup the editor GUI */
-  void setupGUI();
-
-  /* Register controls */
+  /// Register controls
   void registerControls();
 
 private:
-  /* Whether to draw scene */
-  bool m_drawScene = true;
+  /// Editor UI
+  UI *m_ui = nullptr;
 
-  /* Whether to run simulation */
+  /// Whether to run simulation
   bool m_runSim = false;
   /// Speed at which simulation is running
   f32 m_simSpeed = 1.0f;
@@ -82,22 +95,11 @@ private:
   /// m_runSim flag set to true, the simulation will run continuously
   s32 m_simSteps = 0;
 
-  /* Debug type */
-  WindSimulation::FieldKind m_debugFieldKind =
-      WindSimulation::FieldKind::DENSITY;
-  /* Whether to draw debug data */
-  bool m_debugDraw = false;
-  /* Whether to draw debug data frame */
-  bool m_debugDrawFrame = false;
-
   /* Camera object */
   bs::HSceneObject m_camera;
 
   /* Root geometry node */
   bs::HSceneObject m_geometry;
-
-  /// Run toggle button
-  bs::GUIToggle *m_runToggle;
 
   /* Wind simulation field */
   WindSimulation *m_windSim;
