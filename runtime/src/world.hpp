@@ -45,14 +45,11 @@ private:
   bs::String queueTime{};
 };
 
+// ============================================================ //
+
 class World : public App {
 public:
   explicit World(const App::Info &info);
-
-  /**
-   * Reset the world state. (Delete players etc.)
-   */
-  void reset();
 
   void onPreUpdate(f32) override;
 
@@ -76,7 +73,6 @@ public:
   /**
    * Build the player entity, camera and attach gui to the
    * camera.
-   * @pre m_players must be empty
    */
   void setupMyPlayer();
 

@@ -156,7 +156,7 @@ bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
 
 void World::setupMyPlayer() {
   using namespace bs;
-  AlfAssert(m_netComps.empty(), "must be done first");
+  AlfAssert(m_netComps.empty(), "setupmyplayer must be done first");
   HSceneObject player = SceneObject::create("MyPlayer");
   HCharacterController charController =
       player->addComponent<CCharacterController>();
@@ -202,11 +202,6 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
   }
 }
 
-void World::reset() {
-  // TODO
-  // m_netComps.clear();
-}
-
 void World::onPlayerJoin(const MoveableState &moveableState) {
   logInfo("player {} joined", moveableState.getUniqueId().raw());
   m_creator.player(moveableState);
@@ -218,7 +213,7 @@ void World::onPlayerLeave(UniqueId uid) {
   {
     auto it = m_netComps.find(uid);
     if (it != m_netComps.end()) {
-      // it->second->destroy();
+      it->second->SODestroy();
       m_netComps.erase(it);
     } else {
       logWarning("(netComps) player left, but couldn't find them");
