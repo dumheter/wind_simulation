@@ -43,14 +43,16 @@ class EditorFactory {
   WIND_NAMESPACE_CLASS(EditorFactory);
 
 public:
-  /// Creates an empty scene
+  /// Creates an empty scene with the specifide name
   ///
   /// The scene contains the following objects:
   ///  - "root": Root of the scene
   ///    - "camera": Camera
-  static bs::HSceneObject createEmptyScene();
+  static bs::HSceneObject createEmptyScene(const bs::String &name);
 
-  /// Creates a default scene (Note CLEAR THE SCENE AFTER CALLING THIS)
+  /// Creates a default scene (Note CLEAR THE SCENE AFTER CALLING THIS). The
+  /// name of the root object is specified as well as the scale of the
+  /// ground-plane.
   ///
   /// The created scene has a specific structure. An overview of the
   /// structure with the name for each object is presented here
@@ -62,7 +64,8 @@ public:
   ///     - "geometry_plane": Root of all geometry
   ///     - "geometry_box": Root of all geometry
   ///     - "geometry_bunny": Root of all geometry
-  static bs::HSceneObject createDefaultScene(f32 groundScale);
+  static bs::HSceneObject createDefaultScene(const bs::String &name,
+                                             f32 groundScale);
 
 public:
   /// Name of the camera object

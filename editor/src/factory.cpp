@@ -48,7 +48,7 @@
 
 namespace wind {
 
-bs::HSceneObject EditorFactory::createEmptyScene() {
+bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name) {
 
   using namespace bs;
 
@@ -56,7 +56,7 @@ bs::HSceneObject EditorFactory::createEmptyScene() {
   const RenderWindowProperties &windowProp = window->getProperties();
 
   // Root object
-  HSceneObject root = SceneObject::create("root");
+  HSceneObject root = SceneObject::create(name);
 
   // Camera and skybox
   {
@@ -69,7 +69,7 @@ bs::HSceneObject EditorFactory::createEmptyScene() {
     // Camera
     HSceneObject camera = SceneObject::create(OBJ_CAMERA_NAME);
     camera->setParent(root);
-    camera->setPosition(Vec3F(groundScale, 2.5f, groundScale - 4.0f) * 0.65f);
+    camera->setPosition(Vec3F(0.0f, 2.5f, 0.0f) * 0.65f);
     camera->lookAt(Vec3F(.0f, 1.5f, .0f));
     HCamera cameraComp = camera->addComponent<CCamera>();
     cameraComp->getViewport()->setTarget(window);
@@ -87,14 +87,15 @@ bs::HSceneObject EditorFactory::createEmptyScene() {
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject EditorFactory::createDefaultScene(f32 groundScale) {
+bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
+                                                   f32 groundScale) {
   using namespace bs;
 
   const SPtr<RenderWindow> window = gApplication().getPrimaryWindow();
   const RenderWindowProperties &windowProp = window->getProperties();
 
   // Root object
-  HSceneObject root = SceneObject::create("root");
+  HSceneObject root = SceneObject::create(name);
 
   // Camera and skybox
   {
