@@ -98,8 +98,16 @@
     <ClCompile Include="src\app.cpp" />
     <ClCompile Include="src\asset.cpp" />
     <ClCompile Include="src\BsCameraFlyer.cpp" />
+<<<<<<< HEAD
     <ClCompile Include="src\debug\debug.cpp" />
+=======
+    <ClCompile Include="src\scene\cnet_component.cpp" />
+    <ClCompile Include="src\scene\component_factory.cpp" />
+    <ClCompile Include="src\scene\crotor.cpp" />
+>>>>>>> master
     <ClCompile Include="src\log.cpp" />
+    <ClCompile Include="src\state\moveable_state.cpp" />
+    <ClCompile Include="src\state\player_input.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\assert.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\buffer.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\console.cpp" />
@@ -138,6 +146,12 @@
     <ClInclude Include="src\asset.hpp" />
     <ClInclude Include="src\BsCameraFlyer.h" />
     <ClInclude Include="src\debug\debug.hpp" />
+    <ClInclude Include="src\scene\cnet_component.hpp" />
+    <ClInclude Include="src\scene\component_factory.hpp" />
+    <ClInclude Include="src\scene\component_handles.hpp" />
+    <ClInclude Include="src\scene\crotor.hpp" />
+    <ClInclude Include="src\state\moveable_state.hpp" />
+    <ClInclude Include="src\state\player_input.hpp" />
     <ClInclude Include="src\types.hpp" />
     <ClInclude Include="src\macros.hpp" />
     <ClInclude Include="src\math\dim.hpp" />
@@ -213,6 +227,8 @@
     <ClInclude Include="src\thirdparty\stb\stb_voxel_render.h" />
     <ClInclude Include="src\thirdparty\stb\stretchy_buffer.h" />
     <ClInclude Include="src\utility\bsprinter.hpp" />
+    <ClInclude Include="src\utility\rtti_types.hpp" />
+    <ClInclude Include="src\utility\unique_id.hpp" />
     <ClInclude Include="src\utility\util.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

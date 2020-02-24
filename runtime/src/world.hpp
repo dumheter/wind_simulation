@@ -5,12 +5,15 @@
 #include "GUI/BsGUILabel.h"
 #include "app.hpp"
 #include "cmyplayer.hpp"
-#include "cnet_component.hpp"
 #include "creator.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
-#include "player_input.hpp"
+#include "scene/cnet_component.hpp"
+#include "scene/component_factory.hpp"
+#include "scene/crotor.hpp"
+#include "state/player_input.hpp"
 #include "utility/unique_id.hpp"
+#include <GUI/BsGUITexture.h>
 #include <unordered_map>
 
 namespace wind {
@@ -22,39 +25,38 @@ public:
   void update(const Client &client);
 
 private:
-  bs::GUILabel *hCQL;
-  bs::GUILabel *hCQR;
-  bs::GUILabel *hBSCE;
-  bs::GUILabel *hping;
-  bs::GUILabel *houtBytes;
-  bs::GUILabel *houtPackets;
-  bs::GUILabel *hinBytes;
-  bs::GUILabel *hinPackets;
-  bs::GUILabel *hqueueTime;
+  bs::GUILabel *hCQL{};
+  bs::GUILabel *hCQR{};
+  bs::GUILabel *hBSCE{};
+  bs::GUILabel *hping{};
+  bs::GUILabel *houtBytes{};
+  bs::GUILabel *houtPackets{};
+  bs::GUILabel *hinBytes{};
+  bs::GUILabel *hinPackets{};
+  bs::GUILabel *hqueueTime{};
 
-  bs::String CQL;
-  bs::String CQR;
-  bs::String BSCE;
-  bs::String ping;
-  bs::String outBytes;
-  bs::String outPackets;
-  bs::String inBytes;
-  bs::String inPackets;
-  bs::String queueTime;
+  bs::String CQL{};
+  bs::String CQR{};
+  bs::String BSCE{};
+  bs::String ping{};
+  bs::String outBytes{};
+  bs::String outPackets{};
+  bs::String inBytes{};
+  bs::String inPackets{};
+  bs::String queueTime{};
 };
+
+// ============================================================ //
 
 class World : public App {
 public:
-  World(const App::Info &info);
-
-  /**
-   * Reset the world state. (Delete players etc.)
-   */
-  void reset();
+  explicit World(const App::Info &info);
 
   void onPreUpdate(f32) override;
 
   void onFixedUpdate(f32) override;
+
+  void onWindowResize() override;
 
   /**
    * Add a player to our world.
@@ -72,7 +74,6 @@ public:
   /**
    * Build the player entity, camera and attach gui to the
    * camera.
-   * @pre m_players must be empty
    */
   void setupMyPlayer();
 
@@ -119,7 +120,11 @@ public:
     return m_walkers;
   }
 
-  const Creator &getCreator() { return m_creator; }
+  const Creator &getCreator() const { return m_creator; }
+
+  const bs::HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
+
+  bool getCursorMode() const { return m_cursorMode; }
 
 private:
   void setupInput();
@@ -132,6 +137,9 @@ private:
   bs::HMaterial createMaterial(const bs::String &path);
   bs::HSceneObject createGUI(bs::HSceneObject camera);
 
+  /// Give full window width and height.
+  void updateAimPosition(u32 width, u32 height);
+
 private:
   std::unordered_map<UniqueId, HCNetComponent> m_netComps;
   std::unordered_map<UniqueId, bs::HFPSWalker> m_walkers;
@@ -141,6 +149,7 @@ private:
   HCMyPlayer m_player;
   Creator m_creator;
   NetDebugInfo m_netDebugInfo{};
+  bs::GUITexture *m_aim;
 };
 
 } // namespace wind

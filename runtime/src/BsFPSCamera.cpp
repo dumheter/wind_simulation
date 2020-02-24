@@ -1,21 +1,20 @@
 #include "BsFPSCamera.h"
 
-#include "Math/BsMath.h"
-#include "Math/BsVector3.h"
-#include "Physics/BsPhysics.h"
-#include "Scene/BsSceneObject.h"
-
 namespace bs {
 
 constexpr float ROTATION_SPEED = 3.0f;
 
-constexpr Degree PITCH_RANGE = Degree(45.0f);
+constexpr Degree PITCH_RANGE = Degree(30.0f);
 
 FPSCamera::FPSCamera(const HSceneObject &parent) : Component(parent) {
   setName("FPSCamera");
 
   mHorizontalAxis = VirtualAxis("Horizontal");
   mVerticalAxis = VirtualAxis("Vertical");
+  mUp = VirtualButton("AUp");
+  mDown = VirtualButton("ADown");
+  mLeft = VirtualButton("ALeft");
+  mRight = VirtualButton("ARight");
 
   Quaternion rotation = SO()->getTransform().getRotation();
 
@@ -34,9 +33,15 @@ void FPSCamera::update() {
         Degree(gVirtualInput().getAxisValue(mHorizontalAxis) * ROTATION_SPEED);
     mPitch +=
         Degree(gVirtualInput().getAxisValue(mVerticalAxis) * ROTATION_SPEED);
-
-    applyAngles();
   }
+
+  constexpr float kArrowRotSpeed = 1.5f;
+  mPitch += Degree(gVirtualInput().isButtonHeld(mUp) * kArrowRotSpeed);
+  mPitch -= Degree(gVirtualInput().isButtonHeld(mDown) * kArrowRotSpeed);
+  mYaw += Degree(gVirtualInput().isButtonHeld(mLeft) * kArrowRotSpeed);
+  mYaw -= Degree(gVirtualInput().isButtonHeld(mRight) * kArrowRotSpeed);
+
+  applyAngles();
 }
 
 void FPSCamera::applyAngles() {
@@ -66,5 +71,11 @@ void FPSCamera::applyAngles() {
     SO()->setRotation(xRot);
   }
 }
+
+bs::RTTITypeBase *FPSCamera::getRTTIStatic() {
+  return FPSCameraRTTI::instance();
+}
+
+bs::RTTITypeBase *FPSCamera::getRTTI() const { return getRTTIStatic(); }
 
 } // namespace bs

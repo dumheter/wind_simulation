@@ -2,10 +2,8 @@
 #include "log.hpp"
 #include "network/net_common.hpp"
 #include "world.hpp"
-#include <microprofile/microprofile.h>
 
 int main() {
-  MicroProfileInit();
   wind::fixConsole();
   wind::logInfo("¸,ø¤º°`°º¤ø,¸  {}  ¸,ø¤º°`°º¤ø,¸", "W I N D");
   wind::Common::InitNetwork();
