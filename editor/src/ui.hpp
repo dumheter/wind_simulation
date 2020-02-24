@@ -26,51 +26,45 @@
 // Headers
 // ========================================================================== //
 
-#include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
+#include "sim/wind_sim.hpp"
+#include "types.hpp"
+
+#include <GUI/BsGUIToggle.h>
 
 // ========================================================================== //
-// Types
-// ========================================================================== //
-
-namespace wind {
-
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
+// UI Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// Clamp 'value' between two other values 'min' and 'max'
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
-  return value < minValue ? minValue : value > maxValue ? maxValue : value;
-}
+class Editor;
 
-// -------------------------------------------------------------------------- //
+///	Class that represents the Editor UI
+class UI {
+public:
+  /// Construct the UI with the editor for which it should be displayed
+  explicit UI(Editor *editor);
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b) {
-  return a > b ? a : b;
-}
+  /// Update UI
+  void onFixedUpdate(f32 delta);
 
-// -------------------------------------------------------------------------- //
+  /// Updates the toggle status of the run button
+  void setRunToggle(bool toggled);
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b, T c) {
-  return wind::maxValue(a, wind::maxValue(b, c));
-}
+private:
+  /// Pointer to the editor instance
+  Editor *m_editor;
 
-// -------------------------------------------------------------------------- //
+  /// Run toggle button
+  bs::GUIToggle *m_runToggle;
 
-/// Returns the minimum of two values
-template <typename T> inline constexpr T minValue(T a, T b) {
-  return a < b ? a : b;
-}
+  /// Debug type
+  WindSimulation::FieldKind m_debugFieldKind =
+      WindSimulation::FieldKind::DENSITY;
+  /// Whether to draw debug data
+  bool m_debugDraw = false;
+  /// Whether to draw debug data frame
+  bool m_debugDrawFrame = false;
+};
 
 } // namespace wind

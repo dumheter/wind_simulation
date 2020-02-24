@@ -26,51 +26,51 @@
 // Headers
 // ========================================================================== //
 
-#include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
+#include "macros.hpp"
+#include "math/math.hpp"
+#include "types.hpp"
+
+#include <Scene/BsSceneManager.h>
+#include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
-// Types
-// ========================================================================== //
-
-namespace wind {
-
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
+// Factory
 // ========================================================================== //
 
 namespace wind {
 
-/// Clamp 'value' between two other values 'min' and 'max'
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
-  return value < minValue ? minValue : value > maxValue ? maxValue : value;
-}
+class EditorFactory {
+  WIND_NAMESPACE_CLASS(EditorFactory);
 
-// -------------------------------------------------------------------------- //
+public:
+  /// Creates an empty scene with the specified name
+  ///
+  /// The scene contains the following objects:
+  /// - "root": Root of the scene
+  ///   - "geometry": Root of all geometry
+  ///     - "geometry_plane": Root of all geometry
+  static bs::HSceneObject createEmptyScene(const bs::String &name,
+                                           f32 groundScale);
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b) {
-  return a > b ? a : b;
-}
+  /// Creates a default scene (Note CLEAR THE SCENE AFTER CALLING THIS). The
+  /// name of the root object is specified as well as the scale of the
+  /// ground-plane.
+  ///
+  /// The created scene has a specific structure. An overview of the
+  /// structure with the name for each object is presented here
+  ///
+  /// Overview:
+  /// - "root": Root of the scene
+  ///   - "geometry": Root of all geometry
+  ///     - "geometry_plane": Root of all geometry
+  ///     - "geometry_box": Root of all geometry
+  ///     - "geometry_bunny": Root of all geometry
+  static bs::HSceneObject createDefaultScene(const bs::String &name,
+                                             f32 groundScale);
 
-// -------------------------------------------------------------------------- //
-
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b, T c) {
-  return wind::maxValue(a, wind::maxValue(b, c));
-}
-
-// -------------------------------------------------------------------------- //
-
-/// Returns the minimum of two values
-template <typename T> inline constexpr T minValue(T a, T b) {
-  return a < b ? a : b;
-}
+public:
+  /// Name of the camera object
+  static constexpr char OBJ_CAMERA_NAME[] = "camera";
+};
 
 } // namespace wind

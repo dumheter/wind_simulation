@@ -26,51 +26,37 @@
 // Headers
 // ========================================================================== //
 
-#include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
+#include "macros.hpp"
+#include "math/math.hpp"
 
 // ========================================================================== //
-// Types
-// ========================================================================== //
-
-namespace wind {
-
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
+// Debug Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// Clamp 'value' between two other values 'min' and 'max'
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
-  return value < minValue ? minValue : value > maxValue ? maxValue : value;
-}
+///	Class with debug utilities
+class Debug {
+  WIND_NAMESPACE_CLASS(Debug);
 
-// -------------------------------------------------------------------------- //
+public:
+  /// Break the debugger
+  static void breakDebugger();
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b) {
-  return a > b ? a : b;
-}
+  /// Check that the specified value is in range otherwise break the debugger
+  template <typename T>
+  static void rangeCheck(T value, T minValue, T maxValue) {
+    if (value < minValue || value > maxValue) {
+      breakDebugger();
+    }
+  }
 
-// -------------------------------------------------------------------------- //
-
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b, T c) {
-  return wind::maxValue(a, wind::maxValue(b, c));
-}
-
-// -------------------------------------------------------------------------- //
-
-/// Returns the minimum of two values
-template <typename T> inline constexpr T minValue(T a, T b) {
-  return a < b ? a : b;
-}
+  /// Clamp a value between the min and max values. If the value is outside the
+  /// range the debugger breaks
+  template <typename T> static T clampDebug(T value, T minValue, T maxValue) {
+    rangeCheck(value, minValue, maxValue);
+    return clamp(value, minValue, maxValue);
+  }
+};
 
 } // namespace wind
