@@ -18,11 +18,10 @@ using UniqueIdType = u64;
 class UniqueId {
 public:
   UniqueId() = default;
-  // UniqueId() : m_uniqueId(kInvalid) {}
 
   explicit constexpr UniqueId(UniqueIdType uniqueId) : m_uniqueId(uniqueId) {}
 
-  operator bool() const { return m_uniqueId != kInvalid; }
+  constexpr bool isValid() const { return m_uniqueId != kInvalid; }
 
   bool operator==(const UniqueId &other) const {
     return m_uniqueId == other.m_uniqueId;

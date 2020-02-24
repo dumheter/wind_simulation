@@ -450,7 +450,7 @@ void World::updateAimPosition(u32 width, u32 height) {
 }
 
 void World::addNetComp(HCNetComponent netComp) {
-  logVerbose("net component with id [{}] added", netComp->getUniqueId());
+  logVerbose("net component with id [{}] added", netComp->getUniqueId().raw());
   auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add net comp");
 }

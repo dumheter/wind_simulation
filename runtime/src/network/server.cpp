@@ -357,7 +357,7 @@ void Server::DisconnectConnection(ConnectionId connection) {
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
   }
 
-  if (leaveUid) {
+  if (leaveUid.isValid()) {
     Packet packet{};
     packet.SetHeader(PacketHeaderTypes::kPlayerLeave);
     auto mw = packet.GetMemoryWriter();

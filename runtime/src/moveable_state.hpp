@@ -18,7 +18,9 @@ namespace wind {
 class MoveableState {
 
 public:
-  MoveableState(UniqueId id = UniqueId::invalid());
+  explicit MoveableState(UniqueId id);
+
+  MoveableState() : MoveableState(UniqueId::invalid()) {}
 
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
