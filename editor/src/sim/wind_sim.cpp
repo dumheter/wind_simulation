@@ -168,25 +168,24 @@ void WindSimulation::stepVelocity(f32 delta) {
     Vec3F newValue = oldValue += delta * m_v0->get(i);
     m_v->set(i, newValue);
   }
-  // if (m_addVelocitySource) {
-  //  m_addVelocitySource = false;
-
-  if (false) { // Left-side source
-    for (s32 z = 2; z < 7; z++) {
-      for (s32 y = 2; y < 7; y++) {
-        m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
-        m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+  if (m_addVelocitySource) {
+    m_addVelocitySource = false;
+    if (false) { // Left-side source
+      for (s32 z = 2; z < 7; z++) {
+        for (s32 y = 2; y < 7; y++) {
+          m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+          m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+        }
       }
-    }
-  } else { // Center source
-    for (s32 z = 14; z < 18; z++) {
-      for (s32 y = 10; y < 14; y++) {
-        m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
-        m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+    } else { // Center source
+      for (s32 z = 14; z < 18; z++) {
+        for (s32 y = 10; y < 14; y++) {
+          m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+          m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+        }
       }
     }
   }
-  //}
 
   // Diffusion
   if (m_velocityDiffusionActive) {

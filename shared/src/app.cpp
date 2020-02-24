@@ -51,6 +51,11 @@ protected:
     Application::fixedUpdate();
     f32 delta = bs::gTime().getFixedFrameDelta();
     App::g_app->onFixedUpdate(delta);
+
+    if (App::g_app->m_tpsSkip-- == 0) {
+      App::g_app->m_tpsSkip = 60 / App::g_app->m_tps;
+      App::g_app->onTick();
+    }
   }
 
   void onStartUp() override {
@@ -94,7 +99,8 @@ App *App::g_app = nullptr;
 
 App::App(const Info &info)
     : m_title(info.title), m_width(info.width), m_height(info.height),
-      m_widthPreFullscreen(info.width), m_heightPreFullscreen(info.height) {
+      m_tps(info.tps), m_widthPreFullscreen(info.width),
+      m_heightPreFullscreen(info.height) {
   using namespace bs;
 
   g_app = this;
@@ -225,6 +231,13 @@ void App::hideProfiler() {
   using namespace bs;
 
   gApplication().hideProfilerOverlay();
+}
+
+// -------------------------------------------------------------------------- //
+
+wind::App::Info App::MakeInfo(const bs::String &title, u32 width, u32 height,
+                              u32 tps) {
+  return App::Info{title, width, height, tps};
 }
 
 } // namespace wind

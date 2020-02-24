@@ -69,7 +69,8 @@
 
 namespace wind {
 
-Editor::Editor() : App(Info{"Editor", WINDOW_WIDTH, WINDOW_HEIGHT}) {}
+Editor::Editor()
+    : App(App::MakeInfo("Editor", WINDOW_WIDTH, WINDOW_HEIGHT, 20)) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -100,11 +101,17 @@ void Editor::onPreUpdate(f32 delta) {
   }
 
   // Full-screen toggle 'F'
-  if (gInput().isButtonDown(ButtonCode::BC_F)) {
+  if (gInput().isButtonDown(ButtonCode::BC_F1)) {
     if (isFullscreen()) {
       exitFullscreen();
     } else {
-      enterFullscreen();
+      enterFullscreen(App::VideoMode{0, 0}, 0);
+    }
+  } else if (gInput().isButtonDown(ButtonCode::BC_F2)) {
+    if (isFullscreen()) {
+      exitFullscreen();
+    } else {
+      enterFullscreen(App::VideoMode{0, 0}, 1);
     }
   }
 
