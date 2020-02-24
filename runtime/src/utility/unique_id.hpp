@@ -1,5 +1,4 @@
-#ifndef UNIQUE_ID_HPP_
-#define UNIQUE_ID_HPP_
+#pragma once
 
 #include "types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
@@ -85,5 +84,3 @@ template <> struct hash<wind::UniqueId> {
   }
 };
 } // namespace std
-
-#endif // UNIQUE_ID_HPP_

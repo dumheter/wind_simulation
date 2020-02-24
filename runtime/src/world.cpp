@@ -325,15 +325,15 @@ void World::setupInput() {
         Cursor::instance().clipToWindow(*primaryWindow);
       }
     } else if (ev.buttonCode == BC_1) {
-      if (m_player->isConnected() && m_cursorMode) {
+      if (m_player->isConnected()) {
         m_player->setWeapon(Creator::Types::kInvalid);
       }
     } else if (ev.buttonCode == BC_2) {
-      if (m_player->isConnected() && m_cursorMode) {
+      if (m_player->isConnected()) {
         m_player->setWeapon(Creator::Types::kBall);
       }
     } else if (ev.buttonCode == BC_3) {
-      if (m_player->isConnected() && m_cursorMode) {
+      if (m_player->isConnected()) {
         m_player->setWeapon(Creator::Types::kCube);
       }
     }
