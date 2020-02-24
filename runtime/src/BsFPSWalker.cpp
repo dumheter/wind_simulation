@@ -1,18 +1,8 @@
 #include "BsFPSWalker.h"
-
-#include <Scene/BsSceneManager.h>
-
-#include "BsApplication.h"
-#include "Components/BsCCamera.h"
 #include "Components/BsCCharacterController.h"
-#include "Math/BsMath.h"
-#include "Math/BsQuaternion.h"
-#include "Math/BsVector3.h"
+#include "Input/BsVirtualInput.h"
 #include "Physics/BsPhysics.h"
-#include "Scene/BsSceneObject.h"
-#include "Utility/BsTime.h"
-#include "log.hpp"
-#include "world.hpp"
+#include "Scene/BsSceneManager.h"
 
 namespace bs {
 constexpr float START_SPEED = 4.0f; // m/s
@@ -117,4 +107,11 @@ void FPSWalker::applyInput(wind::PlayerInput input) {
   //   netComp->resetChanged();
   // }
 }
+
+bs::RTTITypeBase *FPSWalker::getRTTIStatic() {
+  return FPSWalkerRTTI::instance();
+}
+
+bs::RTTITypeBase *FPSWalker::getRTTI() const { return getRTTIStatic(); }
+
 } // namespace bs

@@ -119,7 +119,7 @@ public:
 private:
   static App *g_app;
 
-private:
+protected:
   /* Application title */
   bs::String m_title;
   /* Window width */

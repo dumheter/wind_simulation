@@ -1,12 +1,16 @@
-#ifndef CNET_COMPONENT_HPP_
-#define CNET_COMPONENT_HPP_
+#pragma once
 
 #include "BsPrerequisites.h"
+#include "Private/RTTI/BsGameObjectRTTI.h"
+#include "RTTI/BsMathRTTI.h"
+#include "Reflection/BsRTTIPlain.h"
+#include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
 #include "Scene/BsGameObjectHandle.h"
 #include "Scene/BsSceneObject.h"
 #include "creator.hpp"
 #include "moveable_state.hpp"
+#include "rtti_types.hpp"
 #include "types.hpp"
 #include "utility/unique_id.hpp"
 
@@ -16,11 +20,13 @@ class World;
 
 class CNetComponent : public bs::Component {
 public:
+  CNetComponent(); // serialization
+
   /**
    * Dont forget to add this component to the world.
    * world->addNetComp(...)
    */
-  CNetComponent(bs::HSceneObject parent);
+  explicit CNetComponent(bs::HSceneObject parent);
 
   CNetComponent(bs::HSceneObject parent, const MoveableState &moveableState);
 
@@ -62,6 +68,11 @@ public:
     return !(*this == other);
   }
 
+  friend class CNetComponentRTTI;
+
+  static bs::RTTITypeBase *getRTTIStatic();
+  bs::RTTITypeBase *getRTTI() const override;
+
 private:
   bool m_hasChanged;
   MoveableState m_state;
@@ -69,6 +80,29 @@ private:
 
 using HCNetComponent = bs::GameObjectHandle<CNetComponent>;
 
-} // namespace wind
+class CNetComponentRTTI
+    : public bs::RTTIType<CNetComponent, bs::Component, CNetComponentRTTI> {
+private:
+  BS_BEGIN_RTTI_MEMBERS
+  BS_RTTI_MEMBER_PLAIN(m_hasChanged, 0)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_id, m_state.m_id, 1)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_type, m_state.m_type, 2)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_flag, m_state.m_flag, 3)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_position, m_state.m_position, 4)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_vel, m_state.m_vel, 5)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_angVel, m_state.m_angVel, 6)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_state.m_rotation, 7)
+  BS_END_RTTI_MEMBERS
 
-#endif // CNET_COMPONENT_HPP_
+public:
+  const bs::String &getRTTIName() override {
+    static bs::String name = "CNetComponent";
+    return name;
+  }
+  bs::UINT32 getRTTIId() override { return TID_CNetComponent; }
+  bs::SPtr<bs::IReflectable> newRTTIObject() override {
+    return bs::SceneObject::createEmptyComponent<CNetComponent>();
+  }
+};
+
+} // namespace wind

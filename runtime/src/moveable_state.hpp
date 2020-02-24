@@ -1,5 +1,4 @@
-#ifndef MOVEABLE_STATE_HPP_
-#define MOVEABLE_STATE_HPP_
+#pragma once
 
 #include "BsApplication.h"
 #include "Components/BsCRigidbody.h"
@@ -19,9 +18,9 @@ namespace wind {
 class MoveableState {
 
 public:
-  MoveableState();
+  explicit MoveableState(UniqueId id);
 
-  MoveableState(UniqueId id) : MoveableState() { m_id = id; }
+  MoveableState() : MoveableState(UniqueId::invalid()) {}
 
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
@@ -79,7 +78,7 @@ public:
 
   static MoveableState FromBytes(alflib::RawMemoryReader &mr);
 
-private:
+public: // public for RTTI
   UniqueId m_id;
   Creator::Types m_type;
   Bitfield m_flag;
@@ -88,6 +87,5 @@ private:
   bs::Vector3 m_angVel;
   bs::Quaternion m_rotation;
 };
-} // namespace wind
 
-#endif // MOVEABLE_STATE_HPP_
+} // namespace wind

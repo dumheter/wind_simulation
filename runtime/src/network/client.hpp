@@ -17,7 +17,8 @@ class World;
 
 class Client : public ISteamNetworkingSocketsCallbacks {
 public:
-  Client(World *world);
+  Client() = default;
+  explicit Client(World *world);
   Client(World *world, ConnectionId activeConnection);
 
   virtual ~Client() final;

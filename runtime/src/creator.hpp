@@ -1,5 +1,4 @@
-#ifndef CREATOR_HPP_
-#define CREATOR_HPP_
+#pragma once
 
 #include "BsPrerequisites.h"
 #include "types.hpp"
@@ -14,14 +13,9 @@ class MoveableState;
 
 class Creator {
 public:
-  enum class Types : u32 {
-    kInvalid = 0,
-    kPlayer,
-    kCube,
-    kBall,
-  };
+  enum class Types : u32 { kInvalid = 0, kPlayer, kCube, kBall, kRotor };
 
-  Creator(World *world);
+  explicit Creator(World *world);
 
   /**
    * Based on type info in moveableState, call the correct
@@ -34,6 +28,8 @@ public:
   HCNetComponent cube(const MoveableState &moveableState) const;
 
   HCNetComponent ball(const MoveableState &moveableState) const;
+
+  HCNetComponent rotor(const MoveableState &moveableState) const;
 
   void floor() const;
 
@@ -48,7 +44,6 @@ private:
   bs::HPhysicsMaterial m_physicsMatStd;
   bs::HMesh m_meshBall;
   bs::HMesh m_meshCube;
+  bs::HMesh m_meshRotor;
 };
 } // namespace wind
-
-#endif // CREATOR_HPP_

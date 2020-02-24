@@ -1,45 +1,21 @@
 #include "world.hpp"
-#include "BsApplication.h"
-#include "BsFPSCamera.h"
-#include "Components/BsCBoxCollider.h"
 #include "Components/BsCCamera.h"
 #include "Components/BsCCharacterController.h"
-#include "Components/BsCPlaneCollider.h"
-#include "Components/BsCRenderable.h"
-#include "Components/BsCRigidbody.h"
-#include "Components/BsCSphereCollider.h"
 #include "GUI/BsCGUIWidget.h"
 #include "GUI/BsGUIButton.h"
-#include "GUI/BsGUIContent.h"
 #include "GUI/BsGUIInputBox.h"
-#include "GUI/BsGUILabel.h"
-#include "GUI/BsGUILayout.h"
 #include "GUI/BsGUILayoutX.h"
 #include "GUI/BsGUILayoutY.h"
 #include "GUI/BsGUIPanel.h"
-#include "GUI/BsGUIViewport.h"
+#include "GUI/BsGUISlider.h"
 #include "Importer/BsImporter.h"
 #include "Input/BsInput.h"
-#include "Material/BsMaterial.h"
-#include "Physics/BsBoxCollider.h"
-#include "Physics/BsPhysicsMaterial.h"
-#include "Physics/BsPlaneCollider.h"
-#include "Physics/BsRigidbody.h"
 #include "Platform/BsCursor.h"
-#include "RenderAPI/BsRenderTarget.h"
-#include "RenderAPI/BsRenderWindow.h"
-#include "Resources/BsBuiltinResources.h"
-#include "Scene/BsSceneObject.h"
+#include "Scene/BsSceneManager.h"
 #include "asset.hpp"
-#include "cmyplayer.hpp"
-#include "creator.hpp"
 #include "log.hpp"
-#include "utility/util.hpp"
 #include <Components/BsCSkybox.h>
-#include <alflib/core/assert.hpp>
-#include <chrono>
-#include <cstdlib>
-
+#include <Image/BsSpriteTexture.h>
 #include <microprofile/microprofile.h>
 #include <regex>
 
@@ -88,6 +64,10 @@ void NetDebugInfo::update(const Client &client) {
 
 // ============================================================ //
 
+constexpr u32 kAimDiameter = 8;
+
+// ============================================================ //
+
 World::World(const App::Info &info)
     : App(info), m_server(this), m_creator(this) {
   using namespace bs;
@@ -113,43 +93,20 @@ void World::onPreUpdate(f32) {
 }
 
 void World::onFixedUpdate(f32) {
+  using namespace bs;
   MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
   m_netDebugInfo.update(m_player->getClient());
 
   static u32 i = 0;
+
   if (++i > 2) {
     i = 0;
     m_server.broadcastServerTick(m_netComps);
   }
-
-  using namespace bs;
-  if (gInput().isButtonHeld(BC_MOUSE_MIDDLE)) {
-    if (m_player->isConnected() && m_cursorMode) {
-      auto spawnPos = getPlayerNetComp()->getState().getPosition();
-      const auto &forward =
-          m_fpsCamera->getCamera()->getTransform().getForward();
-      spawnPos += forward * 0.7f;
-      spawnPos += Vector3(0.0f, 1.0f, 0.0f);
-      MoveableState state{};
-      state.setType(Creator::Types::kBall);
-      state.setPosition(spawnPos);
-      state.setRotation(m_fpsCamera->getCamera()->getTransform().getRotation());
-      bs::Vector3 force{forward * 30.0f};
-
-      auto &packet = m_player->getClient().getPacket();
-      packet.ClearPayload();
-      packet.SetHeader(PacketHeaderTypes::kRequestCreate);
-      auto mw = packet.GetMemoryWriter();
-      mw->Write(state);
-      mw->Write(force.x);
-      mw->Write(force.y);
-      mw->Write(force.z);
-      mw.Finalize();
-      m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
-    }
-  }
 }
+
+void World::onWindowResize() { updateAimPosition(m_width, m_height); }
 
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
@@ -161,6 +118,10 @@ void World::setupScene() {
   cubeState.setRotation(
       bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
   m_creator.cube(cubeState);
+
+  auto rotorState = MoveableState::generateNew();
+  rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
+  m_creator.rotor(rotorState);
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -195,7 +156,7 @@ bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
 
 void World::setupMyPlayer() {
   using namespace bs;
-  AlfAssert(m_netComps.empty(), "must be done first");
+  AlfAssert(m_netComps.empty(), "setupmyplayer must be done first");
   HSceneObject player = SceneObject::create("MyPlayer");
   HCharacterController charController =
       player->addComponent<CCharacterController>();
@@ -204,9 +165,9 @@ void World::setupMyPlayer() {
   auto netComp = player->addComponent<CNetComponent>();
   netComp->setType(Creator::Types::kPlayer);
   auto camera = createCamera(player);
-  auto gui = createGUI(camera);
+  createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
-  auto [it, ok] = m_netComps.insert({UniqueId::kInvalid, netComp});
+  auto [it, ok] = m_netComps.insert({UniqueId::invalid(), netComp});
   AlfAssert(ok, "could not create my player");
 }
 
@@ -241,11 +202,6 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
   }
 }
 
-void World::reset() {
-  // TODO
-  // m_netComps.clear();
-}
-
 void World::onPlayerJoin(const MoveableState &moveableState) {
   logInfo("player {} joined", moveableState.getUniqueId().raw());
   m_creator.player(moveableState);
@@ -257,7 +213,7 @@ void World::onPlayerLeave(UniqueId uid) {
   {
     auto it = m_netComps.find(uid);
     if (it != m_netComps.end()) {
-      // it->second->destroy();
+      it->second->SODestroy();
       m_netComps.erase(it);
     } else {
       logWarning("(netComps) player left, but couldn't find them");
@@ -306,9 +262,9 @@ void World::onDisconnect() {
 
     m_netComps.clear();
     m_walkers.clear();
-    myNetComp->setUniqueId(UniqueId::kInvalid);
-    m_netComps.insert({UniqueId::kInvalid, myNetComp});
-    m_walkers.insert({UniqueId::kInvalid, m_player->getWalker()});
+    myNetComp->setUniqueId(UniqueId::invalid());
+    m_netComps.insert({UniqueId::invalid(), myNetComp});
+    m_walkers.insert({UniqueId::invalid(), m_player->getWalker()});
   }
 }
 
@@ -322,7 +278,7 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
   cameraComp->getViewport()->setTarget(primaryWindow);
   cameraComp->setMain(true);
-  auto &windowProps = primaryWindow->getProperties();
+  const auto &windowProps = primaryWindow->getProperties();
   float aspectRatio = windowProps.width / (float)windowProps.height;
   cameraComp->setAspectRatio(aspectRatio);
   cameraComp->setProjectionType(PT_PERSPECTIVE);
@@ -363,30 +319,17 @@ void World::setupInput() {
         SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
         Cursor::instance().clipToWindow(*primaryWindow);
       }
-    }
-    if (ev.buttonCode == BC_MOUSE_LEFT) {
-      if (m_player->isConnected() && m_cursorMode) {
-        auto spawnPos = getPlayerNetComp()->getState().getPosition();
-        const auto &forward =
-            m_fpsCamera->getCamera()->getTransform().getForward();
-        spawnPos += forward * 0.7f;
-        spawnPos += Vector3(0.0f, 1.0f, 0.0f);
-        MoveableState state{};
-        state.setType(Creator::Types::kBall);
-        state.setPosition(spawnPos);
-        state.setRotation(
-            m_fpsCamera->getCamera()->getTransform().getRotation());
-        bs::Vector3 force{forward * 30.0f};
-        auto &packet = m_player->getClient().getPacket();
-        packet.ClearPayload();
-        packet.SetHeader(PacketHeaderTypes::kRequestCreate);
-        auto mw = packet.GetMemoryWriter();
-        mw->Write(state);
-        mw->Write(force.x);
-        mw->Write(force.y);
-        mw->Write(force.z);
-        mw.Finalize();
-        m_player->getClient().PacketSend(packet, SendStrategy::kUnreliable);
+    } else if (ev.buttonCode == BC_1) {
+      if (m_player->isConnected()) {
+        m_player->setWeapon(Creator::Types::kInvalid);
+      }
+    } else if (ev.buttonCode == BC_2) {
+      if (m_player->isConnected()) {
+        m_player->setWeapon(Creator::Types::kBall);
+      }
+    } else if (ev.buttonCode == BC_3) {
+      if (m_player->isConnected()) {
+        m_player->setWeapon(Creator::Types::kCube);
       }
     }
   });
@@ -396,15 +339,18 @@ void World::setupInput() {
   inputConfig->registerButton("Back", BC_S);
   inputConfig->registerButton("Left", BC_A);
   inputConfig->registerButton("Right", BC_D);
-  inputConfig->registerButton("Forward", BC_UP);
-  inputConfig->registerButton("Back", BC_DOWN);
-  inputConfig->registerButton("Left", BC_LEFT);
-  inputConfig->registerButton("Right", BC_RIGHT);
+  inputConfig->registerButton("AUp", BC_UP);
+  inputConfig->registerButton("ADown", BC_DOWN);
+  inputConfig->registerButton("ALeft", BC_LEFT);
+  inputConfig->registerButton("ARight", BC_RIGHT);
   inputConfig->registerButton("FastMove", BC_LSHIFT);
-  inputConfig->registerButton("RotateObj", BC_MOUSE_LEFT);
-  inputConfig->registerButton("RotateCam", BC_MOUSE_RIGHT);
+  inputConfig->registerButton("Fire1", BC_MOUSE_LEFT);
+  inputConfig->registerButton("MRight", BC_MOUSE_RIGHT);
+  inputConfig->registerButton("Fire2", BC_MOUSE_MIDDLE);
   inputConfig->registerButton("Space", BC_SPACE);
   inputConfig->registerButton("Gravity", BC_Q);
+  inputConfig->registerButton("Fire1", BC_E);
+  inputConfig->registerButton("Fire2", BC_R);
   inputConfig->registerAxis("Horizontal",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",
@@ -471,11 +417,35 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     m_netDebugInfo.setup(layout);
   }
 
+  { // rotor slider
+    auto slider = layout->addNewElement<GUISliderHorz>();
+    slider->onChanged.connect([](f32 percent) {
+      auto rotors = gSceneManager().findComponents<CRotor>(true);
+      for (auto &rotor : rotors) {
+        rotor->setRotation(percent * percent * 1000);
+      }
+    });
+  }
+
+  { // aim dot
+    HTexture dotTex = gImporter().import<Texture>("res/textures/dot.png");
+    HSpriteTexture dotSprite = SpriteTexture::create(dotTex);
+    m_aim = GUITexture::create(dotSprite);
+    m_aim->setSize(kAimDiameter, kAimDiameter);
+    updateAimPosition(m_width, m_height);
+    mainPanel->addElement(m_aim);
+  }
+
   return gui;
 }
 
+void World::updateAimPosition(u32 width, u32 height) {
+  m_aim->setPosition(width / 2 - kAimDiameter / 2,
+                     height / 2 - kAimDiameter / 2);
+}
+
 void World::addNetComp(HCNetComponent netComp) {
-  logVerbose("net component with id [{}] added", netComp->getUniqueId());
+  logVerbose("net component with id [{}] added", netComp->getUniqueId().raw());
   auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add net comp");
 }

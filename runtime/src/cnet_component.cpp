@@ -1,20 +1,19 @@
 #include "cnet_component.hpp"
-#include "Components/BsCRigidbody.h"
-#include "Physics/BsRigidbody.h"
-#include "log.hpp"
-#include "world.hpp"
 
 namespace wind {
 
+CNetComponent::CNetComponent() : m_hasChanged(false), m_state() {}
+
 CNetComponent::CNetComponent(bs::HSceneObject parent)
-    : bs::Component(parent), m_state(MoveableState::generateNew()) {
+    : bs::Component(parent), m_hasChanged(false),
+      m_state(MoveableState::generateNew()) {
   mNotifyFlags = bs::TCF_Transform;
   setName("NetComp");
 }
 
 CNetComponent::CNetComponent(bs::HSceneObject parent,
                              const MoveableState &moveableState)
-    : bs::Component(parent), m_state(moveableState) {
+    : bs::Component(parent), m_hasChanged(false), m_state(moveableState) {
   setName("NetComp");
   mNotifyFlags = bs::TCF_Transform;
 }
@@ -72,5 +71,11 @@ void CNetComponent::setPosition(bs::Vector3 position) {
   SO()->setPosition(m_state.getPosition());
   mNotifyFlags = bs::TCF_Transform;
 }
+
+bs::RTTITypeBase *CNetComponent::getRTTIStatic() {
+  return CNetComponentRTTI::instance();
+}
+
+bs::RTTITypeBase *CNetComponent::getRTTI() const { return getRTTIStatic(); }
 
 } // namespace wind

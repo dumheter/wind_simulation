@@ -1,23 +1,32 @@
-#ifndef CMYPLAYER_HPP_
-#define CMYPLAYER_HPP_
+#pragma once
 
 #include "BsFPSWalker.h"
 #include "BsPrerequisites.h"
+#include "Input/BsVirtualInput.h"
 #include "Math/BsQuaternion.h"
+#include "Private/RTTI/BsGameObjectRTTI.h"
+#include "RTTI/BsMathRTTI.h"
+#include "Reflection/BsRTTIPlain.h"
+#include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
-#include "network/client.hpp"
+#include "creator.hpp"
+#include "rtti_types.hpp"
+#include "utility/unique_id.hpp"
+#include <memory>
 
 namespace wind {
 
 class World;
+class Client;
 
 class CMyPlayer : public bs::Component {
 public:
+  CMyPlayer(); // serialization
   CMyPlayer(bs::HSceneObject parent, World *world);
 
-  void setUniqueId(UniqueId uid) { m_client.setUid(uid); }
+  void setUniqueId(UniqueId uid);
 
-  UniqueId getUniqueId() const { return m_client.getUid(); }
+  UniqueId getUniqueId() const;
 
   bool isConnected() const;
 
@@ -29,21 +38,46 @@ public:
 
   void fixedUpdate() override;
 
-  Client &getClient() { return m_client; }
-  const Client &getClient() const { return m_client; }
+  void onShoot();
+
+  void setWeapon(Creator::Types weapon);
+
+  Client &getClient() { return *m_client; }
+  const Client &getClient() const { return *m_client; }
 
   bs::HFPSWalker getWalker() { return m_fpsWalker; }
 
   void lookupId(UniqueId uid);
 
+  friend class CMyPlayerRTTI;
+
+  static bs::RTTITypeBase *getRTTIStatic();
+  bs::RTTITypeBase *getRTTI() const override;
+
 private:
   World *m_world;
-  Client m_client;
+  std::unique_ptr<Client> m_client;
   bs::HFPSWalker m_fpsWalker;
   bs::Quaternion m_lastRotation;
+  Creator::Types m_weapon;
+  bs::VirtualButton m_fire1;
+  bs::VirtualButton m_fire2;
 };
 
 using HCMyPlayer = bs::GameObjectHandle<CMyPlayer>;
-} // namespace wind
 
-#endif // CMYPLAYER_HPP_
+class CMyPlayerRTTI
+    : public bs::RTTIType<CMyPlayer, bs::Component, CMyPlayerRTTI> {
+private:
+public:
+  const bs::String &getRTTIName() override {
+    static bs::String name = "CMyPlayer";
+    return name;
+  }
+  bs::UINT32 getRTTIId() override { return TID_CMyPlayer; }
+  bs::SPtr<bs::IReflectable> newRTTIObject() override {
+    return bs::SceneObject::createEmptyComponent<CMyPlayer>();
+  }
+};
+
+} // namespace wind

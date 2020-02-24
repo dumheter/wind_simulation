@@ -1,5 +1,4 @@
-#ifndef UNIQUE_ID_HPP_
-#define UNIQUE_ID_HPP_
+#pragma once
 
 #include "types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
@@ -17,28 +16,11 @@ using UniqueIdType = u64;
  */
 class UniqueId {
 public:
-  UniqueId() : m_uniqueId(kInvalid) {}
+  UniqueId() = default;
 
-  UniqueId(UniqueIdType uniqueId) : m_uniqueId(uniqueId) {}
+  explicit constexpr UniqueId(UniqueIdType uniqueId) : m_uniqueId(uniqueId) {}
 
-  operator bool() const { return m_uniqueId != kInvalid; }
-
-  UniqueId(const UniqueId &other) : m_uniqueId(other.m_uniqueId) {}
-  UniqueId &operator=(const UniqueId &other) {
-    m_uniqueId = other.m_uniqueId;
-    return *this;
-  }
-
-  UniqueId(UniqueId &&other) : m_uniqueId(other.m_uniqueId) {
-    other.m_uniqueId = 0;
-  }
-  UniqueId &operator=(UniqueId &&other) {
-    if (this != &other) {
-      m_uniqueId = other.m_uniqueId;
-      other.m_uniqueId = 0;
-    }
-    return *this;
-  }
+  constexpr bool isValid() const { return m_uniqueId != kInvalid; }
 
   bool operator==(const UniqueId &other) const {
     return m_uniqueId == other.m_uniqueId;
@@ -62,6 +44,10 @@ public:
     return UniqueId{mr.Read<decltype(m_uniqueId)>()};
   }
 
+public:
+  static constexpr UniqueId invalid() { return UniqueId{kInvalid}; }
+
+private:
   static constexpr UniqueIdType kInvalid = 0;
 
 private:
@@ -98,5 +84,3 @@ template <> struct hash<wind::UniqueId> {
   }
 };
 } // namespace std
-
-#endif // UNIQUE_ID_HPP_
