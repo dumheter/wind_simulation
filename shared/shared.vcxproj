@@ -144,17 +144,14 @@
     <ClInclude Include="src\asset.hpp" />
     <ClInclude Include="src\BsCameraFlyer.h" />
     <ClInclude Include="src\debug\debug.hpp" />
-<<<<<<< HEAD
     <ClInclude Include="src\scene\rtti.hpp" />
     <ClInclude Include="src\scene\wind_src.hpp" />
-=======
     <ClInclude Include="src\scene\cnet_component.hpp" />
     <ClInclude Include="src\scene\component_factory.hpp" />
     <ClInclude Include="src\scene\component_handles.hpp" />
     <ClInclude Include="src\scene\crotor.hpp" />
     <ClInclude Include="src\state\moveable_state.hpp" />
     <ClInclude Include="src\state\player_input.hpp" />
->>>>>>> feature/editor-save
     <ClInclude Include="src\types.hpp" />
     <ClInclude Include="src\macros.hpp" />
     <ClInclude Include="src\math\dim.hpp" />
