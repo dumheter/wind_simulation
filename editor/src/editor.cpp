@@ -104,7 +104,8 @@ void Editor::onStartup() {
   m_ui = new UI(this);
 
   // Setup default scene
-  setScene(EditorFactory::createEmptyScene("scene_empty", GROUND_PLANE_SCALE));
+  // setScene(EditorFactory::createEmptyScene("scene_empty",
+  // GROUND_PLANE_SCALE));
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,

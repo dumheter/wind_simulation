@@ -76,7 +76,7 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
 
     // Load textures
     const HTexture texGrid = Asset::loadTexture("res/textures/grid.png");
-    const HTexture texGrid2 = Asset::loadTexture("res/textures/grid_2.png");
+    // const HTexture texGrid2 = Asset::loadTexture("res/textures/grid_2.png");
 
     const HShader shader =
         gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
@@ -154,7 +154,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
 
     // Load textures
     const HTexture texGrid = Asset::loadTexture("res/textures/grid.png");
-    const HTexture texGrid2 = Asset::loadTexture("res/textures/grid_2.png");
+    // const HTexture texGrid2 = Asset::loadTexture("res/textures/grid_2.png");
 
     const HShader shader =
         gBuiltinResources().getBuiltinShader(BuiltinShader::Standard);
@@ -202,7 +202,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
     auto [bunnyMesh, bunnyPhysMesh] =
         Asset::loadMeshWithPhysics("res/models/stanford-bunny.fbx", 0.006f);
     HMaterial bunnyMat = Material::create(shader);
-    bunnyMat->setTexture("gAlbedoTex", texGrid2);
+    bunnyMat->setTexture("gAlbedoTex", texGrid);
     HSceneObject bunny = SceneObject::create("geometry_bunny");
     bunny->setParent(geometry);
     bunny->setPosition(Vec3F(6.0f, 3.0f, 4.0f));

@@ -43,6 +43,9 @@
 #include <GUI/BsGUIProgressBar.h>
 #include <GUI/BsGUISlider.h>
 #include <GUI/BsGUIToggle.h>
+#include <Resources/BsResourceManifest.h>
+#include <Resources/BsResources.h>
+#include <Scene/BsPrefab.h>
 #include <Scene/BsSceneManager.h>
 #include <Scene/BsSceneObject.h>
 
@@ -371,6 +374,48 @@ UI::UI(Editor *editor) : m_editor(editor) {
     });
 
     height += button->getBounds().height + 2;
+  }
+
+  // Save/Load scene
+  {
+    GUIInputBox *input = panel->addNewElement<GUIInputBox>();
+    input->setWidth(100);
+    input->setPosition(4, height);
+
+    GUIButton *bSave = panel->addNewElement<GUIButton>(HString("Save"));
+    bSave->setWidth(30);
+    bSave->setPosition(106, height);
+    bSave->onClick.connect([this, input]() {
+      const bs::String path = input->getText() + ".asset";
+      const HSceneObject &scene = m_editor->getScene();
+      HPrefab prefab = Prefab::create(scene, false);
+      gResources().save(prefab, path, true);
+
+      const bs::String pathManifest = input->getText() + ".manifest.asset";
+      SPtr<ResourceManifest> manifest =
+          gResources().getResourceManifest("Default");
+      ResourceManifest::save(manifest, pathManifest, "");
+
+      logVerbose("saving scene ({})", path.c_str());
+    });
+
+    GUIButton *bLoad = panel->addNewElement<GUIButton>(HString("Load"));
+    bLoad->setWidth(30);
+    bLoad->setPosition(138, height);
+    bLoad->onClick.connect([this, input]() {
+      const bs::String pathManifest = input->getText() + ".manifest.asset";
+      SPtr<ResourceManifest> manifest =
+          ResourceManifest::load(pathManifest, "");
+      gResources().registerResourceManifest(manifest);
+
+      const bs::String path = input->getText() + ".asset";
+      HPrefab prefab = gResources().load<Prefab>(path);
+      HSceneObject scene = prefab->instantiate();
+      m_editor->setScene(scene);
+      logVerbose("loading scene ({})", path);
+    });
+
+    height += input->getBounds().height + 2;
   }
 }
 

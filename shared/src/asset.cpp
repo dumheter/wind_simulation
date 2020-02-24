@@ -26,10 +26,14 @@
 // Headers
 // ========================================================================== //
 
+#include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
 #include <Reflection/BsRTTIType.h>
+#include <Resources/BsResource.h>
+#include <Resources/BsResourceHandle.h>
+#include <Resources/BsResourceManifest.h>
 #include <Resources/BsResources.h>
 
 // ========================================================================== //
@@ -68,6 +72,10 @@ bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr,
     texture = gImporter().import<Texture>(path, _impOpt);
     gResources().save(texture, assetPath, true);
   }
+
+  gResources().getResourceManifest("Default")->registerResource(
+      texture.getUUID(), assetPath);
+
   return texture;
 }
 
@@ -103,6 +111,10 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
     texture = gImporter().import<Texture>(path, _impOpt);
     gResources().save(texture, assetPath, true);
   }
+
+  gResources().getResourceManifest("Default")->registerResource(
+      texture.getUUID(), assetPath);
+
   return texture;
 }
 
@@ -134,6 +146,10 @@ bs::HMesh Asset::loadMesh(const bs::Path &path, float scale, bool cpuCached) {
     mesh = gImporter().import<Mesh>(path, _impOpt);
     gResources().save(mesh, assetPath, true);
   }
+
+  gResources().getResourceManifest("Default")->registerResource(mesh.getUUID(),
+                                                                assetPath);
+
   return mesh;
 }
 
@@ -179,6 +195,12 @@ Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached) {
     gResources().save(mesh, assetPath, true);
     gResources().save(physMesh, physAssetPath, true);
   }
+
+  gResources().getResourceManifest("Default")->registerResource(mesh.getUUID(),
+                                                                assetPath);
+  // gResources().getResourceManifest("Default")->registerResource(
+  //    physMesh.getUUID(), assetPath);
+
   return std::make_tuple(mesh, physMesh);
 }
 
