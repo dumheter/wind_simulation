@@ -99,7 +99,7 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
     planeCollider->setMaterial(planePhysMat);
     planeCollider->setMass(0.0f);
 
-#if 1
+#if 0
     // Box
     HMaterial boxMat = Material::create(shader);
     boxMat->setTexture("gAlbedoTex", texGrid2);
