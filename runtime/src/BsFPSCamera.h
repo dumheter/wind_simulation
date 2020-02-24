@@ -6,7 +6,7 @@
 #include "Private/RTTI/BsGameObjectRTTI.h"
 #include "Reflection/BsRTTIPlain.h"
 #include "Reflection/BsRTTIType.h"
-#include "rtti_types.hpp"
+#include "utility/rtti_types.hpp"
 
 namespace bs {
 class FPSCamera : public Component {

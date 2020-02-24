@@ -6,12 +6,11 @@
 #include "Reflection/BsRTTIPlain.h"
 #include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
-#include "Scene/BsGameObjectHandle.h"
 #include "Scene/BsSceneObject.h"
-#include "creator.hpp"
-#include "moveable_state.hpp"
-#include "rtti_types.hpp"
+#include "scene/component_factory.hpp"
+#include "state/moveable_state.hpp"
 #include "types.hpp"
+#include "utility/rtti_types.hpp"
 #include "utility/unique_id.hpp"
 
 namespace wind {
@@ -52,7 +51,7 @@ public:
 
   void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
 
-  void setType(Creator::Types type);
+  void setType(ComponentTypes type);
 
   void setPosition(bs::Vector3 position);
 

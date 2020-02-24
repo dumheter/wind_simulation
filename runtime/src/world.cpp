@@ -135,7 +135,7 @@ HCNetComponent World::getPlayerNetComp() {
 bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
   auto it = m_netComps.find(from);
   if (it != m_netComps.end()) {
-    if (it->second->getState().getType() == Creator::Types::kPlayer) {
+    if (it->second->getState().getType() == ComponentTypes::kPlayer) {
       auto cit = m_walkers.find(from);
       if (cit != m_walkers.end()) {
         auto [_, ok] = m_walkers.insert({to, cit->second});
@@ -163,7 +163,7 @@ void World::setupMyPlayer() {
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
-  netComp->setType(Creator::Types::kPlayer);
+  netComp->setType(ComponentTypes::kPlayer);
   auto camera = createCamera(player);
   createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
@@ -321,15 +321,15 @@ void World::setupInput() {
       }
     } else if (ev.buttonCode == BC_1) {
       if (m_player->isConnected()) {
-        m_player->setWeapon(Creator::Types::kInvalid);
+        m_player->setWeapon(ComponentTypes::kInvalid);
       }
     } else if (ev.buttonCode == BC_2) {
       if (m_player->isConnected()) {
-        m_player->setWeapon(Creator::Types::kBall);
+        m_player->setWeapon(ComponentTypes::kBall);
       }
     } else if (ev.buttonCode == BC_3) {
       if (m_player->isConnected()) {
-        m_player->setWeapon(Creator::Types::kCube);
+        m_player->setWeapon(ComponentTypes::kCube);
       }
     }
   });

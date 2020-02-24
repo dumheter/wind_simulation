@@ -6,7 +6,7 @@
 #include "Math/BsVector3.h"
 #include "Scene/BsSceneObject.h"
 #include "Scene/BsTransform.h"
-#include "creator.hpp"
+#include "scene/component_factory.hpp"
 #include "types.hpp"
 #include "utility/unique_id.hpp"
 #include "utility/util.hpp"
@@ -30,9 +30,9 @@ public:
 
   void setUniqueId(UniqueId id) { m_id = id; }
 
-  Creator::Types getType() const { return m_type; }
+  ComponentTypes getType() const { return m_type; }
 
-  void setType(Creator::Types type) { m_type = type; }
+  void setType(ComponentTypes type) { m_type = type; }
 
   bs::Vector3 getPosition() const { return m_position; }
 
@@ -80,7 +80,7 @@ public:
 
 public: // public for RTTI
   UniqueId m_id;
-  Creator::Types m_type;
+  ComponentTypes m_type;
   Bitfield m_flag;
   bs::Vector3 m_position;
   bs::Vector3 m_vel;

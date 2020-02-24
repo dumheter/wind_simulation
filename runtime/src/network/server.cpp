@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "log.hpp"
-#include "player_input.hpp"
+#include "scene/component_factory.hpp"
+#include "state/player_input.hpp"
 #include "world.hpp"
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
@@ -213,7 +214,7 @@ void Server::handlePacket(Packet &packet) {
     auto state = mr.Read<MoveableState>();
     const bs::Vector3 force{mr.Read<float>(), mr.Read<float>(),
                             mr.Read<float>()};
-    if (state.getType() != Creator::Types::kInvalid) {
+    if (state.getType() != ComponentTypes::kInvalid) {
       state.setUniqueId(UniqueIdGenerator::next());
       auto netComp = m_world->getCreator().create(state);
       netComp->addForce(force, bs::ForceMode::Velocity);

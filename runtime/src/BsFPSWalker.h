@@ -7,8 +7,8 @@
 #include "Scene/BsComponent.h"
 #include "Scene/BsSceneObject.h"
 #include "String/BsString.h"
-#include "player_input.hpp"
-#include "rtti_types.hpp"
+#include "state/player_input.hpp"
+#include "utility/rtti_types.hpp"
 
 namespace bs {
 class IReflectable;

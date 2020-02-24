@@ -9,7 +9,7 @@ CMyPlayer::CMyPlayer()
 
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
     : Component(parent), m_client(std::make_unique<Client>(world)),
-      m_world(world), m_weapon(Creator::Types::kInvalid) {
+      m_world(world), m_weapon(ComponentTypes::kInvalid) {
   setName("CMyPlayer");
   m_fpsWalker = SO()->addComponent<bs::FPSWalker>(world);
   m_fpsWalker->makeActive();
@@ -67,7 +67,7 @@ void CMyPlayer::fixedUpdate() {
 }
 
 void CMyPlayer::onShoot() {
-  if (m_weapon == Creator::Types::kInvalid) {
+  if (m_weapon == ComponentTypes::kInvalid) {
     return;
   }
   auto spawnPos = m_world->getPlayerNetComp()->getState().getPosition();
@@ -93,7 +93,7 @@ void CMyPlayer::onShoot() {
   m_client->PacketSend(packet, SendStrategy::kUnreliable);
 }
 
-void CMyPlayer::setWeapon(Creator::Types weapon) { m_weapon = weapon; }
+void CMyPlayer::setWeapon(ComponentTypes weapon) { m_weapon = weapon; }
 
 void CMyPlayer::lookupId(UniqueId uid) {
   auto &packet = m_client->getPacket();

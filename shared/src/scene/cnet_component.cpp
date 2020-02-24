@@ -57,9 +57,9 @@ void CNetComponent::setState(const MoveableState &moveableState) {
   mNotifyFlags = bs::TCF_Transform;
 }
 
-void CNetComponent::setType(Creator::Types type) {
+void CNetComponent::setType(ComponentTypes type) {
   m_state.setType(type);
-  if (type != Creator::Types::kPlayer && type != Creator::Types::kInvalid) {
+  if (type != ComponentTypes::kPlayer && type != ComponentTypes::kInvalid) {
     m_state.setRigid(true);
   }
 }

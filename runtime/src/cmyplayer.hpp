@@ -9,8 +9,8 @@
 #include "Reflection/BsRTTIPlain.h"
 #include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
-#include "creator.hpp"
-#include "rtti_types.hpp"
+#include "scene/component_factory.hpp"
+#include "utility/rtti_types.hpp"
 #include "utility/unique_id.hpp"
 #include <memory>
 
@@ -40,7 +40,7 @@ public:
 
   void onShoot();
 
-  void setWeapon(Creator::Types weapon);
+  void setWeapon(ComponentTypes weapon);
 
   Client &getClient() { return *m_client; }
   const Client &getClient() const { return *m_client; }
@@ -59,7 +59,7 @@ private:
   std::unique_ptr<Client> m_client;
   bs::HFPSWalker m_fpsWalker;
   bs::Quaternion m_lastRotation;
-  Creator::Types m_weapon;
+  ComponentTypes m_weapon;
   bs::VirtualButton m_fire1;
   bs::VirtualButton m_fire2;
 };

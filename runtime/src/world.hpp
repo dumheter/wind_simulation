@@ -5,12 +5,13 @@
 #include "GUI/BsGUILabel.h"
 #include "app.hpp"
 #include "cmyplayer.hpp"
-#include "cnet_component.hpp"
 #include "creator.hpp"
-#include "crotor.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
-#include "player_input.hpp"
+#include "scene/cnet_component.hpp"
+#include "scene/component_factory.hpp"
+#include "scene/crotor.hpp"
+#include "state/player_input.hpp"
 #include "utility/unique_id.hpp"
 #include <GUI/BsGUITexture.h>
 #include <unordered_map>

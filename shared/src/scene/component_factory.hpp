@@ -1,28 +1,27 @@
 #pragma once
 
 #include "BsPrerequisites.h"
-#include "scene/component_factory.hpp"
+#include "scene/component_handles.hpp"
+#include "types.hpp"
 
 namespace wind {
 
-class CNetComponent;
-using HCNetComponent = bs::GameObjectHandle<CNetComponent>;
+enum class ComponentTypes : u32 { kInvalid = 0, kPlayer, kCube, kBall, kRotor };
 
-class World;
 class MoveableState;
+class Creator;
 
-class Creator {
+// ============================================================ //
+
+class ComponentFactory {
 public:
-
-  explicit Creator(World *world);
+  explicit ComponentFactory();
 
   /**
    * Based on type info in moveableState, call the correct
-   * creator function.
+   * create function.
    */
   HCNetComponent create(const MoveableState &moveableState) const;
-
-  HCNetComponent player(const MoveableState &moveableState) const;
 
   HCNetComponent cube(const MoveableState &moveableState) const;
 
@@ -37,7 +36,13 @@ private:
   bs::HMaterial material(const bs::String &path);
 
 private:
-  World *m_world;
-  ComponentFactory m_factory;
+  bs::HMaterial m_matGrid;
+  bs::HMaterial m_matGrid2;
+  bs::HPhysicsMaterial m_physicsMatStd;
+  bs::HMesh m_meshBall;
+  bs::HMesh m_meshCube;
+  bs::HMesh m_meshRotor;
+
+  friend class Creator;
 };
 } // namespace wind
