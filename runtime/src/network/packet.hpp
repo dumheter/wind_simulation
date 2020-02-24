@@ -24,7 +24,7 @@ struct MemoryWriter {
 
   MemoryWriter(const MemoryWriter &other) = delete;
   MemoryWriter &operator=(const MemoryWriter &other) = delete;
-  MemoryWriter(MemoryWriter &&other);
+  MemoryWriter(MemoryWriter &&other) noexcept;
   MemoryWriter &operator=(MemoryWriter &&other) noexcept;
 
   alflib::RawMemoryWriter *operator->() { return &mw_; }

@@ -224,7 +224,7 @@ MemoryWriter::~MemoryWriter() {
                           "gotten a call to finalize, this is a bug");
 }
 
-MemoryWriter::MemoryWriter(MemoryWriter &&other)
+MemoryWriter::MemoryWriter(MemoryWriter &&other) noexcept
     : mw_(other.packet_->GetRawPayload(), other.packet_->GetPayloadCapacity()),
       packet_(other.packet_), did_finalize(false) {
   other.did_finalize = true;

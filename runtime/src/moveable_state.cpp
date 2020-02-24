@@ -1,7 +1,4 @@
 #include "moveable_state.hpp"
-#include "log.hpp"
-#include "types.hpp"
-#include "utility/bsprinter.hpp"
 
 namespace wind {
 

@@ -1,5 +1,4 @@
-#ifndef CNET_COMPONENT_HPP_
-#define CNET_COMPONENT_HPP_
+#pragma once
 
 #include "BsPrerequisites.h"
 #include "Private/RTTI/BsGameObjectRTTI.h"
@@ -21,7 +20,7 @@ class World;
 
 class CNetComponent : public bs::Component {
 public:
-  CNetComponent() = default; // serialization
+  CNetComponent(); // serialization
 
   /**
    * Dont forget to add this component to the world.
@@ -107,5 +106,3 @@ public:
 };
 
 } // namespace wind
-
-#endif // CNET_COMPONENT_HPP_

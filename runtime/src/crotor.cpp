@@ -1,11 +1,8 @@
 #include "crotor.hpp"
-#include "Components/BsCRigidbody.h"
-#include "Math/BsDegree.h"
-#include "Physics/BsRigidbody.h"
-#include "Scene/BsSceneObject.h"
-#include "alflib/core/assert.hpp"
 
 namespace wind {
+
+CRotor::CRotor() : m_rotation() {}
 
 CRotor::CRotor(const bs::HSceneObject &parent)
     : bs::Component(parent), m_rotation() {

@@ -8,7 +8,8 @@
 namespace wind {
 
 Server::Server(World *world)
-    : m_socketInterface(SteamNetworkingSockets()), m_world(world),
+    : m_socket(k_HSteamListenSocket_Invalid),
+      m_socketInterface(SteamNetworkingSockets()), m_world(world),
       m_connectionState(ConnectionState::kDisconnected) {
   m_pollGroup = m_socketInterface->CreatePollGroup();
   if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {

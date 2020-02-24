@@ -1,14 +1,18 @@
 #pragma once
 
-#include "BsPrerequisites.h"
-#include "Input/BsVirtualInput.h"
-#include "Private/RTTI/BsGameObjectRTTI.h"
-#include "RTTI/BsMathRTTI.h"
-#include "Reflection/BsRTTIPlain.h"
+#include "BsCorePrerequisites.h"
+#include "Input/BsInputConfiguration.h"
+#include "Math/BsQuaternion.h"
 #include "Reflection/BsRTTIType.h"
 #include "Scene/BsComponent.h"
+#include "Scene/BsSceneObject.h"
+#include "String/BsString.h"
 #include "player_input.hpp"
 #include "rtti_types.hpp"
+
+namespace bs {
+class IReflectable;
+}
 
 namespace wind {
 class World;

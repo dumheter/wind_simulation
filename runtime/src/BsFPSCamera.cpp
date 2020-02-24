@@ -1,10 +1,5 @@
 #include "BsFPSCamera.h"
 
-#include "Math/BsMath.h"
-#include "Math/BsVector3.h"
-#include "Physics/BsPhysics.h"
-#include "Scene/BsSceneObject.h"
-
 namespace bs {
 
 constexpr float ROTATION_SPEED = 3.0f;

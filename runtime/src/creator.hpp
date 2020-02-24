@@ -1,5 +1,4 @@
-#ifndef CREATOR_HPP_
-#define CREATOR_HPP_
+#pragma once
 
 #include "BsPrerequisites.h"
 #include "types.hpp"
@@ -48,5 +47,3 @@ private:
   bs::HMesh m_meshRotor;
 };
 } // namespace wind
-
-#endif // CREATOR_HPP_

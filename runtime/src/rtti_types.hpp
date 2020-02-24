@@ -1,5 +1,4 @@
-#ifndef RTTI_TYPES_HPP_
-#define RTTI_TYPES_HPP_
+#pragma once
 
 #include "types.hpp"
 
@@ -12,5 +11,3 @@ constexpr u32 TID_FPSWalker = 2003;
 constexpr u32 TID_FPSCamera = 2004;
 
 } // namespace wind
-
-#endif // RTTI_TYPES_HPP_

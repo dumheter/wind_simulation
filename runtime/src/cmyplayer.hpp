@@ -1,5 +1,4 @@
-#ifndef CMYPLAYER_HPP_
-#define CMYPLAYER_HPP_
+#pragma once
 
 #include "BsFPSWalker.h"
 #include "BsPrerequisites.h"
@@ -22,7 +21,7 @@ class Client;
 
 class CMyPlayer : public bs::Component {
 public:
-  CMyPlayer() = default; // serialization
+  CMyPlayer(); // serialization
   CMyPlayer(bs::HSceneObject parent, World *world);
 
   void setUniqueId(UniqueId uid);
@@ -82,5 +81,3 @@ public:
 };
 
 } // namespace wind
-
-#endif // CMYPLAYER_HPP_

@@ -1,5 +1,4 @@
-#ifndef MOVEABLE_STATE_HPP_
-#define MOVEABLE_STATE_HPP_
+#pragma once
 
 #include "BsApplication.h"
 #include "Components/BsCRigidbody.h"
@@ -88,5 +87,3 @@ public: // public for RTTI
 };
 
 } // namespace wind
-
-#endif // MOVEABLE_STATE_HPP_

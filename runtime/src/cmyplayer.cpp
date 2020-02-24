@@ -1,13 +1,11 @@
 #include "cmyplayer.hpp"
-#include "Scene/BsSceneObject.h"
-#include "bsFPSWalker.h"
-#include "cnet_component.hpp"
-#include "log.hpp"
-#include "network/client.hpp"
-#include "types.hpp"
 #include "world.hpp"
 
 namespace wind {
+
+CMyPlayer::CMyPlayer()
+    : m_world(nullptr), m_fpsWalker(), m_lastRotation(), m_weapon(), m_fire1(),
+      m_fire2() {}
 
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
     : Component(parent), m_client(std::make_unique<Client>(world)),

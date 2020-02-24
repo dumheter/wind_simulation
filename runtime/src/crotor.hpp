@@ -1,5 +1,4 @@
-#ifndef C_ROTOR_HPP_
-#define C_ROTOR_HPP_
+#pragma once
 
 #include "BsPrerequisites.h"
 #include "Math/BsQuaternion.h"
@@ -14,6 +13,8 @@
 namespace wind {
 class CRotor : public bs::Component {
 public:
+  CRotor(); // serialization
+
   explicit CRotor(const bs::HSceneObject &parent);
 
   void fixedUpdate() override;
@@ -30,9 +31,6 @@ public:
 
 private:
   f32 m_rotation;
-
-public:
-  CRotor() = default; // serialization
 };
 
 using HCRotor = bs::GameObjectHandle<CRotor>;
@@ -55,5 +53,3 @@ public:
 };
 
 } // namespace wind
-
-#endif // C_ROTOR_HPP_

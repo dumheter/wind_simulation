@@ -4,10 +4,8 @@
 #include "Input/BsVirtualInput.h"
 #include "Math/BsDegree.h"
 #include "Private/RTTI/BsGameObjectRTTI.h"
-#include "RTTI/BsMathRTTI.h"
 #include "Reflection/BsRTTIPlain.h"
 #include "Reflection/BsRTTIType.h"
-#include "Scene/BsComponent.h"
 #include "rtti_types.hpp"
 
 namespace bs {
