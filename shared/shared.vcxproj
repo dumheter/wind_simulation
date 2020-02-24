@@ -100,6 +100,7 @@
     <ClCompile Include="src\BsCameraFlyer.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\log.cpp" />
+    <ClCompile Include="src\scene\wind_src.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\assert.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\buffer.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\console.cpp" />
@@ -138,6 +139,8 @@
     <ClInclude Include="src\asset.hpp" />
     <ClInclude Include="src\BsCameraFlyer.h" />
     <ClInclude Include="src\debug\debug.hpp" />
+    <ClInclude Include="src\scene\rtti.hpp" />
+    <ClInclude Include="src\scene\wind_src.hpp" />
     <ClInclude Include="src\types.hpp" />
     <ClInclude Include="src\macros.hpp" />
     <ClInclude Include="src\math\dim.hpp" />

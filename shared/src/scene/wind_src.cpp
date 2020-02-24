@@ -20,70 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "util.hpp"
+#include "wind_src.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "log.hpp"
-
-#include <BsApplication.h>
-#include <Input/BsMouse.h>
-#include <Platform/BsCursor.h>
-
-// ========================================================================== //
-// Functions
+// CWindSource Implementation
 // ========================================================================== //
 
 namespace wind {
 
-void dumpSceneAux(const bs::HSceneObject &o, u32 indent) {
-  std::string pad = Util::repeat(' ', indent);
-  const char *name = o->getName().c_str();
-  logInfo("{}{}", pad, name);
-  for (u32 i = 0; i < o->getNumChildren(); ++i) {
-    dumpSceneAux(o->getChild(i), indent + 2);
-  }
-}
-
-} // namespace wind
-
-// ========================================================================== //
-// Util Implementation
-// ========================================================================== //
-
-namespace wind {
-
-void Util::centerCursor(bs::SPtr<bs::RenderWindow> window) {
-  using namespace bs;
-
-  if (!window) {
-    window = gApplication().getPrimaryWindow();
-  }
-  const RenderWindowProperties &windowProps = window->getProperties();
-  const UINT32 x = windowProps.left + (windowProps.width / 2);
-  const UINT32 y = windowProps.top + (windowProps.height / 2);
-  Cursor::instance().setScreenPosition(Vector2I(x, y));
+CWindSource::CWindSource(const bs::HSceneObject &parent) {
+  setName("WindComponent");
+  mNotifyFlags = bs::TCF_Transform;
 }
 
 // -------------------------------------------------------------------------- //
 
-void Util::dumpScene(const bs::HSceneObject &scene) { dumpSceneAux(scene, 0); }
+void CWindSource::onCreated() {}
 
 // -------------------------------------------------------------------------- //
 
-std::string Util::repeat(char c, u32 n) {
-  std::string str;
-  str.resize(n);
-  for (u32 i = 0; i < n; i++) {
-    str[i] = c;
-  }
-  return str;
+void CWindSource::onTransformChanged(bs::TransformChangedFlags flags) {}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CWindSource::getRTTIStatic() {
+  return CWindSourceRTTI::instance();
 }
 
 // -------------------------------------------------------------------------- //
 
-bs::UUID Util::randUUID() { return bs::UUIDGenerator::generateRandom(); }
+bs::String CWindSourceRTTI::s_name = "CWindSource";
 
 } // namespace wind
