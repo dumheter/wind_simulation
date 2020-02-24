@@ -19,7 +19,7 @@ using ContainerValueType = u8;
 class Packet;
 
 struct MemoryWriter {
-  MemoryWriter(Packet *packet);
+  explicit MemoryWriter(Packet *packet);
   ~MemoryWriter();
 
   MemoryWriter(const MemoryWriter &other) = delete;
@@ -109,7 +109,7 @@ public:
   /**
    * Write string into payload, and write 0's to header
    */
-  Packet(const alflib::String &string);
+  explicit Packet(const alflib::String &string);
 
   Packet(const Packet &other);
 

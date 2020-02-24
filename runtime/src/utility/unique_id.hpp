@@ -20,7 +20,7 @@ public:
   UniqueId() = default;
   // UniqueId() : m_uniqueId(kInvalid) {}
 
-  UniqueId(UniqueIdType uniqueId) : m_uniqueId(uniqueId) {}
+  explicit constexpr UniqueId(UniqueIdType uniqueId) : m_uniqueId(uniqueId) {}
 
   operator bool() const { return m_uniqueId != kInvalid; }
 
@@ -46,6 +46,10 @@ public:
     return UniqueId{mr.Read<decltype(m_uniqueId)>()};
   }
 
+public:
+  static constexpr UniqueId invalid() { return UniqueId{kInvalid}; }
+
+private:
   static constexpr UniqueIdType kInvalid = 0;
 
 private:

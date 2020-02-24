@@ -73,7 +73,9 @@ void CNetComponent::setPosition(bs::Vector3 position) {
   mNotifyFlags = bs::TCF_Transform;
 }
 
-bs::RTTITypeBase *CNetComponent::getRTTIStatic() { return CNetComponentRTTI::instance(); }
+bs::RTTITypeBase *CNetComponent::getRTTIStatic() {
+  return CNetComponentRTTI::instance();
+}
 
 bs::RTTITypeBase *CNetComponent::getRTTI() const { return getRTTIStatic(); }
 

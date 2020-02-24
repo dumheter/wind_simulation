@@ -13,7 +13,7 @@
 namespace bs {
 class FPSCamera : public Component {
 public:
-  FPSCamera(const HSceneObject &parent);
+  explicit FPSCamera(const HSceneObject &parent);
 
   void setCharacter(const HSceneObject &characterSO) {
     mCharacterSO = characterSO;
@@ -36,7 +36,7 @@ public:
 private:
   void applyAngles();
 
- private:
+private:
   VirtualButton mUp;
   VirtualButton mDown;
   VirtualButton mLeft;

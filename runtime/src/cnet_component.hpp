@@ -27,7 +27,7 @@ public:
    * Dont forget to add this component to the world.
    * world->addNetComp(...)
    */
-  CNetComponent(bs::HSceneObject parent);
+  explicit CNetComponent(bs::HSceneObject parent);
 
   CNetComponent(bs::HSceneObject parent, const MoveableState &moveableState);
 

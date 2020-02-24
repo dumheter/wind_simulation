@@ -7,14 +7,14 @@
 #include "RTTI/BsMathRTTI.h"
 #include "Reflection/BsRTTIPlain.h"
 #include "Reflection/BsRTTIType.h"
-#include "rtti_types.hpp"
 #include "Scene/BsComponent.h"
+#include "rtti_types.hpp"
 #include "types.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {
 public:
-  CRotor(const bs::HSceneObject &parent);
+  explicit CRotor(const bs::HSceneObject &parent);
 
   void fixedUpdate() override;
 

@@ -14,15 +14,9 @@ class MoveableState;
 
 class Creator {
 public:
-  enum class Types : u32 {
-    kInvalid = 0,
-    kPlayer,
-    kCube,
-    kBall,
-    kRotor
-  };
+  enum class Types : u32 { kInvalid = 0, kPlayer, kCube, kBall, kRotor };
 
-  Creator(World *world);
+  explicit Creator(World *world);
 
   /**
    * Based on type info in moveableState, call the correct

@@ -13,6 +13,8 @@
 #include "Utility/BsTime.h"
 #include "log.hpp"
 #include "world.hpp"
+#include <optional>
+#include <utility>
 
 namespace bs {
 constexpr float START_SPEED = 4.0f; // m/s

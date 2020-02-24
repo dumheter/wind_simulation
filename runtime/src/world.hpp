@@ -24,30 +24,30 @@ public:
   void update(const Client &client);
 
 private:
-  bs::GUILabel *hCQL;
-  bs::GUILabel *hCQR;
-  bs::GUILabel *hBSCE;
-  bs::GUILabel *hping;
-  bs::GUILabel *houtBytes;
-  bs::GUILabel *houtPackets;
-  bs::GUILabel *hinBytes;
-  bs::GUILabel *hinPackets;
-  bs::GUILabel *hqueueTime;
+  bs::GUILabel *hCQL{};
+  bs::GUILabel *hCQR{};
+  bs::GUILabel *hBSCE{};
+  bs::GUILabel *hping{};
+  bs::GUILabel *houtBytes{};
+  bs::GUILabel *houtPackets{};
+  bs::GUILabel *hinBytes{};
+  bs::GUILabel *hinPackets{};
+  bs::GUILabel *hqueueTime{};
 
-  bs::String CQL;
-  bs::String CQR;
-  bs::String BSCE;
-  bs::String ping;
-  bs::String outBytes;
-  bs::String outPackets;
-  bs::String inBytes;
-  bs::String inPackets;
-  bs::String queueTime;
+  bs::String CQL{};
+  bs::String CQR{};
+  bs::String BSCE{};
+  bs::String ping{};
+  bs::String outBytes{};
+  bs::String outPackets{};
+  bs::String inBytes{};
+  bs::String inPackets{};
+  bs::String queueTime{};
 };
 
 class World : public App {
 public:
-  World(const App::Info &info);
+  explicit World(const App::Info &info);
 
   /**
    * Reset the world state. (Delete players etc.)
@@ -140,7 +140,7 @@ private:
   bs::HMaterial createMaterial(const bs::String &path);
   bs::HSceneObject createGUI(bs::HSceneObject camera);
 
-  /* Give full window width and height. */
+  /// Give full window width and height.
   void updateAimPosition(u32 width, u32 height);
 
 private:

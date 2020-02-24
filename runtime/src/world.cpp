@@ -191,9 +191,9 @@ void World::setupMyPlayer() {
   auto netComp = player->addComponent<CNetComponent>();
   netComp->setType(Creator::Types::kPlayer);
   auto camera = createCamera(player);
-  auto gui = createGUI(camera);
+  createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
-  auto [it, ok] = m_netComps.insert({UniqueId::kInvalid, netComp});
+  auto [it, ok] = m_netComps.insert({UniqueId::invalid(), netComp});
   AlfAssert(ok, "could not create my player");
 }
 
@@ -293,9 +293,9 @@ void World::onDisconnect() {
 
     m_netComps.clear();
     m_walkers.clear();
-    myNetComp->setUniqueId(UniqueId::kInvalid);
-    m_netComps.insert({UniqueId::kInvalid, myNetComp});
-    m_walkers.insert({UniqueId::kInvalid, m_player->getWalker()});
+    myNetComp->setUniqueId(UniqueId::invalid());
+    m_netComps.insert({UniqueId::invalid(), myNetComp});
+    m_walkers.insert({UniqueId::invalid(), m_player->getWalker()});
   }
 }
 
@@ -309,7 +309,7 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   SPtr<RenderWindow> primaryWindow = gApplication().getPrimaryWindow();
   cameraComp->getViewport()->setTarget(primaryWindow);
   cameraComp->setMain(true);
-  auto &windowProps = primaryWindow->getProperties();
+  const auto &windowProps = primaryWindow->getProperties();
   float aspectRatio = windowProps.width / (float)windowProps.height;
   cameraComp->setAspectRatio(aspectRatio);
   cameraComp->setProjectionType(PT_PERSPECTIVE);

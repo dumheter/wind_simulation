@@ -24,7 +24,7 @@ class World;
 
 class Server : public ISteamNetworkingSocketsCallbacks {
 public:
-  Server(World *world);
+  explicit Server(World *world);
 
   virtual ~Server() final;
 

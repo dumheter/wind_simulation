@@ -5,8 +5,8 @@
 
 namespace wind {
 
-MoveableState::MoveableState()
-    : m_id(UniqueId::kInvalid), m_type(Creator::Types::kInvalid), m_flag(0),
+MoveableState::MoveableState(UniqueId id)
+    : m_id(id), m_type(Creator::Types::kInvalid), m_flag(0),
       m_position(bs::Vector3::ONE), m_vel(), m_angVel(),
       m_rotation(bs::Quaternion::IDENTITY) {}
 
@@ -16,11 +16,6 @@ void MoveableState::from(const bs::Transform &transform) {
 }
 
 void MoveableState::from(bs::HSceneObject so) {
-  const auto pos = m_position;
-  const auto vel = m_vel;
-  const auto angVel = m_angVel;
-  const auto rot = m_rotation;
-
   from(so->getTransform());
   auto rigid = so->getComponent<bs::CRigidbody>();
   if (rigid) {

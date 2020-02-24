@@ -37,6 +37,7 @@
 #include "asset.hpp"
 #include "bsFPSWalker.h"
 #include "cmyplayer.hpp"
+#include "crotor.hpp"
 #include "log.hpp"
 #include "moveable_state.hpp"
 #include "utility/util.hpp"
@@ -45,7 +46,6 @@
 #include <alflib/core/assert.hpp>
 #include <chrono>
 #include <cstdlib>
-#include "crotor.hpp"
 
 namespace wind {
 
@@ -160,14 +160,14 @@ HCNetComponent Creator::rotor(const MoveableState &moveableState) const {
   collider->setMass(20.0f);
   collider->setExtents(Vector3(19.0f, 1.0f, 19.0f));
   HRigidbody rigid = so->addComponent<CRigidbody>();
-  //rigid->setSleepThreshold(0.1f);
+  // rigid->setSleepThreshold(0.1f);
   rigid->setUseGravity(false);
   rigid->setIsKinematic(true);
   auto netComp = so->addComponent<CNetComponent>(moveableState);
   netComp->setType(Types::kRotor);
   auto crotor = so->addComponent<CRotor>();
   crotor->setRotation(5.0f);
-    auto [it, ok] =
+  auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create rotor, was the id unique?");
   return netComp;
