@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "log.hpp"
-#include "player_input.hpp"
+#include "scene/component_factory.hpp"
+#include "state/player_input.hpp"
 #include "world.hpp"
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
@@ -8,7 +9,8 @@
 namespace wind {
 
 Server::Server(World *world)
-    : m_socketInterface(SteamNetworkingSockets()), m_world(world),
+    : m_socket(k_HSteamListenSocket_Invalid),
+      m_socketInterface(SteamNetworkingSockets()), m_world(world),
       m_connectionState(ConnectionState::kDisconnected) {
   m_pollGroup = m_socketInterface->CreatePollGroup();
   if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {
@@ -212,7 +214,7 @@ void Server::handlePacket(Packet &packet) {
     auto state = mr.Read<MoveableState>();
     const bs::Vector3 force{mr.Read<float>(), mr.Read<float>(),
                             mr.Read<float>()};
-    if (state.getType() != Creator::Types::kInvalid) {
+    if (state.getType() != ComponentTypes::kInvalid) {
       state.setUniqueId(UniqueIdGenerator::next());
       auto netComp = m_world->getCreator().create(state);
       netComp->addForce(force, bs::ForceMode::Velocity);
@@ -356,7 +358,7 @@ void Server::DisconnectConnection(ConnectionId connection) {
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
   }
 
-  if (leaveUid) {
+  if (leaveUid.isValid()) {
     Packet packet{};
     packet.SetHeader(PacketHeaderTypes::kPlayerLeave);
     auto mw = packet.GetMemoryWriter();

@@ -1,5 +1,4 @@
-#ifndef MOVEABLE_STATE_HPP_
-#define MOVEABLE_STATE_HPP_
+#pragma once
 
 #include "BsApplication.h"
 #include "Components/BsCRigidbody.h"
@@ -7,7 +6,7 @@
 #include "Math/BsVector3.h"
 #include "Scene/BsSceneObject.h"
 #include "Scene/BsTransform.h"
-#include "creator.hpp"
+#include "scene/component_factory.hpp"
 #include "types.hpp"
 #include "utility/unique_id.hpp"
 #include "utility/util.hpp"
@@ -19,9 +18,9 @@ namespace wind {
 class MoveableState {
 
 public:
-  MoveableState();
+  explicit MoveableState(UniqueId id);
 
-  MoveableState(UniqueId id) : MoveableState() { m_id = id; }
+  MoveableState() : MoveableState(UniqueId::invalid()) {}
 
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
@@ -31,9 +30,9 @@ public:
 
   void setUniqueId(UniqueId id) { m_id = id; }
 
-  Creator::Types getType() const { return m_type; }
+  ComponentTypes getType() const { return m_type; }
 
-  void setType(Creator::Types type) { m_type = type; }
+  void setType(ComponentTypes type) { m_type = type; }
 
   bs::Vector3 getPosition() const { return m_position; }
 
@@ -79,15 +78,14 @@ public:
 
   static MoveableState FromBytes(alflib::RawMemoryReader &mr);
 
-private:
+public: // public for RTTI
   UniqueId m_id;
-  Creator::Types m_type;
+  ComponentTypes m_type;
   Bitfield m_flag;
   bs::Vector3 m_position;
   bs::Vector3 m_vel;
   bs::Vector3 m_angVel;
   bs::Quaternion m_rotation;
 };
-} // namespace wind
 
-#endif // MOVEABLE_STATE_HPP_
+} // namespace wind

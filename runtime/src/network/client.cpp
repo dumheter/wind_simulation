@@ -9,13 +9,13 @@ Client::Client(World *world)
     : m_connection(k_HSteamNetConnection_Invalid),
       m_socketInterface(SteamNetworkingSockets()),
       m_connectionState(ConnectionState::kDisconnected), m_world(world),
-      m_uid(UniqueId::kInvalid) {}
+      m_uid(UniqueId::invalid()) {}
 
 Client::Client(World *world, ConnectionId activeConnection)
     : m_connection(activeConnection),
       m_socketInterface(SteamNetworkingSockets()),
       m_connectionState(ConnectionState::kConnected), m_world(world),
-      m_uid(UniqueId::kInvalid) {}
+      m_uid(UniqueId::invalid()) {}
 
 Client::~Client() { CloseConnection(); }
 
@@ -61,7 +61,7 @@ void Client::CloseConnection() {
   }
   SetConnectionState(ConnectionState::kDisconnected);
   m_world->onDisconnect();
-  m_uid = UniqueId::kInvalid;
+  m_uid = UniqueId::invalid();
 }
 
 SendResult Client::PacketSend(const Packet &packet,

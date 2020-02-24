@@ -109,6 +109,10 @@ public:
   /* Fixed-update callback */
   virtual void onFixedUpdate(f32 delta) {}
 
+
+  /* New dimensions stored in m_width and m_height */
+  virtual void onWindowResize() {}
+
   /// Tick callback
   virtual void onTick() {}
 
@@ -119,7 +123,7 @@ public:
 private:
   static App *g_app;
 
-private:
+protected:
   /* Application title */
   bs::String m_title;
   /* Window width */

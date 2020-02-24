@@ -1,5 +1,4 @@
-#ifndef PLAYER_INPUT_HPP_
-#define PLAYER_INPUT_HPP_
+#pragma once
 
 #include "types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
@@ -56,5 +55,3 @@ struct PlayerCameraInput {
 };
 
 } // namespace wind
-
-#endif // PLAYER_INPUT_HPP_

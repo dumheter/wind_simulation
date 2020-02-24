@@ -95,28 +95,21 @@
     <ClCompile Include="src\BsFPSCamera.cpp" />
     <ClCompile Include="src\BsFPSWalker.cpp" />
     <ClCompile Include="src\cmyplayer.cpp" />
-    <ClCompile Include="src\cnet_component.cpp" />
-    <ClCompile Include="src\cplayer.cpp" />
     <ClCompile Include="src\creator.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\moveable_state.cpp" />
     <ClCompile Include="src\network\client.cpp" />
     <ClCompile Include="src\network\connection_id.cpp" />
     <ClCompile Include="src\network\net_common.cpp" />
     <ClCompile Include="src\network\packet.cpp" />
     <ClCompile Include="src\network\server.cpp" />
     <ClCompile Include="src\network\side.cpp" />
-    <ClCompile Include="src\player_input.cpp" />
     <ClCompile Include="src\world.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BsFPSCamera.h" />
     <ClInclude Include="src\BsFPSWalker.h" />
     <ClInclude Include="src\cmyplayer.hpp" />
-    <ClInclude Include="src\cnet_component.hpp" />
-    <ClInclude Include="src\cplayer.hpp" />
     <ClInclude Include="src\creator.hpp" />
-    <ClInclude Include="src\moveable_state.hpp" />
     <ClInclude Include="src\network\client.hpp" />
     <ClInclude Include="src\network\connection_id.hpp" />
     <ClInclude Include="src\network\connection_state.hpp" />
@@ -125,8 +118,6 @@
     <ClInclude Include="src\network\packet_header.hpp" />
     <ClInclude Include="src\network\server.hpp" />
     <ClInclude Include="src\network\side.hpp" />
-    <ClInclude Include="src\player_input.hpp" />
-    <ClInclude Include="src\utility\unique_id.hpp" />
     <ClInclude Include="src\world.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
