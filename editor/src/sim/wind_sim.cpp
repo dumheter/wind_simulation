@@ -29,6 +29,7 @@
 // Headers
 // ========================================================================== //
 
+#include "debug/debug.hpp"
 #include "log.hpp"
 #include "math/math.hpp"
 
@@ -67,8 +68,8 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
     m_d->get(i) = 0.0f;
     m_d0->get(i) = 0.0f;
   }
-  m_v->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
-  m_v0->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
+  // m_v->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
+  // m_v0->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
 
   // Postconditions
   assert(m_d->getDim() == m_v->getDim() &&
@@ -180,8 +181,8 @@ void WindSimulation::stepVelocity(f32 delta) {
     } else { // Center source
       for (s32 z = 14; z < 18; z++) {
         for (s32 y = 10; y < 14; y++) {
-          m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
-          m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+          m_v->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
+          m_v0->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
         }
       }
     }
@@ -263,7 +264,7 @@ void WindSimulation::gaussSeidel(Field<f32> *f, Field<f32> *f0, EdgeKind edge,
 
 void WindSimulation::diffuse(Field<f32> *f, Field<f32> *f0, EdgeKind edge,
                              f32 coeff, f32 delta) {
-  s32 maxDim = wind::max(m_width, m_height, m_depth);
+  s32 maxDim = wind::maxValue(m_width, m_height, m_depth);
   s32 cubic = maxDim * maxDim * maxDim;
   f32 a = delta * coeff * cubic;
   f32 c = 1.0f + 6.0f * a;
@@ -274,7 +275,7 @@ void WindSimulation::diffuse(Field<f32> *f, Field<f32> *f0, EdgeKind edge,
 
 void WindSimulation::advect(Field<f32> *f, Field<f32> *f0,
                             VectorField *vecField, EdgeKind edge, f32 delta) {
-  s32 maxDim = wind::max(m_width, m_height, m_depth);
+  s32 maxDim = wind::maxValue(m_width, m_height, m_depth);
   f32 deltaX = delta * maxDim;
   f32 deltaY = delta * maxDim;
   f32 deltaZ = delta * maxDim;
@@ -363,6 +364,7 @@ void WindSimulation::setBoundary(Field<f32> *f, EdgeKind edge) {
   bool isY = edge == EdgeKind::VELOCITY_Y;
   bool isZ = edge == EdgeKind::VELOCITY_Z;
 
+#if 1
   // Obstructions
   for (s32 i = 1; i <= m_width; i++) {
     for (s32 j = 1; j <= m_height; j++) {
@@ -378,35 +380,48 @@ void WindSimulation::setBoundary(Field<f32> *f, EdgeKind edge) {
 
           // X dir
           if (!m_o->get(i - 1, j, k)) {
-            sum += f->get(i - 1, j, k);
+            f32 value = f->get(i - 1, j, k);
+            // Debug::rangeCheck(value, -100.0f, 100.0f);
+            sum += value;
           }
           if (!m_o->get(i + 1, j, k)) {
-            sum += f->get(i + 1, j, k);
+            f32 value = f->get(i + 1, j, k);
+            // Debug::rangeCheck(value, -100.0f, 100.0f);
+            sum += value;
           }
 
           // Y dir
           if (!m_o->get(i, j - 1, k)) {
-            sum += f->get(i, j - 1, k);
+            f32 value = f->get(i, j - 1, k);
+            // Debug::rangeCheck(value, -100.0f, 100.0f);
+            sum += value;
           }
           if (!m_o->get(i, j + 1, k)) {
-            sum += f->get(i, j + 1, k);
+            f32 value = f->get(i, j + 1, k);
+            // Debug::rangeCheck(value, -100.0f, 100.0f);
+            sum += value;
           }
 
           // Y dir
           if (!m_o->get(i, j, k - 1)) {
-            sum += f->get(i, j, k - 1);
+            f32 value = f->get(i, j, k - 1);
+            // Debug::rangeCheck(value, -100.0f, 100.0f);
+            sum += value;
           }
           if (!m_o->get(i, j, k + 1)) {
-            sum += f->get(i, j, k + 1);
+            f32 value = f->get(i, j, k + 1);
+            // Debug::rangeCheck(value, -100.0f, 100.0f);
+            sum += value;
           }
 
-          f->get(i, j, k) = -sum;
+          f->get(i, j, k) = clamp(-sum, -100.0f, 100.0f);
           // f32 d = f->get(i, j, k);
           // int y = 0;
         }
       }
     }
   }
+#endif
 
   // X-Y faces
   for (s32 i = 1; i <= m_width; i++) {

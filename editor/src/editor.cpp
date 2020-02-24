@@ -31,6 +31,7 @@
 #include "log.hpp"
 #include "microprofile/microprofile.h"
 #include "ui.hpp"
+#include "utility/util.hpp"
 
 #include <alflib/core/assert.hpp>
 
@@ -74,15 +75,36 @@ Editor::~Editor() { delete m_ui; }
 void Editor::onStartup() {
   using namespace bs;
 
+  const SPtr<RenderWindow> window = gApplication().getPrimaryWindow();
+  const RenderWindowProperties &windowProp = window->getProperties();
+
+  // Register controls
   registerControls();
 
-  // Setup scene
-  HSceneObject scene = EditorFactory::createDefaultScene(GROUND_PLANE_SCALE);
-  m_camera = scene->findChild(EditorFactory::OBJ_CAMERA_NAME);
-  AlfAssert(m_camera != nullptr, "Scene camera not found");
+  // Setup root
+  m_root = SceneObject::create("root");
+
+  // Create camera
+  m_camera = SceneObject::create("camera");
+  m_camera->setParent(m_root);
+  m_camera->setPosition(
+      Vec3F(GROUND_PLANE_SCALE, 2.5f, GROUND_PLANE_SCALE - 4.0f) * 0.65f);
+  m_camera->lookAt(Vec3F(.0f, 1.5f, .0f));
+  HCamera cameraComp = m_camera->addComponent<CCamera>();
+  cameraComp->getViewport()->setTarget(window);
+  cameraComp->setNearClipDistance(0.005f);
+  cameraComp->setFarClipDistance(1000);
+  cameraComp->setAspectRatio(windowProp.width / f32(windowProp.height));
+  const SPtr<RenderSettings> renderSettings = cameraComp->getRenderSettings();
+  renderSettings->enableIndirectLighting = true;
+  cameraComp->setRenderSettings(renderSettings);
+  const HCameraFlyer cameraFlyerComp = m_camera->addComponent<CameraFlyer>();
 
   // Setup UI
   m_ui = new UI(this);
+
+  // Setup default scene
+  setScene(EditorFactory::createEmptyScene("scene_empty", GROUND_PLANE_SCALE));
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
@@ -187,6 +209,30 @@ void Editor::registerControls() {
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseY));
+}
+
+// -------------------------------------------------------------------------- //
+
+void Editor::setScene(const bs::HSceneObject &scene) {
+  // Set previous scene as not current
+  if (m_scene != nullptr) {
+    m_scene->setActive(false);
+  }
+
+  // Set new scene as current
+  scene->setParent(m_root);
+  m_scene = scene;
+  m_scene->setActive(true);
+
+  // Recreate simulation
+  delete m_windSim;
+  m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
+                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.25f);
+  m_windSim->buildForScene(bs::SceneManager::instance().getMainScene());
+
+  // Debug dump
+  logInfo("Dumping scene structure");
+  Util::dumpScene(m_root);
 }
 
 } // namespace wind

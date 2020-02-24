@@ -26,9 +26,28 @@
 // Headers
 // ========================================================================== //
 
+#include "log.hpp"
+
 #include <BsApplication.h>
 #include <Input/BsMouse.h>
 #include <Platform/BsCursor.h>
+
+// ========================================================================== //
+// Functions
+// ========================================================================== //
+
+namespace wind {
+
+void dumpSceneAux(const bs::HSceneObject &o, u32 indent) {
+  std::string pad = Util::repeat(' ', indent);
+  const char *name = o->getName().c_str();
+  logInfo("{}{}", pad, name);
+  for (u32 i = 0; i < o->getNumChildren(); ++i) {
+    dumpSceneAux(o->getChild(i), indent + 2);
+  }
+}
+
+} // namespace wind
 
 // ========================================================================== //
 // Util Implementation
@@ -36,7 +55,7 @@
 
 namespace wind {
 
-void Util::CenterCursor(bs::SPtr<bs::RenderWindow> window) {
+void Util::centerCursor(bs::SPtr<bs::RenderWindow> window) {
   using namespace bs;
 
   if (!window) {
@@ -46,6 +65,21 @@ void Util::CenterCursor(bs::SPtr<bs::RenderWindow> window) {
   const UINT32 x = windowProps.left + (windowProps.width / 2);
   const UINT32 y = windowProps.top + (windowProps.height / 2);
   Cursor::instance().setScreenPosition(Vector2I(x, y));
+}
+
+// -------------------------------------------------------------------------- //
+
+void Util::dumpScene(const bs::HSceneObject &scene) { dumpSceneAux(scene, 0); }
+
+// -------------------------------------------------------------------------- //
+
+std::string Util::repeat(char c, u32 n) {
+  std::string str;
+  str.resize(n);
+  for (u32 i = 0; i < n; i++) {
+    str[i] = c;
+  }
+  return str;
 }
 
 } // namespace wind

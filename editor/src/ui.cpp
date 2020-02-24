@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "editor.hpp"
+#include "factory.hpp"
 #include "log.hpp"
 #include "microprofile/microprofile.h"
 
@@ -54,10 +55,15 @@ namespace wind {
 UI::UI(Editor *editor) : m_editor(editor) {
   using namespace bs;
 
-  // Setup GUI
+  const SPtr<RenderWindow> &window = gApplication().getPrimaryWindow();
+  const RenderWindowProperties &windowProp = window->getProperties();
+
+  // Setup scene object
   HSceneObject gui = SceneObject::create("gui");
-  HSceneObject camera = editor->getCamera();
-  HCamera cameraComp = camera->getComponent<CCamera>();
+  gui->setParent(m_editor->getSceneRoot());
+
+  // Setup GUI
+  HCamera cameraComp = m_editor->getCamera()->getComponent<CCamera>();
   HGUIWidget guiComp = gui->addComponent<CGUIWidget>(cameraComp);
   GUIPanel *panel = guiComp->getPanel();
 
@@ -359,8 +365,8 @@ UI::UI(Editor *editor) : m_editor(editor) {
     button->setWidth(90);
     button->setPosition(120, height);
     button->onClick.connect([this]() {
-      SceneManager::instance().clearScene();
-
+      m_editor->setScene(EditorFactory::createDefaultScene(
+          "scene_default", Editor::GROUND_PLANE_SCALE));
       logVerbose("loading default scene");
     });
 

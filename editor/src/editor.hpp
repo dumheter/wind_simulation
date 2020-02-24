@@ -76,6 +76,15 @@ public:
   /// Returns a pointer to the wind simulation
   WindSimulation *getSim() const { return m_windSim; }
 
+  /// Returns the root scene
+  const bs::HSceneObject &getSceneRoot() { return m_root; }
+
+  /// Returns the current scene
+  const bs::HSceneObject &getScene() { return m_scene; }
+
+  /// Set the current scene
+  void setScene(const bs::HSceneObject &scene);
+
   /// Returns the main camera used to render the scenes in the editor.
   bs::HSceneObject getCamera() { return m_camera; }
 
@@ -95,14 +104,17 @@ private:
   /// m_runSim flag set to true, the simulation will run continuously
   s32 m_simSteps = 0;
 
-  /* Camera object */
+  /// Scene root
+  bs::HSceneObject m_root;
+  /// GUI camera
+  // bs::HSceneObject m_guiCamera;
+  /// Current scene
+  bs::HSceneObject m_scene;
+  /// Camera object
   bs::HSceneObject m_camera;
 
-  /* Root geometry node */
-  bs::HSceneObject m_geometry;
-
-  /* Wind simulation field */
-  WindSimulation *m_windSim;
+  /// Wind simulation field
+  WindSimulation *m_windSim = nullptr;
 
 public:
   /* Editor window width */
