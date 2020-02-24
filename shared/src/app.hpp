@@ -109,6 +109,10 @@ public:
   /* Fixed-update callback */
   virtual void onFixedUpdate(f32 delta) {}
 
+
+  /* New dimensions stored in m_width and m_height */
+  virtual void onWindowResize() {}
+
   /// Tick callback
   virtual void onTick() {}
 
