@@ -26,8 +26,12 @@
 // Headers
 // ========================================================================== //
 
-#include "scene/rtti.hpp"
-
+#include "BsPrerequisites.h"
+#include "Material/BsMaterial.h"
+#include "scene/component_handles.hpp"
+#include "utility/rtti_types.hpp"
+#include "utility/unique_id.hpp"
+#include "wind/base_functions.hpp"
 #include <BsPrerequisites.h>
 #include <RTTI/BsMathRTTI.h>
 #include <Reflection/BsRTTIPlain.h>
@@ -41,6 +45,11 @@
 
 namespace wind {
 
+struct Collision {
+  UniqueId id;
+  HCNetComponent netComp;
+};
+
 ///
 class CWindSource : public bs::Component {
   friend class CWindSourceRTTI;
@@ -49,25 +58,26 @@ public:
   /// Default constructor required for serialization
   CWindSource() = default;
 
-  explicit CWindSource(const bs::HSceneObject &parent);
+  CWindSource(const bs::HSceneObject &parent, const bs::HMaterial &mat,
+              const bs::HMesh &mesh);
 
-  /// Construct wind source from list of basic functions
-  // CWindSource(const std::vector<BasicFunction>& functions);
+  void addFunction(BaseFn function);
 
-  /// \copydoc bs::Component::onCreated()
+  bs::Vector3 getWindForce(bs::Vector3 pos) const;
+
+  void fixedUpdate() override;
+
   void onCreated() override;
 
-  /// \copydoc bs::Component::onTransformChanged()
-  void onTransformChanged(bs::TransformChangedFlags flags) override;
+  void onCollision();
 
-  ///
   static bs::RTTITypeBase *getRTTIStatic();
 
-  bs::RTTITypeBase *getRTTI() const override { return getRTTIStatic(); }
+  bs::RTTITypeBase *getRTTI() const override;
 
 private:
-  /// List of basic functions
-  // std::vector<BasicFunction> m_functions;
+  std::vector<BaseFn> m_functions{};
+  std::vector<Collision> m_collisions{};
 };
 
 // -------------------------------------------------------------------------- //
@@ -86,18 +96,21 @@ namespace wind {
 ///
 class CWindSourceRTTI
     : public bs::RTTIType<CWindSource, bs::Component, CWindSourceRTTI> {
+private:
+  BS_BEGIN_RTTI_MEMBERS
+  BS_END_RTTI_MEMBERS
+
 public:
-  const bs::String &getRTTIName() override { return s_name; }
+  const bs::String &getRTTIName() override {
+    static bs::String name = "CNetComponent";
+    return name;
+  }
 
   bs::UINT32 getRTTIId() override { return TID_CWindSource; }
 
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
     return bs::SceneObject::createEmptyComponent<CWindSource>();
   }
-
-private:
-  /// Static resource type name
-  static bs::String s_name;
 };
 
 } // namespace wind

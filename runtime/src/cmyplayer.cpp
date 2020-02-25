@@ -80,7 +80,7 @@ void CMyPlayer::onShoot() {
   state.setPosition(spawnPos);
   state.setRotation(
       m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
-  const bs::Vector3 force{forward * 30.0f};
+  const bs::Vector3 force{forward * m_shootForce};
   auto &packet = m_client->getPacket();
   packet.ClearPayload();
   packet.SetHeader(PacketHeaderTypes::kRequestCreate);

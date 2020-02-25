@@ -35,6 +35,6 @@
 namespace wind {
 
 /// RTTI Type ID of CWindSource component
-constexpr u32 TID_CWindSource = 3001;
+
 
 } // namespace wind
