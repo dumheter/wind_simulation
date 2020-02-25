@@ -3,7 +3,7 @@
 
 #include "network/connection_id.hpp"
 #include "network/packet_header.hpp"
-#include "types.hpp"
+#include "shared/types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 #include <vector>

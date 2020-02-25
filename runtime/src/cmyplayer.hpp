@@ -1,18 +1,19 @@
 #pragma once
 
-#include "BsFPSWalker.h"
-#include "BsPrerequisites.h"
-#include "Input/BsVirtualInput.h"
-#include "Math/BsQuaternion.h"
-#include "Private/RTTI/BsGameObjectRTTI.h"
-#include "RTTI/BsMathRTTI.h"
-#include "Reflection/BsRTTIPlain.h"
-#include "Reflection/BsRTTIType.h"
-#include "Scene/BsComponent.h"
-#include "scene/component_factory.hpp"
-#include "utility/rtti_types.hpp"
-#include "utility/unique_id.hpp"
+#include <BsPrerequisites.h>
+#include <Input/BsVirtualInput.h>
+#include <Math/BsQuaternion.h>
+#include <Private/RTTI/BsGameObjectRTTI.h>
+#include <RTTI/BsMathRTTI.h>
+#include <Reflection/BsRTTIPlain.h>
+#include <Reflection/BsRTTIType.h>
+#include <Scene/BsComponent.h>
 #include <memory>
+
+#include "BsFPSWalker.h"
+#include "shared/scene/component_factory.hpp"
+#include "shared/utility/rtti_types.hpp"
+#include "shared/utility/unique_id.hpp"
 
 namespace wind {
 

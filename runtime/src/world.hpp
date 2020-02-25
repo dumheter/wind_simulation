@@ -1,18 +1,18 @@
 #pragma once
 
-#include "BsApplication.h"
-#include "BsFPSCamera.h"
-#include "GUI/BsGUILabel.h"
-#include "app.hpp"
 #include "cmyplayer.hpp"
 #include "creator.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
-#include "scene/cnet_component.hpp"
-#include "scene/component_factory.hpp"
-#include "scene/crotor.hpp"
-#include "state/player_input.hpp"
-#include "utility/unique_id.hpp"
+#include "shared/app.hpp"
+#include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component_factory.hpp"
+#include "shared/scene/crotor.hpp"
+#include "shared/state/player_input.hpp"
+#include "shared/utility/unique_id.hpp"
+#include <BsApplication.h>
+#include <BsFPSCamera.h>
+#include <GUI/BsGUILabel.h>
 #include <GUI/BsGUITexture.h>
 #include <unordered_map>
 

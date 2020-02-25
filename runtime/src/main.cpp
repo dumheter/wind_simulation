@@ -1,6 +1,6 @@
-#include "app.hpp"
-#include "log.hpp"
 #include "network/net_common.hpp"
+#include "shared/app.hpp"
+#include "shared/log.hpp"
 #include "world.hpp"
 
 int main() {

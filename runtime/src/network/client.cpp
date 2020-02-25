@@ -1,5 +1,5 @@
 #include "client.hpp"
-#include "log.hpp"
+#include "shared/log.hpp"
 #include "world.hpp"
 #include <microprofile/microprofile.h>
 

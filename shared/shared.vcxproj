@@ -60,6 +60,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\thirdparty;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,6 +82,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\thirdparty;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,17 +97,19 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\app.cpp" />
-    <ClCompile Include="src\asset.cpp" />
-    <ClCompile Include="src\BsCameraFlyer.cpp" />
-    <ClCompile Include="src\debug\debug.cpp" />
-    <ClCompile Include="src\scene\cnet_component.cpp" />
-    <ClCompile Include="src\scene\component_factory.cpp" />
-    <ClCompile Include="src\scene\crotor.cpp" />
-    <ClCompile Include="src\log.cpp" />
-    <ClCompile Include="src\scene\wind_src.cpp" />
-    <ClCompile Include="src\state\moveable_state.cpp" />
-    <ClCompile Include="src\state\player_input.cpp" />
+    <ClCompile Include="src\shared\app.cpp" />
+    <ClCompile Include="src\shared\asset.cpp" />
+    <ClCompile Include="src\shared\BsCameraFlyer.cpp" />
+    <ClCompile Include="src\shared\debug\debug.cpp" />
+    <ClCompile Include="src\shared\scene\builder.cpp" />
+    <ClCompile Include="src\shared\scene\cnet_component.cpp" />
+    <ClCompile Include="src\shared\scene\component_factory.cpp" />
+    <ClCompile Include="src\shared\scene\crotor.cpp" />
+    <ClCompile Include="src\shared\log.cpp" />
+    <ClCompile Include="src\shared\scene\wind_src.cpp" />
+    <ClCompile Include="src\shared\state\moveable_state.cpp" />
+    <ClCompile Include="src\shared\state\player_input.cpp" />
+    <ClCompile Include="src\shared\utility\json_util.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\assert.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\buffer.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\console.cpp" />
@@ -136,28 +140,32 @@
     <ClCompile Include="src\thirdparty\microtar\microtar.c" />
     <ClCompile Include="src\thirdparty\miniz\miniz.c" />
     <ClCompile Include="src\thirdparty\stb\stb_vorbis.c" />
-    <ClCompile Include="src\utility\util.cpp" />
+    <ClCompile Include="src\shared\utility\util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\app.hpp" />
-    <ClInclude Include="src\assert.hpp" />
-    <ClInclude Include="src\asset.hpp" />
-    <ClInclude Include="src\BsCameraFlyer.h" />
-    <ClInclude Include="src\debug\debug.hpp" />
-    <ClInclude Include="src\scene\rtti.hpp" />
-    <ClInclude Include="src\scene\wind_src.hpp" />
-    <ClInclude Include="src\scene\cnet_component.hpp" />
-    <ClInclude Include="src\scene\component_factory.hpp" />
-    <ClInclude Include="src\scene\component_handles.hpp" />
-    <ClInclude Include="src\scene\crotor.hpp" />
-    <ClInclude Include="src\state\moveable_state.hpp" />
-    <ClInclude Include="src\state\player_input.hpp" />
-    <ClInclude Include="src\types.hpp" />
-    <ClInclude Include="src\macros.hpp" />
-    <ClInclude Include="src\math\dim.hpp" />
-    <ClInclude Include="src\log.hpp" />
-    <ClInclude Include="src\math\field.hpp" />
-    <ClInclude Include="src\math\math.hpp" />
+    <ClInclude Include="src\shared\app.hpp" />
+    <ClInclude Include="src\shared\assert.hpp" />
+    <ClInclude Include="src\shared\asset.hpp" />
+    <ClInclude Include="src\shared\BsCameraFlyer.h" />
+    <ClInclude Include="src\shared\debug\debug.hpp" />
+    <ClInclude Include="src\shared\scene\builder.hpp" />
+    <ClInclude Include="src\shared\scene\rtti.hpp" />
+    <ClInclude Include="src\shared\scene\types.hpp" />
+    <ClInclude Include="src\shared\scene\wind_src.hpp" />
+    <ClInclude Include="src\shared\scene\cnet_component.hpp" />
+    <ClInclude Include="src\shared\scene\component_factory.hpp" />
+    <ClInclude Include="src\shared\scene\component_handles.hpp" />
+    <ClInclude Include="src\shared\scene\crotor.hpp" />
+    <ClInclude Include="src\shared\state\moveable_state.hpp" />
+    <ClInclude Include="src\shared\state\player_input.hpp" />
+    <ClInclude Include="src\shared\utility\json_util.hpp" />
+    <ClInclude Include="src\thirdparty\nlohmann\json.hpp" />
+    <ClInclude Include="src\shared\types.hpp" />
+    <ClInclude Include="src\shared\macros.hpp" />
+    <ClInclude Include="src\shared\math\dim.hpp" />
+    <ClInclude Include="src\shared\log.hpp" />
+    <ClInclude Include="src\shared\math\field.hpp" />
+    <ClInclude Include="src\shared\math\math.hpp" />
     <ClInclude Include="src\thirdparty\alflib\alflib.hpp" />
     <ClInclude Include="src\thirdparty\alflib\collection\array_list.hpp" />
     <ClInclude Include="src\thirdparty\alflib\collection\array_map.hpp" />
@@ -226,10 +234,10 @@
     <ClInclude Include="src\thirdparty\stb\stb_truetype.h" />
     <ClInclude Include="src\thirdparty\stb\stb_voxel_render.h" />
     <ClInclude Include="src\thirdparty\stb\stretchy_buffer.h" />
-    <ClInclude Include="src\utility\bsprinter.hpp" />
-    <ClInclude Include="src\utility\rtti_types.hpp" />
-    <ClInclude Include="src\utility\unique_id.hpp" />
-    <ClInclude Include="src\utility\util.hpp" />
+    <ClInclude Include="src\shared\utility\bsprinter.hpp" />
+    <ClInclude Include="src\shared\utility\rtti_types.hpp" />
+    <ClInclude Include="src\shared\utility\unique_id.hpp" />
+    <ClInclude Include="src\shared\utility\util.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
