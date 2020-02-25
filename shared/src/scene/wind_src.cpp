@@ -20,57 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "wind_src.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
-
-// ========================================================================== //
-// Types
+// CWindSource Implementation
 // ========================================================================== //
 
 namespace wind {
 
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
-// ========================================================================== //
-
-namespace wind {
-
-/// Clamp 'value' between two other values 'min' and 'max'
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
-  return value < minValue ? minValue : value > maxValue ? maxValue : value;
+CWindSource::CWindSource(const bs::HSceneObject &parent) {
+  setName("WindComponent");
+  mNotifyFlags = bs::TCF_Transform;
 }
 
 // -------------------------------------------------------------------------- //
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b) {
-  return a > b ? a : b;
+void CWindSource::onCreated() {}
+
+// -------------------------------------------------------------------------- //
+
+void CWindSource::onTransformChanged(bs::TransformChangedFlags flags) {}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CWindSource::getRTTIStatic() {
+  return CWindSourceRTTI::instance();
 }
 
 // -------------------------------------------------------------------------- //
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b, T c) {
-  return wind::maxValue(a, wind::maxValue(b, c));
-}
-
-// -------------------------------------------------------------------------- //
-
-/// Returns the minimum of two values
-template <typename T> inline constexpr T minValue(T a, T b) {
-  return a < b ? a : b;
-}
+bs::String CWindSourceRTTI::s_name = "CWindSource";
 
 } // namespace wind

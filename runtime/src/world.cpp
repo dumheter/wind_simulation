@@ -86,7 +86,7 @@ void World::onPreUpdate(f32) {
   MicroProfileFlip(nullptr);
   MICROPROFILE_SCOPEI("world", "onPreUpdate", MP_BLUE2);
   if (m_cursorMode) {
-    Util::CenterCursor(bs::gApplication().getPrimaryWindow());
+    Util::centerCursor(bs::gApplication().getPrimaryWindow());
   }
 
   m_server.Poll();

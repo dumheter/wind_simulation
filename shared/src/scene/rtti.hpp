@@ -26,51 +26,15 @@
 // Headers
 // ========================================================================== //
 
-#include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
+#include "types.hpp"
 
 // ========================================================================== //
-// Types
-// ========================================================================== //
-
-namespace wind {
-
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-
-} // namespace wind
-
-// ========================================================================== //
-// Functions
+// RTTI Types
 // ========================================================================== //
 
 namespace wind {
 
-/// Clamp 'value' between two other values 'min' and 'max'
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
-  return value < minValue ? minValue : value > maxValue ? maxValue : value;
-}
-
-// -------------------------------------------------------------------------- //
-
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b) {
-  return a > b ? a : b;
-}
-
-// -------------------------------------------------------------------------- //
-
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b, T c) {
-  return wind::maxValue(a, wind::maxValue(b, c));
-}
-
-// -------------------------------------------------------------------------- //
-
-/// Returns the minimum of two values
-template <typename T> inline constexpr T minValue(T a, T b) {
-  return a < b ? a : b;
-}
+/// RTTI Type ID of CWindSource component
+constexpr u32 TID_CWindSource = 3001;
 
 } // namespace wind

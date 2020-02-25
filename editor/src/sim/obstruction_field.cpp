@@ -55,10 +55,6 @@ ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
 
 // -------------------------------------------------------------------------- //
 
-ObstructionField::~ObstructionField() { delete m_data; }
-
-// -------------------------------------------------------------------------- //
-
 void ObstructionField::buildForScene(
     const bs::SPtr<bs::SceneInstance> &scene,
     const bs::Vector3 &position /*= bs::Vector3()*/) {
