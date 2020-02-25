@@ -423,7 +423,10 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   }
 
   { // rotor slider
-    auto slider = layout->addNewElement<GUISliderHorz>();
+    auto l = layout->addNewElement<GUILayoutX>();
+    auto text = l->addNewElement<GUILabel>(HString{u8"rotorSpeed"});
+    text->setWidth(70);
+    auto slider = l->addNewElement<GUISliderHorz>();
     slider->onChanged.connect([](f32 percent) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
@@ -433,7 +436,10 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   }
 
   { // shootForce slider
-    auto slider = layout->addNewElement<GUISliderHorz>();
+    auto l = layout->addNewElement<GUILayoutX>();
+    auto text = l->addNewElement<GUILabel>(HString{u8"shootForce"});
+    text->setWidth(70);
+    auto slider = l->addNewElement<GUISliderHorz>();
     slider->setPercent(0.3f);
     slider->onChanged.connect(
         [this](f32 percent) { m_player->setShootForce(100.0f * percent); });
