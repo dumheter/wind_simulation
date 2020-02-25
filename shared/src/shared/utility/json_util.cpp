@@ -47,6 +47,16 @@ wind::Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
     } else if (obj.is_object()) {
       f32 x = obj.value("x", fallback.x);
       f32 y = obj.value("y", fallback.y);
+      x = obj.value("u", x);
+      y = obj.value("v", y);
+      auto _it = obj.find("xy");
+      if (_it != obj.end()) {
+        x = y = obj["xy"];
+      }
+      _it = obj.find("uv");
+      if (_it != obj.end()) {
+        x = y = obj["uv"];
+      }
       return Vec2F(x, y);
     } else {
       return fallback;
@@ -81,6 +91,24 @@ wind::Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
       f32 x = obj.value("x", fallback.x);
       f32 y = obj.value("y", fallback.y);
       f32 z = obj.value("z", fallback.z);
+
+      auto _it = obj.find("xyz");
+      if (_it != obj.end()) {
+        x = y = z = obj["xyz"];
+      }
+      _it = obj.find("xy");
+      if (_it != obj.end()) {
+        x = y = obj["xy"];
+      }
+      _it = obj.find("xz");
+      if (_it != obj.end()) {
+        x = z = obj["xz"];
+      }
+      _it = obj.find("yz");
+      if (_it != obj.end()) {
+        y = z = obj["yz"];
+      }
+
       return Vec3F(x, y, z);
     } else {
       return fallback;

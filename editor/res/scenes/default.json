@@ -13,24 +13,26 @@
 					"type": "plane",
 					"texture": "../textures/grid.png",
 					"scale": [ 4.0, 1.0, 4.0 ],
-					"position": { "x": 4.0, "y": 0.4, "z": 4.0 },
-					"tiling": { "x": 16.0, "z": 16.0 },
+					"position": { "xz": 4.0, "y": 0.4 },
+					"tiling": { "uv": 16.0 },
 					"physics": { "restitution": 0.5 }
 				},
 				{
 					"type": "cube",
 					"texture": "../textures/grid_2.png",
-					"position": { "x": 6.0, "y": 3.0, "z": 4.0 },
+					"position": { "x": 6.0, "y": 3.0, "z": 3.0 },
 					"scale": { "y": 7.0, "z": 1.5 },
 					"physics": { "restitution": 0.5, "mass": 25.0 }
 				},
 				{
 				  "name": "fan",
+					"type": "cube",
+					"scale": { "xyz": 0.5 },
+					"position": { "xz": 4.0, "y": 1.0 },
 					"wind": [
 					  {
 						  "type": "constant",
-							"direction": { "x": 0.0, "y": 0.0, "z": 0.0 },
-							"position": { "x": 0.0, "y": 0.0, "z": 0.0 }
+							"direction": [ 0.0, 0.0, 0.0 ]
             }
           ]
         }

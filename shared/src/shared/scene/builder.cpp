@@ -209,12 +209,7 @@ bs::HSceneObject ObjectBuilder::fromJson(const String &directory,
     break;
   }
   case Kind::kPlane: {
-    Vec2F tiling = Vec2F::ONE;
-    if (value.find("tiling") != value.end()) {
-      tiling.x = value["tiling"].value("x", 1.0f);
-      tiling.y = value["tiling"].value("z", 1.0f);
-    }
-
+    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
     if (!tex.empty()) {
       builder.withMaterial(directory + "\\" + tex, tiling);
@@ -222,12 +217,7 @@ bs::HSceneObject ObjectBuilder::fromJson(const String &directory,
     break;
   }
   case Kind::kCube: {
-    Vec2F tiling = Vec2F::ONE;
-    if (value.find("tiling") != value.end()) {
-      tiling.x = value["tiling"].value("x", 1.0f);
-      tiling.y = value["tiling"].value("z", 1.0f);
-    }
-
+    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
     if (!tex.empty()) {
       builder.withMaterial(directory + "\\" + tex, tiling);
@@ -243,6 +233,7 @@ bs::HSceneObject ObjectBuilder::fromJson(const String &directory,
   String name = JsonUtil::getOrCall<String>(value, String("name"), []() {
     return ObjectBuilder::allocDefaultName();
   });
+  builder.withName(name);
 
   builder.withPosition(JsonUtil::getVec3F(value, "position"));
   builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));

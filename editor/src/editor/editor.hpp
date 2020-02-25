@@ -83,7 +83,7 @@ public:
   const bs::HSceneObject &getScene() { return m_scene; }
 
   /// Set the current scene
-  void setScene(const bs::HSceneObject &scene);
+  void setScene(const bs::HSceneObject &scene, bool destroy = false);
 
   /// Returns the main camera used to render the scenes in the editor.
   bs::HSceneObject getCamera() { return m_camera; }

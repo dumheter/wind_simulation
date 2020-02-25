@@ -30,6 +30,7 @@
 #include "editor/factory.hpp"
 #include "microprofile/microprofile.h"
 #include "shared/log.hpp"
+#include "shared/scene/builder.hpp"
 
 #include <Components/BsCCamera.h>
 #include <GUI/BsCGUIWidget.h>
@@ -386,16 +387,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     bSave->setWidth(30);
     bSave->setPosition(106, height);
     bSave->onClick.connect([this, input]() {
-      const bs::String path = input->getText() + ".asset";
-      const HSceneObject &scene = m_editor->getScene();
-      HPrefab prefab = Prefab::create(scene, false);
-      gResources().save(prefab, path, true);
-
-      const bs::String pathManifest = input->getText() + ".manifest.asset";
-      SPtr<ResourceManifest> manifest =
-          gResources().getResourceManifest("Default");
-      ResourceManifest::save(manifest, pathManifest, "");
-
+      const bs::String path = input->getText() + ".json";
       logVerbose("saving scene ({})", path.c_str());
     });
 
@@ -403,16 +395,9 @@ UI::UI(Editor *editor) : m_editor(editor) {
     bLoad->setWidth(30);
     bLoad->setPosition(138, height);
     bLoad->onClick.connect([this, input]() {
-      const bs::String pathManifest = input->getText() + ".manifest.asset";
-      SPtr<ResourceManifest> manifest =
-          ResourceManifest::load(pathManifest, "");
-      gResources().registerResourceManifest(manifest);
-
-      const bs::String path = input->getText() + ".asset";
-      HPrefab prefab = gResources().load<Prefab>(path);
-      HSceneObject scene = prefab->instantiate();
-      m_editor->setScene(scene);
-      logVerbose("loading scene ({})", path);
+      const bs::String path = input->getText() + ".json";
+      logVerbose("loading scene ({})", path.c_str());
+      m_editor->setScene(SceneBuilder::fromFile(path), true);
     });
 
     height += input->getBounds().height + 2;

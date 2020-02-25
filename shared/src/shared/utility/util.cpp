@@ -44,6 +44,10 @@ void dumpSceneAux(const bs::HSceneObject &o, u32 indent) {
   std::string pad = Util::repeat(' ', indent);
   const char *name = o->getName().c_str();
   logInfo("{}{}", pad, name);
+  const bs::Vector<bs::HComponent> &comps = o->getComponents();
+  for (const bs::HComponent &comp : comps) {
+    logInfo("{}* {}", pad, comp->getTypeName());
+  }
   for (u32 i = 0; i < o->getNumChildren(); ++i) {
     dumpSceneAux(o->getChild(i), indent + 2);
   }
