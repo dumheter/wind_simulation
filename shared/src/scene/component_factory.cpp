@@ -100,14 +100,23 @@ ComponentFactory::rotor(const MoveableState &moveableState) const {
   auto collider = so->addComponent<CBoxCollider>();
   collider->setMaterial(m_physicsMatStd);
   collider->setMass(20.0f);
-  collider->setExtents(Vector3(19.0f, 1.0f, 19.0f));
+  collider->setExtents(Vector3(18.0f, 1.0f, 18.0f));
   HRigidbody rigid = so->addComponent<CRigidbody>();
   rigid->setUseGravity(false);
   rigid->setIsKinematic(true);
+
+  // HSceneObject wind = SceneObject::create("WindSource");
+  // wind->setParent(so);
+  // auto windSource = wind->addComponent<CWindSource>(m_matWireframe, m_meshCube);
+  // windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, -500.0f, 1.0f}));
+  // wind->setScale(Vector3(5.0f, 10.0f, 5.0f) * 10.0f);
+  //wind->setPosition(Vector3())
+
   auto netComp = so->addComponent<CNetComponent>(moveableState);
   netComp->setType(ComponentTypes::kRotor);
   auto crotor = so->addComponent<CRotor>();
   crotor->setRotation(5.0f);
+
   return netComp;
 }
 
@@ -120,7 +129,7 @@ ComponentFactory::windSource(const MoveableState &moveableState) const {
   windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, 100.0f, 1.0f}));
   auto netComp = wind->addComponent<CNetComponent>(moveableState);
   netComp->setType(ComponentTypes::kWindSource);
-  wind->setScale(Vector3(5.0f, 5.0f, 5.0f));
+  wind->setScale(Vector3(2.0f, 5.0f, 5.0f));
   return netComp;
 }
 

@@ -59,8 +59,6 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
     auto so = data.collider[1]->SO();
     HCNetComponent netComp = so->getComponent<CNetComponent>();
     if (netComp) {
-      logVerbose("[windSource] col begin with {}, #{}",
-                 so->getRTTI()->getRTTIName(), netComp->getUniqueId().raw());
       m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
     } else {
       logWarning("[windSource] col with non net component");
@@ -81,8 +79,6 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
           break;
         }
       }
-      logVerbose("[windSource] col end with {}, #{}, {} left",
-                 so->getRTTI()->getRTTIName(), id.raw(), m_collisions.size());
     }
   });
 }
