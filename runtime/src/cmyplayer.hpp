@@ -41,6 +41,10 @@ public:
 
   void onShoot();
 
+  void setShootForce(f32 force) { m_shootForce = force; }
+
+  f32 getShootForce() const { return m_shootForce; }
+
   void setWeapon(ComponentTypes weapon);
 
   Client &getClient() { return *m_client; }
@@ -63,6 +67,7 @@ private:
   ComponentTypes m_weapon;
   bs::VirtualButton m_fire1;
   bs::VirtualButton m_fire2;
+  f32 m_shootForce = 30.0f;
 };
 
 using HCMyPlayer = bs::GameObjectHandle<CMyPlayer>;

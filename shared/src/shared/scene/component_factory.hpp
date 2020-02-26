@@ -17,7 +17,7 @@ class Creator;
 
 class ComponentFactory {
 public:
-  explicit ComponentFactory();
+  ComponentFactory();
 
   /**
    * Based on type info in moveableState, call the correct
@@ -31,15 +31,19 @@ public:
 
   HCNetComponent rotor(const MoveableState &moveableState) const;
 
+  HCNetComponent windSource(const MoveableState &moveableState) const;
+
   void floor() const;
 
 private:
   bs::HPhysicsMaterial physicsMaterial();
   bs::HMaterial material(const bs::String &path);
+  bs::HMaterial transparentMaterial(const bs::String &path);
 
 private:
   bs::HMaterial m_matGrid;
   bs::HMaterial m_matGrid2;
+  bs::HMaterial m_matWireframe;
   bs::HPhysicsMaterial m_physicsMatStd;
   bs::HMesh m_meshBall;
   bs::HMesh m_meshCube;

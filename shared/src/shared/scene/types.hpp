@@ -44,7 +44,8 @@ enum class ObjectTypes : u32 {
   kBall,        ///< Sphere/Ball
   kModel,       ///< Model with a specific mesh
   kPlayer,      ///< Player with corresponding components
-  kRotor        ///< Helicopter rotor
+  kRotor,       ///< Helicopter rotor
+  kWindSource   ///<
 };
 
 } // namespace wind

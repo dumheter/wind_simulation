@@ -7,16 +7,16 @@
 
 #include "Math/BsQuaternion.h"
 #include "Math/BsVector3.h"
-#include "log.hpp"
+#include "shared/log.hpp"
 
-template <>
-struct fmt::formatter<bs::Vector3> {
+template <> struct fmt::formatter<bs::Vector3> {
 
   char presentation = 'f';
 
-  constexpr auto parse(format_parse_context& ctx) {
+  constexpr auto parse(format_parse_context &ctx) {
     auto it = ctx.begin(), end = ctx.end();
-    if (it != end && (*it == 'f' || *it == 'e')) presentation = *it++;
+    if (it != end && (*it == 'f' || *it == 'e'))
+      presentation = *it++;
 
     if (it != end && *it != '}')
       throw format_error("invalid format");
@@ -25,7 +25,7 @@ struct fmt::formatter<bs::Vector3> {
   }
 
   template <typename FormatContext>
-  auto format(const bs::Vector3& v, FormatContext& ctx) {
+  auto format(const bs::Vector3 &v, FormatContext &ctx) {
     return format_to(ctx.out(),
                      presentation == 'f' ? "({:.1f}, {:.1f}, {:.1f})"
                                          : "({:.1e}, {:.1e}, {:.1e})",

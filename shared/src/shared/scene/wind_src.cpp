@@ -21,6 +21,13 @@
 // SOFTWARE.
 
 #include "wind_src.hpp"
+#include "Components/BsCBoxCollider.h"
+#include "Components/BsCRenderable.h"
+#include "Scene/BsSceneObject.h"
+#include "Utility/BsTime.h"
+#include "shared/log.hpp"
+#include "shared/scene/cnet_component.hpp"
+#include "shared/utility/bsprinter.hpp"
 
 // ========================================================================== //
 // CWindSource Implementation
@@ -28,9 +35,75 @@
 
 namespace wind {
 
-CWindSource::CWindSource(const bs::HSceneObject &parent) {
+CWindSource::CWindSource(const bs::HSceneObject &parent,
+                         const bs::HMaterial &mat, const bs::HMesh &mesh)
+    : bs::Component(parent) {
   setName("WindComponent");
-  mNotifyFlags = bs::TCF_Transform;
+  auto so = bs::SceneObject::create("CWindSource");
+  so->setParent(parent);
+
+  { // TODO @filip
+    auto render = so->addComponent<bs::CRenderable>();
+    render->setMesh(mesh);
+    render->setMaterial(mat);
+  }
+
+  auto collider = so->addComponent<bs::CBoxCollider>();
+  collider->setIsTrigger(true);
+  collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+
+  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
+    if (data.collider[1] == nullptr) {
+      return;
+    }
+    auto so = data.collider[1]->SO();
+    HCNetComponent netComp = so->getComponent<CNetComponent>();
+    if (netComp) {
+      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
+    } else {
+      logWarning("[windSource] col with non net component");
+    }
+  });
+
+  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
+    if (data.collider[1] == nullptr) {
+      return;
+    }
+    auto so = data.collider[1]->SO();
+    auto netComp = so->getComponent<CNetComponent>();
+    if (netComp) {
+      const auto id = netComp->getUniqueId();
+      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
+        if (it->id == id) {
+          m_collisions.erase(it);
+          break;
+        }
+      }
+    }
+  });
+}
+
+void CWindSource::addFunction(BaseFn function) {
+  m_functions.emplace_back(std::move(function));
+}
+
+bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {
+  bs::Vector3 force{bs::Vector3::ZERO};
+  for (auto fn : m_functions) {
+    force += fn(pos);
+  }
+  return force;
+}
+
+void CWindSource::fixedUpdate() {
+  if (!m_collisions.empty()) {
+    const f32 dt = bs::gTime().getFixedFrameDelta();
+    for (auto &collision : m_collisions) {
+      collision.netComp->addForce(
+          dt * getWindForce(collision.netComp->getState().getPosition()),
+          bs::ForceMode::Velocity);
+    }
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -39,16 +112,10 @@ void CWindSource::onCreated() {}
 
 // -------------------------------------------------------------------------- //
 
-void CWindSource::onTransformChanged(bs::TransformChangedFlags flags) {}
-
-// -------------------------------------------------------------------------- //
-
 bs::RTTITypeBase *CWindSource::getRTTIStatic() {
   return CWindSourceRTTI::instance();
 }
 
-// -------------------------------------------------------------------------- //
-
-bs::String CWindSourceRTTI::s_name = "CWindSource";
+bs::RTTITypeBase *CWindSource::getRTTI() const { return getRTTIStatic(); }
 
 } // namespace wind

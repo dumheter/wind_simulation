@@ -24,7 +24,7 @@ void CNetComponent::onCreated() {
   SO()->setPosition(m_state.getPosition());
   SO()->setRotation(m_state.getRotation());
   auto rigid = SO()->getComponent<bs::CRigidbody>();
-  if (rigid) {
+  if (rigid && !rigid->getIsKinematic()) {
     rigid->setVelocity(m_state.getVel());
     rigid->setAngularVelocity(m_state.getAngVel());
   }

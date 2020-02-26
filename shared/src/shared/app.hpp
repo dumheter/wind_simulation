@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "types.hpp"
+#include "shared/types.hpp"
 
 #include <BsApplication.h>
 
@@ -108,7 +108,6 @@ public:
 
   /* Fixed-update callback */
   virtual void onFixedUpdate(f32 delta) {}
-
 
   /* New dimensions stored in m_width and m_height */
   virtual void onWindowResize() {}

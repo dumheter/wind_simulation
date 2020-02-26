@@ -141,6 +141,7 @@
     <ClCompile Include="src\thirdparty\miniz\miniz.c" />
     <ClCompile Include="src\thirdparty\stb\stb_vorbis.c" />
     <ClCompile Include="src\shared\utility\util.cpp" />
+    <ClCompile Include="src\shared\wind\base_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\shared\app.hpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="src\shared\utility\rtti_types.hpp" />
     <ClInclude Include="src\shared\utility\unique_id.hpp" />
     <ClInclude Include="src\shared\utility\util.hpp" />
+    <ClInclude Include="src\shared\wind\base_functions.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
