@@ -17,6 +17,7 @@
 #include "shared/scene/wind_src.hpp"
 #include <Components/BsCSkybox.h>
 #include <Image/BsSpriteTexture.h>
+#include <Math/BsQuaternion.h>
 #include <microprofile/microprofile.h>
 #include <regex>
 #include <variant>
@@ -125,10 +126,15 @@ void World::setupScene() {
   rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
   m_creator.rotor(rotorState);
 
+  rotorState = MoveableState::generateNew();
+  rotorState.setPosition(bs::Vector3(32.0f, 2.0f, -32.0f));
+  rotorState.setRotation(
+      bs::Quaternion(bs::Degree(90.0f), bs::Degree(0.0f), bs::Degree(0.0f)));
+  m_creator.rotor(rotorState);
+
   auto windSourceState = MoveableState::generateNew();
   windSourceState.setPosition(bs::Vector3(-5.0f, 2.5f, -8.0f));
   auto r = m_creator.windSource(windSourceState);
-  int a = 0;
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -432,15 +438,14 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     slider->onChanged.connect([](f32 percent) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
-        rotor->setRotation(percent * percent * 1000);
-        HCWindSource &wind = rotor->getWindSource();
-        for (auto &fn : wind->getFunctions()) {
-          if (std::holds_alternative<BaseFn::Constant>(fn.fn)) {
-            Vector3 &v = std::get<BaseFn::Constant>(fn.fn).dir;
-            v.normalize();
-            v *= percent * percent * 100.0f;
-          }
-        }
+        rotor->setRotation(bs::Vector3{0.0f, percent * percent * 1000, 0.0f});
+        // HCWindSource &wind = rotor->getWindSource();
+        // for (auto &fn : wind->getFunctions()) {
+        //   if (std::holds_alternative<BaseFn::Constant>(fn.fn)) {
+        //     std::get<BaseFn::Constant>(fn.fn).magnitude =
+        //         percent * percent * 100.0f;
+        //   }
+        // }
       }
     });
   }

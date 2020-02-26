@@ -26,7 +26,7 @@ namespace wind {
     /**
      * Every fixed update, this rotation will be applied.
      */
-    void setRotation(f32 degree);
+    void setRotation(bs::Vector3 degree);
 
     HCWindSource &getWindSource() { return m_windSource; }
     const HCWindSource &getWindSource() const { return m_windSource; }
@@ -35,7 +35,7 @@ namespace wind {
     bs::RTTITypeBase *getRTTI() const override;
 
   private:
-    f32 m_rotation;
+    bs::Quaternion m_rotation;
     HCWindSource m_windSource;
   };
 

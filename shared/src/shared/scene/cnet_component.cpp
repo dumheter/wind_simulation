@@ -38,7 +38,7 @@ void CNetComponent::onTransformChanged(bs::TransformChangedFlags flags) {
 
 void CNetComponent::addForce(bs::Vector3 force, bs::ForceMode mode) {
   auto rigid = SO()->getComponent<bs::CRigidbody>();
-  if (rigid) {
+  if (rigid && !rigid->getIsKinematic()) {
     rigid->addForce(force, mode);
   }
 }

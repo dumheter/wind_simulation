@@ -36,8 +36,8 @@ struct BaseFn {
 
   Variant fn;
 
-  static BaseFn fnConstant(bs::Vector3 dir) {
-    return BaseFn{Constant{dir, 1.0f}};
+  static BaseFn fnConstant(bs::Vector3 dir, f32 magnitude) {
+    return BaseFn{Constant{dir, magnitude}};
   }
 
   bs::Vector3 operator()(bs::Vector3 point) const {

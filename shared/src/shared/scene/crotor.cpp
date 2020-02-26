@@ -10,9 +10,11 @@ CRotor::CRotor(const bs::HSceneObject &parent, const HCWindSource &windSource)
   setName("CRotor");
 }
 
-void CRotor::fixedUpdate() { SO()->yaw(bs::Degree(m_rotation)); }
+void CRotor::fixedUpdate() { SO()->rotate(m_rotation); }
 
-void CRotor::setRotation(f32 degree) { m_rotation = degree; }
+void CRotor::setRotation(bs::Vector3 rot) {
+  m_rotation = bs::Quaternion(bs::Degree(rot.x), bs::Degree(rot.y), bs::Degree(rot.z));
+}
 
 bs::RTTITypeBase *CRotor::getRTTIStatic() { return CRotorRTTI::instance(); }
 

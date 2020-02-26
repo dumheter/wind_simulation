@@ -70,27 +70,47 @@ void CMyPlayer::onShoot() {
   if (m_weapon == ComponentTypes::kInvalid) {
     return;
   }
-  auto spawnPos = m_world->getPlayerNetComp()->getState().getPosition();
-  const auto &forward =
+
+  const auto forward =
       m_world->getFpsCamera()->getCamera()->getTransform().getForward();
+
+  const auto fn = [this, forward](bs::Vector3 spawnPos) {
+    MoveableState state{};
+    state.setType(m_weapon);
+    state.setPosition(spawnPos);
+    state.setRotation(
+        m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
+    const bs::Vector3 force{forward * m_shootForce};
+    auto &packet = m_client->getPacket();
+    packet.ClearPayload();
+    packet.SetHeader(PacketHeaderTypes::kRequestCreate);
+    auto mw = packet.GetMemoryWriter();
+    mw->Write(state);
+    mw->Write(force.x);
+    mw->Write(force.y);
+    mw->Write(force.z);
+    mw.Finalize();
+    m_client->PacketSend(packet, SendStrategy::kUnreliable);
+  };
+
+  auto spawnPos = m_world->getPlayerNetComp()->getState().getPosition();
+
   spawnPos += forward * 0.7f;
   spawnPos += bs::Vector3(0.0f, 1.0f, 0.0f);
-  MoveableState state{};
-  state.setType(m_weapon);
-  state.setPosition(spawnPos);
-  state.setRotation(
-      m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
-  const bs::Vector3 force{forward * m_shootForce};
-  auto &packet = m_client->getPacket();
-  packet.ClearPayload();
-  packet.SetHeader(PacketHeaderTypes::kRequestCreate);
-  auto mw = packet.GetMemoryWriter();
-  mw->Write(state);
-  mw->Write(force.x);
-  mw->Write(force.y);
-  mw->Write(force.z);
-  mw.Finalize();
-  m_client->PacketSend(packet, SendStrategy::kUnreliable);
+
+  fn(spawnPos);
+  // fn(spawnPos + bs::Vector3(0.5f, 0.0f, 0.0f));
+  // fn(spawnPos + bs::Vector3(-0.5f, 0.0f, 0.0f));
+  // fn(spawnPos + bs::Vector3(1.0f, 0.0f, 0.0f));
+  // fn(spawnPos + bs::Vector3(-1.0f, 0.0f, 0.0f));
+  // fn(spawnPos + bs::Vector3(0.5f, 0.0f, 0.5f));
+  // fn(spawnPos + bs::Vector3(-0.5f, 0.0f, -0.5f));
+  // fn(spawnPos + bs::Vector3(1.0f, 0.0f, 1.0f));
+  // fn(spawnPos + bs::Vector3(-1.0f, 0.0f, -1.0f));
+  // fn(spawnPos + bs::Vector3(0.0f, 0.0f, 0.5f));
+  // fn(spawnPos + bs::Vector3(0.0f, 0.0f, -0.5f));
+  // fn(spawnPos + bs::Vector3(0.0f, 0.0f, 1.0f));
+  // fn(spawnPos + bs::Vector3(0.0f, 0.0f, -1.0f));
 }
 
 void CMyPlayer::setWeapon(ComponentTypes weapon) { m_weapon = weapon; }
