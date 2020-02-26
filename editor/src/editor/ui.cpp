@@ -32,6 +32,8 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 
+#include <filesystem>
+
 #include <Components/BsCCamera.h>
 #include <GUI/BsCGUIWidget.h>
 #include <GUI/BsGUIButton.h>
@@ -395,9 +397,17 @@ UI::UI(Editor *editor) : m_editor(editor) {
     bLoad->setWidth(30);
     bLoad->setPosition(138, height);
     bLoad->onClick.connect([this, input]() {
-      const bs::String path = input->getText() + ".json";
-      logVerbose("loading scene ({})", path.c_str());
-      m_editor->setScene(SceneBuilder::fromFile(path), true);
+      m_scenePath = input->getText() + ".json";
+      std::filesystem::path path = m_scenePath.c_str();
+      if (std::filesystem::exists(path)) {
+        logVerbose("loading scene ({})", m_scenePath.c_str());
+        m_editor->setScene(SceneBuilder::fromFile(m_scenePath), true);
+        m_sceneAutoReload = true;
+      } else {
+        logWarning("Scene requested to load does not exist \"{}\"",
+                   m_scenePath.c_str());
+        m_sceneAutoReload = false;
+      }
     });
 
     height += input->getBounds().height + 2;
@@ -407,11 +417,24 @@ UI::UI(Editor *editor) : m_editor(editor) {
 // -------------------------------------------------------------------------- //
 
 void UI::onFixedUpdate(f32 delta) {
-
   // Redraw debug overlay each frame
   if (m_debugDraw) {
     MICROPROFILE_SCOPEI("Sim", "draw", MP_ORANGE1);
     m_editor->getSim()->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
+  }
+
+  // Check current file modification date
+  if (!m_scenePath.empty() && m_sceneAutoReload) {
+    std::filesystem::path path = m_scenePath.c_str();
+    if (std::filesystem::exists(path)) {
+      std::filesystem::file_time_type time =
+          std::filesystem::last_write_time(path);
+      if (time != m_sceneEditTime) {
+        logVerbose("reloading scene ({})", m_scenePath.c_str());
+        m_editor->setScene(SceneBuilder::fromFile(m_scenePath), true);
+      }
+      m_sceneEditTime = time;
+    }
   }
 }
 

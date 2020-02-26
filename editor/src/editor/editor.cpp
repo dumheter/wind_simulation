@@ -215,10 +215,13 @@ void Editor::registerControls() {
 
 // -------------------------------------------------------------------------- //
 
-void Editor::setScene(const bs::HSceneObject &scene) {
+void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
   // Set previous scene as not current
   if (m_scene != nullptr) {
     m_scene->setActive(false);
+    if (destroy) {
+      m_scene->destroy();
+    }
   }
 
   // Set new scene as current

@@ -29,6 +29,8 @@
 #include "editor/sim/wind_sim.hpp"
 #include "shared/types.hpp"
 
+#include <filesystem>
+
 #include <GUI/BsGUIToggle.h>
 
 // ========================================================================== //
@@ -57,6 +59,13 @@ private:
 
   /// Run toggle button
   bs::GUIToggle *m_runToggle;
+
+  /// Current scene path
+  String m_scenePath = "";
+  /// Whether scene auto-reload is enabled
+  bool m_sceneAutoReload = false;
+  /// Time that the scene file was last edited
+  std::filesystem::file_time_type m_sceneEditTime;
 
   /// Debug type
   WindSimulation::FieldKind m_debugFieldKind =

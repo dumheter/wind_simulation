@@ -28,11 +28,12 @@
 
 #include "shared/log.hpp"
 
-#include <thirdparty/alflib/file/file_io.hpp>
-
 #include <BsApplication.h>
 #include <Input/BsMouse.h>
 #include <Platform/BsCursor.h>
+#include <fstream>
+#include <streambuf>
+#include <thirdparty/alflib/file/file_io.hpp>
 
 // ========================================================================== //
 // Functions
@@ -95,16 +96,10 @@ bs::UUID Util::randUUID() { return bs::UUIDGenerator::generateRandom(); }
 // -------------------------------------------------------------------------- //
 
 bs::String Util::readFile(const String &path) {
-  alflib::FileIO io(path.c_str());
-  alflib::FileResult res = io.Open(alflib::FileIO::Flag::kRead);
-  AlfAssert(res == alflib::FileResult::kSuccess, "Failed to open file {}",
-            path.c_str());
-  alflib::String cont;
-  res = io.Read(cont);
-  AlfAssert(res == alflib::FileResult::kSuccess, "Failed to read file {}",
-            path.c_str());
-  io.Close();
-  return String(cont.GetUTF8());
+  std::ifstream stream(path.c_str());
+  std::string str((std::istreambuf_iterator<char>(stream)),
+                  std::istreambuf_iterator<char>());
+  return String(str);
 }
 
 // -------------------------------------------------------------------------- //
