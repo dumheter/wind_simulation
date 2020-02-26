@@ -9,6 +9,7 @@
 #include "Scene/BsComponent.h"
 #include "types.hpp"
 #include "utility/rtti_types.hpp"
+#include "scene/component_handles.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {
@@ -17,7 +18,7 @@ public:
 
   CRotor(); // serialization
 
-  explicit CRotor(const bs::HSceneObject &parent);
+  CRotor(const bs::HSceneObject &parent, const HCWindSource& windSource);
 
   void fixedUpdate() override;
 
@@ -26,11 +27,15 @@ public:
    */
   void setRotation(f32 degree);
 
+  HCWindSource& getWindSource() { return m_windSource; }
+  const HCWindSource &getWindSource() const { return m_windSource; }
+
   static bs::RTTITypeBase *getRTTIStatic();
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
   f32 m_rotation;
+  HCWindSource m_windSource;
 };
 
 using HCRotor = bs::GameObjectHandle<CRotor>;

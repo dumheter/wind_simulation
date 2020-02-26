@@ -14,10 +14,12 @@
 #include "Scene/BsSceneManager.h"
 #include "asset.hpp"
 #include "log.hpp"
+#include "scene/wind_src.hpp"
 #include <Components/BsCSkybox.h>
 #include <Image/BsSpriteTexture.h>
 #include <microprofile/microprofile.h>
 #include <regex>
+#include <variant>
 
 namespace wind {
 
@@ -431,6 +433,14 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
         rotor->setRotation(percent * percent * 1000);
+        HCWindSource &wind = rotor->getWindSource();
+        for (auto &fn : wind->getFunctions()) {
+          if (std::holds_alternative<BaseFn::Constant>(fn.fn)) {
+            Vector3 &v = std::get<BaseFn::Constant>(fn.fn).dir;
+            v.normalize();
+            v *= percent * percent * 100.0f;
+          }
+        }
       }
     });
   }

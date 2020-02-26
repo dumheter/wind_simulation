@@ -105,16 +105,16 @@ ComponentFactory::rotor(const MoveableState &moveableState) const {
   rigid->setUseGravity(false);
   rigid->setIsKinematic(true);
 
-  // HSceneObject wind = SceneObject::create("WindSource");
-  // wind->setParent(so);
-  // auto windSource = wind->addComponent<CWindSource>(m_matWireframe, m_meshCube);
-  // windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, -500.0f, 1.0f}));
-  // wind->setScale(Vector3(5.0f, 10.0f, 5.0f) * 10.0f);
-  //wind->setPosition(Vector3())
+  HSceneObject wind = SceneObject::create("WindSource");
+  wind->setParent(so);
+  auto windSource = wind->addComponent<CWindSource>(m_matWireframe, m_meshCube);
+  windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, 500.0f, 1.0f}));
+  wind->setScale(Vector3(5.0f, 5.0f, 5.0f) * 10.0f);
+  wind->setPosition(Vector3(0.0f, -2.5f, 0.0f) * 10.0f);
 
   auto netComp = so->addComponent<CNetComponent>(moveableState);
   netComp->setType(ComponentTypes::kRotor);
-  auto crotor = so->addComponent<CRotor>();
+  auto crotor = so->addComponent<CRotor>(windSource);
   crotor->setRotation(5.0f);
 
   return netComp;

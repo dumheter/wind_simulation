@@ -1,11 +1,13 @@
 #include "crotor.hpp"
+#include "scene/wind_src.hpp"
+#include "wind_src.hpp"
 
 namespace wind {
 
 CRotor::CRotor() : m_rotation() {}
 
-CRotor::CRotor(const bs::HSceneObject &parent)
-    : bs::Component(parent), m_rotation() {
+CRotor::CRotor(const bs::HSceneObject &parent, const HCWindSource &windSource)
+    : bs::Component(parent), m_rotation(), m_windSource(windSource) {
   setName("CRotor");
 }
 

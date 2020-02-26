@@ -7,25 +7,34 @@
 
 namespace wind {
 
-struct FnConstant {
+namespace baseFunctions {
+
+struct Constant {
+  f32 magnitude;
   bs::Vector3 dir;
 
   bs::Vector3 operator()(bs::Vector3 _) const { return dir; }
 };
 
-struct FnSpline {
+struct Spline {
   std::vector<bs::Vector3> points;
 
   bs::Vector3 operator()(bs::Vector3 point) const { return bs::Vector3::ZERO; }
 };
 
+} // namespace baseFunctions
+
 // ============================================================ //
 
 struct BaseFn {
-  using Variant = std::variant<FnConstant, FnSpline>;
+  using Constant = baseFunctions::Constant;
+  using Spline = baseFunctions::Spline;
+
+  using Variant = std::variant<Constant, Spline>;
+
   Variant fn;
 
-  static BaseFn fnConstant(bs::Vector3 dir) { return BaseFn{FnConstant{dir}}; }
+  static BaseFn fnConstant(bs::Vector3 dir) { return BaseFn{Constant{dir}}; }
 
   bs::Vector3 operator()(bs::Vector3 point) const {
     return std::visit([point](auto &&arg) { return arg(point); }, fn);
