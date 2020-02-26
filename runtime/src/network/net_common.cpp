@@ -1,5 +1,5 @@
 #include "net_common.hpp"
-#include "log.hpp"
+#include "shared/log.hpp"
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 

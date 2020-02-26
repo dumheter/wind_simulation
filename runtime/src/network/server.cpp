@@ -1,7 +1,7 @@
 #include "server.hpp"
-#include "log.hpp"
-#include "scene/component_factory.hpp"
-#include "state/player_input.hpp"
+#include "shared/log.hpp"
+#include "shared/scene/component_factory.hpp"
+#include "shared/state/player_input.hpp"
 #include "world.hpp"
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>

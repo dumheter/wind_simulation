@@ -7,8 +7,8 @@
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
 #include "network/side.hpp"
-#include "scene/cnet_component.hpp"
-#include "types.hpp"
+#include "shared/scene/cnet_component.hpp"
+#include "shared/types.hpp"
 #include <optional>
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>

@@ -1,12 +1,13 @@
 #pragma once
 
-#include "BsPrerequisites.h"
-#include "Input/BsVirtualInput.h"
-#include "Math/BsDegree.h"
-#include "Private/RTTI/BsGameObjectRTTI.h"
-#include "Reflection/BsRTTIPlain.h"
-#include "Reflection/BsRTTIType.h"
-#include "utility/rtti_types.hpp"
+#include "shared/utility/rtti_types.hpp"
+
+#include <BsPrerequisites.h>
+#include <Input/BsVirtualInput.h>
+#include <Math/BsDegree.h>
+#include <Private/RTTI/BsGameObjectRTTI.h>
+#include <Reflection/BsRTTIPlain.h>
+#include <Reflection/BsRTTIType.h>
 
 namespace bs {
 class FPSCamera : public Component {
