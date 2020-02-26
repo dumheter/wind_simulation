@@ -11,6 +11,7 @@
 #include "log.hpp"
 #include "scene/cnet_component.hpp"
 #include "scene/crotor.hpp"
+#include "scene/wind_src.hpp"
 #include "state/moveable_state.hpp"
 
 namespace wind {
@@ -19,6 +20,7 @@ ComponentFactory::ComponentFactory() {
   using namespace bs;
   m_matGrid = material("res/textures/grid.png");
   m_matGrid2 = material("res/textures/grid_2.png");
+  m_matWireframe = transparentMaterial("res/textures/wireframe.png");
   m_physicsMatStd = physicsMaterial();
   m_meshBall = gBuiltinResources().getMesh(BuiltinMesh::Sphere);
   m_meshCube = gBuiltinResources().getMesh(BuiltinMesh::Box);
@@ -29,7 +31,8 @@ HCNetComponent
 ComponentFactory::create(const MoveableState &moveableState) const {
   switch (moveableState.getType()) {
   case ComponentTypes::kPlayer:
-    logError("[ComponentFactory] called create with a player, but I cannot create players.");
+    logError("[ComponentFactory] called create with a player, but I cannot "
+             "create players.");
     break;
   case ComponentTypes::kCube:
     return cube(moveableState);
@@ -37,6 +40,8 @@ ComponentFactory::create(const MoveableState &moveableState) const {
     return ball(moveableState);
   case ComponentTypes::kRotor:
     return rotor(moveableState);
+  case ComponentTypes::kWindSource:
+    return windSource(moveableState);
   default:
     logWarning(
         "[ComponentFactory] create called with invalid type. type {}, id {}",
@@ -95,15 +100,36 @@ ComponentFactory::rotor(const MoveableState &moveableState) const {
   auto collider = so->addComponent<CBoxCollider>();
   collider->setMaterial(m_physicsMatStd);
   collider->setMass(20.0f);
-  collider->setExtents(Vector3(19.0f, 1.0f, 19.0f));
+  collider->setExtents(Vector3(18.0f, 1.0f, 18.0f));
   HRigidbody rigid = so->addComponent<CRigidbody>();
-  // rigid->setSleepThreshold(0.1f);
   rigid->setUseGravity(false);
   rigid->setIsKinematic(true);
+
+  // HSceneObject wind = SceneObject::create("WindSource");
+  // wind->setParent(so);
+  // auto windSource = wind->addComponent<CWindSource>(m_matWireframe, m_meshCube);
+  // windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, -500.0f, 1.0f}));
+  // wind->setScale(Vector3(5.0f, 10.0f, 5.0f) * 10.0f);
+  //wind->setPosition(Vector3())
+
   auto netComp = so->addComponent<CNetComponent>(moveableState);
   netComp->setType(ComponentTypes::kRotor);
   auto crotor = so->addComponent<CRotor>();
   crotor->setRotation(5.0f);
+
+  return netComp;
+}
+
+HCNetComponent
+ComponentFactory::windSource(const MoveableState &moveableState) const {
+  using namespace bs;
+  logVerbose("creating a windSource {}", moveableState.getUniqueId().raw());
+  HSceneObject wind = SceneObject::create("WindSource");
+  auto windSource = wind->addComponent<CWindSource>(m_matWireframe, m_meshCube);
+  windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, 100.0f, 1.0f}));
+  auto netComp = wind->addComponent<CNetComponent>(moveableState);
+  netComp->setType(ComponentTypes::kWindSource);
+  wind->setScale(Vector3(2.0f, 5.0f, 5.0f));
   return netComp;
 }
 
@@ -136,4 +162,15 @@ bs::HMaterial ComponentFactory::material(const bs::String &path) {
   material->setTexture("gAlbedoTex", texture);
   return material;
 }
+
+bs::HMaterial ComponentFactory::transparentMaterial(const bs::String &path) {
+  using namespace bs;
+  HShader shader =
+      gBuiltinResources().getBuiltinShader(BuiltinShader::Transparent);
+  HMaterial material = Material::create(shader);
+  HTexture texture = Asset::loadTexture(path);
+  material->setTexture("gAlbedoTex", texture);
+  return material;
+}
+
 } // namespace wind

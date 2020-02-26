@@ -26,6 +26,8 @@ HCNetComponent Creator::create(const MoveableState &moveableState) const {
     return ball(moveableState);
   case ComponentTypes::kRotor:
     return rotor(moveableState);
+  case ComponentTypes::kWindSource:
+    return windSource(moveableState);
   default:
     logWarning("[creator] create called with invalid type. type {}, id {}",
                static_cast<u32>(moveableState.getType()),
@@ -85,6 +87,14 @@ HCNetComponent Creator::rotor(const MoveableState &moveableState) const {
   auto [it, ok] =
       m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create rotor, was the id unique?");
+  return netComp;
+}
+
+HCNetComponent Creator::windSource(const MoveableState &moveableState) const {
+  auto netComp = m_factory.windSource(moveableState);
+  auto [it, ok] =
+      m_world->getNetComps().insert({moveableState.getUniqueId(), netComp});
+  AlfAssert(ok, "failed to create windSource, was the id unique?");
   return netComp;
 }
 

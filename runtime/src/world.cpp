@@ -122,6 +122,11 @@ void World::setupScene() {
   auto rotorState = MoveableState::generateNew();
   rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
   m_creator.rotor(rotorState);
+
+  auto windSourceState = MoveableState::generateNew();
+  windSourceState.setPosition(bs::Vector3(-5.0f, 2.5f, -8.0f));
+  auto r = m_creator.windSource(windSourceState);
+  int a = 0;
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -418,13 +423,26 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
   }
 
   { // rotor slider
-    auto slider = layout->addNewElement<GUISliderHorz>();
+    auto l = layout->addNewElement<GUILayoutX>();
+    auto text = l->addNewElement<GUILabel>(HString{u8"rotorSpeed"});
+    text->setWidth(70);
+    auto slider = l->addNewElement<GUISliderHorz>();
     slider->onChanged.connect([](f32 percent) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
         rotor->setRotation(percent * percent * 1000);
       }
     });
+  }
+
+  { // shootForce slider
+    auto l = layout->addNewElement<GUILayoutX>();
+    auto text = l->addNewElement<GUILabel>(HString{u8"shootForce"});
+    text->setWidth(70);
+    auto slider = l->addNewElement<GUISliderHorz>();
+    slider->setPercent(0.3f);
+    slider->onChanged.connect(
+        [this](f32 percent) { m_player->setShootForce(100.0f * percent); });
   }
 
   { // aim dot

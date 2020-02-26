@@ -30,11 +30,9 @@ public:
 
   HCNetComponent rotor(const MoveableState &moveableState) const;
 
-  void floor() const;
+  HCNetComponent windSource(const MoveableState &moveableState) const;
 
-private:
-  bs::HPhysicsMaterial physicsMaterial();
-  bs::HMaterial material(const bs::String &path);
+  void floor() const;
 
 private:
   World *m_world;

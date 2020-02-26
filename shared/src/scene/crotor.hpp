@@ -13,6 +13,8 @@
 namespace wind {
 class CRotor : public bs::Component {
 public:
+  friend class CRotorRTTI;
+
   CRotor(); // serialization
 
   explicit CRotor(const bs::HSceneObject &parent);
@@ -23,8 +25,6 @@ public:
    * Every fixed update, this rotation will be applied.
    */
   void setRotation(f32 degree);
-
-  friend class CRotorRTTI;
 
   static bs::RTTITypeBase *getRTTIStatic();
   bs::RTTITypeBase *getRTTI() const override;
