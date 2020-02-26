@@ -2,7 +2,7 @@
 #define NET_COMMON_HPP_
 
 #include "network/packet.hpp"
-#include "types.hpp"
+#include "shared/types.hpp"
 #include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 

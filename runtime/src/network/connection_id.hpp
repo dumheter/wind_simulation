@@ -1,7 +1,7 @@
 #ifndef CONNECTION_ID_HPP_
 #define CONNECTION_ID_HPP_
 
-#include "types.hpp"
+#include "shared/types.hpp"
 
 namespace wind {
 

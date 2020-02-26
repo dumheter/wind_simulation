@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BsPrerequisites.h"
-#include "scene/component_factory.hpp"
+#include "shared/scene/component_factory.hpp"
 
 namespace wind {
 
@@ -13,7 +13,6 @@ class MoveableState;
 
 class Creator {
 public:
-
   explicit Creator(World *world);
 
   /**

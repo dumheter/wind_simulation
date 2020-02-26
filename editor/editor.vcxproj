@@ -61,6 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)..\shared\src\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -77,6 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)..\shared\src\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -91,23 +93,26 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\editor.cpp" />
-    <ClCompile Include="src\factory.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\sim\density_field.cpp" />
-    <ClCompile Include="src\sim\obstruction_field.cpp" />
-    <ClCompile Include="src\sim\vector_field.cpp" />
-    <ClCompile Include="src\sim\wind_sim.cpp" />
-    <ClCompile Include="src\ui.cpp" />
+    <ClCompile Include="src\editor\editor.cpp" />
+    <ClCompile Include="src\editor\factory.cpp" />
+    <ClCompile Include="src\editor\main.cpp" />
+    <ClCompile Include="src\editor\sim\density_field.cpp" />
+    <ClCompile Include="src\editor\sim\obstruction_field.cpp" />
+    <ClCompile Include="src\editor\sim\vector_field.cpp" />
+    <ClCompile Include="src\editor\sim\wind_sim.cpp" />
+    <ClCompile Include="src\editor\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\editor.hpp" />
-    <ClInclude Include="src\factory.hpp" />
-    <ClInclude Include="src\sim\density_field.hpp" />
-    <ClInclude Include="src\sim\obstruction_field.hpp" />
-    <ClInclude Include="src\sim\vector_field.hpp" />
-    <ClInclude Include="src\sim\wind_sim.hpp" />
-    <ClInclude Include="src\ui.hpp" />
+    <ClInclude Include="src\editor\editor.hpp" />
+    <ClInclude Include="src\editor\factory.hpp" />
+    <ClInclude Include="src\editor\sim\density_field.hpp" />
+    <ClInclude Include="src\editor\sim\obstruction_field.hpp" />
+    <ClInclude Include="src\editor\sim\vector_field.hpp" />
+    <ClInclude Include="src\editor\sim\wind_sim.hpp" />
+    <ClInclude Include="src\editor\ui.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\scenes\default.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

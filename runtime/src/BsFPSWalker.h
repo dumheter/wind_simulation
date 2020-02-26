@@ -1,14 +1,15 @@
 #pragma once
 
-#include "BsCorePrerequisites.h"
-#include "Input/BsInputConfiguration.h"
-#include "Math/BsQuaternion.h"
-#include "Reflection/BsRTTIType.h"
-#include "Scene/BsComponent.h"
-#include "Scene/BsSceneObject.h"
-#include "String/BsString.h"
-#include "state/player_input.hpp"
-#include "utility/rtti_types.hpp"
+#include "shared/state/player_input.hpp"
+#include "shared/utility/rtti_types.hpp"
+
+#include <BsCorePrerequisites.h>
+#include <Input/BsInputConfiguration.h>
+#include <Math/BsQuaternion.h>
+#include <Reflection/BsRTTIType.h>
+#include <Scene/BsComponent.h>
+#include <Scene/BsSceneObject.h>
+#include <String/BsString.h>
 
 namespace bs {
 class IReflectable;

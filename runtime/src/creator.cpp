@@ -1,15 +1,17 @@
 #include "creator.hpp"
-#include "Components/BsCBoxCollider.h"
-#include "Components/BsCCharacterController.h"
-#include "Components/BsCPlaneCollider.h"
-#include "Components/BsCRenderable.h"
-#include "Importer/BsImporter.h"
-#include "Material/BsMaterial.h"
-#include "Physics/BsPhysicsMaterial.h"
-#include "Resources/BsBuiltinResources.h"
-#include "asset.hpp"
-#include "log.hpp"
-#include "scene/component_factory.hpp"
+
+#include <Components/BsCBoxCollider.h>
+#include <Components/BsCCharacterController.h>
+#include <Components/BsCPlaneCollider.h>
+#include <Components/BsCRenderable.h>
+#include <Importer/BsImporter.h>
+#include <Material/BsMaterial.h>
+#include <Physics/BsPhysicsMaterial.h>
+#include <Resources/BsBuiltinResources.h>
+
+#include "shared/asset.hpp"
+#include "shared/log.hpp"
+#include "shared/scene/component_factory.hpp"
 #include "world.hpp"
 
 namespace wind {

@@ -12,9 +12,9 @@
 #include "Input/BsInput.h"
 #include "Platform/BsCursor.h"
 #include "Scene/BsSceneManager.h"
-#include "asset.hpp"
-#include "log.hpp"
-#include "scene/wind_src.hpp"
+#include "shared/asset.hpp"
+#include "shared/log.hpp"
+#include "shared/scene/wind_src.hpp"
 #include <Components/BsCSkybox.h>
 #include <Image/BsSpriteTexture.h>
 #include <microprofile/microprofile.h>
