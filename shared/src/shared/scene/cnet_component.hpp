@@ -9,9 +9,9 @@
 #include <Scene/BsSceneObject.h>
 
 #include "shared/scene/component_factory.hpp"
+#include "shared/scene/rtti.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/types.hpp"
-#include "shared/utility/rtti_types.hpp"
 #include "shared/utility/unique_id.hpp"
 
 namespace wind {

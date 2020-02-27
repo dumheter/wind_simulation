@@ -34,8 +34,9 @@
 
 namespace wind {
 
-/// Enumeration of object types
-enum class ObjectTypes : u32 {
+/// Enumeration of object types. These are used to distinguish between object
+/// categories and to specify common information for that object type.
+enum class ObjectType : u32 {
   kInvalid = 0, ///< Invalid
   kEmpty,       ///< Empty object with no components
   kSkybox,      ///< Skybox
@@ -46,6 +47,15 @@ enum class ObjectTypes : u32 {
   kPlayer,      ///< Player with corresponding components
   kRotor,       ///< Helicopter rotor
   kWindSource   ///<
+};
+
+// -------------------------------------------------------------------------- //
+
+/// Enumeration of component types.
+enum class ComponentType : u32 {
+  kRigidbody,  ///< Rigidbody { "restitution", "mass" }
+  kWindSource, ///< Wind source { ["basic function"] }
+  kRotor       ///< Rotor { "x-rot", "y-rot", "z-rot" }
 };
 
 } // namespace wind

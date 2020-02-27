@@ -27,14 +27,8 @@
 // ========================================================================== //
 
 #include "shared/scene/rtti.hpp"
+#include "shared/scene/types.hpp"
 
-#include "shared/scene/component_handles.hpp"
-#include "shared/scene/rtti.hpp"
-#include "shared/utility/unique_id.hpp"
-#include "shared/wind/base_functions.hpp"
-
-#include <BsPrerequisites.h>
-#include <Material/BsMaterial.h>
 #include <RTTI/BsMathRTTI.h>
 #include <Reflection/BsRTTIPlain.h>
 #include <Reflection/BsRTTIType.h>
@@ -42,76 +36,70 @@
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
-// CWindSource Declaration
+// CTag Declaration
 // ========================================================================== //
 
 namespace wind {
 
-struct Collision {
-  UniqueId id;
-  HCNetComponent netComp;
-};
-
-///
-class CWindSource : public bs::Component {
-  friend class CWindSourceRTTI;
+/// Class that represents a component which is used to tag objects with extra
+/// information. Currently the tag contains only the type of the object
+class CTag final : public bs::Component {
+  friend class CTagRTTI;
 
 public:
-  /// Default constructor required for serialization
-  CWindSource() = default;
+  /// Default constructor for serialization
+  CTag() = default;
 
-  CWindSource(const bs::HSceneObject &parent, const bs::HMaterial &mat,
-              const bs::HMesh &mesh);
+  /// Construct a tag component with a specific object type as the tag.
+  CTag(const bs::HSceneObject &parent, ObjectType type);
 
-  void addFunction(BaseFn function);
+  /// Returns the type of the tag
+  ObjectType getType() const { return m_type; }
 
-  bs::Vector3 getWindForce(bs::Vector3 pos) const;
-
-  void fixedUpdate() override;
-
-  void onCreated() override;
-
-  void onCollision();
-
+  /// Returns a reference to the static RTTI object that represents this
+  /// component
   static bs::RTTITypeBase *getRTTIStatic();
 
-  bs::RTTITypeBase *getRTTI() const override;
+  /// \copydoc bs::IReflectable::getRTTI
+  bs::RTTITypeBase *getRTTI() const override { return getRTTIStatic(); }
 
 private:
-  std::vector<BaseFn> m_functions{};
-  std::vector<Collision> m_collisions{};
+  /// Type of the tagged object
+  ObjectType m_type = ObjectType::kInvalid;
 };
 
 // -------------------------------------------------------------------------- //
 
-/// CWindSource handle type
-using HCWindSource = bs::GameObjectHandle<CWindSource>;
+/// CTag handle type
+using HCTag = bs::GameObjectHandle<CTag>;
 
 } // namespace wind
 
 // ========================================================================== //
-// CWindSourceRTTI
+// CTagRTTI Declaration
 // ========================================================================== //
 
 namespace wind {
 
-///
-class CWindSourceRTTI
-    : public bs::RTTIType<CWindSource, bs::Component, CWindSourceRTTI> {
+/// CTag component RTTI
+class CTagRTTI : public bs::RTTIType<CTag, bs::Component, CTagRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
   BS_END_RTTI_MEMBERS
 
 public:
+  /// \copydoc bs::RTTITypeBase::getRTTIName
   const bs::String &getRTTIName() override {
-    static bs::String name = "CNetComponent";
+    static bs::String name = "CTag";
     return name;
   }
 
-  bs::UINT32 getRTTIId() override { return TID_CWindSource; }
+  /// \copydoc bs::RTTITypeBase::getRTTIId
+  bs::UINT32 getRTTIId() override { return TID_CTag; }
 
+  /// \copydoc bs::RTTITypeBase::newRTTIObject
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CWindSource>();
+    return bs::SceneObject::createEmptyComponent<CTag>();
   }
 };
 

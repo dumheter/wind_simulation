@@ -128,7 +128,8 @@ ComponentFactory::windSource(const MoveableState &moveableState) const {
   logVerbose("creating a windSource {}", moveableState.getUniqueId().raw());
   HSceneObject wind = SceneObject::create("WindSource");
   auto windSource = wind->addComponent<CWindSource>(m_matWireframe, m_meshCube);
-  windSource->addFunction(BaseFn::fnConstant(bs::Vector3{1.0f, 100.0f, 1.0f}));
+  windSource->addFunction(
+      BaseFn::fnConstant(bs::Vector3{1.0f, 100.0f, 1.0f}, 1.0f));
   auto netComp = wind->addComponent<CNetComponent>(moveableState);
   netComp->setType(ComponentTypes::kWindSource);
   wind->setScale(Vector3(2.0f, 5.0f, 5.0f));

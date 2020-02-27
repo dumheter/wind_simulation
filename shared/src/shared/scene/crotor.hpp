@@ -8,8 +8,8 @@
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 
+#include "shared/scene/rtti.hpp"
 #include "shared/types.hpp"
-#include "shared/utility/rtti_types.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {

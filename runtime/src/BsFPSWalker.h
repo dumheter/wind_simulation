@@ -1,7 +1,7 @@
 #pragma once
 
+#include "shared/scene/rtti.hpp"
 #include "shared/state/player_input.hpp"
-#include "shared/utility/rtti_types.hpp"
 
 #include <BsCorePrerequisites.h>
 #include <Input/BsInputConfiguration.h>

@@ -32,6 +32,9 @@
 // Main
 // ========================================================================== //
 
+#include "shared/math/math.hpp"
+#include "shared/scene/types.hpp"
+
 int main() {
   using namespace wind;
 

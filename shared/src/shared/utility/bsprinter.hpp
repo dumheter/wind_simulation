@@ -5,9 +5,42 @@
 
 #pragma once
 
-#include "Math/BsQuaternion.h"
-#include "Math/BsVector3.h"
+// ========================================================================== //
+// Headers
+// ========================================================================== //
+
 #include "shared/log.hpp"
+#include "shared/math/math.hpp"
+#include "shared/scene/component/ctag.hpp"
+
+#include <ostream>
+
+#include <thirdparty/fmt/ostream.h>
+
+#include <Math/BsQuaternion.h>
+#include <Math/BsVector3.h>
+
+// ========================================================================== //
+// Functions
+// ========================================================================== //
+
+std::ostream &operator<<(std::ostream &out, const bs::Vector3 &vec);
+
+// -------------------------------------------------------------------------- //
+
+std::ostream &operator<<(std::ostream &out, const bs::Vector2 &vec);
+
+// -------------------------------------------------------------------------- //
+
+std::ostream &operator<<(std::ostream &out, wind::ObjectType type);
+
+// -------------------------------------------------------------------------- //
+
+std::ostream &operator<<(std::ostream &out, const bs::HComponent &comp);
+
+// ========================================================================== //
+// Structures
+// ========================================================================== //
 
 template <> struct fmt::formatter<bs::Vector3> {
 
@@ -32,6 +65,8 @@ template <> struct fmt::formatter<bs::Vector3> {
                      v.x, v.y, v.z);
   }
 };
+
+// -------------------------------------------------------------------------- //
 
 template <> struct fmt::formatter<bs::Quaternion> {
 

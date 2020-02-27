@@ -8,7 +8,7 @@
 
 namespace wind {
 
-using ComponentTypes = ObjectTypes;
+using ComponentTypes = ObjectType;
 
 class MoveableState;
 class Creator;

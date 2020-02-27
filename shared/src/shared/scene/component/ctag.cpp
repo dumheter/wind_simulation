@@ -20,33 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "shared/scene/component/ctag.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "shared/types.hpp"
-
-// ========================================================================== //
-// RTTI Types
+// CTag Implementation
 // ========================================================================== //
 
 namespace wind {
 
-/// RTTI Type ID of CRotor component
-constexpr u32 TID_CRotor = 2000;
-/// RTTI Type ID of CNetComponent component
-constexpr u32 TID_CNetComponent = 2001;
-/// RTTI Type ID of CMyPlayer component
-constexpr u32 TID_CMyPlayer = 2002;
-/// RTTI Type ID of FPSWalker component
-constexpr u32 TID_FPSWalker = 2003;
-/// RTTI Type ID of FPSCamera component
-constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWindSource component
-constexpr u32 TID_CWindSource = 2005;
-/// RTTI Type ID of CTag component
-constexpr u32 TID_CTag = 2006;
+CTag::CTag(const bs::HSceneObject &parent, ObjectType type)
+    : bs::Component(parent), m_type(type) {}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CTag::getRTTIStatic() { return CTagRTTI::instance(); }
 
 } // namespace wind

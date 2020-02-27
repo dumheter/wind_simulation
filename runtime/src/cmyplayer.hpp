@@ -12,7 +12,7 @@
 
 #include "BsFPSWalker.h"
 #include "shared/scene/component_factory.hpp"
-#include "shared/utility/rtti_types.hpp"
+#include "shared/scene/rtti.hpp"
 #include "shared/utility/unique_id.hpp"
 
 namespace wind {

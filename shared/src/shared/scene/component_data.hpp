@@ -26,27 +26,57 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/types.hpp"
+#include "shared/scene/types.hpp"
+#include "shared/wind/base_functions.hpp"
+
+#include <alflib/memory/raw_memory_reader.hpp>
+#include <alflib/memory/raw_memory_writer.hpp>
 
 // ========================================================================== //
-// RTTI Types
+// ComponentData Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// RTTI Type ID of CRotor component
-constexpr u32 TID_CRotor = 2000;
-/// RTTI Type ID of CNetComponent component
-constexpr u32 TID_CNetComponent = 2001;
-/// RTTI Type ID of CMyPlayer component
-constexpr u32 TID_CMyPlayer = 2002;
-/// RTTI Type ID of FPSWalker component
-constexpr u32 TID_FPSWalker = 2003;
-/// RTTI Type ID of FPSCamera component
-constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWindSource component
-constexpr u32 TID_CWindSource = 2005;
-/// RTTI Type ID of CTag component
-constexpr u32 TID_CTag = 2006;
+/// Union-like class with data about different components.
+class ComponentData {
+
+  /// Underlying enum type of the enum "ComponentType"
+  using TagType = std::underlying_type_t<ComponentType>;
+
+  /// Data associated with wind sources
+  struct WindSourceData {
+    std::vector<BaseFn> functions = {};
+  };
+
+  /// Data associated with rigidbodies
+  struct RigidbodyData {
+    f32 restitution = 0.0f;
+    f32 mass = 0.0f;
+  };
+
+public:
+  /// Returns the WindSource data
+  const WindSourceData &windSourceData() const;
+
+  /// Returns the Rigidbody data
+  const RigidbodyData &rigidbodyData() const;
+
+  /// Serializes to bytes
+  bool ToBytes(alflib::RawMemoryWriter &mw) const;
+
+  /// Deserializes from bytes
+  static ComponentData FromBytes(alflib::RawMemoryReader &mr);
+
+  /// Creates a component data representing wind source data
+  static ComponentData asWindSource(const std::vector<BaseFn> &functions);
+
+  /// Creates a component data representing rigidbody data
+  static ComponentData asRigidbody(f32 restitution, f32 mass);
+
+private:
+  /// Variant
+  std::variant<WindSourceData, RigidbodyData> m_data;
+};
 
 } // namespace wind
