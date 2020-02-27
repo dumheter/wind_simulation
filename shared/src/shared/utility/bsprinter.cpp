@@ -46,10 +46,6 @@ std::ostream &operator<<(std::ostream &out, wind::ObjectType type) {
     out << "kEmpty";
     break;
   }
-  case wind::ObjectType::kSkybox: {
-    out << "kSkybox";
-    break;
-  }
   case wind::ObjectType::kPlane: {
     out << "kPlane";
     break;

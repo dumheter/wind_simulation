@@ -39,7 +39,6 @@ namespace wind {
 enum class ObjectType : u32 {
   kInvalid = 0, ///< Invalid
   kEmpty,       ///< Empty object with no components
-  kSkybox,      ///< Skybox
   kPlane,       ///< Flat plane
   kCube,        ///< Cube
   kBall,        ///< Sphere/Ball

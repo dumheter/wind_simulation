@@ -95,7 +95,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   default: {
-    Util::panic("Invalid kind");
+    Util::panic("Invalid type when building object ({})", kind);
     break;
   }
   }
@@ -145,9 +145,6 @@ ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
-  AlfAssert(m_kind == Kind::kSkybox,
-            "Only skybox objects can have a skybox component added");
-
   const bs::HTexture tex = Asset::loadCubemap(path);
   bs::HSkybox comp = m_handle->addComponent<bs::CSkybox>();
   comp->setTexture(tex);
@@ -229,8 +226,6 @@ String ObjectBuilder::nextName() {
 ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
   if (kindString == "empty") {
     return Kind::kEmpty;
-  } else if (kindString == "skybox") {
-    return Kind::kSkybox;
   } else if (kindString == "plane") {
     return Kind::kPlane;
   } else if (kindString == "cube") {
@@ -245,8 +240,6 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   switch (kind) {
   case Kind::kEmpty:
     return "empty";
-  case Kind::kSkybox:
-    return "skybox";
   case Kind::kPlane:
     return "plane";
   case Kind::kCube:

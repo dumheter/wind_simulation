@@ -111,6 +111,8 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
 
 bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
                                    const String &dir) {
+  using json = nlohmann::json;
+
   // Find type
   std::string type = value.value("type", "empty");
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
@@ -118,16 +120,6 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
 
   // Kind-specific options
   switch (kind) {
-  case ObjectBuilder::Kind::kSkybox: {
-    auto cubemapIt = value.find("texture");
-    if (cubemapIt != value.end()) {
-      builder.withSkybox(dir + "\\" + String(*cubemapIt));
-    } else {
-      logError("Cubemap objects require a \"texture\" property");
-      return bs::SceneObject::create("");
-    }
-    break;
-  }
   case ObjectBuilder::Kind::kPlane: {
     Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
@@ -161,6 +153,18 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     f32 restitution = value["physics"].value("restitution", 1.0f);
     f32 mass = value["physics"].value("mass", 0.0f);
     builder.withPhysics(restitution, mass);
+  }
+
+  // Skybox
+  if (value.find("skybox") != value.end()) {
+    json skybox = value["skybox"];
+    if (skybox.find("cubemap") != skybox.end()) {
+      String cubemapPath = dir + "\\" + String(skybox["cubemap"]);
+      builder.withSkybox(cubemapPath);
+    } else {
+      logError("Skybox requires a \"cubemap\" property");
+      return bs::SceneObject::create("");
+    }
   }
 
   // Sub-objects
