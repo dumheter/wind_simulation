@@ -109,11 +109,11 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    if (!m_world->serverIsActive()) {
+    //if (!m_world->serverIsActive()) {
       logInfo("[client:p Create] got a create packet");
       CreateInfo info = PacketParser::Create(m_packet);
       m_world->buildObject(info);
-    }
+      //}
   } else if (header == PacketHeaderTypes::kRequestCreate) {
     logError("[client:p RequestCreate] got a requestcreate packet");
   } // else if (header == PacketHeaderTypes::kLookup) {

@@ -7,9 +7,9 @@
 				{
 					"type": "plane",
 					"texture": "../textures/grid.png",
-					"scale": [ 4.0, 1.0, 4.0 ],
+					"scale": [ 40.0, 1.0, 40.0 ],
 					"position": { "xz": 4.0, "y": -55.5 },
-					"tiling": { "uv": 16.0 },
+					"tiling": { "uv": 160.0 },
 					"physics": { "restitution": 0.5 }
 				},
 				{

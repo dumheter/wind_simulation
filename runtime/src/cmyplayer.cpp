@@ -1,5 +1,6 @@
 #include "cmyplayer.hpp"
 #include "network/util.hpp"
+#include "shared/scene/component_data.hpp"
 #include "shared/scene/serializer.hpp"
 #include "world.hpp"
 #include <type_traits>
@@ -83,6 +84,7 @@ void CMyPlayer::onShoot() {
     state.setRotation(
         m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
     state.setVel(forward * m_shootForce);
+    state.setRigid(true);
     const bs::Vector3 scale{0.3f, 0.3f, 0.3f};
     Packet &packet = m_client->getPacket();
     RequestCreateInfo info{};
@@ -90,7 +92,10 @@ void CMyPlayer::onShoot() {
     info.parent = UniqueId::invalid();
     info.scale = scale;
     info.state = state;
-    //info.components = ...;
+    info.components.emplace_back(
+        ComponentData::asRigidbody(0.5f, 8.0f));
+    info.components.emplace_back(
+        ComponentData::asRenderable("res/textures/grid_2.png"));
     PacketBuilder::RequestCreate(packet, info);
     m_client->PacketSend(packet, SendStrategy::kUnreliable);
   };

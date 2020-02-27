@@ -45,22 +45,26 @@ const ComponentData::RigidbodyData &ComponentData::rigidbodyData() const {
   return std::get<RigidbodyData>(m_data);
 }
 
+const ComponentData::RenderableData &ComponentData::renderableData() const {
+  return std::get<RenderableData>(m_data);
+}
+
 // -------------------------------------------------------------------------- //
 
 bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
-  switch (m_data.index()) {
-  case 0: {
+  if (std::holds_alternative<WindSourceData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kWindSource));
     return mw.Write(std::get<WindSourceData>(m_data).functions);
-  }
-  case 1: {
-    mw.Write(static_cast<TagType>(ComponentType::kWindSource));
+  } else if (std::holds_alternative<RigidbodyData>(m_data)) {
+    mw.Write(static_cast<TagType>(ComponentType::kRigidbody));
     mw.Write(std::get<RigidbodyData>(m_data).restitution);
     return mw.Write(std::get<RigidbodyData>(m_data).mass);
-  }
-  default: {
+  } else if (std::holds_alternative<RenderableData>(m_data)) {
+    mw.Write(static_cast<TagType>(ComponentType::kRenderable));
+    return mw.Write(
+        alflib::String(std::get<RenderableData>(m_data).pathTexture.c_str()));
+  } else {
     Util::panic("Invalid ComponentData variant");
-  }
   }
 }
 
@@ -79,6 +83,10 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
   case ComponentType::kWindSource: {
     std::vector<BaseFn> functions = mr.ReadStdVector<BaseFn>();
     return asWindSource(functions);
+  }
+  case ComponentType::kRenderable: {
+    auto pathTexture = mr.Read<alflib::String>();
+    return asRenderable(String{pathTexture.GetUTF8()});
   }
   case ComponentType::kRotor:
   default: {
@@ -101,6 +109,12 @@ ComponentData::asWindSource(const std::vector<BaseFn> &functions) {
 ComponentData ComponentData::asRigidbody(f32 restitution, f32 mass) {
   ComponentData data;
   data.m_data = RigidbodyData{restitution, mass};
+  return data;
+}
+
+ComponentData ComponentData::asRenderable(const String& pathTexture) {
+  ComponentData data;
+  data.m_data = RenderableData{pathTexture};
   return data;
 }
 

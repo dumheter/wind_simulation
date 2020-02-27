@@ -51,6 +51,7 @@ enum class ObjectType : u32 {
 enum class ComponentType : u32 {
   kWindSource,
   kRigidbody,
+  kRenderable,
   kRotor,
 };
 

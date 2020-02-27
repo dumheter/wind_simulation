@@ -3,14 +3,13 @@
 #include "cmyplayer.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
+#include "network/util.hpp"
 #include "shared/app.hpp"
 #include "shared/scene/cnet_component.hpp"
-#include "shared/scene/component_factory.hpp"
 #include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_camera.hpp"
 #include "shared/state/player_input.hpp"
 #include "shared/utility/unique_id.hpp"
-#include "network/util.hpp"
 #include <BsApplication.h>
 #include <GUI/BsGUILabel.h>
 #include <GUI/BsGUITexture.h>
@@ -71,7 +70,7 @@ public:
 
   void onDisconnect();
 
-  void buildObject(const CreateInfo& info);
+  void buildObject(const CreateInfo &info);
 
   /**
    * Build the player entity, camera and attach gui to the

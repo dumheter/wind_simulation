@@ -79,7 +79,6 @@ World::World(const App::Info &info) : App(info), m_server(this) {
 }
 
 void World::onPreUpdate(f32) {
-  MicroProfileFlip(nullptr);
   MICROPROFILE_SCOPEI("world", "onPreUpdate", MP_BLUE2);
   if (m_cursorMode) {
     Util::centerCursor(bs::gApplication().getPrimaryWindow());
@@ -262,8 +261,30 @@ void World::onDisconnect() {
 }
 
 void World::buildObject(const CreateInfo &info) {
-  // TODO(filip) build object
-  logInfo("[buildObject] TODO");
+  MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
+  auto obj = ObjectBuilder(info.type)
+                 .withScale(info.scale)
+                 .withPosition(info.state.getPosition());
+  for (const auto &component : info.components) {
+    if (component.isType<ComponentData::WindSourceData>()) {
+      MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
+      const auto &wind = component.windSourceData();
+    } else if (component.isType<ComponentData::RigidbodyData>()) {
+      MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
+      const auto &rigid = component.rigidbodyData();
+      obj.withPhysics(rigid.restitution, rigid.mass);
+      obj.withRigidbody();
+    } else if (component.isType<ComponentData::RenderableData>()) {
+      MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
+      const auto &render = component.renderableData();
+      obj.withMaterial(render.pathTexture);
+    }
+  }
+
+  obj.withNetComponent(info.state);
+  // TODO register net comp
+
+  auto so = obj.build();
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
