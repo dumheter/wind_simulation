@@ -14,8 +14,8 @@
 #include "Scene/BsSceneManager.h"
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/scene/builder.hpp"
 #include "shared/scene/wind_src.hpp"
-#include <Components/BsCSkybox.h>
 #include <Image/BsSpriteTexture.h>
 #include <Math/BsQuaternion.h>
 #include <microprofile/microprofile.h>
@@ -71,18 +71,11 @@ constexpr u32 kAimDiameter = 8;
 
 // ============================================================ //
 
-World::World(const App::Info &info)
-    : App(info), m_server(this), m_creator(this) {
+World::World(const App::Info &info) : App(info), m_server(this) {
   using namespace bs;
 
   setupMyPlayer();
   setupInput();
-
-  m_creator.floor();
-  const HTexture skyboxTex = Asset::loadCubemap("res/skybox/daytime.hdr");
-  HSceneObject skybox = SceneObject::create("Skybox");
-  HSkybox skyboxComp = skybox->addComponent<CSkybox>();
-  skyboxComp->setTexture(skyboxTex);
 }
 
 void World::onPreUpdate(f32) {
@@ -113,28 +106,32 @@ void World::onWindowResize() { updateAimPosition(m_width, m_height); }
 
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
-  auto cubeState = MoveableState::generateNew();
-  cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
-  m_creator.cube(cubeState);
-  cubeState = MoveableState::generateNew();
-  cubeState.setPosition(bs::Vector3(0.0f, 5.0f, -8.0f));
-  cubeState.setRotation(
-      bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
-  m_creator.cube(cubeState);
 
-  auto rotorState = MoveableState::generateNew();
-  rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
-  m_creator.rotor(rotorState);
+  // TODO set file path in gui
+  SceneBuilder::fromFile("res/scenes/default.json");
 
-  rotorState = MoveableState::generateNew();
-  rotorState.setPosition(bs::Vector3(32.0f, 2.0f, -32.0f));
-  rotorState.setRotation(
-      bs::Quaternion(bs::Degree(90.0f), bs::Degree(0.0f), bs::Degree(0.0f)));
-  m_creator.rotor(rotorState);
+  // auto cubeState = MoveableState::generateNew();
+  // cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
+  // m_creator.cube(cubeState);
+  // cubeState = MoveableState::generateNew();
+  // cubeState.setPosition(bs::Vector3(0.0f, 5.0f, -8.0f));
+  // cubeState.setRotation(
+  //     bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
+  // m_creator.cube(cubeState);
 
-  auto windSourceState = MoveableState::generateNew();
-  windSourceState.setPosition(bs::Vector3(-5.0f, 2.5f, -8.0f));
-  auto r = m_creator.windSource(windSourceState);
+  // auto rotorState = MoveableState::generateNew();
+  // rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
+  // m_creator.rotor(rotorState);
+
+  // rotorState = MoveableState::generateNew();
+  // rotorState.setPosition(bs::Vector3(32.0f, 2.0f, -32.0f));
+  // rotorState.setRotation(
+  //     bs::Quaternion(bs::Degree(90.0f), bs::Degree(0.0f), bs::Degree(0.0f)));
+  // m_creator.rotor(rotorState);
+
+  // auto windSourceState = MoveableState::generateNew();
+  // windSourceState.setPosition(bs::Vector3(-5.0f, 2.5f, -8.0f));
+  // auto r = m_creator.windSource(windSourceState);
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -148,15 +145,6 @@ HCNetComponent World::getPlayerNetComp() {
 bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
   auto it = m_netComps.find(from);
   if (it != m_netComps.end()) {
-    if (it->second->getState().getType() == ComponentTypes::kPlayer) {
-      auto cit = m_walkers.find(from);
-      if (cit != m_walkers.end()) {
-        auto [_, ok] = m_walkers.insert({to, cit->second});
-        if (ok) {
-          m_walkers.erase(cit);
-        }
-      }
-    }
     auto [_, ok] = m_netComps.insert({to, it->second});
     if (ok) {
       it->second->setUniqueId(to);
@@ -176,7 +164,6 @@ void World::setupMyPlayer() {
   charController->setHeight(1.0f);
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
-  netComp->setType(ComponentTypes::kPlayer);
   auto camera = createCamera(player);
   createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
@@ -190,9 +177,9 @@ void World::applyMoveableState(const MoveableState &moveableState) {
   if (it != m_netComps.end()) {
     it->second->setState(moveableState);
   } else {
-    logVerbose("failed to find netcomp with id {}",
-               moveableState.getUniqueId().raw());
-    m_player->lookupId(moveableState.getUniqueId());
+    logError("failed to find netcomp with id {}",
+             moveableState.getUniqueId().raw());
+    // m_player->lookupId(moveableState.getUniqueId());
   }
 }
 
@@ -217,7 +204,13 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
 
 void World::onPlayerJoin(const MoveableState &moveableState) {
   logInfo("player {} joined", moveableState.getUniqueId().raw());
-  m_creator.player(moveableState);
+  auto so = ObjectBuilder{ObjectType::kPlayer}
+                .withMaterial("res/textures/grid_2.png")
+                .withNetComponent(moveableState)
+                .build();
+  auto netComp = so->getComponent<CNetComponent>();
+  auto [it, ok] = getNetComps().insert({moveableState.getUniqueId(), netComp});
+  AlfAssert(ok, "failed to create player, was the id unique?");
 }
 
 void World::onPlayerLeave(UniqueId uid) {
@@ -232,29 +225,18 @@ void World::onPlayerLeave(UniqueId uid) {
       logWarning("(netComps) player left, but couldn't find them");
     }
   }
-
-  {
-    auto it = m_walkers.find(uid);
-    if (it != m_walkers.end()) {
-      m_walkers.erase(it);
-    } else {
-      logWarning("(characters) player left, but couldn't find them");
-    }
-  }
 }
 
 void World::onPlayerInput(UniqueId uid, PlayerInput input,
                           std::optional<bs::Quaternion> maybeRot) {
   MICROPROFILE_SCOPEI("world", "onPlayerInput", MP_TURQUOISE2);
-  auto it = m_walkers.find(uid);
-  if (it != m_walkers.end()) {
-    it->second->setInput(input);
+  auto it = m_netComps.find(uid);
+  if (it != m_netComps.end()) {
+    auto walker = it->second->SO()->getComponent<FPSWalker>();
+    walker->setInput(input);
     if (maybeRot) {
-      it->second->applyRotation(*maybeRot);
+      walker->applyRotation(*maybeRot);
     }
-    // TODO
-    // it->second->resetNewInputFlag();
-    // m_netComps[uid]->resetChanged();
   }
 }
 
@@ -274,11 +256,14 @@ void World::onDisconnect() {
     }
 
     m_netComps.clear();
-    m_walkers.clear();
     myNetComp->setUniqueId(UniqueId::invalid());
     m_netComps.insert({UniqueId::invalid(), myNetComp});
-    m_walkers.insert({UniqueId::invalid(), m_player->getWalker()});
   }
+}
+
+void World::buildObject(const CreateInfo &info) {
+  // TODO(filip) build object
+  logInfo("[buildObject] TODO");
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
@@ -334,15 +319,15 @@ void World::setupInput() {
       }
     } else if (ev.buttonCode == BC_1) {
       if (m_player->isConnected()) {
-        m_player->setWeapon(ComponentTypes::kInvalid);
+        m_player->setWeapon(ObjectType::kInvalid);
       }
     } else if (ev.buttonCode == BC_2) {
       if (m_player->isConnected()) {
-        m_player->setWeapon(ComponentTypes::kBall);
+        m_player->setWeapon(ObjectType::kBall);
       }
     } else if (ev.buttonCode == BC_3) {
       if (m_player->isConnected()) {
-        m_player->setWeapon(ComponentTypes::kCube);
+        m_player->setWeapon(ObjectType::kCube);
       }
     }
   });

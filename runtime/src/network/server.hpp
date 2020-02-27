@@ -81,7 +81,13 @@ private:
 
   bool PollIncomingPacket(Packet &packet_out);
 
-  void handlePacket(Packet &packet);
+  void handlePacket();
+
+  void handlePacketPlayerTick();
+
+  void handlePacketRequestCreate();
+
+  //void handlePacketLookup();
 
   virtual void OnSteamNetConnectionStatusChanged(
       SteamNetConnectionStatusChangedCallback_t *status) override;

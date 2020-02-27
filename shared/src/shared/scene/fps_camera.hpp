@@ -9,12 +9,15 @@
 #include <Reflection/BsRTTIPlain.h>
 #include <Reflection/BsRTTIType.h>
 
-namespace bs {
-class FPSCamera : public Component {
-public:
-  explicit FPSCamera(const HSceneObject &parent);
+namespace wind {
 
-  void setCharacter(const HSceneObject &characterSO) {
+class FPSCamera : public bs::Component {
+  friend class FPSCameraRTTI;
+
+public:
+  explicit FPSCamera(const bs::HSceneObject &parent);
+
+  void setCharacter(const bs::HSceneObject &characterSO) {
     mCharacterSO = characterSO;
   }
 
@@ -23,8 +26,6 @@ public:
   void update() override;
 
   bs::HSceneObject getCamera() const { return SO(); }
-
-  friend class FPSCameraRTTI;
 
   static bs::RTTITypeBase *getRTTIStatic();
 
@@ -36,19 +37,19 @@ private:
   void applyAngles();
 
 private:
-  VirtualButton mUp;
-  VirtualButton mDown;
-  VirtualButton mLeft;
-  VirtualButton mRight;
-  HSceneObject mCharacterSO;
-  Degree mPitch = Degree(0.0f);
-  Degree mYaw = Degree(0.0f);
-  VirtualAxis mVerticalAxis;
-  VirtualAxis mHorizontalAxis;
+  bs::VirtualButton mUp;
+  bs::VirtualButton mDown;
+  bs::VirtualButton mLeft;
+  bs::VirtualButton mRight;
+  bs::HSceneObject mCharacterSO;
+  bs::Degree mPitch = bs::Degree(0.0f);
+  bs::Degree mYaw = bs::Degree(0.0f);
+  bs::VirtualAxis mVerticalAxis;
+  bs::VirtualAxis mHorizontalAxis;
   bool m_enabled = true;
 };
 
-using HFPSCamera = GameObjectHandle<FPSCamera>;
+using HFPSCamera = bs::GameObjectHandle<FPSCamera>;
 
 class FPSCameraRTTI
     : public bs::RTTIType<FPSCamera, bs::Component, FPSCameraRTTI> {

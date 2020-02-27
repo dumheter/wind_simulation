@@ -55,6 +55,12 @@ public:
   /// Repeat a character N times
   static std::string repeat(char c, u32 n);
 
+  template <typename... ARGS>
+  [[noreturn]] static void panic(const String &message, ARGS &&... arguments) {
+    logError(message, std::forward<ARGS>(arguments)...);
+    abort();
+  }
+
   /// Generate random UUID
   static bs::UUID randUUID();
 

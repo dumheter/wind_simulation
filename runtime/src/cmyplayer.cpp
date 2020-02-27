@@ -1,5 +1,8 @@
 #include "cmyplayer.hpp"
+#include "network/util.hpp"
+#include "shared/scene/serializer.hpp"
 #include "world.hpp"
+#include <type_traits>
 
 namespace wind {
 
@@ -9,9 +12,9 @@ CMyPlayer::CMyPlayer()
 
 CMyPlayer::CMyPlayer(bs::HSceneObject parent, World *world)
     : Component(parent), m_client(std::make_unique<Client>(world)),
-      m_world(world), m_weapon(ComponentTypes::kInvalid) {
+      m_world(world), m_weapon(ObjectType::kInvalid) {
   setName("CMyPlayer");
-  m_fpsWalker = SO()->addComponent<bs::FPSWalker>(world);
+  m_fpsWalker = SO()->addComponent<FPSWalker>();
   m_fpsWalker->makeActive();
   m_lastRotation = SO()->getTransform().getRotation();
   m_fire1 = bs::VirtualButton("Fire1");
@@ -67,7 +70,7 @@ void CMyPlayer::fixedUpdate() {
 }
 
 void CMyPlayer::onShoot() {
-  if (m_weapon == ComponentTypes::kInvalid) {
+  if (m_weapon == ObjectType::kInvalid) {
     return;
   }
 
@@ -76,20 +79,19 @@ void CMyPlayer::onShoot() {
 
   const auto fn = [this, forward](bs::Vector3 spawnPos) {
     MoveableState state{};
-    state.setType(m_weapon);
     state.setPosition(spawnPos);
     state.setRotation(
         m_world->getFpsCamera()->getCamera()->getTransform().getRotation());
-    const bs::Vector3 force{forward * m_shootForce};
-    auto &packet = m_client->getPacket();
-    packet.ClearPayload();
-    packet.SetHeader(PacketHeaderTypes::kRequestCreate);
-    auto mw = packet.GetMemoryWriter();
-    mw->Write(state);
-    mw->Write(force.x);
-    mw->Write(force.y);
-    mw->Write(force.z);
-    mw.Finalize();
+    state.setVel(forward * m_shootForce);
+    const bs::Vector3 scale{0.3f, 0.3f, 0.3f};
+    Packet &packet = m_client->getPacket();
+    RequestCreateInfo info{};
+    info.type = m_weapon;
+    info.parent = UniqueId::invalid();
+    info.scale = scale;
+    info.state = state;
+    //info.components = ...;
+    PacketBuilder::RequestCreate(packet, info);
     m_client->PacketSend(packet, SendStrategy::kUnreliable);
   };
 
@@ -113,17 +115,17 @@ void CMyPlayer::onShoot() {
   // fn(spawnPos + bs::Vector3(0.0f, 0.0f, -1.0f));
 }
 
-void CMyPlayer::setWeapon(ComponentTypes weapon) { m_weapon = weapon; }
+void CMyPlayer::setWeapon(ObjectType weapon) { m_weapon = weapon; }
 
-void CMyPlayer::lookupId(UniqueId uid) {
-  auto &packet = m_client->getPacket();
-  packet.ClearPayload();
-  packet.SetHeader(PacketHeaderTypes::kLookup);
-  auto mw = packet.GetMemoryWriter();
-  mw->Write(uid);
-  mw.Finalize();
-  m_client->PacketSend(packet, SendStrategy::kUnreliable);
-}
+// void CMyPlayer::lookupId(UniqueId uid) {
+//   auto &packet = m_client->getPacket();
+//   packet.ClearPayload();
+//   packet.SetHeader(PacketHeaderTypes::kLookup);
+//   auto mw = packet.GetMemoryWriter();
+//   mw->Write(uid);
+//   mw.Finalize();
+//   m_client->PacketSend(packet, SendStrategy::kUnreliable);
+// }
 
 bs::RTTITypeBase *CMyPlayer::getRTTIStatic() {
   return CMyPlayerRTTI::instance();

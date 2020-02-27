@@ -57,13 +57,6 @@ void CNetComponent::setState(const MoveableState &moveableState) {
   mNotifyFlags = bs::TCF_Transform;
 }
 
-void CNetComponent::setType(ComponentTypes type) {
-  m_state.setType(type);
-  if (type != ComponentTypes::kPlayer && type != ComponentTypes::kInvalid) {
-    m_state.setRigid(true);
-  }
-}
-
 void CNetComponent::setPosition(bs::Vector3 position) {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
   m_hasChanged = true;

@@ -20,8 +20,8 @@ enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   kServerTick,
   kCreate,
   kRequestCreate,
-  kLookup,
-  kLookupResponse,
+  // kLookup,
+  // kLookupResponse,
   kHello,
 };
 

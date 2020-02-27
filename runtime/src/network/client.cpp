@@ -85,7 +85,6 @@ void Client::handlePacket() {
       header == PacketHeaderTypes::kPlayerJoin) {
     logVerbose("[client:p PlayerJoin] packet playerjoin");
     auto mr = m_packet.GetMemoryReader();
-    // auto state = mr.Read<MoveableState>();
     auto uid = mr.Read<UniqueId>();
     auto state = MoveableState{uid};
     m_world->onPlayerJoin(state);
@@ -110,33 +109,30 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    auto mr = m_packet.GetMemoryReader();
     if (!m_world->serverIsActive()) {
-      const u32 count = mr.Read<u32>();
-      logWarning("[client:p Create] got a create packet with {} count", count);
-      MoveableState state;
-      for (u32 i = 0; i < count; ++i) {
-        state = mr.Read<MoveableState>();
-        m_world->getCreator().create(state);
-      }
+      logInfo("[client:p Create] got a create packet");
+      CreateInfo info = PacketParser::Create(m_packet);
+      m_world->buildObject(info);
     }
   } else if (header == PacketHeaderTypes::kRequestCreate) {
     logError("[client:p RequestCreate] got a requestcreate packet");
-  } else if (header == PacketHeaderTypes::kLookup) {
-    logError("[client:p Lookup] got a lookup packet");
-  } else if (header == PacketHeaderTypes::kLookupResponse) {
-    auto mr = m_packet.GetMemoryReader();
-    if (!m_world->serverIsActive()) {
-      const u32 count = mr.Read<u32>();
-      logInfo("[client:p LookupResponse] got a lookup response with {} count",
-              count);
-      MoveableState state;
-      for (u32 i = 0; i < count; ++i) {
-        state = mr.Read<MoveableState>();
-        m_world->getCreator().create(state);
-      }
-    }
-  } else if (header == PacketHeaderTypes::kHello) {
+  } // else if (header == PacketHeaderTypes::kLookup) {
+  //   logError("[client:p Lookup] got a lookup packet");
+  // }
+  // else if (header == PacketHeaderTypes::kLookupResponse) {
+  //   auto mr = m_packet.GetMemoryReader();
+  //   if (!m_world->serverIsActive()) {
+  //     const u32 count = mr.Read<u32>();
+  //     logInfo("[client:p LookupResponse] got a lookup response with {} count",
+  //             count);
+  //     MoveableState state;
+  //     for (u32 i = 0; i < count; ++i) {
+  //       state = mr.Read<MoveableState>();
+  //       m_world->getCreator().create(state);
+  //     }
+  //   }
+  // }
+  else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
     const auto new_uid = mr.Read<UniqueId>();
     logVerbose("[client:p Hello] changed uid from {} to {}", m_uid.raw(),
@@ -144,14 +140,17 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
-      const u32 count = mr.Read<u32>();
-      logVerbose("\tStates: {}", count);
-      MoveableState state;
-      for (u32 i = 0; i < count; ++i) {
-        state = mr.Read<MoveableState>();
-        m_world->getCreator().create(state);
-      }
+      // TODO parse all net comps?
+      // const u32 count = mr.Read<u32>();
+      // logVerbose("\tStates: {}", count);
+      // MoveableState state;
+      // for (u32 i = 0; i < count; ++i) {
+      //   state = mr.Read<MoveableState>();
+      //   m_world->getCreator().create(state);
+      // }
     }
+  } else {
+    logError("[client:p] unknown packet");
   }
 }
 
