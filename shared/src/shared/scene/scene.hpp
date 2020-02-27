@@ -49,7 +49,6 @@ public:
   /// Save a scene to a JSON file at the specified path.
   static void save(const String &path, const bs::HSceneObject &scene);
 
-private:
   /// Private function to load a scene from a JSON value. All resources
   /// are assumed to be relative to the specified directory.
   static bs::HSceneObject loadScene(const nlohmann::json &value,

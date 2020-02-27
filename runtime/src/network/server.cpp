@@ -2,8 +2,11 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/cnet_component.hpp"
+#include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
 #include "world.hpp"
+#include <Scene/BsSceneManager.h>
+#include <ThirdParty/json.hpp>
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
 
@@ -286,7 +289,10 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
-      mw->Write(alflib::String(m_world->getScenePath().c_str()));
+      nlohmann::json json =
+          Scene::saveScene(bs::gSceneManager().getMainScene()->getRoot());
+      mw->Write(alflib::String(json.dump().c_str()));
+      // mw->Write(alflib::String(m_world->getScenePath().c_str()));
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
     }

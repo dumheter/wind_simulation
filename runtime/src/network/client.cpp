@@ -2,6 +2,7 @@
 #include "shared/log.hpp"
 #include "shared/scene/scene.hpp"
 #include "world.hpp"
+#include <ThirdParty/json.hpp>
 #include <microprofile/microprofile.h>
 
 namespace wind {
@@ -123,8 +124,9 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
-      auto scene = String{mr.Read<alflib::String>().GetUTF8()};
-      Scene::load(scene);
+      // auto scene = String{mr.Read<alflib::String>().GetUTF8()};
+      auto json = nlohmann::json::parse(mr.Read<alflib::String>().GetUTF8());
+      Scene::loadScene(json, ".");
     }
   } else {
     logError("[client:p] unknown packet");
