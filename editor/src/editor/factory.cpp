@@ -69,7 +69,7 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
                               .withObject(plane)
                               .build();
 
-  HSceneObject skybox = ObjectBuilder(ObjectBuilder::Kind::kSkybox)
+  HSceneObject skybox = ObjectBuilder(ObjectBuilder::Kind::kEmpty)
                             .withSkybox("res/skybox/daytime.hdr")
                             .build();
 
@@ -112,7 +112,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
                               .withObject(cube)
                               .build();
 
-  HSceneObject skybox = ObjectBuilder(ObjectBuilder::Kind::kSkybox)
+  HSceneObject skybox = ObjectBuilder(ObjectBuilder::Kind::kEmpty)
                             .withSkybox("res/skybox/daytime.hdr")
                             .build();
 
