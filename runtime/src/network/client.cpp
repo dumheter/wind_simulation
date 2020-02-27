@@ -1,5 +1,6 @@
 #include "client.hpp"
 #include "shared/log.hpp"
+#include "shared/scene/scene.hpp"
 #include "world.hpp"
 #include <microprofile/microprofile.h>
 
@@ -109,11 +110,11 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    //if (!m_world->serverIsActive()) {
-      logInfo("[client:p Create] got a create packet");
-      CreateInfo info = PacketParser::Create(m_packet);
-      m_world->buildObject(info);
-      //}
+    // if (!m_world->serverIsActive()) {
+    logInfo("[client:p Create] got a create packet");
+    CreateInfo info = PacketParser::Create(m_packet);
+    m_world->buildObject(info);
+    //}
   } else if (header == PacketHeaderTypes::kRequestCreate) {
     logError("[client:p RequestCreate] got a requestcreate packet");
   } // else if (header == PacketHeaderTypes::kLookup) {
@@ -123,7 +124,8 @@ void Client::handlePacket() {
   //   auto mr = m_packet.GetMemoryReader();
   //   if (!m_world->serverIsActive()) {
   //     const u32 count = mr.Read<u32>();
-  //     logInfo("[client:p LookupResponse] got a lookup response with {} count",
+  //     logInfo("[client:p LookupResponse] got a lookup response with {}
+  //     count",
   //             count);
   //     MoveableState state;
   //     for (u32 i = 0; i < count; ++i) {
@@ -140,6 +142,8 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
+      auto scene = String{mr.Read<alflib::String>().GetUTF8()};
+      Scene::load(scene);
       // TODO parse all net comps?
       // const u32 count = mr.Read<u32>();
       // logVerbose("\tStates: {}", count);

@@ -109,7 +109,8 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
 
   // TODO set file path in gui
-  Scene::load("res/scenes/default.json");
+  Scene::load(m_scene);
+  m_player->SO()->setPosition(bs::Vector3::ZERO);
 
   // auto cubeState = MoveableState::generateNew();
   // cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));

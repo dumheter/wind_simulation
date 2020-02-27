@@ -310,6 +310,7 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
+      mw->Write(alflib::String(m_world->getScenePath().c_str()));
       // TODO write all netcomp objects?
       // auto &netComps = m_world->getNetComps();
       // const u32 count = static_cast<u32>(netComps.size());
