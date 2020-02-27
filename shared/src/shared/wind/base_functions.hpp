@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "shared/types.hpp"
 #include <Math/BsVector3.h>

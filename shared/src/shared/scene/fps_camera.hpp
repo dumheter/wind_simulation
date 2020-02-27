@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/utility/rtti_types.hpp"
+#include "shared/scene/rtti.hpp"
 
 #include <BsPrerequisites.h>
 #include <Input/BsVirtualInput.h>

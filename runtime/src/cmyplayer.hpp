@@ -11,8 +11,8 @@
 #include <memory>
 
 #include "shared/scene/fps_walker.hpp"
+#include "shared/scene/rtti.hpp"
 #include "shared/scene/types.hpp"
-#include "shared/utility/rtti_types.hpp"
 #include "shared/utility/unique_id.hpp"
 
 namespace wind {
@@ -52,7 +52,7 @@ public:
 
   HFPSWalker getWalker() { return m_fpsWalker; }
 
-  //void lookupId(UniqueId uid);
+  // void lookupId(UniqueId uid);
 
   friend class CMyPlayerRTTI;
 

@@ -3,8 +3,7 @@
 	"objects": [
 		{
 			"name": "skybox",
-			"type": "skybox",
-			"texture": "../skybox/daytime.hdr"
+			"skybox": { "cubemap": "../skybox/daytime.hdr" }
     },
 		{
 			"name": "geometry",

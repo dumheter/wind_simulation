@@ -32,7 +32,7 @@
 #include "shared/BsCameraFlyer.h"
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
-#include "shared/scene/builder.hpp"
+#include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
 #include <alflib/core/assert.hpp>
@@ -106,7 +106,7 @@ void Editor::onStartup() {
 
   // Setup default scene
   // setScene(EditorFactory::createDefaultScene("scene", GROUND_PLANE_SCALE));
-  setScene(SceneBuilder::fromFile("res/scenes/default.json"));
+  setScene(Scene::load("res/scenes/default.json"));
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,

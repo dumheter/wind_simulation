@@ -106,12 +106,15 @@
     <ClCompile Include="src\shared\scene\fps_walker.cpp" />
     <ClCompile Include="src\shared\scene\builder.cpp" />
     <ClCompile Include="src\shared\scene\cnet_component.cpp" />
+    <ClCompile Include="src\shared\scene\component\ctag.cpp" />
     <ClCompile Include="src\shared\scene\crotor.cpp" />
     <ClCompile Include="src\shared\log.cpp" />
+    <ClCompile Include="src\shared\scene\scene.cpp" />
     <ClCompile Include="src\shared\scene\serializer.cpp" />
     <ClCompile Include="src\shared\scene\wind_src.cpp" />
     <ClCompile Include="src\shared\state\moveable_state.cpp" />
     <ClCompile Include="src\shared\state\player_input.cpp" />
+    <ClCompile Include="src\shared\utility\bsprinter.cpp" />
     <ClCompile Include="src\shared\utility\json_util.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\assert.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\buffer.cpp" />
@@ -156,7 +159,9 @@
     <ClInclude Include="src\shared\scene\fps_camera.hpp" />
     <ClInclude Include="src\shared\scene\fps_walker.hpp" />
     <ClInclude Include="src\shared\scene\builder.hpp" />
+    <ClInclude Include="src\shared\scene\component\ctag.hpp" />
     <ClInclude Include="src\shared\scene\rtti.hpp" />
+    <ClInclude Include="src\shared\scene\scene.hpp" />
     <ClInclude Include="src\shared\scene\serializer.hpp" />
     <ClInclude Include="src\shared\scene\types.hpp" />
     <ClInclude Include="src\shared\scene\wind_src.hpp" />
@@ -242,7 +247,6 @@
     <ClInclude Include="src\thirdparty\stb\stb_voxel_render.h" />
     <ClInclude Include="src\thirdparty\stb\stretchy_buffer.h" />
     <ClInclude Include="src\shared\utility\bsprinter.hpp" />
-    <ClInclude Include="src\shared\utility\rtti_types.hpp" />
     <ClInclude Include="src\shared\utility\unique_id.hpp" />
     <ClInclude Include="src\shared\utility\util.hpp" />
     <ClInclude Include="src\shared\wind\base_functions.hpp" />

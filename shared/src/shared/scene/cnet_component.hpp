@@ -8,9 +8,9 @@
 #include <Scene/BsComponent.h>
 #include <Scene/BsSceneObject.h>
 
+#include "shared/scene/rtti.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/types.hpp"
-#include "shared/utility/rtti_types.hpp"
 #include "shared/utility/unique_id.hpp"
 
 namespace wind {
@@ -22,7 +22,7 @@ public:
   CNetComponent(); // serialization
 
   /**
-   * Dont forget to add this component to the world.
+   * Don't forget to add this component to the world.
    * world->addNetComp(...)
    */
   explicit CNetComponent(bs::HSceneObject parent);

@@ -29,6 +29,7 @@
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component/ctag.hpp"
 #include "shared/scene/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/json_util.hpp"
@@ -56,6 +57,8 @@ namespace wind {
 
 ObjectBuilder::ObjectBuilder(Kind kind)
     : m_handle(bs::SceneObject::create("")), m_kind(kind) {
+  m_handle->addComponent<CTag>(kind);
+
   // Create by kind
   switch (kind) {
   case Kind::kPlane: {
@@ -92,7 +95,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   default: {
-    Util::panic("[objectBuilder] unable to build object");
+    Util::panic("Invalid type when building object ({})", kind);
     break;
   }
   }
@@ -142,9 +145,6 @@ ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
-  AlfAssert(m_kind == Kind::kSkybox,
-            "Only skybox objects can have a skybox component added");
-
   const bs::HTexture tex = Asset::loadCubemap(path);
   bs::HSkybox comp = m_handle->addComponent<bs::CSkybox>();
   comp->setTexture(tex);
@@ -206,7 +206,7 @@ ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
 bs::HSceneObject ObjectBuilder::build() {
   // Check and possibly auto-generate name
   if (m_handle->getName().empty()) {
-    m_handle->setName(allocDefaultName());
+    m_handle->setName(nextName());
   }
 
   // Reset handle and return built scene
@@ -217,99 +217,44 @@ bs::HSceneObject ObjectBuilder::build() {
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject ObjectBuilder::fromJson(const String &directory,
-                                         const nlohmann::json &value) {
-  // Find type
-  std::string type = value.value("type", "empty");
-  ObjectBuilder::Kind kind = kindFromString(type.c_str());
-  ObjectBuilder builder(kind);
-
-  // Kind-specific options
-  switch (kind) {
-  case ObjectBuilder::Kind::kSkybox: {
-    auto cubemapIt = value.find("texture");
-    if (cubemapIt != value.end()) {
-      builder.withSkybox(directory + "\\" + String(*cubemapIt));
-    } else {
-      logError("Cubemap objects require a \"texture\" property");
-      return bs::SceneObject::create("");
-    }
-    break;
-  }
-  case Kind::kPlane: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(directory + "\\" + tex, tiling);
-    }
-    break;
-  }
-  case Kind::kCube: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(directory + "\\" + tex, tiling);
-    }
-    break;
-  }
-  default: {
-    break;
-  }
-  }
-
-  // Common options
-  String name = JsonUtil::getOrCall<String>(value, String("name"), []() {
-    return ObjectBuilder::allocDefaultName();
-  });
-  builder.withName(name);
-
-  builder.withPosition(JsonUtil::getVec3F(value, "position"));
-  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
-
-  if (value.find("physics") != value.end()) {
-    f32 restitution = value["physics"].value("restitution", 1.0f);
-    f32 mass = value["physics"].value("mass", 0.0f);
-    builder.withPhysics(restitution, mass);
-  }
-
-  // Sub-objects
-  auto it = value.find("objects");
-  if (it != value.end()) {
-    auto arr = *it;
-    if (!arr.is_array()) {
-      logError("\"objects\" is required to be an array of scene objects");
-      return bs::SceneObject::create("");
-    }
-
-    for (auto it = arr.begin(); it != arr.end(); ++it) {
-      bs::HSceneObject subObject = fromJson(directory, *it);
-      builder.withObject(subObject);
-    }
-  }
-
-  return builder.build();
-}
-
-// -------------------------------------------------------------------------- //
-
-String ObjectBuilder::allocDefaultName() {
+String ObjectBuilder::nextName() {
   return "object" + String(std::to_string(s_createdCount++));
 }
 
 // -------------------------------------------------------------------------- //
 
-wind::ObjectBuilder::Kind
-ObjectBuilder::kindFromString(const String &kindString) {
+ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
   if (kindString == "empty") {
-    return ObjectBuilder::Kind::kEmpty;
-  } else if (kindString == "skybox") {
-    return ObjectBuilder::Kind::kSkybox;
+    return Kind::kEmpty;
   } else if (kindString == "plane") {
-    return ObjectBuilder::Kind::kPlane;
+    return Kind::kPlane;
   } else if (kindString == "cube") {
-    return ObjectBuilder::Kind::kCube;
+    return Kind::kCube;
   }
-  return ObjectBuilder::Kind::kInvalid;
+  return Kind::kInvalid;
+}
+
+// -------------------------------------------------------------------------- //
+
+String ObjectBuilder::stringFromKind(Kind kind) {
+  switch (kind) {
+  case Kind::kEmpty:
+    return "empty";
+  case Kind::kPlane:
+    return "plane";
+  case Kind::kCube:
+    return "cube";
+  case Kind::kBall:
+    return "sphere";
+  case Kind::kModel:
+    return "model";
+  case Kind::kPlayer:
+    return "player";
+  case Kind::kInvalid:
+  default: {
+    return "invalid";
+  }
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -359,59 +304,7 @@ bs::HSceneObject SceneBuilder::build() {
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject SceneBuilder::fromFile(const String &path) {
-  using json = nlohmann::json;
-
-  // Get base directory
-  alflib::Path alfPath(path.c_str());
-  alflib::String _directory = alfPath.GetDirectory().GetPathString();
-  String directory = _directory.GetUTF8();
-
-  // Read file
-  String fileContent = Util::readFile(path);
-  fileContent = Util::replace(fileContent, '\t', ' ');
-
-  // Parse file
-  try {
-    json j = json::parse(fileContent.c_str());
-    SceneBuilder builder;
-
-    // Name
-    if (j.find("name") != j.end()) {
-      builder.withName(j["name"]);
-    } else {
-      builder.withName(allocDefaultName());
-    }
-
-    // Objects
-    auto objsIt = j.find("objects");
-    if (objsIt != j.end()) {
-      auto objsArr = *objsIt;
-      if (!objsArr.is_array()) {
-        logError("\"objects\" is required to be an array of scene objects");
-        return bs::SceneObject::create("");
-      }
-
-      for (auto it = objsArr.begin(); it != objsArr.end(); ++it) {
-        bs::HSceneObject object = ObjectBuilder::fromJson(directory, *it);
-        builder.withObject(object);
-      }
-    }
-
-    // Done
-    return builder.build();
-  } catch (std::exception &e) {
-    logError("Exception while parsing json file \"{}\": {}", path.c_str(),
-             e.what());
-  }
-
-  // Failed to parse, return empty scene
-  return bs::SceneObject::create("");
-}
-
-// -------------------------------------------------------------------------- //
-
-String SceneBuilder::allocDefaultName() {
+String SceneBuilder::nextName() {
   return "scene" + String(std::to_string(s_createdCount++));
 }
 

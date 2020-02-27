@@ -1,23 +1,25 @@
 #include "world.hpp"
-#include "Components/BsCCamera.h"
-#include "Components/BsCCharacterController.h"
-#include "GUI/BsCGUIWidget.h"
-#include "GUI/BsGUIButton.h"
-#include "GUI/BsGUIInputBox.h"
-#include "GUI/BsGUILayoutX.h"
-#include "GUI/BsGUILayoutY.h"
-#include "GUI/BsGUIPanel.h"
-#include "GUI/BsGUISlider.h"
-#include "Importer/BsImporter.h"
-#include "Input/BsInput.h"
-#include "Platform/BsCursor.h"
-#include "Scene/BsSceneManager.h"
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
+#include "shared/scene/scene.hpp"
 #include "shared/scene/wind_src.hpp"
+
+#include <Components/BsCCamera.h>
+#include <Components/BsCCharacterController.h>
+#include <GUI/BsCGUIWidget.h>
+#include <GUI/BsGUIButton.h>
+#include <GUI/BsGUIInputBox.h>
+#include <GUI/BsGUILayoutX.h>
+#include <GUI/BsGUILayoutY.h>
+#include <GUI/BsGUIPanel.h>
+#include <GUI/BsGUISlider.h>
 #include <Image/BsSpriteTexture.h>
+#include <Importer/BsImporter.h>
+#include <Input/BsInput.h>
 #include <Math/BsQuaternion.h>
+#include <Platform/BsCursor.h>
+#include <Scene/BsSceneManager.h>
 #include <microprofile/microprofile.h>
 #include <regex>
 #include <variant>
@@ -107,7 +109,7 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
 
   // TODO set file path in gui
-  SceneBuilder::fromFile("res/scenes/default.json");
+  Scene::load("res/scenes/default.json");
 
   // auto cubeState = MoveableState::generateNew();
   // cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));

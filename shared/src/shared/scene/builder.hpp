@@ -80,15 +80,14 @@ public:
   /// Build the scene object
   bs::HSceneObject build();
 
-  ///
-  static bs::HSceneObject fromJson(const String &directory,
-                                   const nlohmann::json &value);
+  /// Returns the next generic object name
+  static String nextName();
 
-  /// Allocates a new default name (not a memory alloc...)
-  static String allocDefaultName();
-
-private:
+  /// Returns an object kind from string
   static Kind kindFromString(const String &kindString);
+
+  /// Returns a string from a kind
+  static String stringFromKind(Kind kind);
 
 private:
   /// Number of created objects
@@ -125,11 +124,8 @@ public:
 
   bs::HSceneObject build();
 
-  /// Create a scene builder from a file
-  static bs::HSceneObject fromFile(const String &path);
-
-  /// Allocates a new default name (not a memory alloc...)
-  static String allocDefaultName();
+  /// Returns the next generic scene name
+  static String nextName();
 
 private:
   /// Number of created scenes
