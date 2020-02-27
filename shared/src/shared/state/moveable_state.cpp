@@ -3,7 +3,7 @@
 namespace wind {
 
 MoveableState::MoveableState(UniqueId id)
-    : m_id(id), m_type(ComponentTypes::kInvalid), m_flag(0),
+    : m_id(id), m_flag(0),
       m_position(bs::Vector3::ONE), m_vel(), m_angVel(),
       m_rotation(bs::Quaternion::IDENTITY) {}
 
@@ -41,7 +41,6 @@ void MoveableState::to(bs::HSceneObject &so) const {
 
 bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
   mw.Write(m_id);
-  mw.Write(static_cast<u32>(m_type));
   mw.Write(m_position.x);
   mw.Write(m_position.y);
   mw.Write(m_position.z);
@@ -63,7 +62,6 @@ bool MoveableState::ToBytes(alflib::RawMemoryWriter &mw) const {
 
 MoveableState MoveableState::FromBytes(alflib::RawMemoryReader &mr) {
   MoveableState ms{mr.Read<decltype(ms.m_id)>()};
-  ms.m_type = static_cast<ComponentTypes>(mr.Read<u32>());
   ms.m_position.x = mr.Read<decltype(ms.m_position.x)>();
   ms.m_position.y = mr.Read<decltype(ms.m_position.y)>();
   ms.m_position.z = mr.Read<decltype(ms.m_position.z)>();

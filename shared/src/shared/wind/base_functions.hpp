@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Math/BsVector3.h"
 #include "shared/types.hpp"
+#include <Math/BsVector3.h>
 #include <variant>
 #include <vector>
 

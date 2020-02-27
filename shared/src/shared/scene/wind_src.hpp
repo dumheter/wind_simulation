@@ -73,6 +73,10 @@ public:
 
   void onCollision();
 
+  const std::vector<BaseFn>& getFunctions() const { return m_functions; }
+
+  std::vector<BaseFn> &getFunctions() { return m_functions; }
+
   static bs::RTTITypeBase *getRTTIStatic();
 
   bs::RTTITypeBase *getRTTI() const override;

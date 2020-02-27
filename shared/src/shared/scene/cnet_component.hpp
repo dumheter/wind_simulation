@@ -8,7 +8,6 @@
 #include <Scene/BsComponent.h>
 #include <Scene/BsSceneObject.h>
 
-#include "shared/scene/component_factory.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/types.hpp"
@@ -23,7 +22,7 @@ public:
   CNetComponent(); // serialization
 
   /**
-   * Dont forget to add this component to the world.
+   * Don't forget to add this component to the world.
    * world->addNetComp(...)
    */
   explicit CNetComponent(bs::HSceneObject parent);
@@ -51,8 +50,6 @@ public:
   void setState(const MoveableState &moveableState);
 
   void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
-
-  void setType(ComponentTypes type);
 
   void setPosition(bs::Vector3 position);
 
@@ -86,12 +83,11 @@ private:
   BS_BEGIN_RTTI_MEMBERS
   BS_RTTI_MEMBER_PLAIN(m_hasChanged, 0)
   BS_RTTI_MEMBER_PLAIN_NAMED(m_id, m_state.m_id, 1)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_type, m_state.m_type, 2)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_flag, m_state.m_flag, 3)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_position, m_state.m_position, 4)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_vel, m_state.m_vel, 5)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_angVel, m_state.m_angVel, 6)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_state.m_rotation, 7)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_flag, m_state.m_flag, 2)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_position, m_state.m_position, 3)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_vel, m_state.m_vel, 4)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_angVel, m_state.m_angVel, 5)
+  BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_state.m_rotation, 6)
   BS_END_RTTI_MEMBERS
 
 public:

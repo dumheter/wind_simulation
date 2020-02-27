@@ -1,17 +1,16 @@
 #pragma once
 
 #include "cmyplayer.hpp"
-#include "creator.hpp"
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
+#include "network/util.hpp"
 #include "shared/app.hpp"
 #include "shared/scene/cnet_component.hpp"
-#include "shared/scene/component_factory.hpp"
 #include "shared/scene/crotor.hpp"
+#include "shared/scene/fps_camera.hpp"
 #include "shared/state/player_input.hpp"
 #include "shared/utility/unique_id.hpp"
 #include <BsApplication.h>
-#include <BsFPSCamera.h>
 #include <GUI/BsGUILabel.h>
 #include <GUI/BsGUITexture.h>
 #include <unordered_map>
@@ -71,6 +70,8 @@ public:
 
   void onDisconnect();
 
+  void buildObject(const CreateInfo &info);
+
   /**
    * Build the player entity, camera and attach gui to the
    * camera.
@@ -112,17 +113,7 @@ public:
     return m_netComps;
   }
 
-  std::unordered_map<UniqueId, bs::HFPSWalker> &getWalkers() {
-    return m_walkers;
-  }
-
-  const std::unordered_map<UniqueId, bs::HFPSWalker> &getWalkers() const {
-    return m_walkers;
-  }
-
-  const Creator &getCreator() const { return m_creator; }
-
-  const bs::HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
+  const HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
 
   bool getCursorMode() const { return m_cursorMode; }
 
@@ -142,12 +133,10 @@ private:
 
 private:
   std::unordered_map<UniqueId, HCNetComponent> m_netComps;
-  std::unordered_map<UniqueId, bs::HFPSWalker> m_walkers;
   bool m_cursorMode = false;
-  bs::HFPSCamera m_fpsCamera;
+  HFPSCamera m_fpsCamera;
   Server m_server;
   HCMyPlayer m_player;
-  Creator m_creator;
   NetDebugInfo m_netDebugInfo{};
   bs::GUITexture *m_aim;
 };

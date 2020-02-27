@@ -8,6 +8,7 @@
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 
+#include "shared/scene/component_handles.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/types.hpp"
 
@@ -18,20 +19,24 @@ public:
 
   CRotor(); // serialization
 
-  explicit CRotor(const bs::HSceneObject &parent);
+  CRotor(const bs::HSceneObject &parent, const HCWindSource &windSource);
 
   void fixedUpdate() override;
 
   /**
    * Every fixed update, this rotation will be applied.
    */
-  void setRotation(f32 degree);
+  void setRotation(bs::Vector3 degree);
+
+  HCWindSource &getWindSource() { return m_windSource; }
+  const HCWindSource &getWindSource() const { return m_windSource; }
 
   static bs::RTTITypeBase *getRTTIStatic();
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
-  f32 m_rotation;
+  bs::Quaternion m_rotation;
+  HCWindSource m_windSource;
 };
 
 using HCRotor = bs::GameObjectHandle<CRotor>;

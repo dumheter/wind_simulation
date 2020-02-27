@@ -28,7 +28,10 @@
 
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/ctag.hpp"
+#include "shared/scene/fps_walker.hpp"
+#include "shared/state/moveable_state.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
@@ -36,6 +39,7 @@
 #include <thirdparty/alflib/file/path.hpp>
 
 #include <Components/BsCBoxCollider.h>
+#include <Components/BsCCharacterController.h>
 #include <Components/BsCPlaneCollider.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
@@ -72,7 +76,24 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   case Kind::kModel: {
     break;
   }
-  case Kind::kEmpty:
+  case Kind::kPlayer: {
+    bs::HCharacterController charController =
+        m_handle->addComponent<bs::CCharacterController>();
+    charController->setHeight(1.0f);
+    charController->setRadius(0.4f);
+    auto prep = bs::SceneObject::create("playerRep");
+    prep->setParent(m_handle);
+    prep->setScale(bs::Vector3(0.3f, 2.0f, 0.3f));
+    prep->setPosition(bs::Vector3(0.0f, -1.0f, 0.0f));
+    m_renderable = prep->addComponent<bs::CRenderable>();
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    m_renderable->setMesh(mesh);
+    auto fpsWalker = m_handle->addComponent<FPSWalker>();
+    break;
+  }
+  case Kind::kEmpty: {
+    break;
+  }
   default: {
     Util::panic("Invalid kind");
     break;
@@ -174,6 +195,12 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   object->setParent(m_handle);
 
+  return *this;
+}
+
+ObjectBuilder &
+ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
+  m_handle->addComponent<CNetComponent>(moveableState);
   return *this;
 }
 

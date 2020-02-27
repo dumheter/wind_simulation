@@ -39,6 +39,8 @@
 
 namespace wind {
 
+class MoveableState;
+
 class ObjectBuilder {
 public:
   /// Object kind
@@ -71,6 +73,9 @@ public:
 
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);
+
+  /// @post Must register netcomp in world
+  ObjectBuilder& withNetComponent(const MoveableState& moveableState);
 
   /// Build the scene object
   bs::HSceneObject build();

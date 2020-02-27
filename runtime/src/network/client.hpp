@@ -78,7 +78,7 @@ private:
   ConnectionState m_connectionState;
   World *m_world;
   UniqueId m_uid;
-  Packet m_packet{1000000};
+  Packet m_packet{10000000};
 };
 
 } // namespace wind
