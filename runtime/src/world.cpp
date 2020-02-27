@@ -181,7 +181,6 @@ void World::applyMoveableState(const MoveableState &moveableState) {
   } else {
     logError("failed to find netcomp with id {}",
              moveableState.getUniqueId().raw());
-    // m_player->lookupId(moveableState.getUniqueId());
   }
 }
 

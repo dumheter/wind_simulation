@@ -87,8 +87,6 @@ private:
 
   void handlePacketRequestCreate();
 
-  //void handlePacketLookup();
-
   virtual void OnSteamNetConnectionStatusChanged(
       SteamNetConnectionStatusChangedCallback_t *status) override;
 

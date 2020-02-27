@@ -27,7 +27,7 @@ bool writeRigidbody(alflib::RawMemoryWriter *mw, f32 restitution, f32 mass) {
   return mw->Write(mass);
 }
 
-bool writeRotor(alflib::RawMemoryWriter * mw) { return false; }
+bool writeRotor(alflib::RawMemoryWriter *mw) { return false; }
 
 void readComponent(alflib::RawMemoryReader &mr, bs::HSceneObject &so) {
   const auto type = static_cast<ComponentType>(

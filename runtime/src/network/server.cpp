@@ -201,11 +201,7 @@ void Server::handlePacket() {
   } else if (header == PacketHeaderTypes::kRequestCreate) {
     logVerbose("[server:p requestcreate] ");
     handlePacketRequestCreate();
-  }
-  // else if (header == PacketHeaderTypes::kLookup) {
-  // handlePacketLookup();
-  // }
-  else {
+  } else {
     logVerbose("[server] got unknown packet {}",
                static_cast<u32>(m_packet.GetHeaderType()));
   }
@@ -231,26 +227,6 @@ void Server::handlePacketRequestCreate() {
   PacketBuilder::Create(m_packet, info);
   PacketBroadcastUnreliableFast(m_packet);
 }
-
-// void Server::handlePacketLookup() {
-//   auto mr = m_packet.GetMemoryReader();
-//   const auto from = packet.GetFromConnection();
-//   auto uid = mr.Read<UniqueId>();
-//   logVerbose("[server:p lookup] for uid {}", uid.raw());
-//   const auto it = m_world->getNetComps().find(uid);
-//   if (it != m_world->getNetComps().end()) {
-//     m_packet.ClearPayload();
-//     m_packet.SetHeader(PacketHeaderTypes::kLookupResponse);
-//     auto mw = m_packet.GetMemoryWriter();
-//     const u32 count = 1;
-//     mw->Write(count);
-//     mw->Write(it->second->getState());
-//     mw.Finalize();
-//     PacketUnicast(m_packet, SendStrategy::kReliable, from);
-//   } else {
-//     logWarning("[server:p lookup] failed to find uid");
-//   }
-// }
 
 void Server::OnSteamNetConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t *status) {
@@ -311,13 +287,6 @@ void Server::OnSteamNetConnectionStatusChanged(
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
       mw->Write(alflib::String(m_world->getScenePath().c_str()));
-      // TODO write all netcomp objects?
-      // auto &netComps = m_world->getNetComps();
-      // const u32 count = static_cast<u32>(netComps.size());
-      // mw->Write(count);
-      // for (auto [uid, netComp] : netComps) {
-      //   mw->Write(netComp->getState());
-      // }
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
     }

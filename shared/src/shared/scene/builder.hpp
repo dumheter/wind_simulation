@@ -75,7 +75,7 @@ public:
   ObjectBuilder &withObject(const bs::HSceneObject &object);
 
   /// @post Must register netcomp in world
-  ObjectBuilder& withNetComponent(const MoveableState& moveableState);
+  ObjectBuilder &withNetComponent(const MoveableState &moveableState);
 
   /// Build the scene object
   bs::HSceneObject build();

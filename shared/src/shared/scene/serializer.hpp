@@ -19,13 +19,13 @@ void writeBall(alflib::RawMemoryWriter &mw);
 
 // ============================================================ //
 
-bool writeWindSource(alflib::RawMemoryWriter* mw,
+bool writeWindSource(alflib::RawMemoryWriter *mw,
                      const std::vector<BaseFn> &fns);
 
-bool writeRigidbody(alflib::RawMemoryWriter* mw, f32 restitution, f32 mass);
+bool writeRigidbody(alflib::RawMemoryWriter *mw, f32 restitution, f32 mass);
 
-bool writeRotor(alflib::RawMemoryWriter* mw);
+bool writeRotor(alflib::RawMemoryWriter *mw);
 
-void readComponent(alflib::RawMemoryReader& mr, bs::HSceneObject &so);
+void readComponent(alflib::RawMemoryReader &mr, bs::HSceneObject &so);
 
 } // namespace wind

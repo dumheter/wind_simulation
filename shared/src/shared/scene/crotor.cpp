@@ -13,7 +13,8 @@ CRotor::CRotor(const bs::HSceneObject &parent, const HCWindSource &windSource)
 void CRotor::fixedUpdate() { SO()->rotate(m_rotation); }
 
 void CRotor::setRotation(bs::Vector3 rot) {
-  m_rotation = bs::Quaternion(bs::Degree(rot.x), bs::Degree(rot.y), bs::Degree(rot.z));
+  m_rotation =
+      bs::Quaternion(bs::Degree(rot.x), bs::Degree(rot.y), bs::Degree(rot.z));
 }
 
 bs::RTTITypeBase *CRotor::getRTTIStatic() { return CRotorRTTI::instance(); }
