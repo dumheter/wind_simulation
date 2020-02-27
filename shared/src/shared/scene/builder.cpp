@@ -131,7 +131,7 @@ ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
                                            const Vec2F &tiling) {
   const bs::HShader shader =
       bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
-  bs::HTexture texture = Asset::loadTexture(texPath);
+  bs::HTexture texture = AssetManager::loadTexture(texPath);
   m_material = bs::Material::create(shader);
   m_material->setTexture("gAlbedoTex", texture);
   m_material->setVec2("gUVTile", tiling);
