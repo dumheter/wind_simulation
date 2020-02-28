@@ -29,8 +29,8 @@
 #include "editor/factory.hpp"
 #include "editor/ui.hpp"
 #include "microprofile/microprofile.h"
-#include "shared/BsCameraFlyer.h"
 #include "shared/asset.hpp"
+#include "shared/camera_flyer.h"
 #include "shared/log.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
@@ -105,8 +105,7 @@ void Editor::onStartup() {
   m_ui = new UI(this);
 
   // Setup default scene
-  // setScene(EditorFactory::createDefaultScene("scene", GROUND_PLANE_SCALE));
-  setScene(Scene::load("res/scenes/default.json"));
+  setScene(Scene::load("res/scenes/out.json"));
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,

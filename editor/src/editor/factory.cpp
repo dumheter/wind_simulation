@@ -26,8 +26,8 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/BsCameraFlyer.h"
 #include "shared/asset.hpp"
+#include "shared/camera_flyer.h"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 

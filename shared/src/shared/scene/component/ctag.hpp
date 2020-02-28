@@ -26,6 +26,7 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/math/math.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/scene/types.hpp"
 
@@ -56,6 +57,24 @@ public:
   /// Returns the type of the tag
   ObjectType getType() const { return m_type; }
 
+  /// Returns skybox path
+  const String &getPathSkybox() { return m_pathSkybox; }
+
+  /// Sets skybox path
+  void setPathSkybox(const String &path) { m_pathSkybox = path; }
+
+  /// Returns albedo path
+  const String &getPathAlbedo() { return m_pathAlbedo; }
+
+  /// Sets albedo path
+  void setPathAlbedo(const String &path) { m_pathAlbedo = path; }
+
+  /// Returns texture tiling
+  const Vec2F &getTexTiling() { return m_texTiling; }
+
+  /// Sets texture tiling
+  void setTexTiling(const Vec2F &tiling) { m_texTiling = tiling; }
+
   /// Returns a reference to the static RTTI object that represents this
   /// component
   static bs::RTTITypeBase *getRTTIStatic();
@@ -66,6 +85,11 @@ public:
 private:
   /// Type of the tagged object
   ObjectType m_type = ObjectType::kInvalid;
+
+  /// Skybox path
+  String m_pathSkybox = "";
+  String m_pathAlbedo = "";
+  Vec2F m_texTiling = Vec2F::ONE;
 };
 
 // -------------------------------------------------------------------------- //

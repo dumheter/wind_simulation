@@ -389,7 +389,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     input->setWidth(100);
     input->setPosition(4, height);
     input->onValueChanged.connect(
-        [this](const String &text) { m_scenePath = text + ".json"; });
+        [this](const String &text) { m_scenePath = text; });
 
     GUIButton *bSave = panel->addNewElement<GUIButton>(HString("Save"));
     bSave->setWidth(30);

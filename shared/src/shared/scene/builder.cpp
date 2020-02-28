@@ -136,6 +136,10 @@ ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
   m_material->setTexture("gAlbedoTex", texture);
   m_material->setVec2("gUVTile", tiling);
 
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->setPathAlbedo(texPath);
+  ctag->setTexTiling(tiling);
+
   if (m_renderable != nullptr) {
     m_renderable->setMaterial(m_material);
   }
@@ -148,6 +152,9 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
   const bs::HTexture tex = Asset::loadCubemap(path);
   bs::HSkybox comp = m_handle->addComponent<bs::CSkybox>();
   comp->setTexture(tex);
+
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->setPathSkybox(path);
 
   return *this;
 }

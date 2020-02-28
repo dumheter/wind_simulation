@@ -51,14 +51,12 @@ public:
 
 private:
   /// Private function to load a scene from a JSON value. All resources
-  /// are assumed to be relative to the specified directory.
-  static bs::HSceneObject loadScene(const nlohmann::json &value,
-                                    const String &dir);
+  /// are assumed to be relative to the working directory.
+  static bs::HSceneObject loadScene(const nlohmann::json &value);
 
   /// Private function to load a scene object from a JSON value. All resources
-  /// are assumed to be relative to the specified directory.
-  static bs::HSceneObject loadObject(const nlohmann::json &value,
-                                     const String &dir);
+  /// are assumed to be relative to the working directory.
+  static bs::HSceneObject loadObject(const nlohmann::json &value);
 
   ///
   static nlohmann::json saveScene(const bs::HSceneObject &scene);

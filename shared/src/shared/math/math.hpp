@@ -26,6 +26,7 @@
 // Headers
 // ========================================================================== //
 
+#include <Math/BsQuaternion.h>
 #include <Math/BsVector2.h>
 #include <Math/BsVector3.h>
 #include <Math/BsVector3I.h>
@@ -39,6 +40,7 @@ namespace wind {
 using Vec2F = ::bs::Vector2;
 using Vec3F = ::bs::Vector3;
 using Vec3I = ::bs::Vector3I;
+using Quat = ::bs::Quaternion;
 
 } // namespace wind
 

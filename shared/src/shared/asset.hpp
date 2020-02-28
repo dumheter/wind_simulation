@@ -81,6 +81,16 @@ public:
   static std::tuple<bs::HMesh, bs::HPhysicsMesh>
   loadMeshWithPhysics(const bs::Path &path, f32 scale = 1.0f,
                       bool cpuCached = false);
+
+  /// Returns whether or not a handle is of a specific type
+  template <typename T> static bool isType(const Handle &handle) {
+    return std::holds_alternative<T>(handle);
+  }
+
+  /// Returns the texture handle from an asset handle
+  static bs::HTexture handleTexture(const Handle &handle) {
+    return std::get<Texture>(handle).handle;
+  }
 };
 
 } // namespace wind
@@ -97,6 +107,9 @@ public:
   /// Load a texture
   static bs::HTexture loadTexture(const bs::Path &path, bool srgb = true,
                                   bool hdr = false);
+
+  /// Returns the path for a texture asset (inefficient)
+  static bool getTexturePath(const bs::HTexture &texture, bs::Path &pathOut);
 
 private:
   ///

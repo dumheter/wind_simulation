@@ -26,6 +26,7 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/utility/json_util.hpp"
@@ -34,6 +35,8 @@
 #include <thirdparty/alflib/core/assert.hpp>
 #include <thirdparty/alflib/file/path.hpp>
 
+#include <Components/BsCRenderable.h>
+#include <Components/BsCSkybox.h>
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
@@ -44,11 +47,6 @@ namespace wind {
 
 bs::HSceneObject Scene::load(const String &path) {
   using json = nlohmann::json;
-
-  // Get base directory
-  alflib::Path alfPath(path.c_str());
-  alflib::String _dir = alfPath.GetDirectory().GetPathString();
-  String dir = _dir.GetUTF8();
 
   // Read file
   String fileContent = Util::readFile(path);
@@ -64,7 +62,7 @@ bs::HSceneObject Scene::load(const String &path) {
     return bs::SceneObject::create("");
   }
 
-  return loadScene(value, dir);
+  return loadScene(value);
 }
 
 // -------------------------------------------------------------------------- //
@@ -77,8 +75,7 @@ void Scene::save(const String &path, const bs::HSceneObject &scene) {
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
-                                  const String &dir) {
+bs::HSceneObject Scene::loadScene(const nlohmann::json &value) {
   SceneBuilder builder;
 
   // Name
@@ -98,7 +95,7 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
     }
 
     for (auto &it : objsArr) {
-      bs::HSceneObject object = loadObject(it, dir);
+      bs::HSceneObject object = loadObject(it);
       builder.withObject(object);
     }
   }
@@ -109,8 +106,7 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
-                                   const String &dir) {
+bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   using json = nlohmann::json;
 
   // Find type
@@ -124,7 +120,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
     if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling);
+      builder.withMaterial(tex, tiling);
     }
     break;
   }
@@ -132,7 +128,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
     if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling);
+      builder.withMaterial(tex, tiling);
     }
     break;
   }
@@ -159,7 +155,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
   if (value.find("skybox") != value.end()) {
     json skybox = value["skybox"];
     if (skybox.find("cubemap") != skybox.end()) {
-      String cubemapPath = dir + "\\" + String(skybox["cubemap"]);
+      String cubemapPath = String(skybox["cubemap"]);
       builder.withSkybox(cubemapPath);
     } else {
       logError("Skybox requires a \"cubemap\" property");
@@ -177,7 +173,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     }
 
     for (auto &it : arr) {
-      bs::HSceneObject subObject = loadObject(it, dir);
+      bs::HSceneObject subObject = loadObject(it);
       builder.withObject(subObject);
     }
   }
@@ -216,7 +212,36 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
   value["name"] = object->getName();
 
   HCTag tag = object->getComponent<CTag>();
-  value["type"] = ObjectBuilder::stringFromKind(tag->getType());
+  if (tag->getType() != ObjectType::kEmpty) {
+    value["type"] = ObjectBuilder::stringFromKind(tag->getType());
+  }
+
+  // Skybox
+  if (object->getComponent<bs::CSkybox>()) {
+    value["skybox"]["cubemap"] = tag->getPathSkybox();
+  }
+
+  // Material
+  if (object->getComponent<bs::CRenderable>()) {
+    JsonUtil::setValue(value, "tiling", tag->getTexTiling());
+    value["texture"] = tag->getPathAlbedo();
+  }
+
+  // Position
+  Vec3F position = object->getTransform().getPosition();
+  if (position != Vec3F::ZERO) {
+    JsonUtil::setValue(value, "position", position);
+  }
+
+  Vec3F scale = object->getTransform().getScale();
+  if (scale != Vec3F::ONE) {
+    JsonUtil::setValue(value, "scale", scale);
+  }
+
+  Quat rotation = object->getTransform().getRotation();
+  if (rotation != Quat::IDENTITY) {
+    JsonUtil::setValue(value, "rotation", rotation);
+  }
 
   // Sub-objects
   u32 cnt = object->getNumChildren();

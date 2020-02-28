@@ -3,14 +3,14 @@
 	"objects": [
 		{
 			"name": "skybox",
-			"skybox": { "cubemap": "../skybox/daytime.hdr" }
+			"skybox": { "cubemap": "res/skybox/daytime.hdr" }
     },
 		{
 			"name": "geometry",
 			"objects": [
 				{
 					"type": "plane",
-					"texture": "../textures/grid.png",
+					"texture": "res/textures/grid.png",
 					"scale": [ 4.0, 1.0, 4.0 ],
 					"position": { "xz": 4.0, "y": 0.4 },
 					"tiling": { "uv": 16.0 },
@@ -18,7 +18,7 @@
 				},
 				{
 					"type": "cube",
-					"texture": "../textures/grid_2.png",
+					"texture": "res/textures/grid_2.png",
 					"position": { "x": 6.0, "y": 3.0, "z": 3.0 },
 					"scale": { "y": 7.0, "z": 1.5 },
 					"physics": { "restitution": 0.5, "mass": 25.0 }
