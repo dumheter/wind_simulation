@@ -60,7 +60,8 @@ public:
 
   /// Sets the material
   ObjectBuilder &withMaterial(const String &texPath,
-                              const Vec2F &tiling = Vec2F::ONE);
+                              const Vec2F &tiling = Vec2F::ONE,
+                              bool transparent = false);
 
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);

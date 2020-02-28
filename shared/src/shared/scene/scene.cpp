@@ -118,13 +118,17 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
+  // Use trasparent shader?
+  const auto transparent = JsonUtil::getOrCall<bool>(
+      value, String("transparent"), []() { return false; });
+
   // Kind-specific options
   switch (kind) {
   case ObjectBuilder::Kind::kPlane: {
     Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
     if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling);
+      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
     }
     break;
   }
@@ -132,7 +136,23 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
     String tex = value.value("texture", "").c_str();
     if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling);
+      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
+    }
+    break;
+  }
+  case ObjectBuilder::Kind::kBall: {
+    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
+    String tex = value.value("texture", "").c_str();
+    if (!tex.empty()) {
+      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
+    }
+    break;
+  }
+  case ObjectBuilder::Kind::kRotor: {
+    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
+    String tex = value.value("texture", "").c_str();
+    if (!tex.empty()) {
+      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
     }
     break;
   }

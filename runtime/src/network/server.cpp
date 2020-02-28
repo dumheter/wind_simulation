@@ -202,10 +202,10 @@ void Server::handlePacket() {
       header == PacketHeaderTypes::kPlayerTick) {
     handlePacketPlayerTick();
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    logVerbose("[server:p requestcreate] ");
+    //logVeryVerbose("[server:p requestcreate] ");
     handlePacketRequestCreate();
   } else {
-    logVerbose("[server] got unknown packet {}",
+    logWarning("[server] got unknown packet {}",
                static_cast<u32>(m_packet.GetHeaderType()));
   }
 }
@@ -290,7 +290,7 @@ void Server::OnSteamNetConnectionStatusChanged(
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
       nlohmann::json json =
-          Scene::saveScene(bs::gSceneManager().getMainScene()->getRoot());
+          Scene::saveScene(m_world->getScene());
       mw->Write(alflib::String(json.dump().c_str()));
       // mw->Write(alflib::String(m_world->getScenePath().c_str()));
       mw.Finalize();

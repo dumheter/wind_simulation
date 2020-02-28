@@ -26,8 +26,23 @@
 		{
 		    "name": "fan",
 		    "type": "cube",
-		    "scale": { "xyz": 0.5 },
-		    "position": { "xz": 4.0, "y": 1.0 },
+		    "scale": { "xyz": 4 },
+		    "position": { "xz": 8.0, "y": 2.0 },
+                    "transparent": true,
+                    "texture": "../textures/wireframe.png",
+		    "wind": [
+			{
+			    "type": "constant",
+			    "direction": [ 0.0, 0.0, 0.0 ]
+                        }
+                    ]
+                },
+		{
+		    "type": "rotor",
+		    "scale": { "xyz": 1.0 },
+		    "position": { "xz": -15.0, "y": 5.0 },
+                    "texture": "../textures/grid_2.png",
+                    "physics": {"restitution": 0.5, "mass": 20.0 },
 		    "wind": [
 			{
 			    "type": "constant",
