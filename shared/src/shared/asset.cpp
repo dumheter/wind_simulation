@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/log.hpp"
+
 #include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
@@ -44,36 +46,34 @@ namespace wind {
 
 bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr,
                                 bool mipmaps) {
-  using namespace bs;
-
-  Path assetPath = path;
+  bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
-  HTexture texture = gResources().load<Texture>(assetPath);
+  bs::HTexture texture = bs::gResources().load<bs::Texture>(assetPath);
   if (!texture) {
-    gDebug().log(
+    bs::gDebug().log(
         "Texture '" + path.toString() +
             "' has not yet been imported. This process can take a while",
-        LogVerbosity::Warning);
+        bs::LogVerbosity::Warning);
 
-    const SPtr<ImportOptions> _impOpt =
-        Importer::instance().createImportOptions(path);
-    if (rtti_is_of_type<TextureImportOptions>(_impOpt)) {
-      TextureImportOptions *impOpt =
-          static_cast<TextureImportOptions *>(_impOpt.get());
+    const bs::SPtr<bs::ImportOptions> _impOpt =
+        bs::Importer::instance().createImportOptions(path);
+    if (bs::rtti_is_of_type<bs::TextureImportOptions>(_impOpt)) {
+      bs::TextureImportOptions *impOpt =
+          static_cast<bs::TextureImportOptions *>(_impOpt.get());
       impOpt->sRGB = srgb;
       if (hdr) {
-        impOpt->format = PF_RG11B10F;
+        impOpt->format = bs::PF_RG11B10F;
       }
       impOpt->generateMips = mipmaps;
       impOpt->cpuCached = true;
       impOpt->cubemap = false;
     }
-    texture = gImporter().import<Texture>(path, _impOpt);
-    gResources().save(texture, assetPath, true);
+    texture = bs::gImporter().import<bs::Texture>(path, _impOpt);
+    bs::gResources().save(texture, assetPath, true);
   }
 
-  gResources().getResourceManifest("Default")->registerResource(
+  bs::gResources().getResourceManifest("Default")->registerResource(
       texture.getUUID(), assetPath);
 
   return texture;
@@ -82,37 +82,35 @@ bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr,
 // -------------------------------------------------------------------------- //
 
 bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
-  using namespace bs;
-
-  Path assetPath = path;
+  bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
-  HTexture texture = gResources().load<Texture>(assetPath);
+  bs::HTexture texture = bs::gResources().load<bs::Texture>(assetPath);
   if (!texture) {
-    gDebug().log(
+    bs::gDebug().log(
         "Cubemap texture '" + path.toString() +
             "' has not yet been imported. This process can take a while",
-        LogVerbosity::Warning);
+        bs::LogVerbosity::Warning);
 
-    const SPtr<ImportOptions> _impOpt =
-        Importer::instance().createImportOptions(path);
-    if (rtti_is_of_type<TextureImportOptions>(_impOpt)) {
-      TextureImportOptions *impOpt =
-          static_cast<TextureImportOptions *>(_impOpt.get());
+    const bs::SPtr<bs::ImportOptions> _impOpt =
+        bs::Importer::instance().createImportOptions(path);
+    if (bs::rtti_is_of_type<bs::TextureImportOptions>(_impOpt)) {
+      bs::TextureImportOptions *impOpt =
+          static_cast<bs::TextureImportOptions *>(_impOpt.get());
       impOpt->sRGB = srgb;
       if (hdr) {
-        impOpt->format = PF_RG11B10F;
+        impOpt->format = bs::PF_RG11B10F;
       }
       impOpt->generateMips = true;
       impOpt->cpuCached = true;
       impOpt->cubemap = true;
-      impOpt->cubemapSourceType = CubemapSourceType::Cylindrical;
+      impOpt->cubemapSourceType = bs::CubemapSourceType::Cylindrical;
     }
-    texture = gImporter().import<Texture>(path, _impOpt);
-    gResources().save(texture, assetPath, true);
+    texture = bs::gImporter().import<bs::Texture>(path, _impOpt);
+    bs::gResources().save(texture, assetPath, true);
   }
 
-  gResources().getResourceManifest("Default")->registerResource(
+  bs::gResources().getResourceManifest("Default")->registerResource(
       texture.getUUID(), assetPath);
 
   return texture;
@@ -120,35 +118,33 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
 
 // -------------------------------------------------------------------------- //
 
-bs::HMesh Asset::loadMesh(const bs::Path &path, float scale, bool cpuCached) {
-  using namespace bs;
-
-  Path assetPath = path;
+bs::HMesh Asset::loadMesh(const bs::Path &path, f32 scale, bool cpuCached) {
+  bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
-  HMesh mesh = gResources().load<Mesh>(assetPath);
+  bs::HMesh mesh = bs::gResources().load<bs::Mesh>(assetPath);
   if (!mesh) {
-    gDebug().log(
+    bs::gDebug().log(
         "Mesh '" + path.toString() +
             "' has not yet been imported. This process can take a while",
-        LogVerbosity::Warning);
+        bs::LogVerbosity::Warning);
 
-    const SPtr<ImportOptions> _impOpt =
-        Importer::instance().createImportOptions(path);
-    if (rtti_is_of_type<MeshImportOptions>(_impOpt)) {
-      MeshImportOptions *impOpt =
-          static_cast<MeshImportOptions *>(_impOpt.get());
+    const bs::SPtr<bs::ImportOptions> _impOpt =
+        bs::Importer::instance().createImportOptions(path);
+    if (bs::rtti_is_of_type<bs::MeshImportOptions>(_impOpt)) {
+      bs::MeshImportOptions *impOpt =
+          static_cast<bs::MeshImportOptions *>(_impOpt.get());
       impOpt->cpuCached = cpuCached;
       impOpt->importNormals = true;
       impOpt->importTangents = true;
       impOpt->importScale = scale;
     }
-    mesh = gImporter().import<Mesh>(path, _impOpt);
-    gResources().save(mesh, assetPath, true);
+    mesh = bs::gImporter().import<bs::Mesh>(path, _impOpt);
+    bs::gResources().save(mesh, assetPath, true);
   }
 
-  gResources().getResourceManifest("Default")->registerResource(mesh.getUUID(),
-                                                                assetPath);
+  bs::gResources().getResourceManifest("Default")->registerResource(
+      mesh.getUUID(), assetPath);
 
   return mesh;
 }
@@ -157,51 +153,99 @@ bs::HMesh Asset::loadMesh(const bs::Path &path, float scale, bool cpuCached) {
 
 std::tuple<bs::HMesh, bs::HPhysicsMesh>
 Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached) {
-  using namespace bs;
-
-  Path assetPath = path;
+  bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
-  Path physAssetPath = path;
+  bs::Path physAssetPath = path;
   physAssetPath.setExtension(path.getExtension() + ".phys.asset");
 
   // Try to load assets
-  HMesh mesh = gResources().load<Mesh>(assetPath);
-  HPhysicsMesh physMesh = gResources().load<PhysicsMesh>(physAssetPath);
+  bs::HMesh mesh = bs::gResources().load<bs::Mesh>(assetPath);
+  bs::HPhysicsMesh physMesh =
+      bs::gResources().load<bs::PhysicsMesh>(physAssetPath);
 
   // Otherwise import them
   if (!mesh) {
-    gDebug().log(
+    bs::gDebug().log(
         "Mesh '" + path.toString() +
             "' has not yet been imported. This process can take a while",
-        LogVerbosity::Warning);
+        bs::LogVerbosity::Warning);
 
-    const SPtr<ImportOptions> _impOpt =
-        Importer::instance().createImportOptions(path);
-    if (rtti_is_of_type<MeshImportOptions>(_impOpt)) {
-      MeshImportOptions *impOpt =
-          static_cast<MeshImportOptions *>(_impOpt.get());
+    const bs::SPtr<bs::ImportOptions> _impOpt =
+        bs::Importer::instance().createImportOptions(path);
+    if (bs::rtti_is_of_type<bs::MeshImportOptions>(_impOpt)) {
+      bs::MeshImportOptions *impOpt =
+          static_cast<bs::MeshImportOptions *>(_impOpt.get());
       impOpt->cpuCached = cpuCached;
       impOpt->importNormals = true;
       impOpt->importTangents = true;
       impOpt->importScale = scale;
-      impOpt->collisionMeshType = CollisionMeshType::Normal;
+      impOpt->collisionMeshType = bs::CollisionMeshType::Normal;
     }
 
     // Import mesh and physics mesh
-    auto res = gImporter().importAll(path, _impOpt);
-    mesh = static_resource_cast<Mesh>(res->entries[0].value);
-    physMesh = static_resource_cast<PhysicsMesh>(res->entries[1].value);
+    auto res = bs::gImporter().importAll(path, _impOpt);
+    mesh = bs::static_resource_cast<bs::Mesh>(res->entries[0].value);
+    physMesh = bs::static_resource_cast<bs::PhysicsMesh>(res->entries[1].value);
 
-    gResources().save(mesh, assetPath, true);
-    gResources().save(physMesh, physAssetPath, true);
+    bs::gResources().save(mesh, assetPath, true);
+    bs::gResources().save(physMesh, physAssetPath, true);
   }
 
-  gResources().getResourceManifest("Default")->registerResource(mesh.getUUID(),
-                                                                assetPath);
+  bs::gResources().getResourceManifest("Default")->registerResource(
+      mesh.getUUID(), assetPath);
   // gResources().getResourceManifest("Default")->registerResource(
   //    physMesh.getUUID(), assetPath);
 
   return std::make_tuple(mesh, physMesh);
+}
+
+} // namespace wind
+
+// ========================================================================== //
+// AssetManager Implementation
+// ========================================================================== //
+
+namespace wind {
+
+bs::HTexture AssetManager::loadTexture(const bs::Path &path, bool srgb,
+                                       bool hdr) {
+  AssetManager &mgr = instance();
+  if (mgr.m_assetMap.count(path) > 0) {
+    Asset::Handle handle = mgr.m_assetMap[path];
+    return std::get<Asset::Texture>(handle).handle;
+  } else {
+    bs::HTexture textureHandle = Asset::loadTexture(path, srgb, hdr);
+    Asset::Handle handle = Asset::Texture{textureHandle};
+    mgr.m_assetMap[path] = handle;
+    return textureHandle;
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+bool AssetManager::getTexturePath(const bs::HTexture &texture,
+                                  bs::Path &pathOut) {
+
+  AssetManager &mgr = instance();
+  for (const auto &entry : mgr.m_assetMap) {
+    const bs::Path &path = entry.first;
+    const Asset::Handle &handle = entry.second;
+    if (Asset::isType<Asset::Texture>(handle)) {
+      bs::HTexture _texture = Asset::handleTexture(handle);
+      if (_texture == texture) {
+        pathOut = path;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// -------------------------------------------------------------------------- //
+
+AssetManager &AssetManager::instance() {
+  static AssetManager manager;
+  return manager;
 }
 
 } // namespace wind

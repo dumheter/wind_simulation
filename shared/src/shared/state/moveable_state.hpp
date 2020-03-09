@@ -9,7 +9,6 @@
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 
-#include "shared/scene/component_factory.hpp"
 #include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
 #include "shared/utility/util.hpp"
@@ -30,10 +29,6 @@ public:
   UniqueId getUniqueId() const { return m_id; }
 
   void setUniqueId(UniqueId id) { m_id = id; }
-
-  ComponentTypes getType() const { return m_type; }
-
-  void setType(ComponentTypes type) { m_type = type; }
 
   bs::Vector3 getPosition() const { return m_position; }
 
@@ -68,6 +63,8 @@ public:
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
 
+  static MoveableState FromBytes(alflib::RawMemoryReader &mr);
+
 private:
   using Bitfield = u8;
   static constexpr Bitfield kFlagRigid = 0;
@@ -77,11 +74,8 @@ public:
 
   void setRigid(bool isRigid) { bitSet(m_flag, kFlagRigid, (Bitfield)isRigid); }
 
-  static MoveableState FromBytes(alflib::RawMemoryReader &mr);
-
 public: // public for RTTI
   UniqueId m_id;
-  ComponentTypes m_type;
   Bitfield m_flag;
   bs::Vector3 m_position;
   bs::Vector3 m_vel;

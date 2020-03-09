@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -39,10 +39,18 @@
 
 namespace wind {
 
+class MoveableState;
+
 class ObjectBuilder {
 public:
+  /// Enumeration of shader kinds. An object material uses one of these.
+  enum class ShaderKind {
+    kStandard,   ///< Standard PBR shader.
+    kTransparent ///< Transparent PBR shader.
+  };
+
   /// Object kind
-  using Kind = ObjectTypes;
+  using Kind = ObjectType;
 
   /// Construct object builder
   ObjectBuilder(Kind kind = Kind::kEmpty);
@@ -57,8 +65,9 @@ public:
   ObjectBuilder &withScale(const Vec3F &scale);
 
   /// Sets the material
-  ObjectBuilder &withMaterial(const String &texPath,
+  ObjectBuilder &withMaterial(ShaderKind shaderKind, const String &texPath,
                               const Vec2F &tiling = Vec2F::ONE);
+
 
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);
@@ -72,18 +81,24 @@ public:
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);
 
+  /// @post Must register netcomp in world
+  ObjectBuilder &withNetComponent(const MoveableState &moveableState);
+
   /// Build the scene object
   bs::HSceneObject build();
 
-  ///
-  static bs::HSceneObject fromJson(const String &directory,
-                                   const nlohmann::json &value);
+  /// Returns the next generic object name
+  static String nextName();
 
-  /// Allocates a new default name (not a memory alloc...)
-  static String allocDefaultName();
-
-private:
+  /// Returns an object kind from string
   static Kind kindFromString(const String &kindString);
+
+  /// Returns a string from a kind
+  static String stringFromKind(Kind kind);
+
+  static ShaderKind shaderKindFromString(const String &kind);
+
+  static String stringFromShaderKind(ShaderKind kind);
 
 private:
   /// Number of created objects
@@ -120,11 +135,8 @@ public:
 
   bs::HSceneObject build();
 
-  /// Create a scene builder from a file
-  static bs::HSceneObject fromFile(const String &path);
-
-  /// Allocates a new default name (not a memory alloc...)
-  static String allocDefaultName();
+  /// Returns the next generic scene name
+  static String nextName();
 
 private:
   /// Number of created scenes

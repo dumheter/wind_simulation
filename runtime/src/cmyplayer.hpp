@@ -10,9 +10,9 @@
 #include <Scene/BsComponent.h>
 #include <memory>
 
-#include "BsFPSWalker.h"
-#include "shared/scene/component_factory.hpp"
-#include "shared/utility/rtti_types.hpp"
+#include "shared/scene/fps_walker.hpp"
+#include "shared/scene/rtti.hpp"
+#include "shared/scene/types.hpp"
 #include "shared/utility/unique_id.hpp"
 
 namespace wind {
@@ -45,14 +45,14 @@ public:
 
   f32 getShootForce() const { return m_shootForce; }
 
-  void setWeapon(ComponentTypes weapon);
+  void setWeapon(ObjectType weapon);
 
   Client &getClient() { return *m_client; }
   const Client &getClient() const { return *m_client; }
 
-  bs::HFPSWalker getWalker() { return m_fpsWalker; }
+  HFPSWalker getWalker() { return m_fpsWalker; }
 
-  void lookupId(UniqueId uid);
+  // void lookupId(UniqueId uid);
 
   friend class CMyPlayerRTTI;
 
@@ -62,9 +62,9 @@ public:
 private:
   World *m_world;
   std::unique_ptr<Client> m_client;
-  bs::HFPSWalker m_fpsWalker;
+  HFPSWalker m_fpsWalker;
   bs::Quaternion m_lastRotation;
-  ComponentTypes m_weapon;
+  ObjectType m_weapon;
   bs::VirtualButton m_fire1;
   bs::VirtualButton m_fire2;
   f32 m_shootForce = 30.0f;

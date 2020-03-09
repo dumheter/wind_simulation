@@ -1,0 +1,56 @@
+{
+    "name": "default_json",
+    "objects": [
+	{
+	    "name": "skybox",
+	    "skybox": { "cubemap": "../skybox/daytime.hdr" }
+        },
+	{
+	    "name": "geometry",
+	    "objects": [
+		{
+		    "type": "plane",
+		    "texture": "../textures/grid.png",
+		    "scale": [ 40.0, 1.0, 40.0 ],
+		    "position": { "xz": 4.0, "y": -0.4 },
+		    "tiling": { "uv": 160.0 },
+		    "physics": { "restitution": 0.5 }
+		},
+		{
+		    "type": "cube",
+		    "texture": "../textures/grid_2.png",
+		    "position": { "x": 6.0, "y": 3.0, "z": 3.0 },
+		    "scale": { "y": 7.0, "z": 1.5 },
+		    "physics": { "restitution": 0.5, "mass": 25.0 }
+		},
+		{
+		    "name": "fan",
+		    "type": "cube",
+		    "scale": { "xyz": 4 },
+		    "position": { "xz": 8.0, "y": 2.0 },
+                    "transparent": true,
+                    "texture": "../textures/wireframe.png",
+		    "wind": [
+			{
+			    "type": "constant",
+			    "direction": [ 0.0, 0.0, 0.0 ]
+                        }
+                    ]
+                },
+		{
+		    "type": "rotor",
+		    "scale": { "xyz": 1.0 },
+		    "position": { "xz": -15.0, "y": 5.0 },
+                    "texture": "../textures/grid_2.png",
+                    "physics": {"restitution": 0.5, "mass": 20.0 },
+		    "wind": [
+			{
+			    "type": "constant",
+			    "direction": [ 0.0, 0.0, 0.0 ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

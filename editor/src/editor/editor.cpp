@@ -29,33 +29,19 @@
 #include "editor/factory.hpp"
 #include "editor/ui.hpp"
 #include "microprofile/microprofile.h"
-#include "shared/BsCameraFlyer.h"
 #include "shared/asset.hpp"
+#include "shared/camera_flyer.h"
 #include "shared/log.hpp"
-#include "shared/scene/builder.hpp"
+#include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
-#include <alflib/core/assert.hpp>
-
-#include <Components/BsCBoxCollider.h>
 #include <Components/BsCCamera.h>
-#include <Components/BsCMeshCollider.h>
-#include <Components/BsCPlaneCollider.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
-#include <Components/BsCSkybox.h>
 #include <Debug/BsDebugDraw.h>
 #include <Importer/BsImporter.h>
-#include <Importer/BsMeshImportOptions.h>
-#include <Importer/BsTextureImportOptions.h>
 #include <Input/BsInput.h>
-#include <Material/BsMaterial.h>
-#include <Mesh/BsMesh.h>
-#include <Physics/BsPhysics.h>
-#include <Physics/BsPhysicsMaterial.h>
 #include <Resources/BsBuiltinResources.h>
-#include <Resources/BsResourceManifest.h>
-#include <Resources/BsResources.h>
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
@@ -64,8 +50,7 @@
 
 namespace wind {
 
-Editor::Editor()
-    : App(App::MakeInfo("Editor", WINDOW_WIDTH, WINDOW_HEIGHT, 20)) {}
+Editor::Editor() : App(MakeInfo("Editor", WINDOW_WIDTH, WINDOW_HEIGHT, 20)) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -105,8 +90,8 @@ void Editor::onStartup() {
   m_ui = new UI(this);
 
   // Setup default scene
-  // setScene(EditorFactory::createDefaultScene("scene", GROUND_PLANE_SCALE));
-  setScene(SceneBuilder::fromFile("res/scenes/default.json"));
+  setScene(Scene::loadFile("res/scenes/default.json"));
+  Scene::saveFile("res/scenes/out.json", getScene());
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,

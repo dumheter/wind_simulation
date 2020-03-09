@@ -1,7 +1,7 @@
 #pragma once
 
+#include "shared/scene/rtti.hpp"
 #include "shared/state/player_input.hpp"
-#include "shared/utility/rtti_types.hpp"
 
 #include <BsCorePrerequisites.h>
 #include <Input/BsInputConfiguration.h>
@@ -16,14 +16,12 @@ class IReflectable;
 }
 
 namespace wind {
-class World;
-}
 
-namespace bs {
+class FPSWalker : public bs::Component {
+  friend class FPSWalkerRTTI;
 
-class FPSWalker : public Component {
 public:
-  FPSWalker(const HSceneObject &parent, wind::World *world);
+  FPSWalker(const bs::HSceneObject &parent);
 
   void update() override;
 
@@ -35,16 +33,14 @@ public:
 
   void resetNewInputFlag() { m_hasNewInput = false; }
 
-  wind::PlayerInput getPlayerInput() {
+  PlayerInput getPlayerInput() {
     m_hasNewInput = false;
     return m_lastInput;
   }
 
-  void setInput(wind::PlayerInput input) { m_lastInput = input; }
+  void setInput(PlayerInput input) { m_lastInput = input; }
 
   void applyRotation(const bs::Quaternion &rotation);
-
-  friend class FPSWalkerRTTI;
 
   static bs::RTTITypeBase *getRTTIStatic();
 
@@ -53,31 +49,30 @@ public:
   FPSWalker() = default; // serialization
 
 private:
-  wind::PlayerInput getInput();
+  PlayerInput getInput();
 
-  void applyInput(wind::PlayerInput input);
+  void applyInput(PlayerInput input);
 
 private:
-  HCharacterController mController;
-  wind::World *m_world;
+  bs::HCharacterController mController;
 
   float mCurrentSpeed = 0.0f;
 
-  VirtualButton mMoveForward;
-  VirtualButton mMoveBack;
-  VirtualButton mMoveLeft;
-  VirtualButton mMoveRight;
-  VirtualButton mFastMove;
-  VirtualButton mSpace;
-  VirtualButton mGravity;
+  bs::VirtualButton mMoveForward;
+  bs::VirtualButton mMoveBack;
+  bs::VirtualButton mMoveLeft;
+  bs::VirtualButton mMoveRight;
+  bs::VirtualButton mFastMove;
+  bs::VirtualButton mSpace;
+  bs::VirtualButton mGravity;
 
   bool m_gravity = true;
-  wind::PlayerInput m_lastInput{};
+  PlayerInput m_lastInput{};
   bool m_hasNewInput;
   bool m_isActive = false;
 };
 
-using HFPSWalker = GameObjectHandle<FPSWalker>;
+using HFPSWalker = bs::GameObjectHandle<FPSWalker>;
 
 class FPSWalkerRTTI
     : public bs::RTTIType<FPSWalker, bs::Component, FPSWalkerRTTI> {
@@ -97,4 +92,4 @@ public:
   }
 };
 
-} // namespace bs
+} // namespace wind

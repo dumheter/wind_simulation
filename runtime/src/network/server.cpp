@@ -1,8 +1,12 @@
 #include "server.hpp"
 #include "shared/log.hpp"
-#include "shared/scene/component_factory.hpp"
+#include "shared/scene/builder.hpp"
+#include "shared/scene/cnet_component.hpp"
+#include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
 #include "world.hpp"
+#include <Scene/BsSceneManager.h>
+#include <ThirdParty/json.hpp>
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
 
@@ -35,7 +39,7 @@ void Server::Poll() {
     while (got_packet) {
       got_packet = PollIncomingPacket(m_packet);
       if (got_packet) {
-        handlePacket(m_packet);
+        handlePacket();
       }
     }
   }
@@ -192,65 +196,40 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
   return got_packet;
 }
 
-void Server::handlePacket(Packet &packet) {
+void Server::handlePacket() {
   MICROPROFILE_SCOPEI("server", "handlePacket", MP_YELLOW4);
   if (auto header = m_packet.GetHeaderType();
       header == PacketHeaderTypes::kPlayerTick) {
-    auto mr = m_packet.GetMemoryReader();
-    auto input = mr.Read<PlayerInput>();
-    const u8 rotChanged = mr.Read<u8>();
-    std::optional<bs::Quaternion> maybeRot = std::nullopt;
-    if (rotChanged) {
-      maybeRot = std::make_optional<bs::Quaternion>(
-          mr.Read<float>(), mr.Read<float>(), mr.Read<float>(),
-          mr.Read<float>());
-    }
-    const auto from = m_packet.GetFromConnection();
-    const auto uid = m_connections[from];
-    m_world->onPlayerInput(uid, input, maybeRot);
+    handlePacketPlayerTick();
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    logVerbose("[server:p requestcreate] ");
-    auto mr = m_packet.GetMemoryReader();
-    auto state = mr.Read<MoveableState>();
-    const bs::Vector3 force{mr.Read<float>(), mr.Read<float>(),
-                            mr.Read<float>()};
-    if (state.getType() != ComponentTypes::kInvalid) {
-      state.setUniqueId(UniqueIdGenerator::next());
-      auto netComp = m_world->getCreator().create(state);
-      netComp->addForce(force, bs::ForceMode::Velocity);
-      m_packet.ClearPayload();
-      m_packet.SetHeader(PacketHeaderTypes::kCreate);
-      auto mw = m_packet.GetMemoryWriter();
-      const u32 count = 1;
-      mw->Write(count);
-      mw->Write(netComp->getState());
-      mw.Finalize();
-      PacketBroadcastUnreliableFast(m_packet);
-    } else {
-      logWarning("[server:p requestcreate] invalid type in state");
-    }
-  } else if (header == PacketHeaderTypes::kLookup) {
-    auto mr = m_packet.GetMemoryReader();
-    const auto from = packet.GetFromConnection();
-    auto uid = mr.Read<UniqueId>();
-    logVerbose("[server:p lookup] for uid {}", uid.raw());
-    const auto it = m_world->getNetComps().find(uid);
-    if (it != m_world->getNetComps().end()) {
-      m_packet.ClearPayload();
-      m_packet.SetHeader(PacketHeaderTypes::kLookupResponse);
-      auto mw = m_packet.GetMemoryWriter();
-      const u32 count = 1;
-      mw->Write(count);
-      mw->Write(it->second->getState());
-      mw.Finalize();
-      PacketUnicast(m_packet, SendStrategy::kReliable, from);
-    } else
-      logWarning("[server:p lookup] failed to find uid");
+    //logVeryVerbose("[server:p requestcreate] ");
+    handlePacketRequestCreate();
   } else {
-    logVerbose("[server] got unknown packet {}",
+    logWarning("[server] got unknown packet {}",
                static_cast<u32>(m_packet.GetHeaderType()));
   }
-} // namespace wind
+}
+
+void Server::handlePacketPlayerTick() {
+  auto mr = m_packet.GetMemoryReader();
+  auto input = mr.Read<PlayerInput>();
+  const u8 rotChanged = mr.Read<u8>();
+  std::optional<bs::Quaternion> maybeRot = std::nullopt;
+  if (rotChanged) {
+    maybeRot = std::make_optional<bs::Quaternion>(
+        mr.Read<float>(), mr.Read<float>(), mr.Read<float>(), mr.Read<float>());
+  }
+  const auto from = m_packet.GetFromConnection();
+  const auto uid = m_connections[from];
+  m_world->onPlayerInput(uid, input, maybeRot);
+}
+
+void Server::handlePacketRequestCreate() {
+  RequestCreateInfo info = PacketParser::RequestCreate(m_packet);
+  info.state.setUniqueId(UniqueIdGenerator::next());
+  PacketBuilder::Create(m_packet, info);
+  PacketBroadcastUnreliableFast(m_packet);
+}
 
 void Server::OnSteamNetConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t *status) {
@@ -310,13 +289,10 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
-      auto &netComps = m_world->getNetComps();
-      const u32 count = static_cast<u32>(netComps.size());
-      mw->Write(count);
-      // m_world->updateRigidbodys();
-      for (auto [uid, netComp] : netComps) {
-        mw->Write(netComp->getState());
-      }
+      nlohmann::json json =
+          Scene::saveScene(m_world->getScene());
+      mw->Write(alflib::String(json.dump().c_str()));
+      // mw->Write(alflib::String(m_world->getScenePath().c_str()));
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
     }

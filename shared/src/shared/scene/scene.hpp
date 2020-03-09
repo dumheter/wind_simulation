@@ -26,27 +26,48 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/macros.hpp"
 #include "shared/types.hpp"
 
+#include <BsPrerequisites.h>
+#include <ThirdParty/json.hpp>
+
 // ========================================================================== //
-// RTTI Types
+// Scene Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// RTTI Type ID of CRotor component
-constexpr u32 TID_CRotor = 2000;
-/// RTTI Type ID of CNetComponent component
-constexpr u32 TID_CNetComponent = 2001;
-/// RTTI Type ID of CMyPlayer component
-constexpr u32 TID_CMyPlayer = 2002;
-/// RTTI Type ID of FPSWalker component
-constexpr u32 TID_FPSWalker = 2003;
-/// RTTI Type ID of FPSCamera component
-constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWindSource component
-constexpr u32 TID_CWindSource = 2005;
-/// RTTI Type ID of CTag component
-constexpr u32 TID_CTag = 2006;
+///
+class Scene {
+  WIND_NAMESPACE_CLASS(Scene);
+
+public:
+  /// Load a scene from a string (source is where the JSON comes from)
+  static bs::HSceneObject load(const String &scene, const String &source = "");
+
+  /// Load a scene from a JSON file at the specified path.
+  static bs::HSceneObject loadFile(const String &path);
+
+  /// Save a scene to a string
+  static String save(const bs::HSceneObject &scene);
+
+  /// Save a scene to a JSON file at the specified path.
+  static void saveFile(const String &path, const bs::HSceneObject &scene);
+
+  /// Private function to load a scene from a JSON value. All resources
+  /// are assumed to be relative to the working directory.
+  static bs::HSceneObject loadScene(const nlohmann::json &value);
+
+  /// Private function to load a scene object from a JSON value. All resources
+  /// are assumed to be relative to the working directory.
+  static bs::HSceneObject loadObject(const nlohmann::json &value);
+
+  ///
+  static nlohmann::json saveScene(const bs::HSceneObject &scene);
+
+  ///
+  static nlohmann::json saveObject(const bs::HSceneObject &object);
+};
 
 } // namespace wind

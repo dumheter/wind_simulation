@@ -31,6 +31,7 @@
 #include "microprofile/microprofile.h"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
+#include "shared/scene/scene.hpp"
 
 #include <filesystem>
 
@@ -60,6 +61,8 @@ namespace wind {
 
 UI::UI(Editor *editor) : m_editor(editor) {
   using namespace bs;
+
+  m_scenePath = "res/scenes/out.json";
 
   const SPtr<RenderWindow> &window = gApplication().getPrimaryWindow();
   const RenderWindowProperties &windowProp = window->getProperties();
@@ -382,26 +385,31 @@ UI::UI(Editor *editor) : m_editor(editor) {
   // Save/Load scene
   {
     GUIInputBox *input = panel->addNewElement<GUIInputBox>();
+    input->setText(m_scenePath);
     input->setWidth(100);
     input->setPosition(4, height);
+    input->onValueChanged.connect(
+        [this](const String &text) { m_scenePath = text; });
 
     GUIButton *bSave = panel->addNewElement<GUIButton>(HString("Save"));
     bSave->setWidth(30);
     bSave->setPosition(106, height);
     bSave->onClick.connect([this, input]() {
-      const bs::String path = input->getText() + ".json";
-      logVerbose("saving scene ({})", path.c_str());
+      std::filesystem::path path = m_scenePath.c_str();
+      logVerbose("saving scene ({})", path);
+      String _path = path.string().c_str();
+      Scene::saveFile(_path, m_editor->getScene());
     });
 
     GUIButton *bLoad = panel->addNewElement<GUIButton>(HString("Load"));
     bLoad->setWidth(30);
     bLoad->setPosition(138, height);
     bLoad->onClick.connect([this, input]() {
-      m_scenePath = input->getText() + ".json";
       std::filesystem::path path = m_scenePath.c_str();
       if (std::filesystem::exists(path)) {
-        logVerbose("loading scene ({})", m_scenePath.c_str());
-        m_editor->setScene(SceneBuilder::fromFile(m_scenePath), true);
+        logVerbose("loading scene ({})", path);
+        String _path = path.string().c_str();
+        m_editor->setScene(Scene::loadFile(_path), true);
         m_sceneAutoReload = true;
       } else {
         logWarning("Scene requested to load does not exist \"{}\"",
@@ -431,7 +439,7 @@ void UI::onFixedUpdate(f32 delta) {
           std::filesystem::last_write_time(path);
       if (time != m_sceneEditTime) {
         logVerbose("reloading scene ({})", m_scenePath.c_str());
-        m_editor->setScene(SceneBuilder::fromFile(m_scenePath), true);
+        m_editor->setScene(Scene::loadFile(m_scenePath), true);
       }
       m_sceneEditTime = time;
     }

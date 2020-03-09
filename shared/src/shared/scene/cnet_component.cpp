@@ -38,7 +38,7 @@ void CNetComponent::onTransformChanged(bs::TransformChangedFlags flags) {
 
 void CNetComponent::addForce(bs::Vector3 force, bs::ForceMode mode) {
   auto rigid = SO()->getComponent<bs::CRigidbody>();
-  if (rigid) {
+  if (rigid && !rigid->getIsKinematic()) {
     rigid->addForce(force, mode);
   }
 }
@@ -55,13 +55,6 @@ void CNetComponent::setState(const MoveableState &moveableState) {
     rigid->setAngularVelocity(m_state.getAngVel());
   }
   mNotifyFlags = bs::TCF_Transform;
-}
-
-void CNetComponent::setType(ComponentTypes type) {
-  m_state.setType(type);
-  if (type != ComponentTypes::kPlayer && type != ComponentTypes::kInvalid) {
-    m_state.setRigid(true);
-  }
 }
 
 void CNetComponent::setPosition(bs::Vector3 position) {

@@ -26,59 +26,71 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/macros.hpp"
-#include "shared/math/math.hpp"
+#include "shared/scene/types.hpp"
 #include "shared/types.hpp"
+#include "shared/wind/base_functions.hpp"
 
-#include <ThirdParty/json.hpp>
+#include <alflib/memory/raw_memory_reader.hpp>
+#include <alflib/memory/raw_memory_writer.hpp>
 
 // ========================================================================== //
-// JsonUtil Declaration
+// ComponentData Declaration
 // ========================================================================== //
 
 namespace wind {
 
-///
-class JsonUtil {
-  WIND_NAMESPACE_CLASS(JsonUtil);
+/// Union-like class with data about different components.
+class ComponentData {
 
 public:
-  ///
-  template <typename T, typename F, typename... ARGS>
-  static T getOrCall(const nlohmann::json &value, const String &key, F &&func,
-                     ARGS &&... arguments);
+  /// Underlying enum type of the enum "ComponentType"
+  using TagType = std::underlying_type_t<ComponentType>;
 
-  /// Read a vector from a JSON value or return the default value
-  static Vec2F getVec2F(const nlohmann::json &value, const String &key,
-                        const Vec2F &fallback = Vec2F::ZERO);
+  /// Data associated with wind sources
+  struct WindSourceData {
+    std::vector<BaseFn> functions = {};
+  };
 
-  /// Read a vector from a JSON value or return the default value
-  static Vec3F getVec3F(const nlohmann::json &value, const String &key,
-                        const Vec3F &fallback = Vec3F::ZERO);
+  /// Data associated with rigidbodies
+  struct RigidbodyData {
+    f32 restitution = 0.0f;
+    f32 mass = 0.0f;
+  };
 
-  /// Set Vec2
-  static void setValue(nlohmann::json &value, const String &key,
-                       const Vec2F &vec);
+  struct RenderableData {
+    String pathTexture;
+  };
 
-  /// Set Vec3
-  static void setValue(nlohmann::json &value, const String &key,
-                       const Vec3F &vec);
-
-  /// Set Quat
-  static void setValue(nlohmann::json &value, const String &key,
-                       const Quat &quat);
-};
-
-// -------------------------------------------------------------------------- //
-
-template <typename T, typename F, typename... ARGS>
-T wind::JsonUtil::getOrCall(const nlohmann::json &value, const String &key,
-                            F &&func, ARGS &&... args) {
-  auto it = value.find(key.c_str());
-  if (it != value.end()) {
-    return *it;
+public:
+  template <typename T> bool isType() const {
+    return std::holds_alternative<T>(m_data);
   }
-  return func(std::forward<ARGS>(args)...);
-}
+
+  /// Returns the WindSource data
+  const WindSourceData &windSourceData() const;
+
+  /// Returns the Rigidbody data
+  const RigidbodyData &rigidbodyData() const;
+
+  const RenderableData &renderableData() const;
+
+  /// Serializes to bytes
+  bool ToBytes(alflib::RawMemoryWriter &mw) const;
+
+  /// Deserializes from bytes
+  static ComponentData FromBytes(alflib::RawMemoryReader &mr);
+
+  /// Creates a component data representing wind source data
+  static ComponentData asWindSource(const std::vector<BaseFn> &functions);
+
+  /// Creates a component data representing rigidbody data
+  static ComponentData asRigidbody(f32 restitution, f32 mass);
+
+  static ComponentData asRenderable(const String &pathTexture);
+
+private:
+  /// Variant
+  std::variant<WindSourceData, RigidbodyData, RenderableData> m_data;
+};
 
 } // namespace wind

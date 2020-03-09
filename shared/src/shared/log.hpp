@@ -1,8 +1,11 @@
 #pragma once
 
+#include "shared/utility/bsprinter.hpp"
+
 #include <BsApplication.h>
 #include <Debug/BsDebug.h>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <string>
 
 namespace wind {

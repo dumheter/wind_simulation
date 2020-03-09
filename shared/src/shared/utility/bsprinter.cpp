@@ -20,61 +20,77 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-
-// ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include <Math/BsQuaternion.h>
-#include <Math/BsVector2.h>
-#include <Math/BsVector3.h>
-#include <Math/BsVector3I.h>
-
-// ========================================================================== //
-// Types
-// ========================================================================== //
-
-namespace wind {
-
-using Vec2F = ::bs::Vector2;
-using Vec3F = ::bs::Vector3;
-using Vec3I = ::bs::Vector3I;
-using Quat = ::bs::Quaternion;
-
-} // namespace wind
+#include "shared/utility/bsprinter.hpp"
 
 // ========================================================================== //
 // Functions
 // ========================================================================== //
 
-namespace wind {
-
-/// Clamp 'value' between two other values 'min' and 'max'
-template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
-  return value < minValue ? minValue : value > maxValue ? maxValue : value;
+std::ostream &operator<<(std::ostream &out, const bs::Vector3 &vec) {
+  out << fmt::format("({:.1f}, {:.1f}, {:.1f})", vec.x, vec.y, vec.z);
+  return out;
 }
 
 // -------------------------------------------------------------------------- //
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b) {
-  return a > b ? a : b;
+std::ostream &operator<<(std::ostream &out, const bs::Vector2 &vec) {
+  out << fmt::format("({:.1f}, {:.1f})", vec.x, vec.y);
+  return out;
 }
 
 // -------------------------------------------------------------------------- //
 
-/// Returns the maximum of two values
-template <typename T> inline constexpr T maxValue(T a, T b, T c) {
-  return wind::maxValue(a, wind::maxValue(b, c));
+std::ostream &operator<<(std::ostream &out, wind::ObjectType type) {
+  switch (type) {
+  case wind::ObjectType::kEmpty: {
+    out << "kEmpty";
+    break;
+  }
+  case wind::ObjectType::kPlane: {
+    out << "kPlane";
+    break;
+  }
+  case wind::ObjectType::kCube: {
+    out << "kCube";
+    break;
+  }
+  case wind::ObjectType::kBall: {
+    out << "kBall";
+    break;
+  }
+  case wind::ObjectType::kModel: {
+    out << "kModel";
+    break;
+  }
+  case wind::ObjectType::kPlayer: {
+    out << "kPlayer";
+    break;
+  }
+  case wind::ObjectType::kRotor: {
+    out << "kRotor";
+    break;
+  }
+  case wind::ObjectType::kWindSource: {
+    out << "kWindSource";
+    break;
+  }
+  case wind::ObjectType::kInvalid:
+  default: {
+    out << "kInvalid";
+    break;
+  }
+  }
+  return out;
 }
 
 // -------------------------------------------------------------------------- //
 
-/// Returns the minimum of two values
-template <typename T> inline constexpr T minValue(T a, T b) {
-  return a < b ? a : b;
+std::ostream &operator<<(std::ostream &out, const bs::HComponent &comp) {
+  if (comp->getRTTI()->getRTTIId() == wind::TID_CTag) {
+    wind::CTag *tag = static_cast<wind::CTag *>(comp.get());
+    out << fmt::format("CTag {{ {} }}", tag->getType());
+  } else {
+    out << comp->getName();
+  }
+  return out;
 }
-
-} // namespace wind

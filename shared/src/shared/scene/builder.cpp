@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,10 @@
 
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component/ctag.hpp"
+#include "shared/scene/fps_walker.hpp"
+#include "shared/state/moveable_state.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
@@ -35,12 +39,15 @@
 #include <thirdparty/alflib/file/path.hpp>
 
 #include <Components/BsCBoxCollider.h>
+#include <Components/BsCCharacterController.h>
 #include <Components/BsCPlaneCollider.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
 #include <Components/BsCSkybox.h>
+#include <Components/BsCSphereCollider.h>
 #include <Material/BsMaterial.h>
 #include <Physics/BsPhysicsMaterial.h>
+#include <RenderAPI/BsSamplerState.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
@@ -52,6 +59,8 @@ namespace wind {
 
 ObjectBuilder::ObjectBuilder(Kind kind)
     : m_handle(bs::SceneObject::create("")), m_kind(kind) {
+  m_handle->addComponent<CTag>(kind);
+
   // Create by kind
   switch (kind) {
   case Kind::kPlane: {
@@ -66,11 +75,41 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     m_renderable->setMesh(mesh);
     break;
   }
+  case Kind::kBall: {
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Sphere);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
+    break;
+  }
   case Kind::kModel: {
     break;
   }
-  case Kind::kEmpty:
+  case Kind::kPlayer: {
+    bs::HCharacterController charController =
+        m_handle->addComponent<bs::CCharacterController>();
+    charController->setHeight(1.0f);
+    charController->setRadius(0.4f);
+    auto prep = bs::SceneObject::create("playerRep");
+    prep->setParent(m_handle);
+    prep->setScale(bs::Vector3(0.3f, 2.0f, 0.3f));
+    prep->setPosition(bs::Vector3(0.0f, -1.0f, 0.0f));
+    m_renderable = prep->addComponent<bs::CRenderable>();
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    m_renderable->setMesh(mesh);
+    auto fpsWalker = m_handle->addComponent<FPSWalker>();
+    break;
+  }
+  case Kind::kRotor: {
+    bs::HMesh mesh = Asset::loadMesh("res/meshes/rotor.fbx", 0.1f);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
+    break;
+  }
+  case Kind::kEmpty: {
+    break;
+  }
   default: {
+    Util::panic("Invalid type when building object ({})", kind);
     break;
   }
   }
@@ -102,15 +141,46 @@ ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
+ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
+                                           const String &texPath,
                                            const Vec2F &tiling) {
-  const bs::HShader shader =
-      bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
-  bs::HTexture texture = Asset::loadTexture(texPath);
+  // Determine shader
+  bs::HShader shader;
+  switch (shaderKind) {
+  case ShaderKind::kTransparent: {
+    shader = bs::gBuiltinResources().getBuiltinShader(
+        bs::BuiltinShader::Transparent);
+    break;
+  }
+  case ShaderKind::kStandard:
+  default: {
+    shader =
+        bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
+    break;
+  }
+  }
+
+  // Setup material
+  const bs::HTexture texture = AssetManager::loadTexture(texPath);
   m_material = bs::Material::create(shader);
   m_material->setTexture("gAlbedoTex", texture);
   m_material->setVec2("gUVTile", tiling);
 
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().mat.albedo = texPath;
+  ctag->getData().mat.tiling = tiling;
+  ctag->getData().mat.shader = stringFromShaderKind(shaderKind);
+
+  // Sampler
+  // bs::SAMPLER_STATE_DESC samplerDesc;
+  // samplerDesc.minFilter = bs::FilterOptions::FO_LINEAR;
+  // samplerDesc.magFilter = bs::FilterOptions::FO_LINEAR;
+  // samplerDesc.mipFilter = bs::FilterOptions::FO_LINEAR;
+  // const bs::SPtr<bs::SamplerState> sampler =
+  //    bs::SamplerState::create(samplerDesc);
+  // m_material->setSamplerState("gAlbedoSamp", sampler);
+
+  // Set
   if (m_renderable != nullptr) {
     m_renderable->setMaterial(m_material);
   }
@@ -120,12 +190,12 @@ ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
-  AlfAssert(m_kind == Kind::kSkybox,
-            "Only skybox objects can have a skybox component added");
-
   const bs::HTexture tex = Asset::loadCubemap(path);
   bs::HSkybox comp = m_handle->addComponent<bs::CSkybox>();
   comp->setTexture(tex);
+
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().skybox = path;
 
   return *this;
 }
@@ -133,7 +203,7 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
-  bs::HPhysicsMaterial material =
+  const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
   switch (m_kind) {
@@ -147,6 +217,20 @@ ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
     bs::HBoxCollider collider = m_handle->addComponent<bs::CBoxCollider>();
     collider->setMaterial(material);
     collider->setMass(mass);
+    break;
+  }
+  case Kind::kBall: {
+    bs::HSphereCollider collider =
+        m_handle->addComponent<bs::CSphereCollider>();
+    collider->setMaterial(material);
+    collider->setMass(mass);
+    break;
+  }
+  case Kind::kRotor: {
+    bs::HBoxCollider collider = m_handle->addComponent<bs::CBoxCollider>();
+    collider->setMaterial(material);
+    collider->setMass(mass);
+    collider->setExtents(Vec3F(1.8f, 0.1f, 1.8f));
     break;
   }
   default: {
@@ -173,12 +257,18 @@ ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   return *this;
 }
 
+ObjectBuilder &
+ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
+  m_handle->addComponent<CNetComponent>(moveableState);
+  return *this;
+}
+
 // -------------------------------------------------------------------------- //
 
 bs::HSceneObject ObjectBuilder::build() {
   // Check and possibly auto-generate name
   if (m_handle->getName().empty()) {
-    m_handle->setName(allocDefaultName());
+    m_handle->setName(nextName());
   }
 
   // Reset handle and return built scene
@@ -189,99 +279,75 @@ bs::HSceneObject ObjectBuilder::build() {
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject ObjectBuilder::fromJson(const String &directory,
-                                         const nlohmann::json &value) {
-  // Find type
-  std::string type = value.value("type", "empty");
-  ObjectBuilder::Kind kind = kindFromString(type.c_str());
-  ObjectBuilder builder(kind);
-
-  // Kind-specific options
-  switch (kind) {
-  case ObjectBuilder::Kind::kSkybox: {
-    auto cubemapIt = value.find("texture");
-    if (cubemapIt != value.end()) {
-      builder.withSkybox(directory + "\\" + String(*cubemapIt));
-    } else {
-      logError("Cubemap objects require a \"texture\" property");
-      return bs::SceneObject::create("");
-    }
-    break;
-  }
-  case Kind::kPlane: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(directory + "\\" + tex, tiling);
-    }
-    break;
-  }
-  case Kind::kCube: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(directory + "\\" + tex, tiling);
-    }
-    break;
-  }
-  default: {
-    break;
-  }
-  }
-
-  // Common options
-  String name = JsonUtil::getOrCall<String>(value, String("name"), []() {
-    return ObjectBuilder::allocDefaultName();
-  });
-  builder.withName(name);
-
-  builder.withPosition(JsonUtil::getVec3F(value, "position"));
-  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
-
-  if (value.find("physics") != value.end()) {
-    f32 restitution = value["physics"].value("restitution", 1.0f);
-    f32 mass = value["physics"].value("mass", 0.0f);
-    builder.withPhysics(restitution, mass);
-  }
-
-  // Sub-objects
-  auto it = value.find("objects");
-  if (it != value.end()) {
-    auto arr = *it;
-    if (!arr.is_array()) {
-      logError("\"objects\" is required to be an array of scene objects");
-      return bs::SceneObject::create("");
-    }
-
-    for (auto it = arr.begin(); it != arr.end(); ++it) {
-      bs::HSceneObject subObject = fromJson(directory, *it);
-      builder.withObject(subObject);
-    }
-  }
-
-  return builder.build();
-}
-
-// -------------------------------------------------------------------------- //
-
-String ObjectBuilder::allocDefaultName() {
+String ObjectBuilder::nextName() {
   return "object" + String(std::to_string(s_createdCount++));
 }
 
 // -------------------------------------------------------------------------- //
 
-wind::ObjectBuilder::Kind
-ObjectBuilder::kindFromString(const String &kindString) {
+ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
   if (kindString == "empty") {
-    return ObjectBuilder::Kind::kEmpty;
-  } else if (kindString == "skybox") {
-    return ObjectBuilder::Kind::kSkybox;
+    return Kind::kEmpty;
   } else if (kindString == "plane") {
-    return ObjectBuilder::Kind::kPlane;
+    return Kind::kPlane;
   } else if (kindString == "cube") {
-    return ObjectBuilder::Kind::kCube;
+    return Kind::kCube;
+  } else if (kindString == "ball") {
+    return Kind::kBall;
+  } else if (kindString == "model") {
+    return Kind::kPlayer;
+  } else if (kindString == "rotor") {
+    return Kind::kRotor;
+  } else if (kindString == "windSource") {
+    return Kind::kWindSource;
   }
-  return ObjectBuilder::Kind::kInvalid;
+  return Kind::kInvalid;
+}
+
+// -------------------------------------------------------------------------- //
+
+String ObjectBuilder::stringFromKind(Kind kind) {
+  switch (kind) {
+  case Kind::kEmpty:
+    return "empty";
+  case Kind::kPlane:
+    return "plane";
+  case Kind::kCube:
+    return "cube";
+  case Kind::kBall:
+    return "sphere";
+  case Kind::kModel:
+    return "model";
+  case Kind::kPlayer:
+    return "player";
+  case Kind::kInvalid:
+  default: {
+    return "invalid";
+  }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder::ShaderKind
+ObjectBuilder::shaderKindFromString(const String &kind) {
+  if (kind == "transparent") {
+    return ShaderKind::kTransparent;
+  }
+  return ShaderKind::kStandard;
+}
+
+// -------------------------------------------------------------------------- //
+
+String ObjectBuilder::stringFromShaderKind(ShaderKind kind) {
+  switch (kind) {
+  case ShaderKind::kStandard:
+    return "standard";
+  case ShaderKind::kTransparent:
+    return "transparent";
+  default:
+    Util::panic("Invalid shader kind");
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -331,59 +397,7 @@ bs::HSceneObject SceneBuilder::build() {
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject SceneBuilder::fromFile(const String &path) {
-  using json = nlohmann::json;
-
-  // Get base directory
-  alflib::Path alfPath(path.c_str());
-  alflib::String _directory = alfPath.GetDirectory().GetPathString();
-  String directory = _directory.GetUTF8();
-
-  // Read file
-  String fileContent = Util::readFile(path);
-  fileContent = Util::replace(fileContent, '\t', ' ');
-
-  // Parse file
-  try {
-    json j = json::parse(fileContent.c_str());
-    SceneBuilder builder;
-
-    // Name
-    if (j.find("name") != j.end()) {
-      builder.withName(j["name"]);
-    } else {
-      builder.withName(allocDefaultName());
-    }
-
-    // Objects
-    auto objsIt = j.find("objects");
-    if (objsIt != j.end()) {
-      auto objsArr = *objsIt;
-      if (!objsArr.is_array()) {
-        logError("\"objects\" is required to be an array of scene objects");
-        return bs::SceneObject::create("");
-      }
-
-      for (auto it = objsArr.begin(); it != objsArr.end(); ++it) {
-        bs::HSceneObject object = ObjectBuilder::fromJson(directory, *it);
-        builder.withObject(object);
-      }
-    }
-
-    // Done
-    return builder.build();
-  } catch (std::exception &e) {
-    logError("Exception while parsing json file \"{}\": {}", path.c_str(),
-             e.what());
-  }
-
-  // Failed to parse, return empty scene
-  return bs::SceneObject::create("");
-}
-
-// -------------------------------------------------------------------------- //
-
-String SceneBuilder::allocDefaultName() {
+String SceneBuilder::nextName() {
   return "scene" + String(std::to_string(s_createdCount++));
 }
 

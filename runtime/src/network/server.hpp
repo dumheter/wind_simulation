@@ -81,7 +81,11 @@ private:
 
   bool PollIncomingPacket(Packet &packet_out);
 
-  void handlePacket(Packet &packet);
+  void handlePacket();
+
+  void handlePacketPlayerTick();
+
+  void handlePacketRequestCreate();
 
   virtual void OnSteamNetConnectionStatusChanged(
       SteamNetConnectionStatusChangedCallback_t *status) override;
@@ -92,7 +96,7 @@ private:
   HSteamNetPollGroup m_pollGroup;
   std::unordered_map<ConnectionId, UniqueId> m_connections;
   World *m_world;
-  Packet m_packet{1000000};
+  Packet m_packet{10000000};
   ConnectionState m_connectionState;
 };
 } // namespace wind

@@ -47,7 +47,7 @@ void dumpSceneAux(const bs::HSceneObject &o, u32 indent) {
   logInfo("{}{}", pad, name);
   const bs::Vector<bs::HComponent> &comps = o->getComponents();
   for (const bs::HComponent &comp : comps) {
-    logInfo("{}* {}", pad, comp->getTypeName());
+    logInfo("{}* {}", pad, comp);
   }
   for (u32 i = 0; i < o->getNumChildren(); ++i) {
     dumpSceneAux(o->getChild(i), indent + 2);
@@ -100,6 +100,14 @@ bs::String Util::readFile(const String &path) {
   std::string str((std::istreambuf_iterator<char>(stream)),
                   std::istreambuf_iterator<char>());
   return String(str);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Util::writeFile(const String &path, const String &text) {
+  std::ofstream stream(path.c_str());
+  stream << text;
+  stream.close();
 }
 
 // -------------------------------------------------------------------------- //

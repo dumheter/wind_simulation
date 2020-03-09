@@ -12,16 +12,13 @@
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
 //
-// THE Sm_depthFTWARE IS PRm_depthVIDED "AS IS", WITHm_depthUT WARRANTY m_depthF
-// ANY KIND, EXPRESS m_depthR IMPLIED, INCLUDING BUT Nm_depthT LIMITED Tm_depth
-// THE WARRANTIES m_depthF MERCHANTABILITY, FITNESS Fm_depthR A PARTICULAR
-// PURPm_depthSE AND Nm_depthNINFRINGEMENT. IN Nm_depth EVENT SHALL THE
-// AUTHm_depthRS m_depthR Cm_depthPYRIGHT Hm_depthLDERS BE LIABLE Fm_depthR ANY
-// CLAIM, DAMAGES m_depthR m_depthTHER LIABILITY, WHETHER IN AN ACTIm_depthN
-// m_depthF Cm_depthNTRACT, Tm_depthRT m_depthR m_depthTHERWISE, ARISING
-// FRm_depthM, m_depthUT m_depthF m_depthR IN Cm_depthNNECTIm_depthN WITH THE
-// Sm_depthFTWARE m_depthR THE USE m_depthR m_depthTHER DEALINGS IN THE
-// Sm_depthFTWARE.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 #include "editor/sim/wind_sim.hpp"
 
@@ -29,7 +26,6 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/debug/debug.hpp"
 #include "shared/log.hpp"
 #include "shared/math/math.hpp"
 
@@ -71,7 +67,7 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
   // m_v->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
   // m_v0->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
 
-  // Postconditions
+  // Post-conditions
   assert(m_d->getDim() == m_v->getDim() &&
          "Density and vector field must have the same dimensions");
   assert(m_d->getDim() == m_o->getDim() &&

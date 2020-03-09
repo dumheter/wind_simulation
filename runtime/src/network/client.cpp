@@ -1,6 +1,8 @@
 #include "client.hpp"
 #include "shared/log.hpp"
+#include "shared/scene/scene.hpp"
 #include "world.hpp"
+#include <ThirdParty/json.hpp>
 #include <microprofile/microprofile.h>
 
 namespace wind {
@@ -85,7 +87,6 @@ void Client::handlePacket() {
       header == PacketHeaderTypes::kPlayerJoin) {
     logVerbose("[client:p PlayerJoin] packet playerjoin");
     auto mr = m_packet.GetMemoryReader();
-    // auto state = mr.Read<MoveableState>();
     auto uid = mr.Read<UniqueId>();
     auto state = MoveableState{uid};
     m_world->onPlayerJoin(state);
@@ -110,32 +111,11 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    auto mr = m_packet.GetMemoryReader();
-    if (!m_world->serverIsActive()) {
-      const u32 count = mr.Read<u32>();
-      logWarning("[client:p Create] got a create packet with {} count", count);
-      MoveableState state;
-      for (u32 i = 0; i < count; ++i) {
-        state = mr.Read<MoveableState>();
-        m_world->getCreator().create(state);
-      }
-    }
+    // logVeryVerbose("[client:p Create] got a create packet");
+    CreateInfo info = PacketParser::Create(m_packet);
+    m_world->buildObject(info);
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    logError("[client:p RequestCreate] got a requestcreate packet");
-  } else if (header == PacketHeaderTypes::kLookup) {
-    logError("[client:p Lookup] got a lookup packet");
-  } else if (header == PacketHeaderTypes::kLookupResponse) {
-    auto mr = m_packet.GetMemoryReader();
-    if (!m_world->serverIsActive()) {
-      const u32 count = mr.Read<u32>();
-      logInfo("[client:p LookupResponse] got a lookup response with {} count",
-              count);
-      MoveableState state;
-      for (u32 i = 0; i < count; ++i) {
-        state = mr.Read<MoveableState>();
-        m_world->getCreator().create(state);
-      }
-    }
+    logWarning("[client:p RequestCreate] got a requestcreate packet");
   } else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
     const auto new_uid = mr.Read<UniqueId>();
@@ -144,14 +124,10 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
-      const u32 count = mr.Read<u32>();
-      logVerbose("\tStates: {}", count);
-      MoveableState state;
-      for (u32 i = 0; i < count; ++i) {
-        state = mr.Read<MoveableState>();
-        m_world->getCreator().create(state);
-      }
+      Scene::load(mr.Read<alflib::String>().GetUTF8());
     }
+  } else {
+    logError("[client:p] unknown packet");
   }
 }
 
@@ -227,9 +203,6 @@ void Client::OnSteamNetConnectionStatusChanged(
   case k_ESteamNetworkingConnectionState_Connected: {
     if (ConnectionState::kConnecting == m_connectionState) {
       SetConnectionState(ConnectionState::kConnected);
-      if (m_world->serverIsActive()) {
-        m_world->setupScene();
-      }
     }
     break;
   }

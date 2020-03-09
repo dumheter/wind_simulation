@@ -61,11 +61,20 @@ public:
   /// Read an entire file to a string
   static String readFile(const String &path);
 
+  /// Write a string to a file
+  static void writeFile(const String &path, const String &text);
+
   /// Filter a 'pattern' from 'string'
   static String filter(const String &string, const String &pattern);
 
   /// Replace characters in string
   static String replace(const String &string, char from, char to);
+
+  template <typename... ARGS>
+  [[noreturn]] static void panic(const String &message, ARGS &&... arguments) {
+    logError(message, std::forward<ARGS>(arguments)...);
+    abort();
+  }
 };
 
 // -------------------------------------------------------------------------- //
