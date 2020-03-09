@@ -32,9 +32,6 @@
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
-#include <thirdparty/alflib/core/assert.hpp>
-#include <thirdparty/alflib/file/path.hpp>
-
 #include <Components/BsCRenderable.h>
 #include <Components/BsCSkybox.h>
 #include <Scene/BsSceneObject.h>
@@ -114,37 +111,32 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
-  // Kind-specific options
-  switch (kind) {
-  case ObjectBuilder::Kind::kPlane: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(tex, tiling);
-    }
-    break;
-  }
-  case ObjectBuilder::Kind::kCube: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(tex, tiling);
-    }
-    break;
-  }
-  default: {
-    break;
-  }
-  }
-
-  // Common options
-  String name = JsonUtil::getOrCall<String>(
+  // Name
+  const String name = JsonUtil::getOrCall<String>(
       value, String("name"), []() { return ObjectBuilder::nextName(); });
   builder.withName(name);
 
+  // Transform
   builder.withPosition(JsonUtil::getVec3F(value, "position"));
   builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
 
+  // Material
+  auto itMat = value.find("material");
+  if (itMat != value.end()) {
+    json mat = *itMat;
+    const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
+    const String tex = mat.value("texture", "").c_str();
+    const String shaderStr = mat.value("shader", "").c_str();
+    const ObjectBuilder::ShaderKind shaderKind =
+        ObjectBuilder::shaderKindFromString(shaderStr);
+    if (!tex.empty()) {
+      builder.withMaterial(shaderKind, tex, tiling);
+    } else {
+      logWarning("Object has tiling specified but no texture");
+    }
+  }
+
+  // Physics
   if (value.find("physics") != value.end()) {
     f32 restitution = value["physics"].value("restitution", 1.0f);
     f32 mass = value["physics"].value("mass", 0.0f);
@@ -172,8 +164,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       return bs::SceneObject::create("");
     }
 
-    for (auto &it : arr) {
-      bs::HSceneObject subObject = loadObject(it);
+    for (auto &it0 : arr) {
+      bs::HSceneObject subObject = loadObject(it0);
       builder.withObject(subObject);
     }
   }
@@ -218,27 +210,29 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
 
   // Skybox
   if (object->getComponent<bs::CSkybox>()) {
-    value["skybox"]["cubemap"] = tag->getPathSkybox();
+    value["skybox"]["cubemap"] = tag->getData().skybox;
   }
 
   // Material
   if (object->getComponent<bs::CRenderable>()) {
-    JsonUtil::setValue(value, "tiling", tag->getTexTiling());
-    value["texture"] = tag->getPathAlbedo();
+    //json mat = value["material"];
+    JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
+    value["material"]["texture"] = tag->getData().mat.albedo;
+    value["material"]["shader"] = tag->getData().mat.shader;
   }
 
   // Position
-  Vec3F position = object->getTransform().getPosition();
+  const Vec3F position = object->getTransform().getPosition();
   if (position != Vec3F::ZERO) {
     JsonUtil::setValue(value, "position", position);
   }
 
-  Vec3F scale = object->getTransform().getScale();
+  const Vec3F scale = object->getTransform().getScale();
   if (scale != Vec3F::ONE) {
     JsonUtil::setValue(value, "scale", scale);
   }
 
-  Quat rotation = object->getTransform().getRotation();
+  const Quat rotation = object->getTransform().getRotation();
   if (rotation != Quat::IDENTITY) {
     JsonUtil::setValue(value, "rotation", rotation);
   }

@@ -59,7 +59,8 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
           .withName("plane")
           .withScale(Vec3F(groundScale, 1.0f, groundScale))
           .withPosition(Vec3F(groundScale, .4f, groundScale))
-          .withMaterial("res/textures/grid.png",
+          .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                        "res/textures/grid.png",
                         Vec2F(groundScale * 4.0f, groundScale * 4.0f))
           .withPhysics(0.5f)
           .build();
@@ -93,7 +94,8 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
           .withName("plane")
           .withScale(Vec3F(groundScale, 1.0f, groundScale))
           .withPosition(Vec3F(groundScale, .4f, groundScale))
-          .withMaterial("res/textures/grid.png",
+          .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                        "res/textures/grid.png",
                         Vec2F(groundScale * 4.0f, groundScale * 4.0f))
           .withPhysics(0.5f)
           .build();
@@ -102,7 +104,8 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
                           .withName("cube")
                           .withScale(Vec3F(1.0f, 6.5f, 1.5f))
                           .withPosition(Vec3F(6.0f, 3.0f, 4.0f))
-                          .withMaterial("res/textures/grid_2.png")
+                          .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                                        "res/textures/grid_2.png")
                           .withPhysics(0.5f, 25.0f)
                           .build();
 

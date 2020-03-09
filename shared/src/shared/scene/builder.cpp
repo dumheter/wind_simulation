@@ -127,18 +127,35 @@ ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
+ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
+                                           const String &texPath,
                                            const Vec2F &tiling) {
-  const bs::HShader shader =
-      bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
-  bs::HTexture texture = AssetManager::loadTexture(texPath);
+  // Determine shader
+  bs::HShader shader;
+  switch (shaderKind) {
+  case ShaderKind::kTransparent: {
+    shader = bs::gBuiltinResources().getBuiltinShader(
+        bs::BuiltinShader::Transparent);
+    break;
+  }
+  case ShaderKind::kStandard:
+  default: {
+    shader =
+        bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
+    break;
+  }
+  }
+
+  // Setup material
+  const bs::HTexture texture = AssetManager::loadTexture(texPath);
   m_material = bs::Material::create(shader);
   m_material->setTexture("gAlbedoTex", texture);
   m_material->setVec2("gUVTile", tiling);
 
-  HCTag ctag = m_handle->getComponent<CTag>();
-  ctag->setPathAlbedo(texPath);
-  ctag->setTexTiling(tiling);
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().mat.albedo = texPath;
+  ctag->getData().mat.tiling = tiling;
+  ctag->getData().mat.shader = stringFromShaderKind(shaderKind);
 
   if (m_renderable != nullptr) {
     m_renderable->setMaterial(m_material);
@@ -154,7 +171,7 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
   comp->setTexture(tex);
 
   HCTag ctag = m_handle->getComponent<CTag>();
-  ctag->setPathSkybox(path);
+  ctag->getData().skybox = path;
 
   return *this;
 }
@@ -162,7 +179,7 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
-  bs::HPhysicsMaterial material =
+  const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
   switch (m_kind) {
@@ -261,6 +278,29 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   default: {
     return "invalid";
   }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder::ShaderKind
+ObjectBuilder::shaderKindFromString(const String &kind) {
+  if (kind == "transparent") {
+    return ShaderKind::kTransparent;
+  }
+  return ShaderKind::kStandard;
+}
+
+// -------------------------------------------------------------------------- //
+
+String ObjectBuilder::stringFromShaderKind(ShaderKind kind) {
+  switch (kind) {
+  case ShaderKind::kStandard:
+    return "standard";
+  case ShaderKind::kTransparent:
+    return "transparent";
+  default:
+    Util::panic("Invalid shader kind");
   }
 }
 

@@ -43,6 +43,12 @@ class MoveableState;
 
 class ObjectBuilder {
 public:
+  /// Enumeration of shader kinds. An object material uses one of these.
+  enum class ShaderKind {
+    kStandard,   ///< Standard PBR shader.
+    kTransparent ///< Transparent PBR shader.
+  };
+
   /// Object kind
   using Kind = ObjectType;
 
@@ -59,7 +65,7 @@ public:
   ObjectBuilder &withScale(const Vec3F &scale);
 
   /// Sets the material
-  ObjectBuilder &withMaterial(const String &texPath,
+  ObjectBuilder &withMaterial(ShaderKind shaderKind, const String &texPath,
                               const Vec2F &tiling = Vec2F::ONE);
 
   /// Sets skybox texture
@@ -75,7 +81,7 @@ public:
   ObjectBuilder &withObject(const bs::HSceneObject &object);
 
   /// @post Must register netcomp in world
-  ObjectBuilder& withNetComponent(const MoveableState& moveableState);
+  ObjectBuilder &withNetComponent(const MoveableState &moveableState);
 
   /// Build the scene object
   bs::HSceneObject build();
@@ -88,6 +94,10 @@ public:
 
   /// Returns a string from a kind
   static String stringFromKind(Kind kind);
+
+  static ShaderKind shaderKindFromString(const String &kind);
+
+  static String stringFromShaderKind(ShaderKind kind);
 
 private:
   /// Number of created objects
