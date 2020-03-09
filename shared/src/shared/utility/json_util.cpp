@@ -117,4 +117,9 @@ wind::Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
   return fallback;
 }
 
+String JsonUtil::getString(const nlohmann::json &value, const String &key,
+                           const char *fallback) {
+  return value.value(key.c_str(), fallback).c_str();
+}
+
 } // namespace wind

@@ -31,6 +31,7 @@
 #include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/fps_walker.hpp"
+#include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
@@ -143,9 +144,11 @@ ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
 ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
                                            const Vec2F &tiling,
                                            bool transparent) {
-  const bs::HShader shader = transparent ?
-                             bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Transparent) :
-                             bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
+  const bs::HShader shader = transparent
+                                 ? bs::gBuiltinResources().getBuiltinShader(
+                                       bs::BuiltinShader::Transparent)
+                                 : bs::gBuiltinResources().getBuiltinShader(
+                                       bs::BuiltinShader::Standard);
   bs::HTexture texture = AssetManager::loadTexture(texPath);
   m_material = bs::Material::create(shader);
   m_material->setTexture("gAlbedoTex", texture);
@@ -218,6 +221,15 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
+  auto wind = m_handle->addComponent<CWindSource>();
+  wind->addFunctions(functions);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   object->setParent(m_handle);
 
@@ -265,8 +277,6 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
-  } else if (kindString == "windSource") {
-    return Kind::kWindSource;
   }
   return Kind::kInvalid;
 }

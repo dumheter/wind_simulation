@@ -122,29 +122,6 @@ void World::setupScene() {
   // TODO set file path in gui
   m_scene = Scene::load(m_scenePath);
   m_player->SO()->setPosition(bs::Vector3::ZERO);
-
-  // auto cubeState = MoveableState::generateNew();
-  // cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
-  // m_creator.cube(cubeState);
-  // cubeState = MoveableState::generateNew();
-  // cubeState.setPosition(bs::Vector3(0.0f, 5.0f, -8.0f));
-  // cubeState.setRotation(
-  //     bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
-  // m_creator.cube(cubeState);
-
-  // auto rotorState = MoveableState::generateNew();
-  // rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
-  // m_creator.rotor(rotorState);
-
-  // rotorState = MoveableState::generateNew();
-  // rotorState.setPosition(bs::Vector3(32.0f, 2.0f, -32.0f));
-  // rotorState.setRotation(
-  //     bs::Quaternion(bs::Degree(90.0f), bs::Degree(0.0f), bs::Degree(0.0f)));
-  // m_creator.rotor(rotorState);
-
-  // auto windSourceState = MoveableState::generateNew();
-  // windSourceState.setPosition(bs::Vector3(-5.0f, 2.5f, -8.0f));
-  // auto r = m_creator.windSource(windSourceState);
 }
 
 HCNetComponent World::getPlayerNetComp() {

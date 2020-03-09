@@ -30,8 +30,10 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
+#include "shared/wind/base_functions.hpp"
 
 #include <ThirdParty/json.hpp>
+#include <vector>
 
 // ========================================================================== //
 // ObjectBuilder
@@ -71,6 +73,11 @@ public:
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();
+
+  /// Adds wind
+  /// @note Expects its parent to be a cube, and will use its
+  /// mesh for the wind collision trigger volume.
+  ObjectBuilder &withWindSource(const std::vector<BaseFn>& functions);
 
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);

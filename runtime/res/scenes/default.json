@@ -23,32 +23,73 @@
 		    "scale": { "y": 7.0, "z": 1.5 },
 		    "physics": { "restitution": 0.5, "mass": 25.0 }
 		},
+
+
 		{
-		    "name": "fan",
+		    "name": "wind cube",
 		    "type": "cube",
 		    "scale": { "xyz": 4 },
-		    "position": { "xz": 8.0, "y": 2.0 },
+		    "position": { "xz": 8.0, "y": 1.8 },
                     "transparent": true,
                     "texture": "../textures/wireframe.png",
-		    "wind": [
-			{
-			    "type": "constant",
-			    "direction": [ 0.0, 0.0, 0.0 ]
-                        }
-                    ]
+		    "wind": [{
+			"type": "constant",
+                        "magnitude": 2,
+			"direction": [0.0, 1.0, 0.0]
+                    },
+                             {
+			         "type": "constant",
+                                 "magnitude": 8,
+			         "direction": [0.0, 0.0, 1.0]
+                             }]
                 },
+                {
+		    "name": "wind cube2",
+		    "type": "cube",
+		    "scale": { "xyz": 4 },
+		    "position": { "x": 8.0, "y": 1.8 , "z": 12.0},
+                    "transparent": true,
+                    "texture": "../textures/wireframe.png",
+		    "wind": [{
+			"type": "constant",
+                        "magnitude": 2,
+			"direction": [0.0, 1.0, 0.0]
+                    },
+                             {
+			         "type": "constant",
+                                 "magnitude": 5,
+			         "direction": [0.0, 0.0, -1.0]
+                             }
+                            ]
+                },
+
+
+                {
+		    "name": "wind cube long",
+		    "type": "cube",
+		    "scale": [ 6, 4, 24],
+		    "position": { "x": 32.0, "y": 1.8 , "z": 0.0},
+                    "transparent": true,
+                    "texture": "../textures/wireframe.png",
+		    "wind": [{
+			"type": "constant",
+                        "magnitude": 7,
+			"direction": [0.0, 0.0, 1.0]
+                    }
+                            ]
+                },
+
+
 		{
 		    "type": "rotor",
 		    "scale": { "xyz": 1.0 },
 		    "position": { "xz": -15.0, "y": 5.0 },
                     "texture": "../textures/grid_2.png",
                     "physics": {"restitution": 0.5, "mass": 20.0 },
-		    "wind": [
-			{
-			    "type": "constant",
-			    "direction": [ 0.0, 0.0, 0.0 ]
-                        }
-                    ]
+		    "wind": [{
+			"type": "constant",
+			"direction": { "xyz": 0.0 }
+                    }]
                 }
             ]
         }

@@ -28,6 +28,7 @@
 
 #include "shared/scene/rtti.hpp"
 
+#include "shared/math/math.hpp"
 #include "shared/scene/component_handles.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/utility/unique_id.hpp"
@@ -60,10 +61,12 @@ public:
   /// Default constructor required for serialization
   CWindSource() = default;
 
-  CWindSource(const bs::HSceneObject &parent, const bs::HMaterial &mat,
-              const bs::HMesh &mesh);
+  /// @size Size of the cube volume where wind interacts.
+  CWindSource(const bs::HSceneObject &parent);
 
   void addFunction(BaseFn function);
+
+  void addFunctions(const std::vector<BaseFn>& functions);
 
   bs::Vector3 getWindForce(bs::Vector3 pos) const;
 

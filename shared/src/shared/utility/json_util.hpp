@@ -55,6 +55,9 @@ public:
   /// Read a vector from a JSON value or return the default value
   static Vec3F getVec3F(const nlohmann::json &value, const String &key,
                         const Vec3F &fallback = Vec3F::ZERO);
+
+  static String getString(const nlohmann::json &value, const String &key,
+                          const char *fallback = "");
 };
 
 // -------------------------------------------------------------------------- //

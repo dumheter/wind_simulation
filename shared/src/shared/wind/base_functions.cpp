@@ -45,4 +45,23 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   return fn;
 }
+
+String BaseFn::toString(baseFunctions::Type fn) const {
+  switch (fn) {
+  case baseFunctions::Type::kConstant:
+    return "constant";
+  case baseFunctions::Type::kSpline:
+    return "spline";
+  }
+}
+
+BaseFn BaseFn::fromString(const String &fn) {
+  if (fn == "constant") {
+    return BaseFn::fnConstant(Vec3F::ZERO, 100.0f);
+  } else /*if (fn == "spline") */ {
+    // return BaseFn::fn
+    return BaseFn();
+  }
+}
+
 } // namespace wind
