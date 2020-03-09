@@ -111,7 +111,7 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    //logVeryVerbose("[client:p Create] got a create packet");
+    // logVeryVerbose("[client:p Create] got a create packet");
     CreateInfo info = PacketParser::Create(m_packet);
     m_world->buildObject(info);
   } else if (header == PacketHeaderTypes::kRequestCreate) {
@@ -124,9 +124,7 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
-      // auto scene = String{mr.Read<alflib::String>().GetUTF8()};
-      auto json = nlohmann::json::parse(mr.Read<alflib::String>().GetUTF8());
-      Scene::loadScene(json, ".");
+      Scene::load(mr.Read<alflib::String>().GetUTF8());
     }
   } else {
     logError("[client:p] unknown packet");

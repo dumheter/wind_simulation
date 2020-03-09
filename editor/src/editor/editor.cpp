@@ -90,8 +90,8 @@ void Editor::onStartup() {
   m_ui = new UI(this);
 
   // Setup default scene
-  setScene(Scene::load("res/scenes/default.json"));
-  Scene::save("res/scenes/out.json", getScene());
+  setScene(Scene::loadFile("res/scenes/default.json"));
+  Scene::saveFile("res/scenes/out.json", getScene());
 
   // Create simulation
   m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,

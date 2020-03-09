@@ -42,32 +42,43 @@
 
 namespace wind {
 
-bs::HSceneObject Scene::load(const String &path) {
+bs::HSceneObject Scene::load(const String &scene, const String &source) {
   using json = nlohmann::json;
 
-  // Read file
-  String fileContent = Util::readFile(path);
-  fileContent = Util::replace(fileContent, '\t', ' ');
-
-  // Parse file
   json value;
   try {
-    value = json::parse(fileContent.c_str());
+    value = json::parse(scene.c_str());
   } catch (std::exception &e) {
-    logError("Exception while parsing json file \"{}\": {}", path.c_str(),
-             e.what());
+    String src = "";
+    if (!source.empty()) {
+      src = fmt::format(" file \"{}\"", source.c_str()).c_str();
+    }
+    logError("Exception while parsing json{}: {}", src.c_str(), e.what());
     return bs::SceneObject::create("");
   }
-
   return loadScene(value);
 }
 
 // -------------------------------------------------------------------------- //
 
-void Scene::save(const String &path, const bs::HSceneObject &scene) {
+bs::HSceneObject Scene::loadFile(const String &path) {
+  String fileContent = Util::readFile(path);
+  fileContent = Util::replace(fileContent, '\t', ' ');
+  return load(fileContent.c_str());
+}
+
+// -------------------------------------------------------------------------- //
+
+String Scene::save(const bs::HSceneObject &scene) {
   using json = nlohmann::json;
-  json value = saveScene(scene);
-  Util::writeFile(path, value.dump(2).c_str());
+  const json value = saveScene(scene);
+  return value.dump(2).c_str();
+}
+
+// -------------------------------------------------------------------------- //
+
+void Scene::saveFile(const String &path, const bs::HSceneObject &scene) {
+  Util::writeFile(path, save(scene));
 }
 
 // -------------------------------------------------------------------------- //
@@ -215,7 +226,7 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
 
   // Material
   if (object->getComponent<bs::CRenderable>()) {
-    //json mat = value["material"];
+    // json mat = value["material"];
     JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
     value["material"]["texture"] = tag->getData().mat.albedo;
     value["material"]["shader"] = tag->getData().mat.shader;
