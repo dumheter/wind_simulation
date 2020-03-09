@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,14 +26,14 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
-#include <thirdparty/alflib/core/assert.hpp>
-#include <thirdparty/alflib/file/path.hpp>
-
+#include <Components/BsCRenderable.h>
+#include <Components/BsCSkybox.h>
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
@@ -42,43 +42,48 @@
 
 namespace wind {
 
-bs::HSceneObject Scene::load(const String &path) {
+bs::HSceneObject Scene::load(const String &scene, const String &source) {
   using json = nlohmann::json;
 
-  // Get base directory
-  alflib::Path alfPath(path.c_str());
-  alflib::String _dir = alfPath.GetDirectory().GetPathString();
-  String dir = _dir.GetUTF8();
-
-  // Read file
-  String fileContent = Util::readFile(path);
-  fileContent = Util::replace(fileContent, '\t', ' ');
-
-  // Parse file
   json value;
   try {
-    value = json::parse(fileContent.c_str());
+    value = json::parse(scene.c_str());
   } catch (std::exception &e) {
-    logError("Exception while parsing json file \"{}\": {}", path.c_str(),
-             e.what());
+    String src = "";
+    if (!source.empty()) {
+      src = fmt::format(" file \"{}\"", source.c_str()).c_str();
+    }
+    logError("Exception while parsing json{}: {}", src.c_str(), e.what());
     return bs::SceneObject::create("");
   }
-
-  return loadScene(value, dir);
+  return loadScene(value);
 }
 
 // -------------------------------------------------------------------------- //
 
-void Scene::save(const String &path, const bs::HSceneObject &scene) {
+bs::HSceneObject Scene::loadFile(const String &path) {
+  String fileContent = Util::readFile(path);
+  fileContent = Util::replace(fileContent, '\t', ' ');
+  return load(fileContent.c_str());
+}
+
+// -------------------------------------------------------------------------- //
+
+String Scene::save(const bs::HSceneObject &scene) {
   using json = nlohmann::json;
-  json value = saveScene(scene);
-  Util::writeFile(path, value.dump(2).c_str());
+  const json value = saveScene(scene);
+  return value.dump(2).c_str();
 }
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
-                                  const String &dir) {
+void Scene::saveFile(const String &path, const bs::HSceneObject &scene) {
+  Util::writeFile(path, save(scene));
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::HSceneObject Scene::loadScene(const nlohmann::json &value) {
   SceneBuilder builder;
 
   // Name
@@ -98,7 +103,7 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
     }
 
     for (auto &it : objsArr) {
-      bs::HSceneObject object = loadObject(it, dir);
+      bs::HSceneObject object = loadObject(it);
       builder.withObject(object);
     }
   }
@@ -109,8 +114,7 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value,
 
 // -------------------------------------------------------------------------- //
 
-bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
-                                   const String &dir) {
+bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   using json = nlohmann::json;
 
   // Find type
@@ -118,49 +122,23 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
-  // Use trasparent shader?
-  const auto transparent = JsonUtil::getOrCall<bool>(
-      value, String("transparent"), []() { return false; });
-
-  // Kind-specific options
-  switch (kind) {
-  case ObjectBuilder::Kind::kPlane: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
+  // Material
+  auto itMat = value.find("material");
+  if (itMat != value.end()) {
+    json mat = *itMat;
+    const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
+    const String tex = mat.value("texture", "").c_str();
+    const String shaderStr = mat.value("shader", "").c_str();
+    const ObjectBuilder::ShaderKind shaderKind =
+        ObjectBuilder::shaderKindFromString(shaderStr);
     if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
+      builder.withMaterial(shaderKind, tex, tiling);
+    } else {
+      logWarning("Object has tiling specified but no texture");
     }
-    break;
-  }
-  case ObjectBuilder::Kind::kCube: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
-    }
-    break;
-  }
-  case ObjectBuilder::Kind::kBall: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
-    }
-    break;
-  }
-  case ObjectBuilder::Kind::kRotor: {
-    Vec2F tiling = JsonUtil::getVec2F(value, "tiling", Vec2F::ONE);
-    String tex = value.value("texture", "").c_str();
-    if (!tex.empty()) {
-      builder.withMaterial(dir + "\\" + tex, tiling, transparent);
-    }
-    break;
-  }
-  default: {
-    break;
-  }
   }
 
+  // Physics
   if (value.find("physics") != value.end()) {
     f32 restitution = value["physics"].value("restitution", 1.0f);
     f32 mass = value["physics"].value("mass", 0.0f);
@@ -171,7 +149,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
   if (value.find("skybox") != value.end()) {
     json skybox = value["skybox"];
     if (skybox.find("cubemap") != skybox.end()) {
-      String cubemapPath = dir + "\\" + String(skybox["cubemap"]);
+      String cubemapPath = String(skybox["cubemap"]);
       builder.withSkybox(cubemapPath);
     } else {
       logError("Skybox requires a \"cubemap\" property");
@@ -179,6 +157,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     }
   }
 
+  // Wind
   if (value.find("wind") != value.end()) {
     json wind = value["wind"];
 
@@ -192,10 +171,12 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
     builder.withWindSource(functions);
   }
 
-  // Common options
+  // Name
   String name = JsonUtil::getOrCall<String>(
       value, String("name"), []() { return ObjectBuilder::nextName(); });
   builder.withName(name);
+
+  // Transform
   builder.withPosition(JsonUtil::getVec3F(value, "position"));
   builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
 
@@ -208,8 +189,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value,
       return bs::SceneObject::create("");
     }
 
-    for (auto &it : arr) {
-      bs::HSceneObject subObject = loadObject(it, dir);
+    for (auto &it0 : arr) {
+      bs::HSceneObject subObject = loadObject(it0);
       builder.withObject(subObject);
     }
   }
@@ -248,7 +229,38 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
   value["name"] = object->getName();
 
   HCTag tag = object->getComponent<CTag>();
-  value["type"] = ObjectBuilder::stringFromKind(tag->getType());
+  if (tag->getType() != ObjectType::kEmpty) {
+    value["type"] = ObjectBuilder::stringFromKind(tag->getType());
+  }
+
+  // Skybox
+  if (object->getComponent<bs::CSkybox>()) {
+    value["skybox"]["cubemap"] = tag->getData().skybox;
+  }
+
+  // Material
+  if (object->getComponent<bs::CRenderable>()) {
+    // json mat = value["material"];
+    JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
+    value["material"]["texture"] = tag->getData().mat.albedo;
+    value["material"]["shader"] = tag->getData().mat.shader;
+  }
+
+  // Position
+  const Vec3F position = object->getTransform().getPosition();
+  if (position != Vec3F::ZERO) {
+    JsonUtil::setValue(value, "position", position);
+  }
+
+  const Vec3F scale = object->getTransform().getScale();
+  if (scale != Vec3F::ONE) {
+    JsonUtil::setValue(value, "scale", scale);
+  }
+
+  const Quat rotation = object->getTransform().getRotation();
+  if (rotation != Quat::IDENTITY) {
+    JsonUtil::setValue(value, "rotation", rotation);
+  }
 
   // Sub-objects
   u32 cnt = object->getNumChildren();

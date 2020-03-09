@@ -1,15 +1,17 @@
-#include "BsCameraFlyer.h"
-#include "BsApplication.h"
-#include "Components/BsCCamera.h"
-#include "Input/BsInput.h"
-#include "Input/BsMouse.h"
-#include "Math/BsMath.h"
-#include "Math/BsVector3.h"
-#include "Platform/BsCursor.h"
-#include "Scene/BsSceneObject.h"
-#include "Utility/BsTime.h"
+#include "camera_flyer.h"
+
+#include <BsApplication.h>
+#include <Components/BsCCamera.h>
+#include <Input/BsInput.h>
+#include <Input/BsMouse.h>
+#include <Math/BsMath.h>
+#include <Math/BsVector3.h>
+#include <Platform/BsCursor.h>
+#include <Scene/BsSceneObject.h>
+#include <Utility/BsTime.h>
 
 namespace bs {
+
 const float CameraFlyer::START_SPEED = 8.0f;
 const float CameraFlyer::TOP_SPEED = 24.0f;
 const float CameraFlyer::ACCELERATION = 5.0f;

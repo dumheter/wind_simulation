@@ -120,7 +120,7 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
 
   // TODO set file path in gui
-  m_scene = Scene::load(m_scenePath);
+  m_scene = Scene::loadFile(m_scenePath);
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -194,7 +194,8 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
 void World::onPlayerJoin(const MoveableState &moveableState) {
   logInfo("player {} joined", moveableState.getUniqueId().raw());
   auto so = ObjectBuilder{ObjectType::kPlayer}
-                .withMaterial("res/textures/grid_2.png")
+                .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                              "res/textures/grid_2.png")
                 .withNetComponent(moveableState)
                 .build();
   auto netComp = so->getComponent<CNetComponent>();
@@ -267,7 +268,8 @@ void World::buildObject(const CreateInfo &info) {
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
       const auto &render = component.renderableData();
-      obj.withMaterial(render.pathTexture);
+      obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                       render.pathTexture);
     }
   }
 

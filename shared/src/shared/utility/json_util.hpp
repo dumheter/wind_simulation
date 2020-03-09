@@ -56,8 +56,22 @@ public:
   static Vec3F getVec3F(const nlohmann::json &value, const String &key,
                         const Vec3F &fallback = Vec3F::ZERO);
 
+
   static String getString(const nlohmann::json &value, const String &key,
                           const char *fallback = "");
+
+  /// Set Vec2
+  static void setValue(nlohmann::json &value, const String &key,
+                       const Vec2F &vec);
+
+  /// Set Vec3
+  static void setValue(nlohmann::json &value, const String &key,
+                       const Vec3F &vec);
+
+  /// Set Quat
+  static void setValue(nlohmann::json &value, const String &key,
+                       const Quat &quat);
+
 };
 
 // -------------------------------------------------------------------------- //

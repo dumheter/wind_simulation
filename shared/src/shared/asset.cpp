@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/log.hpp"
+
 #include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
@@ -116,7 +118,7 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
 
 // -------------------------------------------------------------------------- //
 
-bs::HMesh Asset::loadMesh(const bs::Path &path, float scale, bool cpuCached) {
+bs::HMesh Asset::loadMesh(const bs::Path &path, f32 scale, bool cpuCached) {
   bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
@@ -217,6 +219,26 @@ bs::HTexture AssetManager::loadTexture(const bs::Path &path, bool srgb,
     mgr.m_assetMap[path] = handle;
     return textureHandle;
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+bool AssetManager::getTexturePath(const bs::HTexture &texture,
+                                  bs::Path &pathOut) {
+
+  AssetManager &mgr = instance();
+  for (const auto &entry : mgr.m_assetMap) {
+    const bs::Path &path = entry.first;
+    const Asset::Handle &handle = entry.second;
+    if (Asset::isType<Asset::Texture>(handle)) {
+      bs::HTexture _texture = Asset::handleTexture(handle);
+      if (_texture == texture) {
+        pathOut = path;
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // -------------------------------------------------------------------------- //

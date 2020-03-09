@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@
 #include <Components/BsCSphereCollider.h>
 #include <Material/BsMaterial.h>
 #include <Physics/BsPhysicsMaterial.h>
+#include <RenderAPI/BsSamplerState.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
@@ -141,19 +142,46 @@ ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withMaterial(const String &texPath,
-                                           const Vec2F &tiling,
-                                           bool transparent) {
-  const bs::HShader shader = transparent
-                                 ? bs::gBuiltinResources().getBuiltinShader(
-                                       bs::BuiltinShader::Transparent)
-                                 : bs::gBuiltinResources().getBuiltinShader(
-                                       bs::BuiltinShader::Standard);
-  bs::HTexture texture = AssetManager::loadTexture(texPath);
+ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
+                                           const String &texPath,
+                                           const Vec2F &tiling) {
+  // Determine shader
+  bs::HShader shader;
+  switch (shaderKind) {
+  case ShaderKind::kTransparent: {
+    shader = bs::gBuiltinResources().getBuiltinShader(
+        bs::BuiltinShader::Transparent);
+    break;
+  }
+  case ShaderKind::kStandard:
+  default: {
+    shader =
+        bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
+    break;
+  }
+  }
+
+  // Setup material
+  const bs::HTexture texture = AssetManager::loadTexture(texPath);
   m_material = bs::Material::create(shader);
   m_material->setTexture("gAlbedoTex", texture);
   m_material->setVec2("gUVTile", tiling);
 
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().mat.albedo = texPath;
+  ctag->getData().mat.tiling = tiling;
+  ctag->getData().mat.shader = stringFromShaderKind(shaderKind);
+
+  // Sampler
+  // bs::SAMPLER_STATE_DESC samplerDesc;
+  // samplerDesc.minFilter = bs::FilterOptions::FO_LINEAR;
+  // samplerDesc.magFilter = bs::FilterOptions::FO_LINEAR;
+  // samplerDesc.mipFilter = bs::FilterOptions::FO_LINEAR;
+  // const bs::SPtr<bs::SamplerState> sampler =
+  //    bs::SamplerState::create(samplerDesc);
+  // m_material->setSamplerState("gAlbedoSamp", sampler);
+
+  // Set
   if (m_renderable != nullptr) {
     m_renderable->setMaterial(m_material);
   }
@@ -167,13 +195,16 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
   bs::HSkybox comp = m_handle->addComponent<bs::CSkybox>();
   comp->setTexture(tex);
 
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().skybox = path;
+
   return *this;
 }
 
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
-  bs::HPhysicsMaterial material =
+  const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
   switch (m_kind) {
@@ -301,6 +332,29 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   default: {
     return "invalid";
   }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder::ShaderKind
+ObjectBuilder::shaderKindFromString(const String &kind) {
+  if (kind == "transparent") {
+    return ShaderKind::kTransparent;
+  }
+  return ShaderKind::kStandard;
+}
+
+// -------------------------------------------------------------------------- //
+
+String ObjectBuilder::stringFromShaderKind(ShaderKind kind) {
+  switch (kind) {
+  case ShaderKind::kStandard:
+    return "standard";
+  case ShaderKind::kTransparent:
+    return "transparent";
+  default:
+    Util::panic("Invalid shader kind");
   }
 }
 

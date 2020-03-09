@@ -122,4 +122,30 @@ String JsonUtil::getString(const nlohmann::json &value, const String &key,
   return value.value(key.c_str(), fallback).c_str();
 }
 
+// -------------------------------------------------------------------------- //
+
+void JsonUtil::setValue(nlohmann::json &value, const String &key,
+                        const Vec2F &vec) {
+  value[key.c_str()]["x"] = vec.x;
+  value[key.c_str()]["y"] = vec.y;
+}
+
+// -------------------------------------------------------------------------- //
+
+void JsonUtil::setValue(nlohmann::json &value, const String &key,
+                        const Vec3F &vec) {
+  value[key.c_str()]["x"] = vec.x;
+  value[key.c_str()]["y"] = vec.y;
+  value[key.c_str()]["z"] = vec.z;
+}
+
+// -------------------------------------------------------------------------- //
+
+void JsonUtil::setValue(nlohmann::json &value, const String &key,
+                        const Quat &quat) {
+  value[key.c_str()]["x"] = quat.x;
+  value[key.c_str()]["y"] = quat.y;
+  value[key.c_str()]["z"] = quat.z;
+}
+
 } // namespace wind

@@ -99,7 +99,7 @@
   <ItemGroup>
     <ClCompile Include="src\shared\app.cpp" />
     <ClCompile Include="src\shared\asset.cpp" />
-    <ClCompile Include="src\shared\BsCameraFlyer.cpp" />
+    <ClCompile Include="src\shared\camera_flyer.cpp" />
     <ClCompile Include="src\shared\debug\debug.cpp" />
     <ClCompile Include="src\shared\scene\component_data.cpp" />
     <ClCompile Include="src\shared\scene\fps_camera.cpp" />
@@ -153,7 +153,7 @@
     <ClInclude Include="src\shared\app.hpp" />
     <ClInclude Include="src\shared\assert.hpp" />
     <ClInclude Include="src\shared\asset.hpp" />
-    <ClInclude Include="src\shared\BsCameraFlyer.h" />
+    <ClInclude Include="src\shared\camera_flyer.h" />
     <ClInclude Include="src\shared\debug\debug.hpp" />
     <ClInclude Include="src\shared\scene\component_data.hpp" />
     <ClInclude Include="src\shared\scene\fps_camera.hpp" />

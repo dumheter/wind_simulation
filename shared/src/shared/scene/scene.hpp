@@ -43,21 +43,25 @@ class Scene {
   WIND_NAMESPACE_CLASS(Scene);
 
 public:
+  /// Load a scene from a string (source is where the JSON comes from)
+  static bs::HSceneObject load(const String &scene, const String &source = "");
+
   /// Load a scene from a JSON file at the specified path.
-  static bs::HSceneObject load(const String &path);
+  static bs::HSceneObject loadFile(const String &path);
+
+  /// Save a scene to a string
+  static String save(const bs::HSceneObject &scene);
 
   /// Save a scene to a JSON file at the specified path.
-  static void save(const String &path, const bs::HSceneObject &scene);
+  static void saveFile(const String &path, const bs::HSceneObject &scene);
 
   /// Private function to load a scene from a JSON value. All resources
-  /// are assumed to be relative to the specified directory.
-  static bs::HSceneObject loadScene(const nlohmann::json &value,
-                                    const String &dir);
+  /// are assumed to be relative to the working directory.
+  static bs::HSceneObject loadScene(const nlohmann::json &value);
 
   /// Private function to load a scene object from a JSON value. All resources
-  /// are assumed to be relative to the specified directory.
-  static bs::HSceneObject loadObject(const nlohmann::json &value,
-                                     const String &dir);
+  /// are assumed to be relative to the working directory.
+  static bs::HSceneObject loadObject(const nlohmann::json &value);
 
   ///
   static nlohmann::json saveScene(const bs::HSceneObject &scene);

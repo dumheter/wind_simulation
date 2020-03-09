@@ -389,7 +389,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     input->setWidth(100);
     input->setPosition(4, height);
     input->onValueChanged.connect(
-        [this](const String &text) { m_scenePath = text + ".json"; });
+        [this](const String &text) { m_scenePath = text; });
 
     GUIButton *bSave = panel->addNewElement<GUIButton>(HString("Save"));
     bSave->setWidth(30);
@@ -398,7 +398,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       std::filesystem::path path = m_scenePath.c_str();
       logVerbose("saving scene ({})", path);
       String _path = path.string().c_str();
-      Scene::save(_path, m_editor->getScene());
+      Scene::saveFile(_path, m_editor->getScene());
     });
 
     GUIButton *bLoad = panel->addNewElement<GUIButton>(HString("Load"));
@@ -409,7 +409,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       if (std::filesystem::exists(path)) {
         logVerbose("loading scene ({})", path);
         String _path = path.string().c_str();
-        m_editor->setScene(Scene::load(_path), true);
+        m_editor->setScene(Scene::loadFile(_path), true);
         m_sceneAutoReload = true;
       } else {
         logWarning("Scene requested to load does not exist \"{}\"",
@@ -439,7 +439,7 @@ void UI::onFixedUpdate(f32 delta) {
           std::filesystem::last_write_time(path);
       if (time != m_sceneEditTime) {
         logVerbose("reloading scene ({})", m_scenePath.c_str());
-        m_editor->setScene(Scene::load(m_scenePath), true);
+        m_editor->setScene(Scene::loadFile(m_scenePath), true);
       }
       m_sceneEditTime = time;
     }

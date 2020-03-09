@@ -26,6 +26,7 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/math/math.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/scene/types.hpp"
 
@@ -46,6 +47,8 @@ namespace wind {
 class CTag final : public bs::Component {
   friend class CTagRTTI;
 
+  struct Data;
+
 public:
   /// Default constructor for serialization
   CTag() = default;
@@ -55,6 +58,12 @@ public:
 
   /// Returns the type of the tag
   ObjectType getType() const { return m_type; }
+
+  /// Returns the reference to the additional data stored in the tag component.
+  Data &getData() { return m_data; }
+
+  /// Returns the reference to the additional data stored in the tag component.
+  const Data &getData() const { return m_data; }
 
   /// Returns a reference to the static RTTI object that represents this
   /// component
@@ -66,6 +75,16 @@ public:
 private:
   /// Type of the tagged object
   ObjectType m_type = ObjectType::kInvalid;
+
+  /// Additional data required to be stored for objects
+  struct Data {
+    String skybox = "";
+    struct Material {
+      String shader = "standard";
+      String albedo = "";
+      Vec2F tiling = Vec2F::ONE;
+    } mat;
+  } m_data;
 };
 
 // -------------------------------------------------------------------------- //
