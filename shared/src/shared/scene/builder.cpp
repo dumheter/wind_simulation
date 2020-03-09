@@ -47,6 +47,7 @@
 #include <Components/BsCSphereCollider.h>
 #include <Material/BsMaterial.h>
 #include <Physics/BsPhysicsMaterial.h>
+#include <RenderAPI/BsSamplerState.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
@@ -170,6 +171,16 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
   ctag->getData().mat.tiling = tiling;
   ctag->getData().mat.shader = stringFromShaderKind(shaderKind);
 
+  // Sampler
+  // bs::SAMPLER_STATE_DESC samplerDesc;
+  // samplerDesc.minFilter = bs::FilterOptions::FO_LINEAR;
+  // samplerDesc.magFilter = bs::FilterOptions::FO_LINEAR;
+  // samplerDesc.mipFilter = bs::FilterOptions::FO_LINEAR;
+  // const bs::SPtr<bs::SamplerState> sampler =
+  //    bs::SamplerState::create(samplerDesc);
+  // m_material->setSamplerState("gAlbedoSamp", sampler);
+
+  // Set
   if (m_renderable != nullptr) {
     m_renderable->setMaterial(m_material);
   }
