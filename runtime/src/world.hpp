@@ -117,6 +117,9 @@ public:
 
   bool getCursorMode() const { return m_cursorMode; }
 
+  const String &getScenePath() const { return m_scenePath; }
+  const auto &getScene() const { return m_scene; }
+
 private:
   void setupInput();
 
@@ -139,6 +142,8 @@ private:
   HCMyPlayer m_player;
   NetDebugInfo m_netDebugInfo{};
   bs::GUITexture *m_aim;
+  String m_scenePath{"res/scenes/default.json"};
+  bs::HSceneObject m_scene;
 };
 
 } // namespace wind

@@ -112,7 +112,7 @@ ComponentData ComponentData::asRigidbody(f32 restitution, f32 mass) {
   return data;
 }
 
-ComponentData ComponentData::asRenderable(const String& pathTexture) {
+ComponentData ComponentData::asRenderable(const String &pathTexture) {
   ComponentData data;
   data.m_data = RenderableData{pathTexture};
   return data;

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
 #include <Components/BsCSkybox.h>
+#include <Components/BsCSphereCollider.h>
 #include <Material/BsMaterial.h>
 #include <Physics/BsPhysicsMaterial.h>
 #include <Resources/BsBuiltinResources.h>
@@ -73,6 +74,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     m_renderable->setMesh(mesh);
     break;
   }
+  case Kind::kBall: {
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Sphere);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
+    break;
+  }
   case Kind::kModel: {
     break;
   }
@@ -89,6 +96,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
     m_renderable->setMesh(mesh);
     auto fpsWalker = m_handle->addComponent<FPSWalker>();
+    break;
+  }
+  case Kind::kRotor: {
+    bs::HMesh mesh = Asset::loadMesh("res/meshes/rotor.fbx", 0.1f);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
     break;
   }
   case Kind::kEmpty: {
@@ -195,6 +208,20 @@ ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
     collider->setMass(mass);
     break;
   }
+  case Kind::kBall: {
+    bs::HSphereCollider collider =
+        m_handle->addComponent<bs::CSphereCollider>();
+    collider->setMaterial(material);
+    collider->setMass(mass);
+    break;
+  }
+  case Kind::kRotor: {
+    bs::HBoxCollider collider = m_handle->addComponent<bs::CBoxCollider>();
+    collider->setMaterial(material);
+    collider->setMass(mass);
+    collider->setExtents(Vec3F(1.8f, 0.1f, 1.8f));
+    break;
+  }
   default: {
     break;
   }
@@ -254,6 +281,14 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kPlane;
   } else if (kindString == "cube") {
     return Kind::kCube;
+  } else if (kindString == "ball") {
+    return Kind::kBall;
+  } else if (kindString == "model") {
+    return Kind::kPlayer;
+  } else if (kindString == "rotor") {
+    return Kind::kRotor;
+  } else if (kindString == "windSource") {
+    return Kind::kWindSource;
   }
   return Kind::kInvalid;
 }

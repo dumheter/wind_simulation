@@ -74,8 +74,6 @@ public:
 
   void setRigid(bool isRigid) { bitSet(m_flag, kFlagRigid, (Bitfield)isRigid); }
 
-
-
 public: // public for RTTI
   UniqueId m_id;
   Bitfield m_flag;

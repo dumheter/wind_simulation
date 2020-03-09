@@ -109,7 +109,8 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
 
   // TODO set file path in gui
-  Scene::load("res/scenes/default.json");
+  m_scene = Scene::load(m_scenePath);
+  m_player->SO()->setPosition(bs::Vector3::ZERO);
 
   // auto cubeState = MoveableState::generateNew();
   // cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
@@ -159,7 +160,7 @@ bool World::netCompChangeUniqueId(UniqueId from, UniqueId to) {
 void World::setupMyPlayer() {
   using namespace bs;
   AlfAssert(m_netComps.empty(), "setupmyplayer must be done first");
-  HSceneObject player = SceneObject::create("MyPlayer");
+  HSceneObject player = ObjectBuilder{ObjectType::kEmpty}.build();
   HCharacterController charController =
       player->addComponent<CCharacterController>();
   charController->setHeight(1.0f);
@@ -180,7 +181,6 @@ void World::applyMoveableState(const MoveableState &moveableState) {
   } else {
     logError("failed to find netcomp with id {}",
              moveableState.getUniqueId().raw());
-    // m_player->lookupId(moveableState.getUniqueId());
   }
 }
 
@@ -291,7 +291,7 @@ void World::buildObject(const CreateInfo &info) {
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
   using namespace bs;
-  HSceneObject camera = SceneObject::create("Camera");
+  HSceneObject camera = ObjectBuilder{ObjectType::kEmpty}.build();
   camera->setParent(player);
   camera->setPosition(Vector3(0.0f, 1.8f * 0.5f - 0.1f, 0.0f));
 
@@ -423,6 +423,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
         auto &t = input->getText();
         if (t.find(":") != std::string::npos && t.size() > 8) {
           m_player->connect(input->getText().c_str());
+          setupScene();
         }
       }
     });

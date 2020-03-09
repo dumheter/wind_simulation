@@ -27,8 +27,8 @@
 // ========================================================================== //
 
 #include "shared/scene/types.hpp"
-#include "shared/wind/base_functions.hpp"
 #include "shared/types.hpp"
+#include "shared/wind/base_functions.hpp"
 
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
@@ -42,7 +42,7 @@ namespace wind {
 /// Union-like class with data about different components.
 class ComponentData {
 
- public:
+public:
   /// Underlying enum type of the enum "ComponentType"
   using TagType = std::underlying_type_t<ComponentType>;
 
@@ -62,8 +62,9 @@ class ComponentData {
   };
 
 public:
-  template <typename T>
-  bool isType() const { return std::holds_alternative<T>(m_data); }
+  template <typename T> bool isType() const {
+    return std::holds_alternative<T>(m_data);
+  }
 
   /// Returns the WindSource data
   const WindSourceData &windSourceData() const;
@@ -85,7 +86,7 @@ public:
   /// Creates a component data representing rigidbody data
   static ComponentData asRigidbody(f32 restitution, f32 mass);
 
-  static ComponentData asRenderable(const String& pathTexture);
+  static ComponentData asRenderable(const String &pathTexture);
 
 private:
   /// Variant
