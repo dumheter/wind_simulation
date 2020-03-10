@@ -101,7 +101,7 @@ void CWindSource::fixedUpdate() {
     for (auto &collision : m_collisions) {
       if (collision.netComp) {
         bs::Vector3 force =
-            dt * getWindForce(collision.netComp->getState().getPosition());
+            dt * getWindForce(collision.netComp->getState().position);
         bs::Transform t = SO()->getTransform();
         t.setScale(bs::Vector3::ONE);
         t.setPosition(bs::Vector3::ZERO);

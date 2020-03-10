@@ -40,9 +40,9 @@ public:
    */
   void addForce(bs::Vector3 force, bs::ForceMode mode);
 
-  UniqueId getUniqueId() const { return m_state.getUniqueId(); }
+  UniqueId getUniqueId() const { return m_state.id; }
 
-  void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
+  void setUniqueId(UniqueId id) { m_state.id = id; }
 
   const MoveableState &getState() const { return m_state; }
 
@@ -73,7 +73,7 @@ public:
 private:
   bool m_hasChanged;
   MoveableState m_state;
-};
+}; // namespace wind
 
 using HCNetComponent = bs::GameObjectHandle<CNetComponent>;
 
@@ -82,12 +82,12 @@ class CNetComponentRTTI
 private:
   BS_BEGIN_RTTI_MEMBERS
   BS_RTTI_MEMBER_PLAIN(m_hasChanged, 0)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_id, m_state.m_id, 1)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_flag, m_state.m_flag, 2)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_position, m_state.m_position, 3)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_vel, m_state.m_vel, 4)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_angVel, m_state.m_angVel, 5)
-  BS_RTTI_MEMBER_PLAIN_NAMED(m_rotation, m_state.m_rotation, 6)
+  BS_RTTI_MEMBER_PLAIN_NAMED(id, m_state.id, 1)
+  BS_RTTI_MEMBER_PLAIN_NAMED(flag, m_state.flag, 2)
+  BS_RTTI_MEMBER_PLAIN_NAMED(position, m_state.position, 3)
+  BS_RTTI_MEMBER_PLAIN_NAMED(vel, m_state.vel, 4)
+  BS_RTTI_MEMBER_PLAIN_NAMED(angVel, m_state.angVel, 5)
+  BS_RTTI_MEMBER_PLAIN_NAMED(rotation, m_state.rotation, 6)
   BS_END_RTTI_MEMBERS
 
 public:

@@ -239,7 +239,7 @@ void Server::handlePacketPlayerTick() {
 
 void Server::handlePacketRequestCreate() {
   RequestCreateInfo info = PacketParser::RequestCreate(m_packet);
-  info.state.setUniqueId(UniqueIdGenerator::next());
+  info.state.id = UniqueIdGenerator::next();
   PacketBuilder::Create(m_packet, info);
   PacketBroadcastUnreliableFast(m_packet);
 }

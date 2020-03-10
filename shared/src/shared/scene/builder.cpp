@@ -87,7 +87,6 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kPlayer: {
-    logWarning("### built player");
     bs::HCharacterController charController =
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);

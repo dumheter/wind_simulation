@@ -21,12 +21,12 @@ CNetComponent::CNetComponent(bs::HSceneObject parent,
 void CNetComponent::onCreated() {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
   m_hasChanged = true;
-  SO()->setPosition(m_state.getPosition());
-  SO()->setRotation(m_state.getRotation());
+  SO()->setPosition(m_state.position);
+  SO()->setRotation(m_state.rotation);
   auto rigid = SO()->getComponent<bs::CRigidbody>();
   if (rigid && !rigid->getIsKinematic()) {
-    rigid->setVelocity(m_state.getVel());
-    rigid->setAngularVelocity(m_state.getAngVel());
+    rigid->setVelocity(m_state.vel);
+    rigid->setAngularVelocity(m_state.angVel);
   }
   mNotifyFlags = bs::TCF_Transform;
 }
@@ -47,12 +47,12 @@ void CNetComponent::setState(const MoveableState &moveableState) {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
   m_hasChanged = true;
   m_state = moveableState;
-  SO()->setPosition(m_state.getPosition());
-  SO()->setRotation(m_state.getRotation());
+  SO()->setPosition(m_state.position);
+  SO()->setRotation(m_state.rotation);
   auto rigid = SO()->getComponent<bs::CRigidbody>();
   if (rigid) {
-    rigid->setVelocity(m_state.getVel());
-    rigid->setAngularVelocity(m_state.getAngVel());
+    rigid->setVelocity(m_state.vel);
+    rigid->setAngularVelocity(m_state.angVel);
   }
   mNotifyFlags = bs::TCF_Transform;
 }
@@ -60,8 +60,8 @@ void CNetComponent::setState(const MoveableState &moveableState) {
 void CNetComponent::setPosition(bs::Vector3 position) {
   mNotifyFlags = (bs::TransformChangedFlags::TCF_None);
   m_hasChanged = true;
-  m_state.setPosition(position);
-  SO()->setPosition(m_state.getPosition());
+  m_state.position = position;
+  SO()->setPosition(m_state.position);
   mNotifyFlags = bs::TCF_Transform;
 }
 

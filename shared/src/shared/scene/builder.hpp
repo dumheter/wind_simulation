@@ -41,7 +41,7 @@
 
 namespace wind {
 
-class MoveableState;
+struct MoveableState;
 
 class ObjectBuilder {
 public:

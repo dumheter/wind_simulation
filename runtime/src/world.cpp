@@ -123,9 +123,8 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
-  m_dynamicScene = ObjectBuilder{ObjectType::kEmpty}
-  .withName("dynamicScene")
-       .build();
+  m_dynamicScene =
+      ObjectBuilder{ObjectType::kEmpty}.withName("dynamicScene").build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -168,21 +167,20 @@ void World::setupMyPlayer() {
 
 void World::applyMoveableState(const MoveableState &moveableState) {
   MICROPROFILE_SCOPEI("world", "appylMoveableState", MP_TURQUOISE);
-  auto it = m_netComps.find(moveableState.getUniqueId());
+  auto it = m_netComps.find(moveableState.id);
   if (it != m_netComps.end()) {
     it->second->setState(moveableState);
   } else {
-    logError("failed to find netcomp with id {}",
-             moveableState.getUniqueId().raw());
+    logError("failed to find netcomp with id {}", moveableState.id.raw());
   }
 }
 
 void World::applyMyMoveableState(const MoveableState &moveableState) {
   MICROPROFILE_SCOPEI("world", "appylMyMoveableState", MP_TURQUOISE1);
-  auto it = m_netComps.find(moveableState.getUniqueId());
+  auto it = m_netComps.find(moveableState.id);
   if (it != m_netComps.end()) {
-    const auto myPos = it->second->getState().getPosition();
-    const auto newPos = moveableState.getPosition();
+    const auto myPos = it->second->getState().position;
+    const auto newPos = moveableState.position;
     constexpr float kDivergeMax = 2.0f;
     if (std::fabs(myPos.x - newPos.x) > kDivergeMax ||
         std::fabs(myPos.y - newPos.y) > kDivergeMax ||
@@ -192,25 +190,25 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
     }
   } else {
     logError("[world:applyMyMoveableState] failed to find netcomp with id {}",
-             moveableState.getUniqueId().raw());
+             moveableState.id.raw());
   }
 }
 
 void World::onPlayerJoin(const MoveableState &moveableState) {
-  logInfo("player {} joined", moveableState.getUniqueId().raw());
+  logInfo("player {} joined", moveableState.id.raw());
 
-  if (m_netComps.count(moveableState.getUniqueId())) {
+  if (m_netComps.count(moveableState.id)) {
     logVeryVerbose("[world:onPlayerJoin] duplicate player, not adding, {}",
-                   moveableState.getUniqueId().raw());
+                   moveableState.id.raw());
     return;
   }
 
   auto so = ObjectBuilder{ObjectType::kPlayer}
-  .withName("playerJoin")
+                .withName("playerJoin")
                 .withNetComponent(moveableState)
                 .build();
   auto netComp = so->getComponent<CNetComponent>();
-  auto [it, ok] = getNetComps().insert({moveableState.getUniqueId(), netComp});
+  auto [it, ok] = getNetComps().insert({moveableState.id, netComp});
   AlfAssert(ok, "failed to create player, was the id unique?");
   so->setParent(m_dynamicScene);
 }
@@ -273,16 +271,16 @@ void World::onDisconnect() {
 void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
 
-  if (m_netComps.count(info.state.getUniqueId())) {
+  if (m_netComps.count(info.state.id)) {
     logVeryVerbose("[world:buildObject] duplicate object, not building, {}",
-                   info.state.getUniqueId().raw());
+                   info.state.id.raw());
     return;
   }
 
   auto obj = ObjectBuilder(info.type)
                  .withScale(info.scale)
-                 .withPosition(info.state.getPosition())
-                 .withRotation(info.state.getRotation());
+                 .withPosition(info.state.position)
+                 .withRotation(info.state.rotation);
   for (const auto &component : info.components) {
     if (component.isType<ComponentData::RigidbodyData>()) {
       MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
@@ -488,13 +486,6 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
         rotor->setRotation(bs::Vector3{0.0f, percent * percent * 1000, 0.0f});
-        // HCWindSource &wind = rotor->getWindSource();
-        // for (auto &fn : wind->getFunctions()) {
-        //   if (std::holds_alternative<BaseFn::Constant>(fn.fn)) {
-        //     std::get<BaseFn::Constant>(fn.fn).magnitude =
-        //         percent * percent * 100.0f;
-        //   }
-        // }
       }
     });
   }

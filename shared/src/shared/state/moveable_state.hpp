@@ -15,9 +15,8 @@
 
 namespace wind {
 
-class MoveableState {
+struct MoveableState {
 
-public:
   explicit MoveableState(UniqueId id);
 
   MoveableState() : MoveableState(UniqueId::invalid()) {}
@@ -25,26 +24,6 @@ public:
   static MoveableState generateNew() {
     return MoveableState{UniqueIdGenerator::next()};
   }
-
-  UniqueId getUniqueId() const { return m_id; }
-
-  void setUniqueId(UniqueId id) { m_id = id; }
-
-  bs::Vector3 getPosition() const { return m_position; }
-
-  void setPosition(bs::Vector3 position) { m_position = position; }
-
-  bs::Vector3 getVel() const { return m_vel; }
-
-  void setVel(bs::Vector3 vel) { m_vel = vel; }
-
-  bs::Vector3 getAngVel() const { return m_angVel; }
-
-  void setAngVel(bs::Vector3 angVel) { m_angVel = angVel; }
-
-  bs::Quaternion getRotation() const { return m_rotation; }
-
-  void setRotation(bs::Quaternion rotation) { m_rotation = rotation; }
 
   void from(const bs::Transform &transform);
 
@@ -70,17 +49,17 @@ private:
   static constexpr Bitfield kFlagRigid = 0;
 
 public:
-  bool getRigid() const { return bitCheck(m_flag, kFlagRigid); }
+  bool getRigid() const { return bitCheck(flag, kFlagRigid); }
 
-  void setRigid(bool isRigid) { bitSet(m_flag, kFlagRigid, (Bitfield)isRigid); }
+  void setRigid(bool isRigid) { bitSet(flag, kFlagRigid, (Bitfield)isRigid); }
 
-public: // public for RTTI
-  UniqueId m_id;
-  Bitfield m_flag;
-  bs::Vector3 m_position;
-  bs::Vector3 m_vel;
-  bs::Vector3 m_angVel;
-  bs::Quaternion m_rotation;
+ public:
+  UniqueId id;
+  Bitfield flag;
+  bs::Vector3 position;
+  bs::Vector3 vel;
+  bs::Vector3 angVel;
+  bs::Quaternion rotation;
 };
 
 } // namespace wind
