@@ -20,25 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor.hpp"
+#include "cspline.hpp"
 
 // ========================================================================== //
-// Headers
+// CSpline Implementation
 // ========================================================================== //
 
-#include "shared/log.hpp"
-#include "shared/math/spline.hpp"
+namespace wind {
 
-// ========================================================================== //
-// Main
-// ========================================================================== //
+CSpline::CSpline(const bs::HSceneObject &parent, const Spline &spline)
+    : Component(parent), m_spline(new Spline(spline)) {}
 
-int main() {
-  using namespace wind;
+// -------------------------------------------------------------------------- //
 
-  fixConsole();
-  Editor editor;
-  editor.run();
+CSpline::CSpline(const bs::HSceneObject &parent,
+                 const std::vector<Vec3F> &points, u32 degrees)
+    : Component(parent), m_spline(new Spline(points, degrees)) {}
 
-  return 0;
-}
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CSpline::getRTTIStatic() { return CSplineRTTI::instance(); }
+
+} // namespace wind

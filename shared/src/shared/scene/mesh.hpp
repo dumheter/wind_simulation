@@ -20,25 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
-#include "shared/math/spline.hpp"
+#include "shared/macros.hpp"
+#include "shared/math/math.hpp"
+
+#include <Mesh/BsMesh.h>
 
 // ========================================================================== //
-// Main
+// MeshManager Declaration
 // ========================================================================== //
 
-int main() {
-  using namespace wind;
+namespace wind {
 
-  fixConsole();
-  Editor editor;
-  editor.run();
+WIND_FORWARD_DECLARE(Spline);
 
-  return 0;
-}
+/// Mesh manager
+class MeshManager {
+public:
+  /// Create a mesh for a spline
+  static bs::HMesh createSplineMesh(const Spline &spline);
+
+private:
+  ///
+  MeshManager() = default;
+
+  ///
+  ~MeshManager() = default;
+
+  /// Returns mesh manager instance
+  static MeshManager &instance() {
+    static MeshManager mgr;
+    return mgr;
+  }
+};
+
+} // namespace wind

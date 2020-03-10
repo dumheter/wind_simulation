@@ -20,25 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
-#include "shared/math/spline.hpp"
+#include <shared/math/math.hpp>
+
+#include <tinyspline/tinyspline.h>
 
 // ========================================================================== //
-// Main
+// Spline Declaration
 // ========================================================================== //
 
-int main() {
-  using namespace wind;
+namespace wind {
 
-  fixConsole();
-  Editor editor;
-  editor.run();
+/// B-spline
+class Spline {
 
-  return 0;
-}
+public:
+  /// Construct a spline from a list of points and an optional list of knots.
+  explicit Spline(const std::vector<Vec3F> &points, u32 degree = 2);
+
+  /// Destruct spline
+  ~Spline();
+
+  /// Sample the spline at time 't' (0.0 -> 1.0).
+  Vec3F sample(f32 t);
+
+private:
+  /// Spline handle
+  tsBSpline m_spline = {};
+  /// DeBoor net
+  tsDeBoorNet m_net = {};
+};
+
+} // namespace wind

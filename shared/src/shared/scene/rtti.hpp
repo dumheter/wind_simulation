@@ -48,5 +48,7 @@ constexpr u32 TID_FPSCamera = 2004;
 constexpr u32 TID_CWindSource = 2005;
 /// RTTI Type ID of CTag component
 constexpr u32 TID_CTag = 2006;
+/// RTTI Type ID of CSpline component
+constexpr u32 TID_CSpline = 2007;
 
 } // namespace wind

@@ -28,12 +28,14 @@
 
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/render/shader.hpp"
 #include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/fps_walker.hpp"
+#include "shared/scene/mesh.hpp"
 #include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
-#include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
 #include <Components/BsCBoxCollider.h>
@@ -48,8 +50,6 @@
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
-#include "shared/render/shader.hpp"
-
 // ========================================================================== //
 // ObjectBuilder Implementation
 // ========================================================================== //
@@ -63,21 +63,21 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   // Create by kind
   switch (kind) {
   case Kind::kPlane: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Quad);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    const bs::HMesh mesh =
+        bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Quad);
+    withMesh(mesh);
     break;
   }
   case Kind::kCube: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    const bs::HMesh mesh =
+        bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
+    withMesh(mesh);
     break;
   }
   case Kind::kBall: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Sphere);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    const bs::HMesh mesh =
+        bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Sphere);
+    withMesh(mesh);
     break;
   }
   case Kind::kModel: {
@@ -133,6 +133,19 @@ ObjectBuilder &ObjectBuilder::withPosition(const Vec3F &position) {
 
 ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
   m_handle->setScale(scale);
+
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withMesh(const bs::HMesh &mesh) {
+  m_renderable = m_handle->addComponent<bs::CRenderable>();
+  m_renderable->setMesh(mesh);
+
+  if (m_material != nullptr) {
+    m_renderable->setMaterial(m_material);
+  }
 
   return *this;
 }
@@ -252,7 +265,7 @@ ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withRigidbody() {
-  bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
+  const bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
 
   return *this;
 }
@@ -263,6 +276,22 @@ ObjectBuilder &
 ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
   auto wind = m_handle->addComponent<CWindSource>();
   wind->addFunctions(functions);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
+                                         u32 degree) {
+  // Spline component
+  HCSpline spline = m_handle->addComponent<CSpline>(points, degree);
+
+  // Add sub-object to render spline
+  const bs::HMesh mesh = MeshManager::createSplineMesh(*spline->getSpline());
+  const bs::HSceneObject obj =
+      ObjectBuilder{ObjectType::kModel}.withMesh(mesh).build();
+  withObject(obj);
+
   return *this;
 }
 

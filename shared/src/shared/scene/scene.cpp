@@ -164,12 +164,33 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
 
     std::vector<BaseFn> functions{};
     for (const auto fn : wind) {
-      String type = JsonUtil::getString(fn, "type", "constant");
+      String windType = JsonUtil::getString(fn, "type", "constant");
       Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
       f32 mag = fn.value("magnitude", 0.0f);
       functions.push_back(BaseFn::fnConstant(dir, mag));
     }
     builder.withWindSource(functions);
+  }
+
+  // Spline
+  auto itSpline = value.find("spline");
+  if (itSpline != value.end()) {
+    json spline = *itSpline;
+
+    u32 degree = JsonUtil::getU32(spline, "degree", 2);
+    const auto splinePointsIt = spline.find("points");
+    if (splinePointsIt != spline.end()) {
+      const nlohmann::json splinePoints = *splinePointsIt;
+      if (splinePoints.is_array()) {
+        std::vector<Vec3F> points;
+        for (const nlohmann::json &splinePoint : splinePoints) {
+          points.push_back(JsonUtil::getVec3F(splinePoint));
+        }
+        builder.withSpline(points, degree);
+      }
+    } else {
+      logError("spline must contain a list of control points");
+    }
   }
 
   // Name

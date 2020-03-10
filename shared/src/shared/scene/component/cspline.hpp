@@ -26,42 +26,44 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/macros.hpp"
 #include "shared/math/math.hpp"
+#include "shared/math/spline.hpp"
 #include "shared/scene/rtti.hpp"
-#include "shared/scene/types.hpp"
 
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
-// CTag Declaration
+// CSpline Declaration
 // ========================================================================== //
 
 namespace wind {
 
 /// Class that represents a component which is used to tag objects with extra
 /// information. Currently the tag contains only the type of the object
-class CTag final : public bs::Component {
+class CSpline final : public bs::Component {
   friend class CTagRTTI;
 
   struct Data;
 
 public:
   /// Default constructor for serialization
-  CTag() = default;
+  CSpline() = default;
 
-  /// Construct a tag component with a specific object type as the tag.
-  CTag(const bs::HSceneObject &parent, ObjectType type);
+  /// Construct a spline component.
+  CSpline(const bs::HSceneObject &parent, const Spline &spline);
 
-  /// Returns the type of the tag
-  ObjectType getType() const { return m_type; }
+  /// Construct a spline component.
+  CSpline(const bs::HSceneObject &parent, const std::vector<Vec3F> &points,
+          u32 degrees = 2);
 
-  /// Returns the reference to the additional data stored in the tag component.
-  Data &getData() { return m_data; }
+  /// Returns the underlying spline data
+  Spline *getSpline() { return m_spline; }
 
-  /// Returns the reference to the additional data stored in the tag component.
-  const Data &getData() const { return m_data; }
+  /// Returns the underlying spline data
+  const Spline *getSpline() const { return m_spline; }
 
   /// Returns a reference to the static RTTI object that represents this
   /// component
@@ -71,39 +73,25 @@ public:
   bs::RTTITypeBase *getRTTI() const override { return getRTTIStatic(); }
 
 private:
-  /// Type of the tagged object
-  ObjectType m_type = ObjectType::kInvalid;
-
-  /// Additional data required to be stored for objects
-  struct Data {
-    String skybox = "";
-    struct Material {
-      String shader = "standard";
-      String albedo = "";
-      Vec2F tiling = Vec2F::ONE;
-      Vec4F color = Vec4F(1.0f, 1.0f, 1.0f, 1.0f);
-    } mat;
-    struct Spline {
-      std::vector<Vec3F> points = {};
-    };
-  } m_data;
+  /// Spline
+  Spline *m_spline = nullptr;
 };
 
 // -------------------------------------------------------------------------- //
 
-/// CTag handle type
-using HCTag = bs::GameObjectHandle<CTag>;
+/// CSpline handle type
+using HCSpline = bs::GameObjectHandle<CSpline>;
 
 } // namespace wind
 
 // ========================================================================== //
-// CTagRTTI Declaration
+// CSplineRTTI Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// CTag component RTTI
-class CTagRTTI : public bs::RTTIType<CTag, bs::Component, CTagRTTI> {
+/// CSpline component RTTI
+class CSplineRTTI : public bs::RTTIType<CSpline, bs::Component, CSplineRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
   BS_END_RTTI_MEMBERS
@@ -111,16 +99,16 @@ private:
 public:
   /// \copydoc bs::RTTITypeBase::getRTTIName
   const bs::String &getRTTIName() override {
-    static bs::String name = "CTag";
+    static bs::String name = "CSpline";
     return name;
   }
 
   /// \copydoc bs::RTTITypeBase::getRTTIId
-  bs::UINT32 getRTTIId() override { return TID_CTag; }
+  bs::UINT32 getRTTIId() override { return TID_CSpline; }
 
   /// \copydoc bs::RTTITypeBase::newRTTIObject
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CTag>();
+    return bs::SceneObject::createEmptyComponent<CSpline>();
   }
 };
 

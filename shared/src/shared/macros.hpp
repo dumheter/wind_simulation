@@ -26,8 +26,13 @@
 // Macros
 // ========================================================================== //
 
-/* Macro to force a namespace class */
+/// Macro to force a namespace class
 #define WIND_NAMESPACE_CLASS(type)                                             \
 public:                                                                        \
   type() = delete;                                                             \
   ~type() = delete;
+
+// -------------------------------------------------------------------------- //
+
+/// Macro for forward declaring a class
+#define WIND_FORWARD_DECLARE(type) class type

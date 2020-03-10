@@ -23,42 +23,6 @@
 #include "shader.hpp"
 
 #include <Importer/BsImporter.h>
-#include <Material/BsPass.h>
-#include <Resources/BsResources.h>
-
-#include "shared/utility/util.hpp"
-
-// ========================================================================== //
-// Static data
-// ========================================================================== //
-
-static const char sWireframeVS[] = "struct VsIn {\n"
-                                   "  float3 pos : POSITION;\n"
-                                   "}\n"
-                                   "\n"
-                                   "struct VsOut {\n"
-                                   "  float4 pos;\n"
-                                   "}\n"
-                                   "\n"
-                                   "cbuffer Transform : b0 {\n"
-                                   "  float4x4 mvp;\n"
-                                   "}\n"
-                                   "\n"
-                                   "VsOut main(VsIn in) {\n"
-                                   "  VsOut out;\n"
-                                   "  out.pos = mul(mvp, in.pos);\n"
-                                   "  return out;\n"
-                                   "}";
-
-// -------------------------------------------------------------------------- //
-
-static const char sWireframePS[] = "struct VsOut {\n"
-                                   "  float4 pos;\n"
-                                   "}\n"
-                                   "\n"
-                                   "float4 main(VsOut in) {\n"
-                                   " return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
-                                   "}\n";
 
 // ========================================================================== //
 // ShaderManager Implementation

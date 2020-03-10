@@ -67,6 +67,9 @@ public:
   /// Set the scale
   ObjectBuilder &withScale(const Vec3F &scale);
 
+  /// Set the mesh
+  ObjectBuilder &withMesh(const bs::HMesh &mesh);
+
   /// Set the material of the object to one that uses the specified shader and
   /// has the specified texture. Tiling for the texture and a tint color can
   /// also be specified. Whether color is applicable depends on the shader.
@@ -87,7 +90,10 @@ public:
   /// Adds wind
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
-  ObjectBuilder &withWindSource(const std::vector<BaseFn>& functions);
+  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions);
+
+  /// Adds a spline component to the object
+  ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree);
 
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);

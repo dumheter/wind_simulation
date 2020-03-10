@@ -48,9 +48,16 @@ public:
   static T getOrCall(const nlohmann::json &value, const String &key, F &&func,
                      ARGS &&... arguments);
 
+  static u32 getU32(const nlohmann::json &value, const String &key,
+                    u32 fallback = 0);
+
   /// Read a vector from a JSON value or return the default value
   static Vec2F getVec2F(const nlohmann::json &value, const String &key,
                         const Vec2F &fallback = Vec2F::ZERO);
+
+  /// Read a vector from a JSON value or return the default value
+  static Vec3F getVec3F(const nlohmann::json &value,
+                        const Vec3F &fallback = Vec3F::ZERO);
 
   /// Read a vector from a JSON value or return the default value
   static Vec3F getVec3F(const nlohmann::json &value, const String &key,
