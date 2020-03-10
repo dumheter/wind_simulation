@@ -171,14 +171,16 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     builder.withWindSource(functions);
   }
 
+  // Rotor
+  if (value.find("rotor") != value.end()) {
+    Vec3F rot = JsonUtil::getVec3F(value, "rotor", Vec3F::ZERO);
+    builder.withRotor(rot);
+  }
+
   // Name
   String name = JsonUtil::getOrCall<String>(
       value, String("name"), []() { return ObjectBuilder::nextName(); });
   builder.withName(name);
-
-  // Transform
-  builder.withPosition(JsonUtil::getVec3F(value, "position"));
-  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
 
   // Sub-objects
   auto it = value.find("objects");
@@ -194,6 +196,11 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       builder.withObject(subObject);
     }
   }
+
+  // Transform - MUST BE LAST
+  builder.withPosition(JsonUtil::getVec3F(value, "position"));
+  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
+  builder.withRotation(JsonUtil::getVec3F(value, "rotation"));
 
   return builder.build();
 }

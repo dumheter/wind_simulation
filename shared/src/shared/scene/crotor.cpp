@@ -5,14 +5,17 @@ namespace wind {
 
 CRotor::CRotor() : m_rotation() {}
 
-CRotor::CRotor(const bs::HSceneObject &parent, const HCWindSource &windSource)
-    : bs::Component(parent), m_rotation(), m_windSource(windSource) {
+CRotor::CRotor(const bs::HSceneObject &parent, Vec3F rotation)
+    : bs::Component(parent), m_rotation() {
   setName("CRotor");
+  setRotation(rotation);
 }
 
-void CRotor::fixedUpdate() { SO()->rotate(m_rotation); }
+void CRotor::fixedUpdate() {
+  SO()->rotate(m_rotation);
+}
 
-void CRotor::setRotation(bs::Vector3 rot) {
+void CRotor::setRotation(Vec3F rot) {
   m_rotation =
       bs::Quaternion(bs::Degree(rot.x), bs::Degree(rot.y), bs::Degree(rot.z));
 }

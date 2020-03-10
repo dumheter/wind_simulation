@@ -63,6 +63,9 @@ public:
   /// Sets the position
   ObjectBuilder &withPosition(const Vec3F &position);
 
+  /// Sets the rotation
+  ObjectBuilder &withRotation(const Vec3F &rotation);
+
   /// Sets the scale
   ObjectBuilder &withScale(const Vec3F &scale);
 
@@ -84,6 +87,9 @@ public:
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
   ObjectBuilder &withWindSource(const std::vector<BaseFn>& functions);
+
+  /// Add rotor
+  ObjectBuilder &withRotor(Vec3F rotation);
 
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);

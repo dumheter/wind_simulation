@@ -30,6 +30,7 @@
 #include "shared/log.hpp"
 #include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/ctag.hpp"
+#include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
 #include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
@@ -129,6 +130,14 @@ ObjectBuilder &ObjectBuilder::withName(const String &name) {
 ObjectBuilder &ObjectBuilder::withPosition(const Vec3F &position) {
   m_handle->setPosition(position);
 
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withRotation(const Vec3F &rotation) {
+  m_handle->setRotation(
+      bs::Quaternion(bs::Degree(rotation.x), bs::Degree(rotation.y), bs::Degree(rotation.z)));
   return *this;
 }
 
@@ -256,6 +265,13 @@ ObjectBuilder &
 ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
   auto wind = m_handle->addComponent<CWindSource>();
   wind->addFunctions(functions);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withRotor(Vec3F rotation) {
+  auto rotor = m_handle->addComponent<CRotor>(rotation);
   return *this;
 }
 
