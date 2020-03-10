@@ -70,6 +70,10 @@ std::ostream &operator<<(std::ostream &out, wind::ObjectType type) {
     out << "kRotor";
     break;
   }
+  case wind::ObjectType::kCylinder: {
+    out << "kCylinder";
+    break;
+  }
   case wind::ObjectType::kInvalid:
   default: {
     out << "kInvalid";

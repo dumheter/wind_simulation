@@ -92,15 +92,14 @@ ObjectBuilder::ObjectBuilder(Kind kind)
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);
     charController->setRadius(0.4f);
-    auto prep = ObjectBuilder{ObjectType::kEmpty}
-                    .withName("playerRep")
-                    .build();
+    auto prep = ObjectBuilder{ObjectType::kCylinder}
+    .withName("playerRep")
+         .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
+         .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
+         .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                       "res/textures/grid_bg.png")
+         .build();
     prep->setParent(m_handle);
-    prep->setScale(bs::Vector3(0.3f, 2.0f, 0.3f));
-    prep->setPosition(bs::Vector3(0.0f, -1.0f, 0.0f));
-    m_renderable = prep->addComponent<bs::CRenderable>();
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
-    m_renderable->setMesh(mesh);
     auto fpsWalker = m_handle->addComponent<FPSWalker>();
     break;
   }
@@ -111,6 +110,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kEmpty: {
+    break;
+  }
+  case Kind::kCylinder: {
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
     break;
   }
   default: {
@@ -343,6 +348,8 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
+  } else if (kindString == "cylinder") {
+    return Kind::kCylinder;
   }
   return Kind::kInvalid;
 }
@@ -365,6 +372,8 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "player";
   case Kind::kRotor:
     return "rotor";
+  case Kind::kCylinder:
+    return "cylinder";
   case Kind::kInvalid:
   default: {
     return "invalid";

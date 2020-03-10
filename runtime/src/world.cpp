@@ -206,8 +206,7 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
   }
 
   auto so = ObjectBuilder{ObjectType::kPlayer}
-                .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                              "res/textures/grid_bg.png")
+  .withName("playerJoin")
                 .withNetComponent(moveableState)
                 .build();
   auto netComp = so->getComponent<CNetComponent>();
