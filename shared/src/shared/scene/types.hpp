@@ -45,7 +45,6 @@ enum class ObjectType : u32 {
   kModel,       ///< Model with a specific mesh
   kPlayer,      ///< Player with corresponding components
   kRotor,       ///< Helicopter rotor
-  kWindSource   ///<
 };
 
 // -------------------------------------------------------------------------- //

@@ -157,6 +157,10 @@ public:
     m_velocityAdvectionActive = active;
   }
 
+  /// Set the vector field to look like a tornado (rotation around center +
+  /// force upwards + force increase with height)
+  void setAsTornado();
+
 private:
   /// Gauss-Seidel relaxation
   void gaussSeidel(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 a, f32 c);

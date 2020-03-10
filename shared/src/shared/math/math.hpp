@@ -26,10 +26,13 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/types.hpp"
+
 #include <Math/BsQuaternion.h>
 #include <Math/BsVector2.h>
 #include <Math/BsVector3.h>
 #include <Math/BsVector3I.h>
+#include <Math/BsVector4.h>
 
 // ========================================================================== //
 // Types
@@ -40,6 +43,7 @@ namespace wind {
 using Vec2F = ::bs::Vector2;
 using Vec3F = ::bs::Vector3;
 using Vec3I = ::bs::Vector3I;
+using Vec4F = ::bs::Vector4;
 using Quat = ::bs::Quaternion;
 
 } // namespace wind
@@ -54,6 +58,24 @@ namespace wind {
 template <typename T, typename S, typename U>
 inline constexpr T clamp(T value, S minValue, U maxValue) {
   return value < minValue ? minValue : value > maxValue ? maxValue : value;
+}
+
+// ============================================================ //
+
+/**
+ * Map val from a range [from_min, from_max], to another range
+ * [to_min, to_max].
+ *
+ * @pre val must be in range [from_min, from_max].
+ *
+ * Example:
+ *   Map(5, 0, 10, 0, 100)  -> 50
+ *   Map(10, 0, 10, 0, 100) -> 100
+ *   Map(0, 0, 10, 0, 100)  -> 0
+ */
+template <typename T>
+inline T map(T val, T from_min, T from_max, T to_min, T to_max) {
+  return (val - from_min) * (to_max - to_min) / (from_max - from_min) + to_min;
 }
 
 // -------------------------------------------------------------------------- //
@@ -75,6 +97,14 @@ template <typename T> inline constexpr T maxValue(T a, T b, T c) {
 /// Returns the minimum of two values
 template <typename T> inline constexpr T minValue(T a, T b) {
   return a < b ? a : b;
+}
+
+// -------------------------------------------------------------------------- //
+
+/// Round a floating-point number to N decimals
+inline f32 round(f32 value, u32 dec) {
+  const u32 decN = static_cast<u32>(pow(10, dec));
+  return roundf(value * decN) / decN;
 }
 
 } // namespace wind

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "shared/math/math.hpp"
 #include "shared/types.hpp"
-#include <Math/BsVector3.h>
 #include <variant>
 #include <vector>
 
@@ -20,21 +20,19 @@ enum class Type : u32 {
 };
 
 struct Constant {
-  bs::Vector3 dir;
+  Vec3F dir;
   f32 magnitude;
 
-  bs::Vector3 operator()(const bs::Vector3) const { return dir * magnitude; }
+  Vec3F operator()(const Vec3F) const { return dir * magnitude; }
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
   static Constant FromBytes(alflib::RawMemoryReader &mr);
 };
 
 struct Spline {
-  std::vector<bs::Vector3> points;
+  std::vector<Vec3F> points;
 
-  bs::Vector3 operator()(const bs::Vector3 point) const {
-    return bs::Vector3::ZERO;
-  }
+  Vec3F operator()(const Vec3F point) const { return Vec3F::ZERO; }
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
   static Spline FromBytes(alflib::RawMemoryReader &mr);
@@ -52,17 +50,21 @@ struct BaseFn {
 
   Variant fn;
 
-  static BaseFn fnConstant(bs::Vector3 dir, f32 magnitude) {
+  static BaseFn fnConstant(Vec3F dir, f32 magnitude) {
     return BaseFn{Constant{dir, magnitude}};
   }
 
-  bs::Vector3 operator()(bs::Vector3 point) const {
+  Vec3F operator()(Vec3F point) const {
     return std::visit([point](auto &&arg) { return arg(point); }, fn);
   }
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
 
   static BaseFn FromBytes(alflib::RawMemoryReader &mr);
+
+  String toString(baseFunctions::Type fn) const;
+
+  static BaseFn fromString(const String &fn);
 };
 
 // ============================================================ //

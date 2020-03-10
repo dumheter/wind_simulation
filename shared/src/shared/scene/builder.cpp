@@ -31,12 +31,10 @@
 #include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/fps_walker.hpp"
+#include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
-
-#include <thirdparty/alflib/core/assert.hpp>
-#include <thirdparty/alflib/file/path.hpp>
 
 #include <Components/BsCBoxCollider.h>
 #include <Components/BsCCharacterController.h>
@@ -47,9 +45,10 @@
 #include <Components/BsCSphereCollider.h>
 #include <Material/BsMaterial.h>
 #include <Physics/BsPhysicsMaterial.h>
-#include <RenderAPI/BsSamplerState.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
+
+#include "shared/render/shader.hpp"
 
 // ========================================================================== //
 // ObjectBuilder Implementation
@@ -110,7 +109,6 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   }
   default: {
     Util::panic("Invalid type when building object ({})", kind);
-    break;
   }
   }
 }
@@ -143,13 +141,18 @@ ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
 
 ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
                                            const String &texPath,
-                                           const Vec2F &tiling) {
+                                           const Vec2F &tiling,
+                                           const Vec4F &color) {
   // Determine shader
   bs::HShader shader;
   switch (shaderKind) {
   case ShaderKind::kTransparent: {
     shader = bs::gBuiltinResources().getBuiltinShader(
         bs::BuiltinShader::Transparent);
+    break;
+  }
+  case ShaderKind::kWireframe: {
+    shader = ShaderManager::getWireframe();
     break;
   }
   case ShaderKind::kStandard:
@@ -161,15 +164,20 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
   }
 
   // Setup material
-  const bs::HTexture texture = AssetManager::loadTexture(texPath);
   m_material = bs::Material::create(shader);
-  m_material->setTexture("gAlbedoTex", texture);
-  m_material->setVec2("gUVTile", tiling);
+  if (shaderKind != ShaderKind::kWireframe) {
+    const bs::HTexture texture = AssetManager::loadTexture(texPath);
+    m_material->setTexture("gAlbedoTex", texture);
+    m_material->setVec2("gUVTile", tiling);
+  } else {
+    m_material->setVec4("gWireColor", color);
+  }
 
   const HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().mat.albedo = texPath;
   ctag->getData().mat.tiling = tiling;
   ctag->getData().mat.shader = stringFromShaderKind(shaderKind);
+  ctag->getData().mat.color = color;
 
   // Sampler
   // bs::SAMPLER_STATE_DESC samplerDesc;
@@ -251,6 +259,15 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
+  auto wind = m_handle->addComponent<CWindSource>();
+  wind->addFunctions(functions);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   object->setParent(m_handle);
 
@@ -298,8 +315,6 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
-  } else if (kindString == "windSource") {
-    return Kind::kWindSource;
   }
   return Kind::kInvalid;
 }
@@ -334,6 +349,9 @@ ObjectBuilder::shaderKindFromString(const String &kind) {
   if (kind == "transparent") {
     return ShaderKind::kTransparent;
   }
+  if (kind == "wireframe") {
+    return ShaderKind::kWireframe;
+  }
   return ShaderKind::kStandard;
 }
 
@@ -345,6 +363,8 @@ String ObjectBuilder::stringFromShaderKind(ShaderKind kind) {
     return "standard";
   case ShaderKind::kTransparent:
     return "transparent";
+  case ShaderKind::kWireframe:
+    return "wireframe";
   default:
     Util::panic("Invalid shader kind");
   }

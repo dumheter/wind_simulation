@@ -64,8 +64,8 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
     m_d->get(i) = 0.0f;
     m_d0->get(i) = 0.0f;
   }
-  // m_v->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
-  // m_v0->set(22, 12, 16, Vec3F(1.0f, 0.0f, 0.1f));
+
+  setAsTornado();
 
   // Post-conditions
   assert(m_d->getDim() == m_v->getDim() &&
@@ -174,13 +174,15 @@ void WindSimulation::stepVelocity(f32 delta) {
           m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
         }
       }
-    } else { // Center source
+    } else if (false) { // Center source
       for (s32 z = 14; z < 18; z++) {
         for (s32 y = 10; y < 14; y++) {
           m_v->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
           m_v0->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
         }
       }
+    } else {
+      setAsTornado();
     }
   }
 
@@ -232,6 +234,34 @@ void WindSimulation::debugDraw(FieldKind kind, const bs::Vector3 &offset,
   }
   default:
     break;
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+void WindSimulation::setAsTornado() {
+  const Vec3F posCenter(m_width / 2.0f, 0.0f, m_depth / 2.0f);
+
+  for (s32 k = 1; k <= m_depth; k++) {
+    for (s32 j = 1; j <= m_height; j++) {
+      for (s32 i = 1; i <= m_width; i++) {
+        const Vec3F pos(f32(i), 0.0f, f32(k));
+        Vec3F vec = (pos - posCenter);
+        const f32 dist = vec.normalize();
+        const f32 tmp = vec.x;
+        vec.x = vec.z;
+        vec.z = -tmp;
+        vec.y = 0.1f;
+
+        Vec3F res = vec * f32(j) / clamp(dist, 1.0f, 10.0f);
+        res.y = clamp(res.y, -5.0f, 5.0f);
+        res.x = clamp(res.x, -5.0f, 5.0f);
+        res.z = clamp(res.z, -5.0f, 5.0f);
+
+        m_v->set(i, j, k, res);
+        m_v0->set(i, j, k, res);
+      }
+    }
   }
 }
 

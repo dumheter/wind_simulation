@@ -113,6 +113,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\scenes\default.json" />
+    <None Include="res\scenes\tornado.json" />
+    <None Include="res\shaders\wireframe.bsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

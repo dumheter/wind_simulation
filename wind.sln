@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runtime", "runtime\runtime.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor", "editor\editor.vcxproj", "{DEAB0FEA-E72E-41FD-91BA-B6AC478B156A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{D0320D4B-693C-40D9-AED5-2BA7A3DB7B1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,10 @@ Global
 		{DEAB0FEA-E72E-41FD-91BA-B6AC478B156A}.Debug|x64.Build.0 = Debug|x64
 		{DEAB0FEA-E72E-41FD-91BA-B6AC478B156A}.Release|x64.ActiveCfg = Release|x64
 		{DEAB0FEA-E72E-41FD-91BA-B6AC478B156A}.Release|x64.Build.0 = Release|x64
+		{D0320D4B-693C-40D9-AED5-2BA7A3DB7B1E}.Debug|x64.ActiveCfg = Debug|x64
+		{D0320D4B-693C-40D9-AED5-2BA7A3DB7B1E}.Debug|x64.Build.0 = Debug|x64
+		{D0320D4B-693C-40D9-AED5-2BA7A3DB7B1E}.Release|x64.ActiveCfg = Release|x64
+		{D0320D4B-693C-40D9-AED5-2BA7A3DB7B1E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

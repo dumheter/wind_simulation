@@ -122,27 +122,19 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
-  // Name
-  const String name = JsonUtil::getOrCall<String>(
-      value, String("name"), []() { return ObjectBuilder::nextName(); });
-  builder.withName(name);
-
-  // Transform
-  builder.withPosition(JsonUtil::getVec3F(value, "position"));
-  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
-
   // Material
   auto itMat = value.find("material");
   if (itMat != value.end()) {
     json mat = *itMat;
     const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
+    const Vec4F color =
+        JsonUtil::getVec4F(mat, "color", Vec4F(1.0f, 1.0f, 1.0f, 1.0f));
     const String tex = mat.value("texture", "").c_str();
     const String shaderStr = mat.value("shader", "").c_str();
     const ObjectBuilder::ShaderKind shaderKind =
         ObjectBuilder::shaderKindFromString(shaderStr);
-    if (!tex.empty()) {
-      builder.withMaterial(shaderKind, tex, tiling);
-    } else {
+    builder.withMaterial(shaderKind, tex, tiling, color);
+    if (tex.empty() && mat.find("tiling") != mat.end()) {
       logWarning("Object has tiling specified but no texture");
     }
   }
@@ -165,6 +157,29 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       return bs::SceneObject::create("");
     }
   }
+
+  // Wind
+  if (value.find("wind") != value.end()) {
+    json wind = value["wind"];
+
+    std::vector<BaseFn> functions{};
+    for (const auto fn : wind) {
+      String type = JsonUtil::getString(fn, "type", "constant");
+      Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
+      f32 mag = fn.value("magnitude", 0.0f);
+      functions.push_back(BaseFn::fnConstant(dir, mag));
+    }
+    builder.withWindSource(functions);
+  }
+
+  // Name
+  String name = JsonUtil::getOrCall<String>(
+      value, String("name"), []() { return ObjectBuilder::nextName(); });
+  builder.withName(name);
+
+  // Transform
+  builder.withPosition(JsonUtil::getVec3F(value, "position"));
+  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
 
   // Sub-objects
   auto it = value.find("objects");
@@ -230,6 +245,7 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
     value["material"]["texture"] = tag->getData().mat.albedo;
     value["material"]["shader"] = tag->getData().mat.shader;
+    JsonUtil::setValue(value["material"], "color", tag->getData().mat.color);
   }
 
   // Position

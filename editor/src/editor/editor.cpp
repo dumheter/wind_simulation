@@ -221,8 +221,8 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
   m_windSim->buildForScene(bs::SceneManager::instance().getMainScene());
 
   // Debug dump
-  logInfo("Dumping scene structure");
-  Util::dumpScene(m_root);
+  //logInfo("Dumping scene structure");
+  //Util::dumpScene(m_root);
 }
 
 } // namespace wind

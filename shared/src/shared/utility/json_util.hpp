@@ -56,6 +56,14 @@ public:
   static Vec3F getVec3F(const nlohmann::json &value, const String &key,
                         const Vec3F &fallback = Vec3F::ZERO);
 
+  /// Read a vector from a JSON value or return the default value
+  static Vec4F getVec4F(const nlohmann::json &value, const String &key,
+                        const Vec4F &fallback = Vec4F::ZERO);
+
+  /// Read a string from a JSON value or return default value
+  static String getString(const nlohmann::json &value, const String &key,
+                          const String &fallback = "");
+
   /// Set Vec2
   static void setValue(nlohmann::json &value, const String &key,
                        const Vec2F &vec);
@@ -63,6 +71,9 @@ public:
   /// Set Vec3
   static void setValue(nlohmann::json &value, const String &key,
                        const Vec3F &vec);
+  /// Set Vec3
+  static void setValue(nlohmann::json &value, const String &key,
+                       const Vec4F &vec);
 
   /// Set Quat
   static void setValue(nlohmann::json &value, const String &key,

@@ -1,6 +1,7 @@
 #include "world.hpp"
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/scene/wind_src.hpp"
@@ -87,6 +88,16 @@ void World::onPreUpdate(f32) {
   }
 
   m_server.Poll();
+
+  if (f32 v = bs::gVirtualInput().getAxisValue(m_scroll); std::abs(v) > 0.1f) {
+    constexpr f32 kFromExtreme = 512.0f;
+    constexpr f32 kToExtreme = 0.1f;
+    v = clamp(v, -kFromExtreme, kFromExtreme);
+    v = map(v, -kFromExtreme, kFromExtreme, -kToExtreme, kToExtreme);
+    const f32 new_percent = m_shootForce->getPercent() + v;
+    m_shootForce->setPercent(new_percent);
+    m_player->setShootForce(100.0f * new_percent);
+  }
 }
 
 void World::onFixedUpdate(f32) {
@@ -111,29 +122,6 @@ void World::setupScene() {
   // TODO set file path in gui
   m_scene = Scene::loadFile(m_scenePath);
   m_player->SO()->setPosition(bs::Vector3::ZERO);
-
-  // auto cubeState = MoveableState::generateNew();
-  // cubeState.setPosition(bs::Vector3(0.0f, 2.0f, -8.0f));
-  // m_creator.cube(cubeState);
-  // cubeState = MoveableState::generateNew();
-  // cubeState.setPosition(bs::Vector3(0.0f, 5.0f, -8.0f));
-  // cubeState.setRotation(
-  //     bs::Quaternion(bs::Degree(0), bs::Degree(45), bs::Degree(0)));
-  // m_creator.cube(cubeState);
-
-  // auto rotorState = MoveableState::generateNew();
-  // rotorState.setPosition(bs::Vector3(5.0f, 5.0f, -8.0f));
-  // m_creator.rotor(rotorState);
-
-  // rotorState = MoveableState::generateNew();
-  // rotorState.setPosition(bs::Vector3(32.0f, 2.0f, -32.0f));
-  // rotorState.setRotation(
-  //     bs::Quaternion(bs::Degree(90.0f), bs::Degree(0.0f), bs::Degree(0.0f)));
-  // m_creator.rotor(rotorState);
-
-  // auto windSourceState = MoveableState::generateNew();
-  // windSourceState.setPosition(bs::Vector3(-5.0f, 2.5f, -8.0f));
-  // auto r = m_creator.windSource(windSourceState);
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -322,6 +310,8 @@ bs::HSceneObject World::createCamera(bs::HSceneObject player) {
 
 void World::setupInput() {
   using namespace bs;
+  m_scroll = bs::VirtualAxis("Scroll");
+
   gInput().onButtonUp.connect([this](const ButtonEvent &ev) {
     if (ev.buttonCode == BC_ESCAPE) {
       gApplication().quitRequested();
@@ -378,6 +368,8 @@ void World::setupInput() {
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseX));
   inputConfig->registerAxis("Vertical",
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseY));
+  inputConfig->registerAxis("Scroll",
+                            VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseZ));
 }
 
 bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
@@ -465,9 +457,9 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     auto l = layout->addNewElement<GUILayoutX>();
     auto text = l->addNewElement<GUILabel>(HString{u8"shootForce"});
     text->setWidth(70);
-    auto slider = l->addNewElement<GUISliderHorz>();
-    slider->setPercent(0.3f);
-    slider->onChanged.connect(
+    m_shootForce = l->addNewElement<GUISliderHorz>();
+    m_shootForce->setPercent(0.3f);
+    m_shootForce->onChanged.connect(
         [this](f32 percent) { m_player->setShootForce(100.0f * percent); });
   }
 
