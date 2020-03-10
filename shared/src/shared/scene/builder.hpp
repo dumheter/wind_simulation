@@ -30,6 +30,7 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
+#include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
 
 #include <ThirdParty/json.hpp>
@@ -74,7 +75,6 @@ public:
   ObjectBuilder &withMaterial(ShaderKind shaderKind, const String &texPath,
                               const Vec2F &tiling = Vec2F::ONE);
 
-
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);
 
@@ -87,7 +87,7 @@ public:
   /// Adds wind
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
-  ObjectBuilder &withWindSource(const std::vector<BaseFn>& functions);
+  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions);
 
   /// Add rotor
   ObjectBuilder &withRotor(Vec3F rotation);
@@ -97,6 +97,10 @@ public:
 
   /// @post Must register netcomp in world
   ObjectBuilder &withNetComponent(const MoveableState &moveableState);
+
+  /// @post Must register netcomp in world
+  /// Construct from only an id
+  ObjectBuilder &withNetComponent(UniqueId id);
 
   /// Build the scene object
   bs::HSceneObject build();

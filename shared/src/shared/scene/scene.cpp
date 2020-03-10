@@ -98,7 +98,9 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value) {
   if (objsIt != value.end()) {
     auto objsArr = *objsIt;
     if (!objsArr.is_array()) {
-      logError("[loadScene]\"objects\" is required to be an array of scene objects: {}", value.dump());
+      logError("[loadScene]\"objects\" is required to be an array of scene "
+               "objects: {}",
+               value.dump());
       return bs::SceneObject::create("");
     }
 
@@ -122,6 +124,11 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
+  // Network id
+  if (value.find("id") != value.end()) {
+    builder.withNetComponent(UniqueId(value.value("id", 0)));
+  }
+
   // Material
   auto itMat = value.find("material");
   if (itMat != value.end()) {
@@ -134,7 +141,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     if (!tex.empty()) {
       builder.withMaterial(shaderKind, tex, tiling);
     } else {
-      logWarning("Object has tiling specified but no texture: {}", value.dump());
+      logWarning("Object has tiling specified but no texture: {}",
+                 value.dump());
     }
   }
 
@@ -191,7 +199,9 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   if (it != value.end()) {
     auto arr = *it;
     if (!arr.is_array()) {
-      logError("[loadObjects] \"objects\" is required to be an array of scene objects: {}", value.dump());
+      logError("[loadObjects] \"objects\" is required to be an array of scene "
+               "objects: {}",
+               value.dump());
       return bs::SceneObject::create("");
     }
 
@@ -242,9 +252,15 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
   json value;
   value["name"] = object->getName();
 
+  // Object Type
   HCTag tag = object->getComponent<CTag>();
   if (tag->getType() != ObjectType::kEmpty) {
     value["type"] = ObjectBuilder::stringFromKind(tag->getType());
+  }
+
+  // Network Id
+  if (auto maybeId = tag->getData().id; maybeId) {
+    value["id"] = maybeId->raw();
   }
 
   // Skybox
@@ -255,8 +271,9 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
   // Material
   if (object->getComponent<bs::CRenderable>()) {
     if (!tag->getData().mat.albedo.empty()) {
-    JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
-    value["material"]["texture"] = tag->getData().mat.albedo;
+      JsonUtil::setValue(value["material"], "tiling",
+                         tag->getData().mat.tiling);
+      value["material"]["texture"] = tag->getData().mat.albedo;
     }
     value["material"]["shader"] = tag->getData().mat.shader;
   }

@@ -72,6 +72,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCube: {
+    withName("cube");
     bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
     m_renderable = m_handle->addComponent<bs::CRenderable>();
     m_renderable->setMesh(mesh);
@@ -92,12 +93,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     charController->setHeight(1.0f);
     charController->setRadius(0.4f);
     auto prep = ObjectBuilder{ObjectType::kCylinder}
-    .withName("playerRep")
-         .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
-         .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
-         .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                       "res/textures/grid_bg.png")
-         .build();
+                    .withName("playerRep")
+                    .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
+                    .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
+                    .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                                  "res/textures/grid_bg.png")
+                    .build();
     prep->setParent(m_handle);
     auto fpsWalker = m_handle->addComponent<FPSWalker>();
     break;
@@ -306,7 +307,17 @@ ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
 
 ObjectBuilder &
 ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
-  m_handle->addComponent<CNetComponent>(moveableState);
+  auto netComp = m_handle->addComponent<CNetComponent>(moveableState);
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().id = std::make_optional(moveableState.id);
+  return *this;
+}
+
+ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
+  MoveableState state{};
+  m_handle->addComponent<CNetComponent>(state);
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().id = std::make_optional(id);
   return *this;
 }
 
