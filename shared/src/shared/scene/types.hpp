@@ -45,6 +45,7 @@ enum class ObjectType : u32 {
   kModel,       ///< Model with a specific mesh
   kPlayer,      ///< Player with corresponding components
   kRotor,       ///< Helicopter rotor
+  kCylinder,
 };
 
 // -------------------------------------------------------------------------- //
@@ -54,7 +55,8 @@ enum class ComponentType : u32 {
   kRigidbody,  ///< Rigidbody { "restitution", "mass" }
   kWindSource, ///< Wind source { ["basic function"] }
   kRenderable,
-  kRotor ///< Rotor { "x-rot", "y-rot", "z-rot" }
+  kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
+  kCollider,
 };
 
 } // namespace wind

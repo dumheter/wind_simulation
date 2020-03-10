@@ -41,7 +41,7 @@
 
 namespace wind {
 
-class MoveableState;
+struct MoveableState;
 
 class ObjectBuilder {
 public:
@@ -64,7 +64,13 @@ public:
   /// Set the position
   ObjectBuilder &withPosition(const Vec3F &position);
 
-  /// Set the scale
+  /// Sets the rotation
+  ObjectBuilder &withRotation(const Vec3F &rotation);
+
+  /// Sets the rotation
+  ObjectBuilder &withRotation(const Quat &rotation);
+
+  /// Sets the scale
   ObjectBuilder &withScale(const Vec3F &scale);
 
   /// Set the mesh
@@ -82,7 +88,7 @@ public:
   ObjectBuilder &withSkybox(const String &path);
 
   /// Sets physics options
-  ObjectBuilder &withPhysics(f32 restitution = 1.0f, f32 mass = 0.0f);
+  ObjectBuilder &withCollider(f32 restitution = 1.0f, f32 mass = 0.0f);
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();
@@ -94,6 +100,9 @@ public:
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree);
+
+  /// Add rotor
+  ObjectBuilder &withRotor(Vec3F rotation);
 
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);

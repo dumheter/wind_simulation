@@ -38,6 +38,8 @@ public:
    */
   void StartServer(const u16 port);
 
+  void StopServer();
+
   /**
    * Attempt to close the connection and remove it from our list of connections.
    */

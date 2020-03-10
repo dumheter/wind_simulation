@@ -32,6 +32,7 @@
 #include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
+#include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
 #include "shared/scene/mesh.hpp"
 #include "shared/scene/wind_src.hpp"
@@ -88,13 +89,14 @@ ObjectBuilder::ObjectBuilder(Kind kind)
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);
     charController->setRadius(0.4f);
-    auto prep = bs::SceneObject::create("playerRep");
+    auto prep = ObjectBuilder{ObjectType::kCylinder}
+                    .withName("playerRep")
+                    .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
+                    .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
+                    .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                                  "res/textures/grid_bg.png")
+                    .build();
     prep->setParent(m_handle);
-    prep->setScale(bs::Vector3(0.3f, 2.0f, 0.3f));
-    prep->setPosition(bs::Vector3(0.0f, -1.0f, 0.0f));
-    m_renderable = prep->addComponent<bs::CRenderable>();
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
-    m_renderable->setMesh(mesh);
     auto fpsWalker = m_handle->addComponent<FPSWalker>();
     break;
   }
@@ -105,6 +107,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kEmpty: {
+    break;
+  }
+  case Kind::kCylinder: {
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
     break;
   }
   default: {
@@ -126,6 +134,21 @@ ObjectBuilder &ObjectBuilder::withName(const String &name) {
 ObjectBuilder &ObjectBuilder::withPosition(const Vec3F &position) {
   m_handle->setPosition(position);
 
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withRotation(const Vec3F &rotation) {
+  m_handle->setRotation(bs::Quaternion(
+      bs::Degree(rotation.x), bs::Degree(rotation.y), bs::Degree(rotation.z)));
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withRotation(const Quat &rotation) {
+  m_handle->setRotation(rotation);
   return *this;
 }
 
@@ -223,7 +246,12 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
+ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().physics.collider = true;
+  ctag->getData().physics.restitution = restitution;
+  ctag->getData().physics.mass = mass;
+
   const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
@@ -265,7 +293,10 @@ ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withRigidbody() {
-  const bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().physics.rigidbody = true;
+  bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
+  rigidbody->setSleepThreshold(0.1f);
 
   return *this;
 }
@@ -297,11 +328,20 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withRotor(Vec3F rotation) {
+  auto rotor = m_handle->addComponent<CRotor>(rotation);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   object->setParent(m_handle);
 
   return *this;
 }
+
+// -------------------------------------------------------------------------- //
 
 ObjectBuilder &
 ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
@@ -341,9 +381,13 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
   } else if (kindString == "ball") {
     return Kind::kBall;
   } else if (kindString == "model") {
+    return Kind::kModel;
+  } else if (kindString == "player") {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
+  } else if (kindString == "cylinder") {
+    return Kind::kCylinder;
   }
   return Kind::kInvalid;
 }
@@ -364,6 +408,10 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "model";
   case Kind::kPlayer:
     return "player";
+  case Kind::kRotor:
+    return "rotor";
+  case Kind::kCylinder:
+    return "cylinder";
   case Kind::kInvalid:
   default: {
     return "invalid";

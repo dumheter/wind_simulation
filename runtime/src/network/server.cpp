@@ -17,18 +17,12 @@ Server::Server(World *world)
       m_socketInterface(SteamNetworkingSockets()), m_world(world),
       m_connectionState(ConnectionState::kDisconnected) {
   m_pollGroup = m_socketInterface->CreatePollGroup();
-  if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {
-    AlfAssert(false, "failed to create poll group");
-  }
 }
 
 Server::~Server() {
-  for (auto [connection, uid] : m_connections) {
-    m_socketInterface->CloseConnection(connection, 0, nullptr, false);
-  }
+  StopServer();
   m_socketInterface->DestroyPollGroup(m_pollGroup);
   m_pollGroup = k_HSteamNetPollGroup_Invalid;
-  m_socketInterface->CloseListenSocket(m_socket);
 }
 
 void Server::Poll() {
@@ -46,6 +40,11 @@ void Server::Poll() {
 }
 
 void Server::StartServer(const u16 port) {
+
+  if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {
+    AlfAssert(false, "failed to create poll group");
+  }
+
   SteamNetworkingIPAddr addr{};
   addr.Clear();
   addr.m_port = port;
@@ -55,7 +54,18 @@ void Server::StartServer(const u16 port) {
   }
   logVerbose("[server] listening on port {}.", port);
   m_connectionState = ConnectionState::kConnected;
-  // m_world->setupScene();
+  m_world->setupScene();
+}
+
+void Server::StopServer() {
+  logInfo("[server] stopping server");
+
+  for (auto [connection, uid] : m_connections) {
+    m_socketInterface->CloseConnection(connection, 0, nullptr, false);
+  }
+
+  m_socketInterface->CloseListenSocket(m_socket);
+  m_connectionState = ConnectionState::kDisconnected;
 }
 
 void Server::PacketBroadcast(const Packet &packet,
@@ -132,6 +142,9 @@ void Server::broadcastServerTick(
 
       mw->Write(count);
       for (auto [uid, netComp] : netComps) {
+        if (uid == 0) {
+          int a = 0;
+        }
         if (netComp->hasChanged()) {
           mw->Write(netComp->getState());
           netComp->resetChanged();
@@ -202,7 +215,7 @@ void Server::handlePacket() {
       header == PacketHeaderTypes::kPlayerTick) {
     handlePacketPlayerTick();
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    //logVeryVerbose("[server:p requestcreate] ");
+    // logVeryVerbose("[server:p requestcreate] ");
     handlePacketRequestCreate();
   } else {
     logWarning("[server] got unknown packet {}",
@@ -226,7 +239,7 @@ void Server::handlePacketPlayerTick() {
 
 void Server::handlePacketRequestCreate() {
   RequestCreateInfo info = PacketParser::RequestCreate(m_packet);
-  info.state.setUniqueId(UniqueIdGenerator::next());
+  info.state.id = UniqueIdGenerator::next();
   PacketBuilder::Create(m_packet, info);
   PacketBroadcastUnreliableFast(m_packet);
 }
@@ -289,12 +302,21 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
-      nlohmann::json json =
-          Scene::saveScene(m_world->getScene());
+      nlohmann::json json = Scene::saveScene(m_world->getStaticScene());
       mw->Write(alflib::String(json.dump().c_str()));
-      // mw->Write(alflib::String(m_world->getScenePath().c_str()));
+      json = Scene::saveScene(m_world->getDynamicScene());
+      mw->Write(alflib::String(json.dump().c_str()));
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
+
+      if (m_connections.size() > 1) {
+        m_packet.ClearPayload();
+        m_packet.SetHeader(PacketHeaderTypes::kPlayerJoin);
+        auto mw = m_packet.GetMemoryWriter();
+        mw->Write(m_world->getPlayerNetComp()->getUniqueId());
+        mw.Finalize();
+        PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
+      }
     }
 
     {

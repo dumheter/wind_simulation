@@ -11,6 +11,7 @@
 #include "shared/scene/component_handles.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/types.hpp"
+#include "shared/math/math.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {
@@ -19,24 +20,20 @@ public:
 
   CRotor(); // serialization
 
-  CRotor(const bs::HSceneObject &parent, const HCWindSource &windSource);
+  CRotor(const bs::HSceneObject &parent, Vec3F rotation);
 
   void fixedUpdate() override;
 
   /**
    * Every fixed update, this rotation will be applied.
    */
-  void setRotation(bs::Vector3 degree);
-
-  HCWindSource &getWindSource() { return m_windSource; }
-  const HCWindSource &getWindSource() const { return m_windSource; }
+  void setRotation(Vec3F rotation);
 
   static bs::RTTITypeBase *getRTTIStatic();
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
   bs::Quaternion m_rotation;
-  HCWindSource m_windSource;
 };
 
 using HCRotor = bs::GameObjectHandle<CRotor>;

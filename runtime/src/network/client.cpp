@@ -101,7 +101,7 @@ void Client::handlePacket() {
       MoveableState state;
       for (u32 i = 0; i < count; ++i) {
         state = mr.Read<MoveableState>();
-        if (state.getUniqueId() != m_uid) {
+        if (state.id != m_uid) {
           m_world->applyMoveableState(state);
         } else {
           m_world->applyMyMoveableState(state);
@@ -111,7 +111,7 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    // logVeryVerbose("[client:p Create] got a create packet");
+    logVeryVerbose("[client:p Create] got a create packet");
     CreateInfo info = PacketParser::Create(m_packet);
     m_world->buildObject(info);
   } else if (header == PacketHeaderTypes::kRequestCreate) {
@@ -124,7 +124,10 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
-      Scene::load(mr.Read<alflib::String>().GetUTF8());
+      auto so = Scene::load(mr.Read<alflib::String>().GetUTF8());
+      m_world->setStaticScene(so);
+      so = Scene::load(mr.Read<alflib::String>().GetUTF8());
+      m_world->setDynamicScene(so);
     }
   } else {
     logError("[client:p] unknown packet");

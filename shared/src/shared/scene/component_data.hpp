@@ -46,19 +46,23 @@ public:
   /// Underlying enum type of the enum "ComponentType"
   using TagType = std::underlying_type_t<ComponentType>;
 
-  /// Data associated with wind sources
+  struct RigidbodyData {};
+
   struct WindSourceData {
     std::vector<BaseFn> functions = {};
   };
 
-  /// Data associated with rigidbodies
-  struct RigidbodyData {
-    f32 restitution = 0.0f;
-    f32 mass = 0.0f;
-  };
-
   struct RenderableData {
     String pathTexture;
+  };
+
+  struct RotorData {
+    Quat rot;
+  };
+
+  struct ColliderData {
+    f32 restitution = 0.0f;
+    f32 mass = 0.0f;
   };
 
 public:
@@ -66,13 +70,17 @@ public:
     return std::holds_alternative<T>(m_data);
   }
 
-  /// Returns the WindSource data
-  const WindSourceData &windSourceData() const;
-
   /// Returns the Rigidbody data
   const RigidbodyData &rigidbodyData() const;
 
+  /// Returns the WindSource data
+  const WindSourceData &windSourceData() const;
+
   const RenderableData &renderableData() const;
+
+  const RotorData &rotorData() const;
+
+  const ColliderData &colliderData() const;
 
   /// Serializes to bytes
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
@@ -80,17 +88,23 @@ public:
   /// Deserializes from bytes
   static ComponentData FromBytes(alflib::RawMemoryReader &mr);
 
+  /// Creates a component data representing rigidbody data
+  static ComponentData asRigidbody();
+
   /// Creates a component data representing wind source data
   static ComponentData asWindSource(const std::vector<BaseFn> &functions);
 
-  /// Creates a component data representing rigidbody data
-  static ComponentData asRigidbody(f32 restitution, f32 mass);
-
   static ComponentData asRenderable(const String &pathTexture);
+
+  static ComponentData asRotor(const Quat &rot);
+
+  static ComponentData asCollider(f32 restitution, f32 mass);
 
 private:
   /// Variant
-  std::variant<WindSourceData, RigidbodyData, RenderableData> m_data;
+  std::variant<RigidbodyData, WindSourceData, RenderableData, RotorData,
+               ColliderData>
+      m_data;
 };
 
 } // namespace wind
