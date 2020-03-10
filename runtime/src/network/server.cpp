@@ -295,8 +295,7 @@ void Server::OnSteamNetConnectionStatusChanged(
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
       nlohmann::json json = Scene::saveScene(m_world->getRootScene());
-      auto s = alflib::String(json.dump(2).c_str());
-      mw->Write(s);
+      mw->Write(alflib::String(json.dump().c_str()));
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
 

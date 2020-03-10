@@ -286,7 +286,7 @@ void World::buildObject(const CreateInfo &info) {
       Vec3F v{rotor.rot.x, rotor.rot.y, rotor.rot.z};
       obj.withRotor(v);
     } else if (component.isType<ComponentData::ColliderData>()) {
-      MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
+      MICROPROFILE_SCOPEI("World", "ColliderData", MP_TURQUOISE4);
       const auto &collider = component.colliderData();
       obj.withCollider(collider.restitution, collider.mass);
     }
@@ -365,6 +365,9 @@ void World::setupInput() {
         m_player->setWeapon(ObjectType::kCube);
       }
     } else if (ev.buttonCode == BC_M) {
+      Util::dumpScene(m_rootScene);
+    } else if (ev.buttonCode == BC_N) {
+      logInfo("{}", Scene::save(m_rootScene));
       Util::dumpScene(m_rootScene);
     }
   });

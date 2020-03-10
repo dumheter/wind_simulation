@@ -137,8 +137,8 @@ ObjectBuilder &ObjectBuilder::withPosition(const Vec3F &position) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withRotation(const Vec3F &rotation) {
-  m_handle->setRotation(
-      bs::Quaternion(bs::Degree(rotation.x), bs::Degree(rotation.y), bs::Degree(rotation.z)));
+  m_handle->setRotation(bs::Quaternion(
+      bs::Degree(rotation.x), bs::Degree(rotation.y), bs::Degree(rotation.z)));
   return *this;
 }
 
@@ -221,6 +221,11 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().physics.collider = true;
+  ctag->getData().physics.restitution = restitution;
+  ctag->getData().physics.mass = mass;
+
   const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
@@ -262,8 +267,9 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withRigidbody() {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().physics.rigidbody = true;
   bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
-
   return *this;
 }
 

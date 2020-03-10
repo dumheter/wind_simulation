@@ -84,6 +84,12 @@ private:
       String albedo = "";
       Vec2F tiling = Vec2F::ONE;
     } mat;
+    struct Physics {
+      f32 restitution = 0.5f;
+      f32 mass = 10.0f;
+      bool collider = false;
+      bool rigidbody = false;
+    } physics;
   } m_data;
 };
 

@@ -9,6 +9,7 @@
 	    "name": "geometry",
 	    "objects": [
 		{
+                    "name": "floor",
 		    "type": "plane",
                     "material": {
 			"shader": "standard",
@@ -18,9 +19,13 @@
 		    "scale": [ 40.0, 1.0, 40.0 ],
 		    "position": { "xz": 4.0, "y": -0.4 },
 		    "tiling": { "uv": 160.0 },
-		    "physics": { "restitution": 0.5 }
+		    "physics": {
+                        "restitution": 0.5,
+                        "rigidbody": false
+                    }
 		},
 		{
+                    "name": "tall cube",
 		    "type": "cube",
 		    "material": {
 			"shader": "standard",
@@ -29,198 +34,7 @@
 		    "position": { "x": 6.0, "y": 3.0, "z": 3.0 },
 		    "scale": { "y": 7.0, "z": 1.5 },
 		    "physics": { "restitution": 0.5, "mass": 25.0 }
-		},
-
-                {
-		    "type": "cube",
-		    "material": {
-			"shader": "standard",
-			"texture": "res/textures/grid_2.png"
-		    },
-		    "position": { "x": 6.0, "y": 4.0, "z": -6.0 },
-		    "scale": { "y": 3.0, "z": 1.5 },
-		    "physics": { "restitution": 0.5, "mass": 25.0 },
-                    "rotor": { "xyz": 1 }
-		},
-
-                {
-		    "type": "cube",
-		    "material": {
-			"shader": "standard",
-			"texture": "res/textures/grid_2.png"
-		    },
-		    "position": { "x": 6.0, "y": 3.0, "z": -10.0 },
-		    "scale": { "y": 7.0, "z": 1.5 },
-		    "physics": { "restitution": 0.5, "mass": 25.0 },
-                    "rotor": { "xz": 0, "y": 1.0}
-		},
-
-
-		{
-		    "name": "wind cube",
-		    "type": "cube",
-		    "scale": { "xyz": 4 },
-		    "position": { "xz": 8.0, "y": 1.8 },
-                    "material": {
-			"shader": "transparent",
-			"texture": "res/textures/wireframe.png"
-		    },
-		    "wind": [{
-			"type": "constant",
-                        "magnitude": 2,
-			"direction": [0.0, 1.0, 0.0]
-                    },
-                             {
-			         "type": "constant",
-                                 "magnitude": 8,
-			         "direction": [0.0, 0.0, 1.0]
-                             }]
-                },
-                {
-		    "name": "wind cube2",
-		    "type": "cube",
-		    "scale": { "xyz": 4 },
-		    "position": { "x": 8.0, "y": 1.8 , "z": 12.0},
-                    "material": {
-			"shader": "transparent",
-			"texture": "res/textures/wireframe.png"
-		    },
-		    "wind": [{
-			"type": "constant",
-                        "magnitude": 2,
-			"direction": [0.0, 1.0, 0.0]
-                    },
-                             {
-			         "type": "constant",
-                                 "magnitude": 5,
-			         "direction": [0.0, 0.0, -1.0]
-                             }
-                            ]
-                },
-
-
-                {
-		    "name": "wind cube long",
-		    "type": "cube",
-		    "scale": [ 6, 4, 24],
-		    "position": { "x": 32.0, "y": 1.8 , "z": 0.0},
-                    "material": {
-			"shader": "transparent",
-			"texture": "res/textures/wireframe.png"
-		    },
-		    "wind": [{
-			"type": "constant",
-                        "magnitude": 7,
-			"direction": [0.0, 0.0, 1.0]
-                    }
-                            ]
-                },
-
-		{
-                    "name": "helicopter",
-		    "type": "rotor",
-		    "scale": { "xyz": 1.0 },
-		    "position": { "xz": -15.0, "y": 5.0 },
-                    "material": {
-			"shader": "standard",
-			"texture": "res/textures/grid_2.png"
-		    },
-                    "physics": {"restitution": 0.5, "mass": 20.0 },
-		    "wind": [{
-			"type": "constant",
-			"direction": { "xyz": 0.0 }
-                    }],
-                    "objects": [
-                        {
-		            "name": "rotor wind volume",
-		            "type": "cube",
-		            "scale": { "xz": 3, "y": 5 },
-		            "position": { "xz": 0, "y": -2.5},
-                            "material": {
-			        "shader": "transparent",
-			        "texture": "res/textures/wireframe.png"
-		            },
-		            "wind": [{
-			        "type": "constant",
-                                "magnitude": 70,
-			        "direction": [0.0, -1.0, 0.0]
-                            }]
-                        }
-                    ],
-                    "rotor": { "xz": 0, "y": 1.0}
-                },
-
-
-                {
-                    "name": "vacum fan",
-		    "type": "rotor",
-		    "scale": { "xyz": 1.0 },
-		    "position": { "x": -15.0, "z": -5, "y": 1.0 },
-                    "rotation": { "x": 90},
-                    "material": {
-			"shader": "standard",
-			"texture": "res/textures/grid_2.png"
-		    },
-                    "physics": {"restitution": 0.5, "mass": 20.0 },
-		    "wind": [{
-			"type": "constant",
-			"direction": { "xyz": 0.0 }
-                    }],
-                    "objects": [
-                        {
-		            "name": "rotor wind volume",
-		            "type": "cube",
-		            "scale": { "xz": 3, "y": 5 },
-		            "position": { "xz": 0, "y": -2.5},
-                            "material": {
-			        "shader": "transparent",
-			        "texture": "res/textures/wireframe.png"
-		            },
-		            "wind": [{
-			        "type": "constant",
-                                "magnitude": 50,
-			        "direction": [0.0, 1.0, 0.0]
-                            }]
-                        }
-                    ],
-                    "rotor": { "xz": 0, "y": 1.0}
-                },
-
-
-                {
-                    "name": "fan",
-		    "type": "rotor",
-		    "scale": { "xyz": 1.0 },
-		    "position": { "x": -15.0, "z": 10, "y": 1.0 },
-                    "rotation": { "x": 90},
-                    "material": {
-			"shader": "standard",
-			"texture": "res/textures/grid_2.png"
-		    },
-                    "physics": {"restitution": 0.5, "mass": 20.0 },
-		    "wind": [{
-			"type": "constant",
-			"direction": { "xyz": 0.0 }
-                    }],
-                    "objects": [
-                        {
-		            "name": "rotor wind volume",
-		            "type": "cube",
-		            "scale": { "xz": 3, "y": 5 },
-		            "position": { "xz": 0, "y": -2.5},
-                            "material": {
-			        "shader": "transparent",
-			        "texture": "res/textures/wireframe.png"
-		            },
-		            "wind": [{
-			        "type": "constant",
-                                "magnitude": 50,
-			        "direction": [0.0, -1.0, 0.0]
-                            }]
-                        }
-                    ],
-                    "rotor": { "x": 0, "z": 0.0, "y": 1.0}
-                }
+		}
             ]
         }
     ]

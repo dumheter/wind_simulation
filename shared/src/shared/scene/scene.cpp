@@ -143,6 +143,10 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     f32 restitution = value["physics"].value("restitution", 1.0f);
     f32 mass = value["physics"].value("mass", 0.0f);
     builder.withCollider(restitution, mass);
+
+    if (value["physics"].value("rigidbody", true)) {
+      builder.withRigidbody();
+    }
   }
 
   // Skybox
@@ -251,6 +255,19 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
     value["material"]["texture"] = tag->getData().mat.albedo;
     value["material"]["shader"] = tag->getData().mat.shader;
+  }
+
+  // Physics
+  {
+    // json mat = value["material"];
+
+    if (!tag->getData().physics.rigidbody) {
+      value["physics"]["rigidbody"] = false;
+    }
+    if (tag->getData().physics.collider) {
+      value["physics"]["restitution"] = tag->getData().physics.restitution;
+      value["physics"]["mass"] = tag->getData().physics.mass;
+    }
   }
 
   // Position
