@@ -143,6 +143,13 @@ ObjectBuilder &ObjectBuilder::withRotation(const Vec3F &rotation) {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withRotation(const Quat &rotation) {
+  m_handle->setRotation(rotation);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
   m_handle->setScale(scale);
 

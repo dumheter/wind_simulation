@@ -65,6 +65,7 @@ public:
 
   /// Sets the rotation
   ObjectBuilder &withRotation(const Vec3F &rotation);
+  ObjectBuilder &withRotation(const Quat &rotation);
 
   /// Sets the scale
   ObjectBuilder &withScale(const Vec3F &scale);

@@ -254,8 +254,9 @@ void World::onDisconnect() {
 void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
   auto obj = ObjectBuilder(info.type)
-                 .withScale(info.scale)
-                 .withPosition(info.state.getPosition());
+             .withScale(info.scale)
+             .withPosition(info.state.getPosition())
+             .withRotation(info.state.getRotation());
   for (const auto &component : info.components) {
     if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
