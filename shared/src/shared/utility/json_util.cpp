@@ -44,7 +44,8 @@ wind::Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
         y = obj[1];
       }
       return Vec2F(x, y);
-    } else if (obj.is_object()) {
+    }
+    if (obj.is_object()) {
       f32 x = obj.value("x", fallback.x);
       f32 y = obj.value("y", fallback.y);
       x = obj.value("u", x);
@@ -58,22 +59,21 @@ wind::Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
         x = y = obj["uv"];
       }
       return Vec2F(x, y);
-    } else {
-      return fallback;
     }
+    return fallback;
   }
   return fallback;
 }
 
 // -------------------------------------------------------------------------- //
 
-wind::Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
-                               const Vec3F &fallback) {
+Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
+                         const Vec3F &fallback) {
   auto it = value.find(key.c_str());
   if (it != value.end()) {
     auto obj = *it;
     if (obj.is_array()) {
-      size_t count = obj.size();
+      const size_t count = obj.size();
       f32 x = fallback.x;
       f32 y = fallback.y;
       f32 z = fallback.z;
@@ -87,7 +87,8 @@ wind::Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
         z = obj[2];
       }
       return Vec3F(x, y, z);
-    } else if (obj.is_object()) {
+    }
+    if (obj.is_object()) {
       f32 x = obj.value("x", fallback.x);
       f32 y = obj.value("y", fallback.y);
       f32 z = obj.value("z", fallback.z);
@@ -110,9 +111,47 @@ wind::Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
       }
 
       return Vec3F(x, y, z);
-    } else {
-      return fallback;
     }
+    return fallback;
+  }
+  return fallback;
+}
+
+// -------------------------------------------------------------------------- //
+
+Vec4F JsonUtil::getVec4F(const nlohmann::json &value, const String &key,
+                         const Vec4F &fallback) {
+  auto it = value.find(key.c_str());
+  if (it != value.end()) {
+    auto obj = *it;
+    if (obj.is_array()) {
+      const size_t count = obj.size();
+      f32 x = fallback.x;
+      f32 y = fallback.y;
+      f32 z = fallback.z;
+      f32 w = fallback.w;
+      if (count >= 1) {
+        x = obj[0];
+      }
+      if (count >= 2) {
+        y = obj[1];
+      }
+      if (count >= 3) {
+        z = obj[2];
+      }
+      if (count >= 4) {
+        w = obj[3];
+      }
+      return Vec4F(x, y, z, w);
+    }
+    if (obj.is_object()) {
+      const f32 x = obj.value("x", fallback.x);
+      const f32 y = obj.value("y", fallback.y);
+      const f32 z = obj.value("z", fallback.z);
+      const f32 w = obj.value("w", fallback.w);
+      return Vec4F(x, y, z, w);
+    }
+    return fallback;
   }
   return fallback;
 }
@@ -132,6 +171,14 @@ void JsonUtil::setValue(nlohmann::json &value, const String &key,
   value[key.c_str()]["x"] = vec.x;
   value[key.c_str()]["y"] = vec.y;
   value[key.c_str()]["z"] = vec.z;
+}
+
+void JsonUtil::setValue(nlohmann::json &value, const String &key,
+                        const Vec4F &vec) {
+  value[key.c_str()]["x"] = vec.x;
+  value[key.c_str()]["y"] = vec.y;
+  value[key.c_str()]["z"] = vec.z;
+  value[key.c_str()]["w"] = vec.w;
 }
 
 // -------------------------------------------------------------------------- //

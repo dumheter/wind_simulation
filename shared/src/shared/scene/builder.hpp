@@ -45,8 +45,9 @@ class ObjectBuilder {
 public:
   /// Enumeration of shader kinds. An object material uses one of these.
   enum class ShaderKind {
-    kStandard,   ///< Standard PBR shader.
-    kTransparent ///< Transparent PBR shader.
+    kStandard,    ///< Standard PBR shader.
+    kTransparent, ///< Transparent PBR shader.
+    kWireframe    ///< Wireframe shader.
   };
 
   /// Object kind
@@ -55,19 +56,22 @@ public:
   /// Construct object builder
   ObjectBuilder(Kind kind = Kind::kEmpty);
 
-  /// Sets the name
+  /// Set the name
   ObjectBuilder &withName(const String &name);
 
-  /// Sets the position
+  /// Set the position
   ObjectBuilder &withPosition(const Vec3F &position);
 
-  /// Sets the scale
+  /// Set the scale
   ObjectBuilder &withScale(const Vec3F &scale);
 
-  /// Sets the material
+  /// Set the material of the object to one that uses the specified shader and
+  /// has the specified texture. Tiling for the texture and a tint color can
+  /// also be specified. Whether color is applicable depends on the shader.
   ObjectBuilder &withMaterial(ShaderKind shaderKind, const String &texPath,
-                              const Vec2F &tiling = Vec2F::ONE);
-
+                              const Vec2F &tiling = Vec2F::ONE,
+                              const Vec4F &color = Vec4F(1.0f, 1.0f, 1.0f,
+                                                         1.0f));
 
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);

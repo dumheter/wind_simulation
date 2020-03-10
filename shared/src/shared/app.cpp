@@ -49,7 +49,7 @@ protected:
   void fixedUpdate() override {
     MICROPROFILE_SCOPEI("App", "onFixedUpdate", MP_GREEN);
     Application::fixedUpdate();
-    f32 delta = bs::gTime().getFixedFrameDelta();
+    const f32 delta = bs::gTime().getFixedFrameDelta();
     App::g_app->onFixedUpdate(delta);
 
     if (App::g_app->m_tpsSkip-- == 0) {
@@ -73,7 +73,7 @@ protected:
     MicroProfileFlip(nullptr);
     MICROPROFILE_SCOPEI("App", "onPreUpdate", MP_GREEN);
     Application::preUpdate();
-    f32 delta = bs::gTime().getFrameDelta();
+    const f32 delta = bs::gTime().getFrameDelta();
     App::g_app->onPreUpdate(delta);
   }
 
@@ -112,7 +112,7 @@ App::App(const Info &info)
   appDesc.physics = "bsfPhysX";
   appDesc.audio = "bsfOpenAudio";
   appDesc.importers = {"bsfFBXImporter", "bsfFontImporter",
-                       "bsfFreeImgImporter"};
+                       "bsfFreeImgImporter", "bsfSL"};
   appDesc.primaryWindowDesc.title = m_title;
   appDesc.primaryWindowDesc.hidden = true;
   appDesc.primaryWindowDesc.allowResize = true;
@@ -206,6 +206,10 @@ void App::show() {
   SPtr<RenderWindow> window = gApplication().getPrimaryWindow();
   window->show();
 }
+
+// -------------------------------------------------------------------------- //
+
+void App::quit() { bs::gApplication().quitRequested(); }
 
 // -------------------------------------------------------------------------- //
 

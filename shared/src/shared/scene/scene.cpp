@@ -136,13 +136,14 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   if (itMat != value.end()) {
     json mat = *itMat;
     const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
+    const Vec4F color =
+        JsonUtil::getVec4F(mat, "color", Vec4F(1.0f, 1.0f, 1.0f, 1.0f));
     const String tex = mat.value("texture", "").c_str();
     const String shaderStr = mat.value("shader", "").c_str();
     const ObjectBuilder::ShaderKind shaderKind =
         ObjectBuilder::shaderKindFromString(shaderStr);
-    if (!tex.empty()) {
-      builder.withMaterial(shaderKind, tex, tiling);
-    } else {
+    builder.withMaterial(shaderKind, tex, tiling, color);
+    if (tex.empty() && mat.find("tiling") != mat.end()) {
       logWarning("Object has tiling specified but no texture");
     }
   }
@@ -230,6 +231,7 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
     value["material"]["texture"] = tag->getData().mat.albedo;
     value["material"]["shader"] = tag->getData().mat.shader;
+    JsonUtil::setValue(value["material"], "color", tag->getData().mat.color);
   }
 
   // Position

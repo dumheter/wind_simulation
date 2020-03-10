@@ -83,6 +83,7 @@ private:
       String shader = "standard";
       String albedo = "";
       Vec2F tiling = Vec2F::ONE;
+      Vec4F color = Vec4F(1.0f, 1.0f, 1.0f, 1.0f);
     } mat;
   } m_data;
 };

@@ -75,6 +75,9 @@ public:
   /* Show application window */
   void show();
 
+  /// Quit the application
+  void quit();
+
   /* Enter fullscreen */
   void enterFullscreen(VideoMode videoMode = VideoMode{0, 0},
                        u32 monitorIdx = 0);
