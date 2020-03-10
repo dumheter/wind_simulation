@@ -15,21 +15,9 @@ namespace wind {
 Server::Server(World *world)
     : m_socket(k_HSteamListenSocket_Invalid),
       m_socketInterface(SteamNetworkingSockets()), m_world(world),
-      m_connectionState(ConnectionState::kDisconnected) {
-  m_pollGroup = m_socketInterface->CreatePollGroup();
-  if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {
-    AlfAssert(false, "failed to create poll group");
-  }
-}
+      m_connectionState(ConnectionState::kDisconnected) {}
 
-Server::~Server() {
-  for (auto [connection, uid] : m_connections) {
-    m_socketInterface->CloseConnection(connection, 0, nullptr, false);
-  }
-  m_socketInterface->DestroyPollGroup(m_pollGroup);
-  m_pollGroup = k_HSteamNetPollGroup_Invalid;
-  m_socketInterface->CloseListenSocket(m_socket);
-}
+Server::~Server() { StopServer(); }
 
 void Server::Poll() {
   if (m_connectionState == ConnectionState::kConnected) {
@@ -46,6 +34,11 @@ void Server::Poll() {
 }
 
 void Server::StartServer(const u16 port) {
+  m_pollGroup = m_socketInterface->CreatePollGroup();
+  if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {
+    AlfAssert(false, "failed to create poll group");
+  }
+
   SteamNetworkingIPAddr addr{};
   addr.Clear();
   addr.m_port = port;
@@ -55,7 +48,19 @@ void Server::StartServer(const u16 port) {
   }
   logVerbose("[server] listening on port {}.", port);
   m_connectionState = ConnectionState::kConnected;
-  // m_world->setupScene();
+  m_world->setupScene();
+}
+
+void Server::StopServer() {
+  logInfo("[server] stopping server");
+
+  for (auto [connection, uid] : m_connections) {
+    m_socketInterface->CloseConnection(connection, 0, nullptr, false);
+  }
+  m_socketInterface->DestroyPollGroup(m_pollGroup);
+  m_pollGroup = k_HSteamNetPollGroup_Invalid;
+  m_socketInterface->CloseListenSocket(m_socket);
+  m_connectionState = ConnectionState::kDisconnected;
 }
 
 void Server::PacketBroadcast(const Packet &packet,
@@ -202,7 +207,7 @@ void Server::handlePacket() {
       header == PacketHeaderTypes::kPlayerTick) {
     handlePacketPlayerTick();
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    //logVeryVerbose("[server:p requestcreate] ");
+    // logVeryVerbose("[server:p requestcreate] ");
     handlePacketRequestCreate();
   } else {
     logWarning("[server] got unknown packet {}",
@@ -289,8 +294,7 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
-      nlohmann::json json =
-          Scene::saveScene(m_world->getScene());
+      nlohmann::json json = Scene::saveScene(m_world->getRootScene());
       mw->Write(alflib::String(json.dump().c_str()));
       // mw->Write(alflib::String(m_world->getScenePath().c_str()));
       mw.Finalize();

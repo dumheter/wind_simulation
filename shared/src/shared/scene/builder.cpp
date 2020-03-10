@@ -328,6 +328,8 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
   } else if (kindString == "ball") {
     return Kind::kBall;
   } else if (kindString == "model") {
+    return Kind::kModel;
+  } else if (kindString == "player") {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
@@ -351,6 +353,8 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "model";
   case Kind::kPlayer:
     return "player";
+  case Kind::kRotor:
+    return "rotor";
   case Kind::kInvalid:
   default: {
     return "invalid";

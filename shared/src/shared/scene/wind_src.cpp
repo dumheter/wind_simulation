@@ -99,13 +99,15 @@ void CWindSource::fixedUpdate() {
   if (!m_collisions.empty()) {
     const f32 dt = bs::gTime().getFixedFrameDelta();
     for (auto &collision : m_collisions) {
-      bs::Vector3 force =
-          dt * getWindForce(collision.netComp->getState().getPosition());
-      bs::Transform t = SO()->getTransform();
-      t.setScale(bs::Vector3::ONE);
-      t.setPosition(bs::Vector3::ZERO);
-      auto newforce = t.getMatrix().multiply(force);
-      collision.netComp->addForce(newforce, bs::ForceMode::Velocity);
+      if (collision.netComp) {
+        bs::Vector3 force =
+            dt * getWindForce(collision.netComp->getState().getPosition());
+        bs::Transform t = SO()->getTransform();
+        t.setScale(bs::Vector3::ONE);
+        t.setPosition(bs::Vector3::ZERO);
+        auto newforce = t.getMatrix().multiply(force);
+        collision.netComp->addForce(newforce, bs::ForceMode::Velocity);
+      }
     }
   }
 }

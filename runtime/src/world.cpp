@@ -104,7 +104,9 @@ void World::onFixedUpdate(f32) {
   using namespace bs;
   MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
-  m_netDebugInfo.update(m_player->getClient());
+  if (m_player) {
+    m_netDebugInfo.update(m_player->getClient());
+  }
 
   static u32 i = 0;
 
@@ -118,9 +120,8 @@ void World::onWindowResize() { updateAimPosition(m_width, m_height); }
 
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
-
   // TODO set file path in gui
-  m_scene = Scene::loadFile(m_scenePath);
+  m_rootScene = Scene::loadFile(m_scenePath);
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -238,7 +239,6 @@ void World::onDisconnect() {
   if (myNetComp) {
 
     const auto myUid = myNetComp->getUniqueId();
-
     for (auto [uid, netComp] : m_netComps) {
       if (netComp && uid != myUid) {
         netComp->SODestroy();
@@ -249,18 +249,27 @@ void World::onDisconnect() {
     myNetComp->setUniqueId(UniqueId::invalid());
     m_netComps.insert({UniqueId::invalid(), myNetComp});
   }
+
+  if (m_server.isActive()) {
+    m_server.StopServer();
+  }
+
+  if (m_rootScene) {
+    m_rootScene->destroy();
+  }
 }
 
 void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
   auto obj = ObjectBuilder(info.type)
-             .withScale(info.scale)
-             .withPosition(info.state.getPosition())
-             .withRotation(info.state.getRotation());
+                 .withScale(info.scale)
+                 .withPosition(info.state.getPosition())
+                 .withRotation(info.state.getRotation());
   for (const auto &component : info.components) {
     if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
+      obj.withWindSource(wind.functions);
     } else if (component.isType<ComponentData::RigidbodyData>()) {
       MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
       const auto &rigid = component.rigidbodyData();
@@ -271,13 +280,19 @@ void World::buildObject(const CreateInfo &info) {
       const auto &render = component.renderableData();
       obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
                        render.pathTexture);
+    } else if (component.isType<ComponentData::RenderableData>()) {
+      MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
+      const auto &render = component.renderableData();
+      obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                       render.pathTexture);
     }
   }
 
   obj.withNetComponent(info.state);
-  // TODO register net comp
 
   auto so = obj.build();
+  auto netComp = so->getComponent<CNetComponent>();
+  addNetComp(netComp);
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
@@ -397,7 +412,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     GUIButton *startServerBtn =
         l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
     startServerBtn->onClick.connect([input, this] {
-      if (m_server.getConnectionState() == ConnectionState::kDisconnected) {
+                                      if (!m_server.isActive()) {
         logVerbose("start server on {}", input->getText().c_str());
         m_server.StartServer(std::atoi(input->getText().c_str()));
       }
@@ -418,7 +433,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
         auto &t = input->getText();
         if (t.find(":") != std::string::npos && t.size() > 8) {
           m_player->connect(input->getText().c_str());
-          setupScene();
+          //setupScene();
         }
       }
     });
