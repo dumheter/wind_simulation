@@ -302,20 +302,19 @@ void Server::OnSteamNetConnectionStatusChanged(
       m_packet.SetHeader(PacketHeaderTypes::kHello);
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
-      nlohmann::json json = Scene::saveScene(m_world->getRootScene());
+      nlohmann::json json = Scene::saveScene(m_world->getStaticScene());
+      mw->Write(alflib::String(json.dump().c_str()));
+      json = Scene::saveScene(m_world->getDynamicScene());
       mw->Write(alflib::String(json.dump().c_str()));
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
 
       if (m_connections.size() > 1) {
-        CreateInfo ci{};
-        ci.type = ObjectType::kPlayer;
-        ci.parent = m_world->getPlayerNetComp()->getUniqueId();
-        ci.scale = Vec3F::ONE;
-        ci.state = m_world->getPlayerNetComp()->getState();
-        ci.components.emplace_back(
-            ComponentData::asRenderable("res/textures/grid_bg.png"));
-        PacketBuilder::Create(m_packet, ci);
+        m_packet.ClearPayload();
+        m_packet.SetHeader(PacketHeaderTypes::kPlayerJoin);
+        auto mw = m_packet.GetMemoryWriter();
+        mw->Write(m_world->getPlayerNetComp()->getUniqueId());
+        mw.Finalize();
         PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
       }
     }

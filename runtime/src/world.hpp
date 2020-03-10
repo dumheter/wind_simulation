@@ -119,8 +119,11 @@ public:
 
   const String &getScenePath() const { return m_scenePath; }
 
-  void setRootScene(bs::HSceneObject so) { m_rootScene = so; }
-  bs::HSceneObject getRootScene() const { return m_rootScene; }
+  void setStaticScene(bs::HSceneObject so) { m_staticScene = so; }
+  bs::HSceneObject getStaticScene() const { return m_staticScene; }
+
+  void setDynamicScene(bs::HSceneObject so) { m_dynamicScene = so; }
+  bs::HSceneObject getDynamicScene() const { return m_dynamicScene; }
 
 private:
   void setupInput();
@@ -145,7 +148,8 @@ private:
   NetDebugInfo m_netDebugInfo{};
   bs::GUITexture *m_aim;
   String m_scenePath{"res/scenes/default.json"};
-  bs::HSceneObject m_rootScene;
+  bs::HSceneObject m_staticScene;
+  bs::HSceneObject m_dynamicScene;
   bs::GUISliderHorz *m_shootForce;
   bs::VirtualAxis m_scroll;
 };

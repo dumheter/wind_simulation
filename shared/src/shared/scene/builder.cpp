@@ -92,7 +92,9 @@ ObjectBuilder::ObjectBuilder(Kind kind)
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);
     charController->setRadius(0.4f);
-    auto prep = bs::SceneObject::create("playerRep");
+    auto prep = ObjectBuilder{ObjectType::kEmpty}
+                    .withName("playerRep")
+                    .build();
     prep->setParent(m_handle);
     prep->setScale(bs::Vector3(0.3f, 2.0f, 0.3f));
     prep->setPosition(bs::Vector3(0.0f, -1.0f, 0.0f));

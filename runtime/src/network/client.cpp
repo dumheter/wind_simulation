@@ -124,8 +124,10 @@ void Client::handlePacket() {
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
-      auto rootSO = Scene::load(mr.Read<alflib::String>().GetUTF8());
-      m_world->setRootScene(rootSO);
+      auto so = Scene::load(mr.Read<alflib::String>().GetUTF8());
+      m_world->setStaticScene(so);
+      so = Scene::load(mr.Read<alflib::String>().GetUTF8());
+      m_world->setDynamicScene(so);
     }
   } else {
     logError("[client:p] unknown packet");

@@ -122,7 +122,8 @@ void World::onWindowResize() { updateAimPosition(m_width, m_height); }
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
   // TODO set file path in gui
-  m_rootScene = Scene::loadFile(m_scenePath);
+  m_staticScene = Scene::loadFile(m_scenePath);
+  m_dynamicScene = ObjectBuilder{ObjectType::kEmpty}.build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -195,6 +196,13 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
 
 void World::onPlayerJoin(const MoveableState &moveableState) {
   logInfo("player {} joined", moveableState.getUniqueId().raw());
+
+  if (m_netComps.count(moveableState.getUniqueId())) {
+    logVeryVerbose("[world:onPlayerJoin] duplicate player, not adding, {}",
+                   moveableState.getUniqueId().raw());
+    return;
+  }
+
   auto so = ObjectBuilder{ObjectType::kPlayer}
                 .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                               "res/textures/grid_bg.png")
@@ -203,6 +211,7 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
   auto netComp = so->getComponent<CNetComponent>();
   auto [it, ok] = getNetComps().insert({moveableState.getUniqueId(), netComp});
   AlfAssert(ok, "failed to create player, was the id unique?");
+  so->setParent(m_dynamicScene);
 }
 
 void World::onPlayerLeave(UniqueId uid) {
@@ -255,8 +264,8 @@ void World::onDisconnect() {
     m_server.StopServer();
   }
 
-  if (m_rootScene) {
-    m_rootScene->destroy();
+  if (m_staticScene) {
+    m_staticScene->destroy();
   }
 }
 
@@ -304,6 +313,7 @@ void World::buildObject(const CreateInfo &info) {
   auto so = obj.build();
   auto netComp = so->getComponent<CNetComponent>();
   addNetComp(netComp);
+  so->setParent(m_dynamicScene);
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
@@ -372,10 +382,15 @@ void World::setupInput() {
         m_player->setWeapon(ObjectType::kCube);
       }
     } else if (ev.buttonCode == BC_M) {
-      Util::dumpScene(m_rootScene);
+      Util::dumpScene(m_staticScene);
     } else if (ev.buttonCode == BC_N) {
-      logInfo("{}", Scene::save(m_rootScene));
-      Util::dumpScene(m_rootScene);
+      logInfo("{}", Scene::save(m_staticScene));
+      Util::dumpScene(m_staticScene);
+    } else if (ev.buttonCode == BC_B) {
+      Util::dumpScene(m_dynamicScene);
+    } else if (ev.buttonCode == BC_V) {
+      logInfo("{}", Scene::save(m_dynamicScene));
+      Util::dumpScene(m_dynamicScene);
     }
   });
 
