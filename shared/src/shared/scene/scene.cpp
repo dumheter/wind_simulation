@@ -122,15 +122,6 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
-  // Name
-  const String name = JsonUtil::getOrCall<String>(
-      value, String("name"), []() { return ObjectBuilder::nextName(); });
-  builder.withName(name);
-
-  // Transform
-  builder.withPosition(JsonUtil::getVec3F(value, "position"));
-  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
-
   // Material
   auto itMat = value.find("material");
   if (itMat != value.end()) {
@@ -166,6 +157,29 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       return bs::SceneObject::create("");
     }
   }
+
+  // Wind
+  if (value.find("wind") != value.end()) {
+    json wind = value["wind"];
+
+    std::vector<BaseFn> functions{};
+    for (const auto fn : wind) {
+      String type = JsonUtil::getString(fn, "type", "constant");
+      Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
+      f32 mag = fn.value("magnitude", 0.0f);
+      functions.push_back(BaseFn::fnConstant(dir, mag));
+    }
+    builder.withWindSource(functions);
+  }
+
+  // Name
+  String name = JsonUtil::getOrCall<String>(
+      value, String("name"), []() { return ObjectBuilder::nextName(); });
+  builder.withName(name);
+
+  // Transform
+  builder.withPosition(JsonUtil::getVec3F(value, "position"));
+  builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
 
   // Sub-objects
   auto it = value.find("objects");

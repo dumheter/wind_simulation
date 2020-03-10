@@ -60,6 +60,24 @@ inline constexpr T clamp(T value, S minValue, U maxValue) {
   return value < minValue ? minValue : value > maxValue ? maxValue : value;
 }
 
+// ============================================================ //
+
+/**
+ * Map val from a range [from_min, from_max], to another range
+ * [to_min, to_max].
+ *
+ * @pre val must be in range [from_min, from_max].
+ *
+ * Example:
+ *   Map(5, 0, 10, 0, 100)  -> 50
+ *   Map(10, 0, 10, 0, 100) -> 100
+ *   Map(0, 0, 10, 0, 100)  -> 0
+ */
+template <typename T>
+inline T map(T val, T from_min, T from_max, T to_min, T to_max) {
+  return (val - from_min) * (to_max - to_min) / (from_max - from_min) + to_min;
+}
+
 // -------------------------------------------------------------------------- //
 
 /// Returns the maximum of two values

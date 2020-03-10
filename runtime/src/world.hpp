@@ -144,6 +144,8 @@ private:
   bs::GUITexture *m_aim;
   String m_scenePath{"res/scenes/default.json"};
   bs::HSceneObject m_scene;
+  bs::GUISliderHorz *m_shootForce;
+  bs::VirtualAxis m_scroll;
 };
 
 } // namespace wind

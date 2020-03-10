@@ -31,6 +31,7 @@
 #include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/fps_walker.hpp"
+#include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
@@ -258,6 +259,15 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
+  auto wind = m_handle->addComponent<CWindSource>();
+  wind->addFunctions(functions);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   object->setParent(m_handle);
 
@@ -305,8 +315,6 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
-  } else if (kindString == "windSource") {
-    return Kind::kWindSource;
   }
   return Kind::kInvalid;
 }

@@ -26,6 +26,7 @@
 #include "Scene/BsSceneObject.h"
 #include "Utility/BsTime.h"
 #include "shared/log.hpp"
+#include "shared/scene/builder.hpp"
 #include "shared/scene/cnet_component.hpp"
 #include "shared/utility/bsprinter.hpp"
 
@@ -35,18 +36,11 @@
 
 namespace wind {
 
-CWindSource::CWindSource(const bs::HSceneObject &parent,
-                         const bs::HMaterial &mat, const bs::HMesh &mesh)
+CWindSource::CWindSource(const bs::HSceneObject &parent)
     : bs::Component(parent) {
   setName("WindComponent");
-  auto so = bs::SceneObject::create("CWindSource");
+  auto so = ObjectBuilder(ObjectType::kEmpty).build();
   so->setParent(parent);
-
-  { // TODO @filip
-    auto render = so->addComponent<bs::CRenderable>();
-    render->setMesh(mesh);
-    render->setMaterial(mat);
-  }
 
   auto collider = so->addComponent<bs::CBoxCollider>();
   collider->setIsTrigger(true);
@@ -85,6 +79,12 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
 
 void CWindSource::addFunction(BaseFn function) {
   m_functions.emplace_back(std::move(function));
+}
+
+void CWindSource::addFunctions(const std::vector<BaseFn> &functions) {
+  for (const auto &function : functions) {
+    addFunction(function);
+  }
 }
 
 bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {

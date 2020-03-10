@@ -158,6 +158,13 @@ Vec4F JsonUtil::getVec4F(const nlohmann::json &value, const String &key,
 
 // -------------------------------------------------------------------------- //
 
+String JsonUtil::getString(const nlohmann::json &value, const String &key,
+                           const String &fallback) {
+  return value.value(key.c_str(), fallback.c_str()).c_str();
+}
+
+// -------------------------------------------------------------------------- //
+
 void JsonUtil::setValue(nlohmann::json &value, const String &key,
                         const Vec2F &vec) {
   value[key.c_str()]["x"] = vec.x;
