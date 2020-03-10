@@ -79,7 +79,7 @@ public:
   ObjectBuilder &withSkybox(const String &path);
 
   /// Sets physics options
-  ObjectBuilder &withPhysics(f32 restitution = 1.0f, f32 mass = 0.0f);
+  ObjectBuilder &withCollider(f32 restitution = 1.0f, f32 mass = 0.0f);
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();

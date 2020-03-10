@@ -92,9 +92,10 @@ void CMyPlayer::onShoot() {
     info.parent = UniqueId::invalid();
     info.scale = scale;
     info.state = state;
-    info.components.emplace_back(ComponentData::asRigidbody(0.5f, 8.0f));
+    info.components.emplace_back(ComponentData::asRigidbody());
+    info.components.emplace_back(ComponentData::asCollider(0.5f, 8.0f));
     info.components.emplace_back(
-        ComponentData::asRenderable("res/textures/grid_2.png"));
+        ComponentData::asRenderable("res/textures/grid_og.png"));
     PacketBuilder::RequestCreate(packet, info);
     m_client->PacketSend(packet, SendStrategy::kUnreliable);
   };

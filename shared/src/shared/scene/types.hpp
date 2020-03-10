@@ -54,7 +54,8 @@ enum class ComponentType : u32 {
   kRigidbody,  ///< Rigidbody { "restitution", "mass" }
   kWindSource, ///< Wind source { ["basic function"] }
   kRenderable,
-  kRotor ///< Rotor { "x-rot", "y-rot", "z-rot" }
+  kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
+  kCollider,
 };
 
 } // namespace wind

@@ -87,6 +87,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kPlayer: {
+    logWarning("### built player");
     bs::HCharacterController charController =
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);
@@ -219,7 +220,7 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
+ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
   const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 

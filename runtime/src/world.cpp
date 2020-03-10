@@ -5,6 +5,7 @@
 #include "shared/scene/builder.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/scene/wind_src.hpp"
+#include "shared/utility/util.hpp"
 
 #include <Components/BsCCamera.h>
 #include <Components/BsCCharacterController.h>
@@ -266,25 +267,28 @@ void World::buildObject(const CreateInfo &info) {
                  .withPosition(info.state.getPosition())
                  .withRotation(info.state.getRotation());
   for (const auto &component : info.components) {
-    if (component.isType<ComponentData::WindSourceData>()) {
+    if (component.isType<ComponentData::RigidbodyData>()) {
+      MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
+      obj.withRigidbody();
+    } else if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
       obj.withWindSource(wind.functions);
-    } else if (component.isType<ComponentData::RigidbodyData>()) {
+    } else if (component.isType<ComponentData::RenderableData>()) {
+      MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
+      const auto &render = component.renderableData();
+      obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                       render.pathTexture);
+    } else if (component.isType<ComponentData::RotorData>()) {
+      MICROPROFILE_SCOPEI("World", "RotorData", MP_TURQUOISE4);
+      const auto &rotor = component.rotorData();
+      // TODO how to convert rotor, quat -> vec3
+      Vec3F v{rotor.rot.x, rotor.rot.y, rotor.rot.z};
+      obj.withRotor(v);
+    } else if (component.isType<ComponentData::ColliderData>()) {
       MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
-      const auto &rigid = component.rigidbodyData();
-      obj.withPhysics(rigid.restitution, rigid.mass);
-      obj.withRigidbody();
-    } else if (component.isType<ComponentData::RenderableData>()) {
-      MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
-      const auto &render = component.renderableData();
-      obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                       render.pathTexture);
-    } else if (component.isType<ComponentData::RenderableData>()) {
-      MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
-      const auto &render = component.renderableData();
-      obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                       render.pathTexture);
+      const auto &collider = component.colliderData();
+      obj.withCollider(collider.restitution, collider.mass);
     }
   }
 
@@ -360,6 +364,8 @@ void World::setupInput() {
       if (m_player->isConnected()) {
         m_player->setWeapon(ObjectType::kCube);
       }
+    } else if (ev.buttonCode == BC_M) {
+      Util::dumpScene(m_rootScene);
     }
   });
 
@@ -412,7 +418,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     GUIButton *startServerBtn =
         l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
     startServerBtn->onClick.connect([input, this] {
-                                      if (!m_server.isActive()) {
+      if (!m_server.isActive()) {
         logVerbose("start server on {}", input->getText().c_str());
         m_server.StartServer(std::atoi(input->getText().c_str()));
       }
@@ -433,7 +439,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
         auto &t = input->getText();
         if (t.find(":") != std::string::npos && t.size() > 8) {
           m_player->connect(input->getText().c_str());
-          //setupScene();
+          // setupScene();
         }
       }
     });

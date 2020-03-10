@@ -138,11 +138,11 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     }
   }
 
-  // Physics
+  // Physics (collider)
   if (value.find("physics") != value.end()) {
     f32 restitution = value["physics"].value("restitution", 1.0f);
     f32 mass = value["physics"].value("mass", 0.0f);
-    builder.withPhysics(restitution, mass);
+    builder.withCollider(restitution, mass);
   }
 
   // Skybox

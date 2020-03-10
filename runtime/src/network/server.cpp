@@ -295,9 +295,21 @@ void Server::OnSteamNetConnectionStatusChanged(
       auto mw = m_packet.GetMemoryWriter();
       mw->Write(uid);
       nlohmann::json json = Scene::saveScene(m_world->getRootScene());
-      mw->Write(alflib::String(json.dump().c_str()));
-      // mw->Write(alflib::String(m_world->getScenePath().c_str()));
+      auto s = alflib::String(json.dump(2).c_str());
+      mw->Write(s);
       mw.Finalize();
+      PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
+
+      // Hacky solution to send servers player object
+      CreateInfo ci{};
+      ci.type = ObjectType::kPlayer;
+      ci.parent = UniqueId::invalid();
+      ci.scale = Vec3F::ONE;
+      ci.state = m_world->getPlayerNetComp()->getState();
+      // ci.components.emplace_back(ComponentData::asRigidbody(0.5f, 80.0f));
+      ci.components.emplace_back(
+          ComponentData::asRenderable("res/textures/grid_bg.png"));
+      PacketBuilder::Create(m_packet, ci);
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
     }
 
