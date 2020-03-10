@@ -42,14 +42,14 @@ public:
 
   UniqueId getUniqueId() const { return m_state.getUniqueId(); }
 
+  void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
+
   const MoveableState &getState() const { return m_state; }
 
   /**
    * Ignores both id and type.
    */
   void setState(const MoveableState &moveableState);
-
-  void setUniqueId(UniqueId id) { m_state.setUniqueId(id); }
 
   void setPosition(bs::Vector3 position);
 

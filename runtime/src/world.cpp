@@ -197,7 +197,7 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
   logInfo("player {} joined", moveableState.getUniqueId().raw());
   auto so = ObjectBuilder{ObjectType::kPlayer}
                 .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                              "res/textures/grid_2.png")
+                              "res/textures/grid_bg.png")
                 .withNetComponent(moveableState)
                 .build();
   auto netComp = so->getComponent<CNetComponent>();
@@ -262,6 +262,13 @@ void World::onDisconnect() {
 
 void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
+
+  if (m_netComps.count(info.state.getUniqueId())) {
+    logVeryVerbose("[world:buildObject] duplicate object, not building, {}",
+                   info.state.getUniqueId().raw());
+    return;
+  }
+
   auto obj = ObjectBuilder(info.type)
                  .withScale(info.scale)
                  .withPosition(info.state.getPosition())

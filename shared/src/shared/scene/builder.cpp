@@ -270,6 +270,7 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
   const HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().physics.rigidbody = true;
   bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
+  rigidbody->setSleepThreshold(0.1f);
   return *this;
 }
 

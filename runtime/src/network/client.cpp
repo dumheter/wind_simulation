@@ -111,7 +111,7 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kPlayerTick) {
     logWarning("[client:p PlayerTick] got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    // logVeryVerbose("[client:p Create] got a create packet");
+    logVeryVerbose("[client:p Create] got a create packet");
     CreateInfo info = PacketParser::Create(m_packet);
     m_world->buildObject(info);
   } else if (header == PacketHeaderTypes::kRequestCreate) {

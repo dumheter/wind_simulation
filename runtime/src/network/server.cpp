@@ -15,9 +15,15 @@ namespace wind {
 Server::Server(World *world)
     : m_socket(k_HSteamListenSocket_Invalid),
       m_socketInterface(SteamNetworkingSockets()), m_world(world),
-      m_connectionState(ConnectionState::kDisconnected) {}
+      m_connectionState(ConnectionState::kDisconnected) {
+  m_pollGroup = m_socketInterface->CreatePollGroup();
+}
 
-Server::~Server() { StopServer(); }
+Server::~Server() {
+  StopServer();
+  m_socketInterface->DestroyPollGroup(m_pollGroup);
+  m_pollGroup = k_HSteamNetPollGroup_Invalid;
+}
 
 void Server::Poll() {
   if (m_connectionState == ConnectionState::kConnected) {
@@ -34,7 +40,7 @@ void Server::Poll() {
 }
 
 void Server::StartServer(const u16 port) {
-  m_pollGroup = m_socketInterface->CreatePollGroup();
+
   if (m_pollGroup == k_HSteamNetPollGroup_Invalid) {
     AlfAssert(false, "failed to create poll group");
   }
@@ -57,8 +63,7 @@ void Server::StopServer() {
   for (auto [connection, uid] : m_connections) {
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
   }
-  m_socketInterface->DestroyPollGroup(m_pollGroup);
-  m_pollGroup = k_HSteamNetPollGroup_Invalid;
+
   m_socketInterface->CloseListenSocket(m_socket);
   m_connectionState = ConnectionState::kDisconnected;
 }
@@ -137,6 +142,9 @@ void Server::broadcastServerTick(
 
       mw->Write(count);
       for (auto [uid, netComp] : netComps) {
+        if (uid == 0) {
+          int a = 0;
+        }
         if (netComp->hasChanged()) {
           mw->Write(netComp->getState());
           netComp->resetChanged();
@@ -299,17 +307,17 @@ void Server::OnSteamNetConnectionStatusChanged(
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
 
-      // Hacky solution to send servers player object
-      CreateInfo ci{};
-      ci.type = ObjectType::kPlayer;
-      ci.parent = UniqueId::invalid();
-      ci.scale = Vec3F::ONE;
-      ci.state = m_world->getPlayerNetComp()->getState();
-      // ci.components.emplace_back(ComponentData::asRigidbody(0.5f, 80.0f));
-      ci.components.emplace_back(
-          ComponentData::asRenderable("res/textures/grid_bg.png"));
-      PacketBuilder::Create(m_packet, ci);
-      PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
+      if (m_connections.size() > 1) {
+        CreateInfo ci{};
+        ci.type = ObjectType::kPlayer;
+        ci.parent = m_world->getPlayerNetComp()->getUniqueId();
+        ci.scale = Vec3F::ONE;
+        ci.state = m_world->getPlayerNetComp()->getState();
+        ci.components.emplace_back(
+            ComponentData::asRenderable("res/textures/grid_bg.png"));
+        PacketBuilder::Create(m_packet, ci);
+        PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
+      }
     }
 
     {
