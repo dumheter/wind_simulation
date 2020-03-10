@@ -98,7 +98,7 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value) {
   if (objsIt != value.end()) {
     auto objsArr = *objsIt;
     if (!objsArr.is_array()) {
-      logError("\"objects\" is required to be an array of scene objects");
+      logError("[loadScene]\"objects\" is required to be an array of scene objects: {}", value.dump());
       return bs::SceneObject::create("");
     }
 
@@ -134,7 +134,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     if (!tex.empty()) {
       builder.withMaterial(shaderKind, tex, tiling);
     } else {
-      logWarning("Object has tiling specified but no texture");
+      logWarning("Object has tiling specified but no texture: {}", value.dump());
     }
   }
 
@@ -191,7 +191,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   if (it != value.end()) {
     auto arr = *it;
     if (!arr.is_array()) {
-      logError("\"objects\" is required to be an array of scene objects");
+      logError("[loadObjects] \"objects\" is required to be an array of scene objects: {}", value.dump());
       return bs::SceneObject::create("");
     }
 
@@ -219,13 +219,16 @@ nlohmann::json Scene::saveScene(const bs::HSceneObject &scene) {
   value["name"] = scene->getName().c_str();
 
   // Objects
-  json objArrValue;
-  u32 cnt = scene->getNumChildren();
-  for (u32 i = 0; i < cnt; i++) {
-    bs::HSceneObject object = scene->getChild(i);
-    objArrValue.push_back(saveObject(object));
+  if (u32 cnt = scene->getNumChildren(); cnt > 0) {
+    json objArrValue;
+    for (u32 i = 0; i < cnt; i++) {
+      bs::HSceneObject object = scene->getChild(i);
+      objArrValue.push_back(saveObject(object));
+    }
+    value["objects"] = objArrValue;
+  } else {
+    value["objects"] = std::vector<json>{};
   }
-  value["objects"] = objArrValue;
 
   return value;
 }
@@ -251,9 +254,10 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
 
   // Material
   if (object->getComponent<bs::CRenderable>()) {
-    // json mat = value["material"];
+    if (!tag->getData().mat.albedo.empty()) {
     JsonUtil::setValue(value["material"], "tiling", tag->getData().mat.tiling);
     value["material"]["texture"] = tag->getData().mat.albedo;
+    }
     value["material"]["shader"] = tag->getData().mat.shader;
   }
 
@@ -295,6 +299,8 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
       objArrValue.push_back(saveObject(subObject));
     }
     value["objects"] = objArrValue;
+  } else {
+    value["objects"] = std::vector<json>{};
   }
 
   return value;

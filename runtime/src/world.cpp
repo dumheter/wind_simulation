@@ -123,7 +123,9 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
-  m_dynamicScene = ObjectBuilder{ObjectType::kEmpty}.build();
+  m_dynamicScene = ObjectBuilder{ObjectType::kEmpty}
+  .withName("dynamicScene")
+       .build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -385,12 +387,10 @@ void World::setupInput() {
       Util::dumpScene(m_staticScene);
     } else if (ev.buttonCode == BC_N) {
       logInfo("{}", Scene::save(m_staticScene));
-      Util::dumpScene(m_staticScene);
     } else if (ev.buttonCode == BC_B) {
       Util::dumpScene(m_dynamicScene);
     } else if (ev.buttonCode == BC_V) {
       logInfo("{}", Scene::save(m_dynamicScene));
-      Util::dumpScene(m_dynamicScene);
     }
   });
 
