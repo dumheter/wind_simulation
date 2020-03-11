@@ -72,14 +72,6 @@
           "position": [ 4.5, 1.0, -6.0 ]
         }
       ]
-    },
-    {
-      "name": "box",
-      "type": "cube",
-      "material": {
-        "shader": "wireframe",
-        "color": [ 1, 0, 0, 1 ]
-      }
     }
 
   ]
