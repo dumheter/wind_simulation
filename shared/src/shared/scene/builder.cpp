@@ -115,11 +115,13 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     withMesh(mesh);
     break;
   }
-    case Kind::kWindVolume: {
-      Vec3F pos{0.0f, 0.0f, 0.0f};
-      withDebugCube(pos, scale, rot);
-      break;
-    }
+  case Kind::kWindVolume: {
+    Vec3F pos{0.0f, 0.0f, 0.0f};
+    Vec3F scale{1.0f, 1.0f, 1.0f};
+    Vec3F rot{1.0f, 1.0f, 1.0f};
+    withDebugCube(pos, scale, rot);
+    break;
+  }
   default: {
     Util::panic("Invalid type when building object ({})", kind);
   }
