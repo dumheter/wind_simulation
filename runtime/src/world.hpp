@@ -99,6 +99,12 @@ public:
   void removeNetComp(HCNetComponent netComp);
 
   /**
+   * Use this if there are untracked netcomponents,
+   * (that the world doesnt know about).
+   */
+  void scanForNetComps();
+
+  /**
    * @return If it could be changed successfully.
    */
   bool netCompChangeUniqueId(UniqueId from, UniqueId to);

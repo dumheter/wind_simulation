@@ -123,8 +123,10 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
-  m_dynamicScene =
-      ObjectBuilder{ObjectType::kEmpty}.withName("dynamicScene").build();
+
+  m_dynamicScene = SceneBuilder{}
+  .withName("dynamicScene")
+       .build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -521,6 +523,19 @@ void World::addNetComp(HCNetComponent netComp) {
   logVerbose("net component with id [{}] added", netComp->getUniqueId().raw());
   auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add net comp");
+}
+
+void World::scanForNetComps() {
+  const auto before = m_netComps.size();
+
+  for (u32 i = 0; i < m_dynamicScene->getNumChildren(); ++ i) {
+    auto obj = m_dynamicScene->getChild(i);
+    auto netComp = obj->getComponent<CNetComponent>();
+    addNetComp(netComp);
+  }
+
+  const auto after = m_netComps.size();
+  logVerbose("[world:scanForNetComps] added {} netComps", after - before);
 }
 
 } // namespace wind

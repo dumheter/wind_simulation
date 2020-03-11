@@ -315,6 +315,7 @@ ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
 
 ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
   MoveableState state{};
+  state.id = id;
   m_handle->addComponent<CNetComponent>(state);
   HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().id = std::make_optional(id);
