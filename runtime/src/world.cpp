@@ -124,9 +124,7 @@ void World::setupScene() {
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
 
-  m_dynamicScene = SceneBuilder{}
-  .withName("dynamicScene")
-       .build();
+  m_dynamicScene = SceneBuilder{}.withName("dynamicScene").build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -207,8 +205,10 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
 
   auto so = ObjectBuilder{ObjectType::kPlayer}
                 .withName("playerJoin")
+                .withPosition(moveableState.position)
                 .withNetComponent(moveableState)
                 .build();
+
   auto netComp = so->getComponent<CNetComponent>();
   auto [it, ok] = getNetComps().insert({moveableState.id, netComp});
   AlfAssert(ok, "failed to create player, was the id unique?");
@@ -390,6 +390,8 @@ void World::setupInput() {
       Util::dumpScene(m_dynamicScene);
     } else if (ev.buttonCode == BC_V) {
       logInfo("{}", Scene::save(m_dynamicScene));
+    } else if (ev.buttonCode == BC_C) {
+      dumpNetComps();
     }
   });
 
@@ -528,7 +530,7 @@ void World::addNetComp(HCNetComponent netComp) {
 void World::scanForNetComps() {
   const auto before = m_netComps.size();
 
-  for (u32 i = 0; i < m_dynamicScene->getNumChildren(); ++ i) {
+  for (u32 i = 0; i < m_dynamicScene->getNumChildren(); ++i) {
     auto obj = m_dynamicScene->getChild(i);
     auto netComp = obj->getComponent<CNetComponent>();
     addNetComp(netComp);
@@ -536,6 +538,12 @@ void World::scanForNetComps() {
 
   const auto after = m_netComps.size();
   logVerbose("[world:scanForNetComps] added {} netComps", after - before);
+}
+
+void World::dumpNetComps() {
+  for (auto [uid, netComp] : m_netComps) {
+    logInfo("{}", uid.raw());
+  }
 }
 
 } // namespace wind

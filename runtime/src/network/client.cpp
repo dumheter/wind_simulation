@@ -126,9 +126,11 @@ void Client::handlePacket() {
     if (!m_world->serverIsActive()) {
       auto so = Scene::load(mr.Read<alflib::String>().GetUTF8());
       m_world->setStaticScene(so);
-      so = Scene::load(mr.Read<alflib::String>().GetUTF8());
+      auto s = mr.Read<alflib::String>();
+      so = Scene::load(s.GetUTF8());
       m_world->setDynamicScene(so);
       m_world->scanForNetComps();
+      logInfo("\n**********************\n{}", s.GetUTF8());
     }
   } else {
     logError("[client:p] unknown packet");

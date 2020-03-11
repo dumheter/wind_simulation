@@ -89,15 +89,18 @@ ObjectBuilder::ObjectBuilder(Kind kind)
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);
     charController->setRadius(0.4f);
+    auto fpsWalker = m_handle->addComponent<FPSWalker>();
+
     auto prep = ObjectBuilder{ObjectType::kCylinder}
+                    .withSave(false)
                     .withName("playerRep")
                     .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
                     .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
                     .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                                   "res/textures/grid_bg.png")
                     .build();
-    prep->setParent(m_handle);
-    auto fpsWalker = m_handle->addComponent<FPSWalker>();
+
+    withObject(prep);
     break;
   }
   case Kind::kRotor: {
@@ -111,8 +114,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   }
   case Kind::kCylinder: {
     bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    withMesh(mesh);
     break;
   }
   default: {

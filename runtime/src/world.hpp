@@ -104,6 +104,8 @@ public:
    */
   void scanForNetComps();
 
+  void dumpNetComps();
+
   /**
    * @return If it could be changed successfully.
    */
@@ -153,7 +155,7 @@ private:
   HCMyPlayer m_player;
   NetDebugInfo m_netDebugInfo{};
   bs::GUITexture *m_aim;
-  String m_scenePath{"res/scenes/default.json"};
+  String m_scenePath{"res/scenes/wind.json"};
   bs::HSceneObject m_staticScene;
   bs::HSceneObject m_dynamicScene;
   bs::GUISliderHorz *m_shootForce;
