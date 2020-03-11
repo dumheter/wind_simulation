@@ -62,7 +62,7 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
           .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                         "res/textures/grid.png",
                         Vec2F(groundScale * 4.0f, groundScale * 4.0f))
-          .withPhysics(0.5f)
+          .withCollider(0.5f)
           .build();
 
   HSceneObject geometry = ObjectBuilder(ObjectBuilder::Kind::kEmpty)
@@ -97,7 +97,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
           .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                         "res/textures/grid.png",
                         Vec2F(groundScale * 4.0f, groundScale * 4.0f))
-          .withPhysics(0.5f)
+          .withCollider(0.5f)
           .build();
 
   HSceneObject cube = ObjectBuilder(ObjectBuilder::Kind::kCube)
@@ -106,7 +106,8 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
                           .withPosition(Vec3F(6.0f, 3.0f, 4.0f))
                           .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                                         "res/textures/grid_2.png")
-                          .withPhysics(0.5f, 25.0f)
+                          .withCollider(0.5f, 25.0f)
+                          .withRigidbody()
                           .build();
 
   HSceneObject geometry = ObjectBuilder(ObjectBuilder::Kind::kEmpty)

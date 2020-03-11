@@ -90,7 +90,7 @@ void Editor::onStartup() {
   m_ui = new UI(this);
 
   // Setup default scene
-  setScene(Scene::loadFile("res/scenes/default.json"));
+  setScene(Scene::loadFile("res/scenes/spline.json"));
   Scene::saveFile("res/scenes/out.json", getScene());
 
   // Create simulation

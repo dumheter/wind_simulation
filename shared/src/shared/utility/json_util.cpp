@@ -28,8 +28,19 @@
 
 namespace wind {
 
-wind::Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
-                               const Vec2F &fallback) {
+u32 JsonUtil::getU32(const nlohmann::json &value, const String &key,
+                     u32 fallback) {
+  const auto it = value.find(key.c_str());
+  if (it != value.end()) {
+    return value[key.c_str()];
+  }
+  return fallback;
+}
+
+// -------------------------------------------------------------------------- //
+
+Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
+                         const Vec2F &fallback) {
   auto it = value.find(key.c_str());
   if (it != value.end()) {
     auto obj = *it;
@@ -67,52 +78,57 @@ wind::Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
 
 // -------------------------------------------------------------------------- //
 
+Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const Vec3F &fallback) {
+  if (value.is_array()) {
+    const size_t count = value.size();
+    f32 x = fallback.x;
+    f32 y = fallback.y;
+    f32 z = fallback.z;
+    if (count >= 1) {
+      x = value[0];
+    }
+    if (count >= 2) {
+      y = value[1];
+    }
+    if (count >= 3) {
+      z = value[2];
+    }
+    return Vec3F(x, y, z);
+  }
+  if (value.is_object()) {
+    f32 x = value.value("x", fallback.x);
+    f32 y = value.value("y", fallback.y);
+    f32 z = value.value("z", fallback.z);
+
+    auto _it = value.find("xyz");
+    if (_it != value.end()) {
+      x = y = z = value["xyz"];
+    }
+    _it = value.find("xy");
+    if (_it != value.end()) {
+      x = y = value["xy"];
+    }
+    _it = value.find("xz");
+    if (_it != value.end()) {
+      x = z = value["xz"];
+    }
+    _it = value.find("yz");
+    if (_it != value.end()) {
+      y = z = value["yz"];
+    }
+
+    return Vec3F(x, y, z);
+  }
+  return fallback;
+}
+
+// -------------------------------------------------------------------------- //
+
 Vec3F JsonUtil::getVec3F(const nlohmann::json &value, const String &key,
                          const Vec3F &fallback) {
-  auto it = value.find(key.c_str());
+  const auto it = value.find(key.c_str());
   if (it != value.end()) {
-    auto obj = *it;
-    if (obj.is_array()) {
-      const size_t count = obj.size();
-      f32 x = fallback.x;
-      f32 y = fallback.y;
-      f32 z = fallback.z;
-      if (count >= 1) {
-        x = obj[0];
-      }
-      if (count >= 2) {
-        y = obj[1];
-      }
-      if (count >= 3) {
-        z = obj[2];
-      }
-      return Vec3F(x, y, z);
-    }
-    if (obj.is_object()) {
-      f32 x = obj.value("x", fallback.x);
-      f32 y = obj.value("y", fallback.y);
-      f32 z = obj.value("z", fallback.z);
-
-      auto _it = obj.find("xyz");
-      if (_it != obj.end()) {
-        x = y = z = obj["xyz"];
-      }
-      _it = obj.find("xy");
-      if (_it != obj.end()) {
-        x = y = obj["xy"];
-      }
-      _it = obj.find("xz");
-      if (_it != obj.end()) {
-        x = z = obj["xz"];
-      }
-      _it = obj.find("yz");
-      if (_it != obj.end()) {
-        y = z = obj["yz"];
-      }
-
-      return Vec3F(x, y, z);
-    }
-    return fallback;
+    return getVec3F(*it, fallback);
   }
   return fallback;
 }
@@ -195,6 +211,16 @@ void JsonUtil::setValue(nlohmann::json &value, const String &key,
   value[key.c_str()]["x"] = quat.x;
   value[key.c_str()]["y"] = quat.y;
   value[key.c_str()]["z"] = quat.z;
+}
+
+// -------------------------------------------------------------------------- //
+
+nlohmann::json JsonUtil::create(const Vec3F &vec) {
+  nlohmann::json value;
+  value["x"] = vec.x;
+  value["y"] = vec.y;
+  value["z"] = vec.z;
+  return value;
 }
 
 } // namespace wind

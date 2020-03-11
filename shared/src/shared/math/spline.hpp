@@ -26,37 +26,45 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/types.hpp"
+#include <shared/math/math.hpp>
+
+#include <tinyspline/tinyspline.h>
 
 // ========================================================================== //
-// Types
+// Spline Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// Enumeration of object types. These are used to distinguish between object
-/// categories and to specify common information for that object type.
-enum class ObjectType : u32 {
-  kInvalid = 0, ///< Invalid
-  kEmpty,       ///< Empty object with no components
-  kPlane,       ///< Flat plane
-  kCube,        ///< Cube
-  kBall,        ///< Sphere/Ball
-  kModel,       ///< Model with a specific mesh
-  kPlayer,      ///< Player with corresponding components
-  kRotor,       ///< Helicopter rotor
-  kCylinder,
-};
+/// B-spline
+class Spline {
 
-// -------------------------------------------------------------------------- //
+public:
+  /// Construct a spline from a list of points and an optional list of knots.
+  explicit Spline(const std::vector<Vec3F> &points, u32 degree = 2);
 
-/// Enumeration of component types.
-enum class ComponentType : u32 {
-  kRigidbody,  ///< Rigidbody { "restitution", "mass" }
-  kWindSource, ///< Wind source { ["basic function"] }
-  kRenderable,
-  kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
-  kCollider,
+  /// Destruct spline
+  ~Spline();
+
+  /// Sample the spline at time 't' (0.0 -> 1.0).
+  Vec3F sample(f32 t);
+
+  /// Returns the points of the spline.
+  const std::vector<Vec3F> &getPoints() const { return m_points; }
+
+  /// Returns the degree of the spline.
+  u32 getDegree() const { return m_degree; }
+
+private:
+  /// Control points
+  std::vector<Vec3F> m_points;
+  /// Degree of spline
+  u32 m_degree;
+
+  /// Spline handle
+  tsBSpline m_spline = {};
+  /// DeBoor net
+  tsDeBoorNet m_net = {};
 };
 
 } // namespace wind

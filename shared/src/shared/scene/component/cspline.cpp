@@ -20,43 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "cspline.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "shared/types.hpp"
-
-// ========================================================================== //
-// Types
+// CSpline Implementation
 // ========================================================================== //
 
 namespace wind {
 
-/// Enumeration of object types. These are used to distinguish between object
-/// categories and to specify common information for that object type.
-enum class ObjectType : u32 {
-  kInvalid = 0, ///< Invalid
-  kEmpty,       ///< Empty object with no components
-  kPlane,       ///< Flat plane
-  kCube,        ///< Cube
-  kBall,        ///< Sphere/Ball
-  kModel,       ///< Model with a specific mesh
-  kPlayer,      ///< Player with corresponding components
-  kRotor,       ///< Helicopter rotor
-  kCylinder,
-};
+CSpline::CSpline(const bs::HSceneObject &parent, const Spline &spline)
+    : Component(parent), m_spline(new Spline(spline)) {}
 
 // -------------------------------------------------------------------------- //
 
-/// Enumeration of component types.
-enum class ComponentType : u32 {
-  kRigidbody,  ///< Rigidbody { "restitution", "mass" }
-  kWindSource, ///< Wind source { ["basic function"] }
-  kRenderable,
-  kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
-  kCollider,
-};
+CSpline::CSpline(const bs::HSceneObject &parent,
+                 const std::vector<Vec3F> &points, u32 degrees)
+    : Component(parent), m_spline(new Spline(points, degrees)) {}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CSpline::getRTTIStatic() { return CSplineRTTI::instance(); }
 
 } // namespace wind

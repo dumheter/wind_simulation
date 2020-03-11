@@ -70,6 +70,10 @@ std::ostream &operator<<(std::ostream &out, wind::ObjectType type) {
     out << "kRotor";
     break;
   }
+  case wind::ObjectType::kCylinder: {
+    out << "kCylinder";
+    break;
+  }
   case wind::ObjectType::kInvalid:
   default: {
     out << "kInvalid";
@@ -84,7 +88,12 @@ std::ostream &operator<<(std::ostream &out, wind::ObjectType type) {
 std::ostream &operator<<(std::ostream &out, const bs::HComponent &comp) {
   if (comp->getRTTI()->getRTTIId() == wind::TID_CTag) {
     wind::CTag *tag = static_cast<wind::CTag *>(comp.get());
-    out << fmt::format("CTag {{ {} }}", tag->getType());
+    if (!tag->getData().id) {
+      out << fmt::format("CTag {{ {} }}", tag->getType());
+    } else {
+      out << fmt::format("CTag {{ {}, {} }}", tag->getType(),
+                         tag->getData().id->raw());
+    }
   } else {
     out << comp->getName();
   }

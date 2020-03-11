@@ -99,6 +99,12 @@ public:
   void removeNetComp(HCNetComponent netComp);
 
   /**
+   * Use this if there are untracked netcomponents,
+   * (that the world doesnt know about).
+   */
+  void scanForNetComps();
+
+  /**
    * @return If it could be changed successfully.
    */
   bool netCompChangeUniqueId(UniqueId from, UniqueId to);
@@ -118,7 +124,12 @@ public:
   bool getCursorMode() const { return m_cursorMode; }
 
   const String &getScenePath() const { return m_scenePath; }
-  const auto &getScene() const { return m_scene; }
+
+  void setStaticScene(bs::HSceneObject so) { m_staticScene = so; }
+  bs::HSceneObject getStaticScene() const { return m_staticScene; }
+
+  void setDynamicScene(bs::HSceneObject so) { m_dynamicScene = so; }
+  bs::HSceneObject getDynamicScene() const { return m_dynamicScene; }
 
 private:
   void setupInput();
@@ -143,7 +154,8 @@ private:
   NetDebugInfo m_netDebugInfo{};
   bs::GUITexture *m_aim;
   String m_scenePath{"res/scenes/default.json"};
-  bs::HSceneObject m_scene;
+  bs::HSceneObject m_staticScene;
+  bs::HSceneObject m_dynamicScene;
   bs::GUISliderHorz *m_shootForce;
   bs::VirtualAxis m_scroll;
 };

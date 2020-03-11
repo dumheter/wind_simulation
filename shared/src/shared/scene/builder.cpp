@@ -28,12 +28,14 @@
 
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/render/shader.hpp"
 #include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
+#include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
 #include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
-#include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
 #include <Components/BsCBoxCollider.h>
@@ -48,8 +50,6 @@
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
-#include "shared/render/shader.hpp"
-
 // ========================================================================== //
 // ObjectBuilder Implementation
 // ========================================================================== //
@@ -63,21 +63,22 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   // Create by kind
   switch (kind) {
   case Kind::kPlane: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Quad);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    const bs::HMesh mesh =
+        bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Quad);
+    withMesh(mesh);
     break;
   }
   case Kind::kCube: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    withName("cube");
+    const bs::HMesh mesh =
+        bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
+    withMesh(mesh);
     break;
   }
   case Kind::kBall: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Sphere);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
+    const bs::HMesh mesh =
+        bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Sphere);
+    withMesh(mesh);
     break;
   }
   case Kind::kModel: {
@@ -88,13 +89,14 @@ ObjectBuilder::ObjectBuilder(Kind kind)
         m_handle->addComponent<bs::CCharacterController>();
     charController->setHeight(1.0f);
     charController->setRadius(0.4f);
-    auto prep = bs::SceneObject::create("playerRep");
+    auto prep = ObjectBuilder{ObjectType::kCylinder}
+                    .withName("playerRep")
+                    .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
+                    .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
+                    .withMaterial(ObjectBuilder::ShaderKind::kStandard,
+                                  "res/textures/grid_bg.png")
+                    .build();
     prep->setParent(m_handle);
-    prep->setScale(bs::Vector3(0.3f, 2.0f, 0.3f));
-    prep->setPosition(bs::Vector3(0.0f, -1.0f, 0.0f));
-    m_renderable = prep->addComponent<bs::CRenderable>();
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
-    m_renderable->setMesh(mesh);
     auto fpsWalker = m_handle->addComponent<FPSWalker>();
     break;
   }
@@ -105,6 +107,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kEmpty: {
+    break;
+  }
+  case Kind::kCylinder: {
+    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    m_renderable = m_handle->addComponent<bs::CRenderable>();
+    m_renderable->setMesh(mesh);
     break;
   }
   default: {
@@ -123,6 +131,15 @@ ObjectBuilder &ObjectBuilder::withName(const String &name) {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withSave(bool save) {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().save = save;
+
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withPosition(const Vec3F &position) {
   m_handle->setPosition(position);
 
@@ -131,8 +148,36 @@ ObjectBuilder &ObjectBuilder::withPosition(const Vec3F &position) {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withRotation(const Vec3F &rotation) {
+  m_handle->setRotation(bs::Quaternion(
+      bs::Degree(rotation.x), bs::Degree(rotation.y), bs::Degree(rotation.z)));
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withRotation(const Quat &rotation) {
+  m_handle->setRotation(rotation);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withScale(const Vec3F &scale) {
   m_handle->setScale(scale);
+
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withMesh(const bs::HMesh &mesh) {
+  m_renderable = m_handle->addComponent<bs::CRenderable>();
+  m_renderable->setMesh(mesh);
+
+  if (m_material != nullptr) {
+    m_renderable->setMaterial(m_material);
+  }
 
   return *this;
 }
@@ -210,7 +255,12 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
+ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().physics.collider = true;
+  ctag->getData().physics.restitution = restitution;
+  ctag->getData().physics.mass = mass;
+
   const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
@@ -252,7 +302,10 @@ ObjectBuilder &ObjectBuilder::withPhysics(f32 restitution, f32 mass) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withRigidbody() {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().physics.rigidbody = true;
   bs::HRigidbody rigidbody = m_handle->addComponent<bs::CRigidbody>();
+  rigidbody->setSleepThreshold(0.1f);
 
   return *this;
 }
@@ -268,15 +321,63 @@ ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
+                                         u32 degree, u32 samples) {
+  // Spline component
+  HCSpline spline = m_handle->addComponent<CSpline>(points, degree);
+
+  // Add sub-objects to render spline
+  Spline *s = spline->getSpline();
+  const f32 step = 1.0f / samples;
+  for (u32 i = 0; i <= samples; i++) {
+    f32 t = step * i;
+    Vec3F pos = s->sample(t);
+
+    const bs::HSceneObject obj =
+        ObjectBuilder{ObjectType::kCube}
+            .withSave(false)
+            .withMaterial(ShaderKind::kStandard,
+                          "res/textures/spline_waypoint.png")
+            .withPosition(pos)
+            .withScale(Vec3F(0.1f, 0.1f, 0.1f))
+            .build();
+    withObject(obj);
+  }
+
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withRotor(Vec3F rotation) {
+  auto rotor = m_handle->addComponent<CRotor>(rotation);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
   object->setParent(m_handle);
 
   return *this;
 }
 
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &
 ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
-  m_handle->addComponent<CNetComponent>(moveableState);
+  auto netComp = m_handle->addComponent<CNetComponent>(moveableState);
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().id = std::make_optional(moveableState.id);
+  return *this;
+}
+
+ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
+  MoveableState state{};
+  state.id = id;
+  m_handle->addComponent<CNetComponent>(state);
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().id = std::make_optional(id);
   return *this;
 }
 
@@ -312,9 +413,13 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
   } else if (kindString == "ball") {
     return Kind::kBall;
   } else if (kindString == "model") {
+    return Kind::kModel;
+  } else if (kindString == "player") {
     return Kind::kPlayer;
   } else if (kindString == "rotor") {
     return Kind::kRotor;
+  } else if (kindString == "cylinder") {
+    return Kind::kCylinder;
   }
   return Kind::kInvalid;
 }
@@ -335,6 +440,10 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "model";
   case Kind::kPlayer:
     return "player";
+  case Kind::kRotor:
+    return "rotor";
+  case Kind::kCylinder:
+    return "cylinder";
   case Kind::kInvalid:
   default: {
     return "invalid";

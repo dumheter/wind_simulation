@@ -20,7 +20,7 @@
             "xz": 4.0,
             "y": 0.4
           },
-          "physics": { "restitution": 0.5 }
+          "physics": { "restitution": 0.5, "rigidbody": false }
         },
         {
           "type": "cube",

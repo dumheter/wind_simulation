@@ -30,6 +30,7 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
+#include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
 
 #include <ThirdParty/json.hpp>
@@ -41,7 +42,7 @@
 
 namespace wind {
 
-class MoveableState;
+struct MoveableState;
 
 class ObjectBuilder {
 public:
@@ -61,11 +62,23 @@ public:
   /// Set the name
   ObjectBuilder &withName(const String &name);
 
+  /// Set whether object is saved
+  ObjectBuilder &withSave(bool save = true);
+
   /// Set the position
   ObjectBuilder &withPosition(const Vec3F &position);
 
-  /// Set the scale
+  /// Sets the rotation
+  ObjectBuilder &withRotation(const Vec3F &rotation);
+
+  /// Sets the rotation
+  ObjectBuilder &withRotation(const Quat &rotation);
+
+  /// Sets the scale
   ObjectBuilder &withScale(const Vec3F &scale);
+
+  /// Set the mesh
+  ObjectBuilder &withMesh(const bs::HMesh &mesh);
 
   /// Set the material of the object to one that uses the specified shader and
   /// has the specified texture. Tiling for the texture and a tint color can
@@ -79,7 +92,7 @@ public:
   ObjectBuilder &withSkybox(const String &path);
 
   /// Sets physics options
-  ObjectBuilder &withPhysics(f32 restitution = 1.0f, f32 mass = 0.0f);
+  ObjectBuilder &withCollider(f32 restitution = 1.0f, f32 mass = 0.0f);
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();
@@ -87,13 +100,24 @@ public:
   /// Adds wind
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
-  ObjectBuilder &withWindSource(const std::vector<BaseFn>& functions);
+  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions);
+
+  /// Adds a spline component to the object
+  ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
+                            u32 samples);
+
+  /// Add rotor
+  ObjectBuilder &withRotor(Vec3F rotation);
 
   /// Add sub-object
   ObjectBuilder &withObject(const bs::HSceneObject &object);
 
   /// @post Must register netcomp in world
   ObjectBuilder &withNetComponent(const MoveableState &moveableState);
+
+  /// @post Must register netcomp in world
+  /// Construct from only an id
+  ObjectBuilder &withNetComponent(UniqueId id);
 
   /// Build the scene object
   bs::HSceneObject build();

@@ -5,6 +5,7 @@
 #include "shared/scene/builder.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/scene/wind_src.hpp"
+#include "shared/utility/util.hpp"
 
 #include <Components/BsCCamera.h>
 #include <Components/BsCCharacterController.h>
@@ -104,7 +105,9 @@ void World::onFixedUpdate(f32) {
   using namespace bs;
   MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
-  m_netDebugInfo.update(m_player->getClient());
+  if (m_player) {
+    m_netDebugInfo.update(m_player->getClient());
+  }
 
   static u32 i = 0;
 
@@ -118,9 +121,12 @@ void World::onWindowResize() { updateAimPosition(m_width, m_height); }
 
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
-
   // TODO set file path in gui
-  m_scene = Scene::loadFile(m_scenePath);
+  m_staticScene = Scene::loadFile(m_scenePath);
+
+  m_dynamicScene = SceneBuilder{}
+  .withName("dynamicScene")
+       .build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
 
@@ -163,21 +169,20 @@ void World::setupMyPlayer() {
 
 void World::applyMoveableState(const MoveableState &moveableState) {
   MICROPROFILE_SCOPEI("world", "appylMoveableState", MP_TURQUOISE);
-  auto it = m_netComps.find(moveableState.getUniqueId());
+  auto it = m_netComps.find(moveableState.id);
   if (it != m_netComps.end()) {
     it->second->setState(moveableState);
   } else {
-    logError("failed to find netcomp with id {}",
-             moveableState.getUniqueId().raw());
+    logError("failed to find netcomp with id {}", moveableState.id.raw());
   }
 }
 
 void World::applyMyMoveableState(const MoveableState &moveableState) {
   MICROPROFILE_SCOPEI("world", "appylMyMoveableState", MP_TURQUOISE1);
-  auto it = m_netComps.find(moveableState.getUniqueId());
+  auto it = m_netComps.find(moveableState.id);
   if (it != m_netComps.end()) {
-    const auto myPos = it->second->getState().getPosition();
-    const auto newPos = moveableState.getPosition();
+    const auto myPos = it->second->getState().position;
+    const auto newPos = moveableState.position;
     constexpr float kDivergeMax = 2.0f;
     if (std::fabs(myPos.x - newPos.x) > kDivergeMax ||
         std::fabs(myPos.y - newPos.y) > kDivergeMax ||
@@ -187,20 +192,27 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
     }
   } else {
     logError("[world:applyMyMoveableState] failed to find netcomp with id {}",
-             moveableState.getUniqueId().raw());
+             moveableState.id.raw());
   }
 }
 
 void World::onPlayerJoin(const MoveableState &moveableState) {
-  logInfo("player {} joined", moveableState.getUniqueId().raw());
+  logInfo("player {} joined", moveableState.id.raw());
+
+  if (m_netComps.count(moveableState.id)) {
+    logVeryVerbose("[world:onPlayerJoin] duplicate player, not adding, {}",
+                   moveableState.id.raw());
+    return;
+  }
+
   auto so = ObjectBuilder{ObjectType::kPlayer}
-                .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                              "res/textures/grid_2.png")
+                .withName("playerJoin")
                 .withNetComponent(moveableState)
                 .build();
   auto netComp = so->getComponent<CNetComponent>();
-  auto [it, ok] = getNetComps().insert({moveableState.getUniqueId(), netComp});
+  auto [it, ok] = getNetComps().insert({moveableState.id, netComp});
   AlfAssert(ok, "failed to create player, was the id unique?");
+  so->setParent(m_dynamicScene);
 }
 
 void World::onPlayerLeave(UniqueId uid) {
@@ -238,7 +250,6 @@ void World::onDisconnect() {
   if (myNetComp) {
 
     const auto myUid = myNetComp->getUniqueId();
-
     for (auto [uid, netComp] : m_netComps) {
       if (netComp && uid != myUid) {
         netComp->SODestroy();
@@ -249,34 +260,61 @@ void World::onDisconnect() {
     myNetComp->setUniqueId(UniqueId::invalid());
     m_netComps.insert({UniqueId::invalid(), myNetComp});
   }
+
+  if (m_server.isActive()) {
+    m_server.StopServer();
+  }
+
+  if (m_staticScene) {
+    m_staticScene->destroy();
+  }
 }
 
 void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
+
+  if (m_netComps.count(info.state.id)) {
+    logVeryVerbose("[world:buildObject] duplicate object, not building, {}",
+                   info.state.id.raw());
+    return;
+  }
+
   auto obj = ObjectBuilder(info.type)
                  .withScale(info.scale)
-                 .withPosition(info.state.getPosition());
+                 .withPosition(info.state.position)
+                 .withRotation(info.state.rotation);
   for (const auto &component : info.components) {
-    if (component.isType<ComponentData::WindSourceData>()) {
+    if (component.isType<ComponentData::RigidbodyData>()) {
+      MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
+      obj.withRigidbody();
+    } else if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
-    } else if (component.isType<ComponentData::RigidbodyData>()) {
-      MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
-      const auto &rigid = component.rigidbodyData();
-      obj.withPhysics(rigid.restitution, rigid.mass);
-      obj.withRigidbody();
+      obj.withWindSource(wind.functions);
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
       const auto &render = component.renderableData();
       obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
                        render.pathTexture);
+    } else if (component.isType<ComponentData::RotorData>()) {
+      MICROPROFILE_SCOPEI("World", "RotorData", MP_TURQUOISE4);
+      const auto &rotor = component.rotorData();
+      // TODO how to convert rotor, quat -> vec3
+      Vec3F v{rotor.rot.x, rotor.rot.y, rotor.rot.z};
+      obj.withRotor(v);
+    } else if (component.isType<ComponentData::ColliderData>()) {
+      MICROPROFILE_SCOPEI("World", "ColliderData", MP_TURQUOISE4);
+      const auto &collider = component.colliderData();
+      obj.withCollider(collider.restitution, collider.mass);
     }
   }
 
   obj.withNetComponent(info.state);
-  // TODO register net comp
 
   auto so = obj.build();
+  auto netComp = so->getComponent<CNetComponent>();
+  addNetComp(netComp);
+  so->setParent(m_dynamicScene);
 }
 
 bs::HSceneObject World::createCamera(bs::HSceneObject player) {
@@ -344,6 +382,14 @@ void World::setupInput() {
       if (m_player->isConnected()) {
         m_player->setWeapon(ObjectType::kCube);
       }
+    } else if (ev.buttonCode == BC_M) {
+      Util::dumpScene(m_staticScene);
+    } else if (ev.buttonCode == BC_N) {
+      logInfo("{}", Scene::save(m_staticScene));
+    } else if (ev.buttonCode == BC_B) {
+      Util::dumpScene(m_dynamicScene);
+    } else if (ev.buttonCode == BC_V) {
+      logInfo("{}", Scene::save(m_dynamicScene));
     }
   });
 
@@ -396,7 +442,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     GUIButton *startServerBtn =
         l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
     startServerBtn->onClick.connect([input, this] {
-      if (m_server.getConnectionState() == ConnectionState::kDisconnected) {
+      if (!m_server.isActive()) {
         logVerbose("start server on {}", input->getText().c_str());
         m_server.StartServer(std::atoi(input->getText().c_str()));
       }
@@ -417,7 +463,7 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
         auto &t = input->getText();
         if (t.find(":") != std::string::npos && t.size() > 8) {
           m_player->connect(input->getText().c_str());
-          setupScene();
+          // setupScene();
         }
       }
     });
@@ -442,13 +488,6 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
       auto rotors = gSceneManager().findComponents<CRotor>(true);
       for (auto &rotor : rotors) {
         rotor->setRotation(bs::Vector3{0.0f, percent * percent * 1000, 0.0f});
-        // HCWindSource &wind = rotor->getWindSource();
-        // for (auto &fn : wind->getFunctions()) {
-        //   if (std::holds_alternative<BaseFn::Constant>(fn.fn)) {
-        //     std::get<BaseFn::Constant>(fn.fn).magnitude =
-        //         percent * percent * 100.0f;
-        //   }
-        // }
       }
     });
   }
@@ -484,6 +523,19 @@ void World::addNetComp(HCNetComponent netComp) {
   logVerbose("net component with id [{}] added", netComp->getUniqueId().raw());
   auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add net comp");
+}
+
+void World::scanForNetComps() {
+  const auto before = m_netComps.size();
+
+  for (u32 i = 0; i < m_dynamicScene->getNumChildren(); ++ i) {
+    auto obj = m_dynamicScene->getChild(i);
+    auto netComp = obj->getComponent<CNetComponent>();
+    addNetComp(netComp);
+  }
+
+  const auto after = m_netComps.size();
+  logVerbose("[world:scanForNetComps] added {} netComps", after - before);
 }
 
 } // namespace wind

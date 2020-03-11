@@ -26,37 +26,37 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/types.hpp"
+#include "shared/macros.hpp"
+#include "shared/math/math.hpp"
+
+#include <Mesh/BsMesh.h>
 
 // ========================================================================== //
-// Types
+// MeshManager Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// Enumeration of object types. These are used to distinguish between object
-/// categories and to specify common information for that object type.
-enum class ObjectType : u32 {
-  kInvalid = 0, ///< Invalid
-  kEmpty,       ///< Empty object with no components
-  kPlane,       ///< Flat plane
-  kCube,        ///< Cube
-  kBall,        ///< Sphere/Ball
-  kModel,       ///< Model with a specific mesh
-  kPlayer,      ///< Player with corresponding components
-  kRotor,       ///< Helicopter rotor
-  kCylinder,
-};
+WIND_FORWARD_DECLARE(Spline);
 
-// -------------------------------------------------------------------------- //
+/// Mesh manager
+class MeshManager {
+public:
+  /// Create a mesh for a spline
+  static bs::HMesh createSplineMesh(const Spline &spline);
 
-/// Enumeration of component types.
-enum class ComponentType : u32 {
-  kRigidbody,  ///< Rigidbody { "restitution", "mass" }
-  kWindSource, ///< Wind source { ["basic function"] }
-  kRenderable,
-  kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
-  kCollider,
+private:
+  ///
+  MeshManager() = default;
+
+  ///
+  ~MeshManager() = default;
+
+  /// Returns mesh manager instance
+  static MeshManager &instance() {
+    static MeshManager mgr;
+    return mgr;
+  }
 };
 
 } // namespace wind
