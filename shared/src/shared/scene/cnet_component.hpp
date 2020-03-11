@@ -10,7 +10,6 @@
 
 #include "shared/scene/rtti.hpp"
 #include "shared/state/moveable_state.hpp"
-#include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
 
 namespace wind {

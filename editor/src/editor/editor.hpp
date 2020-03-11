@@ -29,11 +29,7 @@
 #include "editor/sim/wind_sim.hpp"
 #include "shared/app.hpp"
 
-#include <BsPrerequisites.h>
-#include <GUI/BsGUIToggle.h>
 #include <Renderer/BsCamera.h>
-#include <Scene/BsSceneManager.h>
-#include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
 // Editor Declaration
@@ -117,13 +113,16 @@ private:
   WindSimulation *m_windSim = nullptr;
 
 public:
-  /* Editor window width */
-  static constexpr u32 WINDOW_WIDTH = 1280;
-  /* Editor window height */
-  static constexpr u32 WINDOW_HEIGHT = 720;
+  /// Name of the default scene
+  static constexpr char kDefaultSceneName[] = "res/scenes/world.json";
 
-  /* Scale of the ground plane */
-  static constexpr f32 GROUND_PLANE_SCALE = 4.0f;
+  /// Editor window width
+  static constexpr u32 kWindowWidth = 1280;
+  /// Editor window height
+  static constexpr u32 kWindowHeight = 720;
+
+  /// Scale of the ground plane
+  static constexpr f32 kGroundPlaneScale = 4.0f;
 };
 
 } // namespace wind

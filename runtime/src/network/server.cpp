@@ -5,7 +5,6 @@
 #include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
 #include "world.hpp"
-#include <Scene/BsSceneManager.h>
 #include <ThirdParty/json.hpp>
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>

@@ -9,8 +9,6 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
-#include "shared/math/math.hpp"
 #include "shared/scene/component/ctag.hpp"
 
 #include <ostream>

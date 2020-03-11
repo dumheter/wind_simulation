@@ -34,7 +34,6 @@
 #include <Importer/BsMeshImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
 #include <Reflection/BsRTTIType.h>
-#include <Resources/BsResource.h>
 #include <Resources/BsResourceHandle.h>
 #include <Resources/BsResourceManifest.h>
 #include <Resources/BsResources.h>

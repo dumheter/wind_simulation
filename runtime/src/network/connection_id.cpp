@@ -1,6 +1,5 @@
 #include "connection_id.hpp"
 
-#include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
 namespace wind {

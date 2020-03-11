@@ -41,16 +41,11 @@
 #include <GUI/BsGUIInputBox.h>
 #include <GUI/BsGUILabel.h>
 #include <GUI/BsGUILayout.h>
-#include <GUI/BsGUILayoutY.h>
 #include <GUI/BsGUIListBox.h>
 #include <GUI/BsGUIPanel.h>
-#include <GUI/BsGUIProgressBar.h>
 #include <GUI/BsGUISlider.h>
 #include <GUI/BsGUIToggle.h>
-#include <Resources/BsResourceManifest.h>
 #include <Resources/BsResources.h>
-#include <Scene/BsPrefab.h>
-#include <Scene/BsSceneManager.h>
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
@@ -375,7 +370,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     button->setPosition(120, height);
     button->onClick.connect([this]() {
       m_editor->setScene(EditorFactory::createDefaultScene(
-          "scene_default", Editor::GROUND_PLANE_SCALE));
+          "scene_default", Editor::kGroundPlaneScale));
       // logVerbose("loading default scene");
     });
 

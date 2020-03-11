@@ -10,7 +10,6 @@
 #include "shared/scene/fps_camera.hpp"
 #include "shared/state/player_input.hpp"
 #include "shared/utility/unique_id.hpp"
-#include <BsApplication.h>
 #include <GUI/BsGUILabel.h>
 #include <GUI/BsGUITexture.h>
 #include <unordered_map>

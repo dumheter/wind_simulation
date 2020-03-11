@@ -1,14 +1,11 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
-#include "BsApplication.h"
 #include "network/connection_state.hpp"
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
-#include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
 #include <optional>
-#include <steam/isteamnetworkingutils.h>
 #include <steam/steamnetworkingsockets.h>
 
 namespace wind {

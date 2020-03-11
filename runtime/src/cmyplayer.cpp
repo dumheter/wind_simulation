@@ -3,7 +3,6 @@
 #include "shared/scene/component_data.hpp"
 #include "shared/scene/serializer.hpp"
 #include "world.hpp"
-#include <type_traits>
 
 namespace wind {
 

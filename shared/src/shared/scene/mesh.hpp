@@ -27,7 +27,6 @@
 // ========================================================================== //
 
 #include "shared/macros.hpp"
-#include "shared/math/math.hpp"
 
 #include <Mesh/BsMesh.h>
 

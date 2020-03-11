@@ -6,7 +6,6 @@
 #include "network/connection_state.hpp"
 #include "network/net_common.hpp"
 #include "network/packet.hpp"
-#include "network/side.hpp"
 #include "shared/scene/cnet_component.hpp"
 #include "shared/types.hpp"
 #include <optional>

@@ -29,7 +29,6 @@
 #include "editor/sim/density_field.hpp"
 #include "editor/sim/obstruction_field.hpp"
 #include "editor/sim/vector_field.hpp"
-#include "shared/math/math.hpp"
 
 // ========================================================================== //
 // Editor Declaration

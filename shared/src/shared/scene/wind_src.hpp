@@ -30,11 +30,9 @@
 
 #include "shared/math/math.hpp"
 #include "shared/scene/component_handles.hpp"
-#include "shared/scene/rtti.hpp"
 #include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
 
-#include <BsPrerequisites.h>
 #include <Material/BsMaterial.h>
 #include <RTTI/BsMathRTTI.h>
 #include <Reflection/BsRTTIPlain.h>
@@ -66,7 +64,7 @@ public:
 
   void addFunction(BaseFn function);
 
-  void addFunctions(const std::vector<BaseFn>& functions);
+  void addFunctions(const std::vector<BaseFn> &functions);
 
   bs::Vector3 getWindForce(bs::Vector3 pos) const;
 

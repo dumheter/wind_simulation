@@ -28,7 +28,6 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/cnet_component.hpp"
-#include "shared/utility/bsprinter.hpp"
 
 // ========================================================================== //
 // CWindSource Implementation

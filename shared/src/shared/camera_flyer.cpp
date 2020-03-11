@@ -3,7 +3,6 @@
 #include <BsApplication.h>
 #include <Components/BsCCamera.h>
 #include <Input/BsInput.h>
-#include <Input/BsMouse.h>
 #include <Math/BsMath.h>
 #include <Math/BsVector3.h>
 #include <Platform/BsCursor.h>

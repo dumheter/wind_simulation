@@ -1,11 +1,8 @@
 #pragma once
 
-#include <BsApplication.h>
 #include <Components/BsCRigidbody.h>
 #include <Math/BsQuaternion.h>
 #include <Math/BsVector3.h>
-#include <Scene/BsSceneObject.h>
-#include <Scene/BsTransform.h>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 
@@ -53,7 +50,7 @@ public:
 
   void setRigid(bool isRigid) { bitSet(flag, kFlagRigid, (Bitfield)isRigid); }
 
- public:
+public:
   UniqueId id;
   Bitfield flag;
   bs::Vector3 position;

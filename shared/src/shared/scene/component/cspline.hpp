@@ -26,7 +26,6 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/macros.hpp"
 #include "shared/math/math.hpp"
 #include "shared/math/spline.hpp"
 #include "shared/scene/rtti.hpp"

@@ -24,7 +24,6 @@
 #include <Scene/BsSceneManager.h>
 #include <microprofile/microprofile.h>
 #include <regex>
-#include <variant>
 
 namespace wind {
 

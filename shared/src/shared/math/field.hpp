@@ -30,7 +30,6 @@
 #include "shared/math/math.hpp"
 #include "shared/types.hpp"
 
-#include <BsPrerequisites.h>
 #include <Debug/BsDebugDraw.h>
 
 // ========================================================================== //

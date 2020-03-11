@@ -3,7 +3,6 @@
 #include "shared/scene/component_data.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/state/moveable_state.hpp"
-#include <BsCorePrerequisites.h>
 #include <vector>
 
 namespace wind {

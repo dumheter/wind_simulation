@@ -32,7 +32,6 @@
 #include "types.hpp"
 
 #include <BsCorePrerequisites.h>
-#include <Resources/BsResource.h>
 
 // ========================================================================== //
 // Asset Declaration

@@ -3,15 +3,13 @@
 #include <BsPrerequisites.h>
 #include <Math/BsQuaternion.h>
 #include <Private/RTTI/BsGameObjectRTTI.h>
-#include <RTTI/BsMathRTTI.h>
 #include <Reflection/BsRTTIPlain.h>
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 
+#include "shared/math/math.hpp"
 #include "shared/scene/component_handles.hpp"
 #include "shared/scene/rtti.hpp"
-#include "shared/types.hpp"
-#include "shared/math/math.hpp"
 
 namespace wind {
 class CRotor : public bs::Component {

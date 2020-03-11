@@ -27,7 +27,6 @@
 // ========================================================================== //
 
 #include "shared/macros.hpp"
-#include "shared/math/math.hpp"
 #include "shared/types.hpp"
 
 #include <Scene/BsSceneManager.h>

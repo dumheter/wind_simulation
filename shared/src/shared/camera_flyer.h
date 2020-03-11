@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BsPrerequisites.h"
 #include "Input/BsVirtualInput.h"
 #include "Math/BsMath.h"
 #include "Scene/BsComponent.h"

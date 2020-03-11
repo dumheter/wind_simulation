@@ -2,7 +2,6 @@
 
 #include "shared/scene/rtti.hpp"
 
-#include <BsPrerequisites.h>
 #include <Input/BsVirtualInput.h>
 #include <Math/BsDegree.h>
 #include <Private/RTTI/BsGameObjectRTTI.h>

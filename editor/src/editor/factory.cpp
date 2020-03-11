@@ -27,21 +27,10 @@
 // ========================================================================== //
 
 #include "shared/asset.hpp"
-#include "shared/camera_flyer.h"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 
-#include <BsPrerequisites.h>
-#include <Components/BsCBoxCollider.h>
-#include <Components/BsCCamera.h>
-#include <Components/BsCMeshCollider.h>
-#include <Components/BsCPlaneCollider.h>
-#include <Components/BsCRenderable.h>
-#include <Components/BsCSkybox.h>
 #include <Material/BsMaterial.h>
-#include <Physics/BsPhysicsMaterial.h>
-#include <Resources/BsBuiltinResources.h>
-#include <Scene/BsSceneManager.h>
 
 // ========================================================================== //
 // EditorFactory Implementation

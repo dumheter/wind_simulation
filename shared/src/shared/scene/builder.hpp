@@ -26,14 +26,12 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/macros.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
 
-#include <ThirdParty/json.hpp>
 #include <vector>
 
 // ========================================================================== //

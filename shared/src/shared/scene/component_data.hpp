@@ -30,9 +30,6 @@
 #include "shared/types.hpp"
 #include "shared/wind/base_functions.hpp"
 
-#include <alflib/memory/raw_memory_reader.hpp>
-#include <alflib/memory/raw_memory_writer.hpp>
-
 // ========================================================================== //
 // ComponentData Declaration
 // ========================================================================== //

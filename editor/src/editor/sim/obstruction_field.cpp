@@ -26,17 +26,10 @@
 // Headers
 // ========================================================================== //
 
-#include <BsPrerequisites.h>
-#include <Components/BsCBoxCollider.h>
 #include <Components/BsCRenderable.h>
 #include <CoreThread/BsCoreThread.h>
 #include <Debug/BsDebugDraw.h>
-#include <Mesh/BsMesh.h>
 #include <Physics/BsPhysics.h>
-#include <Physics/BsPhysicsCommon.h>
-#include <Physics/BsPhysicsMaterial.h>
-#include <Scene/BsSceneObject.h>
-#include <Threading/BsThreading.h>
 
 // ========================================================================== //
 // VectorField Implementation

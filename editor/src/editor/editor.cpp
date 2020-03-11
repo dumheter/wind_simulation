@@ -50,7 +50,7 @@
 
 namespace wind {
 
-Editor::Editor() : App(MakeInfo("Editor", WINDOW_WIDTH, WINDOW_HEIGHT, 20)) {}
+Editor::Editor() : App(MakeInfo("Editor", kWindowWidth, kWindowHeight, 20)) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -74,7 +74,7 @@ void Editor::onStartup() {
   m_camera = SceneObject::create("camera");
   m_camera->setParent(m_root);
   m_camera->setPosition(
-      Vec3F(GROUND_PLANE_SCALE, 2.5f, GROUND_PLANE_SCALE - 4.0f) * 0.65f);
+      Vec3F(kGroundPlaneScale, 2.5f, kGroundPlaneScale - 4.0f) * 0.65f);
   m_camera->lookAt(Vec3F(.0f, 1.5f, .0f));
   HCamera cameraComp = m_camera->addComponent<CCamera>();
   cameraComp->getViewport()->setTarget(window);
@@ -90,12 +90,11 @@ void Editor::onStartup() {
   m_ui = new UI(this);
 
   // Setup default scene
-  setScene(Scene::loadFile("res/scenes/spline.json"));
-  Scene::saveFile("res/scenes/out.json", getScene());
+  setScene(Scene::loadFile(kDefaultSceneName));
 
   // Create simulation
-  m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
-                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.25f);
+  m_windSim = new WindSimulation(u32(kGroundPlaneScale * 2.0f), 6,
+                                 u32(kGroundPlaneScale * 2.0f), 0.25f);
   m_windSim->buildForScene(SceneManager::instance().getMainScene());
 }
 
@@ -216,13 +215,13 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
 
   // Recreate simulation
   delete m_windSim;
-  m_windSim = new WindSimulation(u32(GROUND_PLANE_SCALE * 2.0f), 6,
-                                 u32(GROUND_PLANE_SCALE * 2.0f), 0.25f);
+  m_windSim = new WindSimulation(u32(kGroundPlaneScale * 2.0f), 6,
+                                 u32(kGroundPlaneScale * 2.0f), 0.25f);
   m_windSim->buildForScene(bs::SceneManager::instance().getMainScene());
 
   // Debug dump
-  //logInfo("Dumping scene structure");
-  //Util::dumpScene(m_root);
+  // logInfo("Dumping scene structure");
+  // Util::dumpScene(m_root);
 }
 
 } // namespace wind
