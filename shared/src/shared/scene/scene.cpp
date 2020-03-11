@@ -125,6 +125,11 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   ObjectBuilder::Kind kind = ObjectBuilder::kindFromString(type.c_str());
   ObjectBuilder builder(kind);
 
+  // Network id
+  if (value.find("id") != value.end()) {
+    builder.withNetComponent(UniqueId(value.value("id", 0)));
+  }
+
   // Material
   auto itMat = value.find("material");
   if (itMat != value.end()) {
@@ -272,9 +277,15 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
   json value;
   value["name"] = object->getName();
 
+  // Object Type
   HCTag tag = object->getComponent<CTag>();
   if (tag->getType() != ObjectType::kEmpty) {
     value["type"] = ObjectBuilder::stringFromKind(tag->getType());
+  }
+
+  // Network Id
+  if (auto maybeId = tag->getData().id; maybeId) {
+    value["id"] = maybeId->raw();
   }
 
   // Skybox

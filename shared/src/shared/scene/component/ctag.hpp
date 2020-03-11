@@ -29,10 +29,12 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/scene/types.hpp"
+#include "shared/utility/unique_id.hpp"
 
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 #include <Scene/BsSceneObject.h>
+#include <optional>
 
 // ========================================================================== //
 // CTag Declaration
@@ -93,6 +95,7 @@ private:
       bool collider = false;
       bool rigidbody = false;
     } physics;
+    std::optional<UniqueId> id = std::nullopt;
   } m_data;
 };
 

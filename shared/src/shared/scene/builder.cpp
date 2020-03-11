@@ -69,6 +69,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCube: {
+    withName("cube");
     const bs::HMesh mesh =
         bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
     withMesh(mesh);
@@ -365,7 +366,18 @@ ObjectBuilder &ObjectBuilder::withObject(const bs::HSceneObject &object) {
 
 ObjectBuilder &
 ObjectBuilder::withNetComponent(const MoveableState &moveableState) {
-  m_handle->addComponent<CNetComponent>(moveableState);
+  auto netComp = m_handle->addComponent<CNetComponent>(moveableState);
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().id = std::make_optional(moveableState.id);
+  return *this;
+}
+
+ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
+  MoveableState state{};
+  state.id = id;
+  m_handle->addComponent<CNetComponent>(state);
+  HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().id = std::make_optional(id);
   return *this;
 }
 

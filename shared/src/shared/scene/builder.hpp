@@ -30,6 +30,7 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
+#include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
 
 #include <ThirdParty/json.hpp>
@@ -113,6 +114,10 @@ public:
 
   /// @post Must register netcomp in world
   ObjectBuilder &withNetComponent(const MoveableState &moveableState);
+
+  /// @post Must register netcomp in world
+  /// Construct from only an id
+  ObjectBuilder &withNetComponent(UniqueId id);
 
   /// Build the scene object
   bs::HSceneObject build();
