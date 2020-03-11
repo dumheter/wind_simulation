@@ -57,7 +57,7 @@ namespace wind {
 UI::UI(Editor *editor) : m_editor(editor) {
   using namespace bs;
 
-  m_scenePath = "res/scenes/default.json";
+  m_scenePath = Editor::kDefaultSceneName;
 
   const SPtr<RenderWindow> &window = gApplication().getPrimaryWindow();
   const RenderWindowProperties &windowProp = window->getProperties();

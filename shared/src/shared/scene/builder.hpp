@@ -84,7 +84,8 @@ public:
   ObjectBuilder &withMaterial(ShaderKind shaderKind, const String &texPath,
                               const Vec2F &tiling = Vec2F::ONE,
                               const Vec4F &color = Vec4F(1.0f, 1.0f, 1.0f,
-                                                         1.0f));
+                                                         1.0f),
+                              f32 opacity = 1.0f);
 
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);
@@ -116,6 +117,14 @@ public:
   /// @post Must register netcomp in world
   /// Construct from only an id
   ObjectBuilder &withNetComponent(UniqueId id);
+
+  ObjectBuilder &withDebugCube(const Vec3F &size = Vec3F::ONE,
+                               const Vec3F &position = Vec3F::ZERO,
+                               const Vec3F &rotation = Vec3F::ZERO);
+
+  ObjectBuilder &withDebugCylinder(f32 radius, f32 height,
+                                   const Vec3F &position = Vec3F::ZERO,
+                                   const Vec3F &rotation = Vec3F::ZERO);
 
   /// Build the scene object
   bs::HSceneObject build();
