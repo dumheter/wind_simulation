@@ -3,7 +3,7 @@
 namespace wind {
 
 MoveableState::MoveableState(UniqueId id)
-    : id(id), flag(0), position(bs::Vector3::ONE), vel(), angVel(),
+    : id(id), flag(0), position(bs::Vector3::ZERO), vel(), angVel(),
       rotation(bs::Quaternion::IDENTITY) {}
 
 void MoveableState::from(const bs::Transform &transform) {

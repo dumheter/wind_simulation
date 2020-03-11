@@ -104,6 +104,8 @@ public:
    */
   void scanForNetComps();
 
+  void dumpNetComps();
+
   /**
    * @return If it could be changed successfully.
    */
