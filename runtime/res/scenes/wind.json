@@ -62,8 +62,7 @@
 		    "scale": { "xyz": 4 },
 		    "position": { "xz": 8.0, "y": 1.8 },
                     "material": {
-			"shader": "transparent",
-			"texture": "res/textures/wireframe.png"
+			"shader": "wireframe"
 		    },
 		    "wind": [{
 			"type": "constant",
@@ -82,8 +81,8 @@
 		    "scale": { "xyz": 4 },
 		    "position": { "x": 8.0, "y": 1.8 , "z": 12.0},
                     "material": {
-			"shader": "transparent",
-			"texture": "res/textures/wireframe.png"
+			"shader": "wireframe",
+			"color": [0, 1.0, 1.0, 1]
 		    },
 		    "wind": [{
 			"type": "constant",
@@ -105,8 +104,8 @@
 		    "scale": [ 6, 4, 24],
 		    "position": { "x": 32.0, "y": 1.8 , "z": 0.0},
                     "material": {
-			"shader": "transparent",
-			"texture": "res/textures/wireframe.png"
+			"shader": "wireframe",
+			"color": [1.0, 0, 1.0, 1]
 		    },
 		    "wind": [{
 			"type": "constant",
@@ -137,8 +136,8 @@
 		            "scale": { "xz": 3, "y": 5 },
 		            "position": { "xz": 0, "y": -2.5},
                             "material": {
-			        "shader": "transparent",
-			        "texture": "res/textures/wireframe.png"
+			        "shader": "wireframe",
+			        "color": [1.0, 0, 1.0, 1]
 		            },
 		            "wind": [{
 			        "type": "constant",
@@ -159,7 +158,7 @@
                     "rotation": { "x": 90},
                     "material": {
 			"shader": "standard",
-			"texture": "res/textures/grid_2.png"
+			"color": [1.0, 1.0, 0, 1]
 		    },
                     "physics": {"restitution": 0.5, "mass": 20.0 },
 		    "wind": [{
@@ -173,8 +172,8 @@
 		            "scale": { "xz": 3, "y": 5 },
 		            "position": { "xz": 0, "y": -2.5},
                             "material": {
-			        "shader": "transparent",
-			        "texture": "res/textures/wireframe.png"
+			        "shader": "wireframe",
+			        "color": [1.0, 0, 0, 1]
 		            },
 		            "wind": [{
 			        "type": "constant",
@@ -209,8 +208,8 @@
 		            "scale": { "xz": 3, "y": 5 },
 		            "position": { "xz": 0, "y": -2.5},
                             "material": {
-			        "shader": "transparent",
-			        "texture": "res/textures/wireframe.png"
+			        "shader": "wireframe",
+			        "color": [1.0, 0, 0, 1]
 		            },
 		            "wind": [{
 			        "type": "constant",
