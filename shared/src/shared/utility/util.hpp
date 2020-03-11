@@ -58,6 +58,12 @@ public:
   /// Generate random UUID
   static bs::UUID randUUID();
 
+  /// Returns whether a file exists or not
+  static bool fileExist(const String &path);
+
+  /// Returns whether a file exists or not
+  static bool fileExist(const bs::Path &path);
+
   /// Read an entire file to a string
   static String readFile(const String &path);
 

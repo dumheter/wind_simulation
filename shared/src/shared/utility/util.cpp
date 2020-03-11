@@ -28,11 +28,13 @@
 
 #include "shared/log.hpp"
 
+#include <filesystem>
+#include <fstream>
+#include <streambuf>
+
 #include <BsApplication.h>
 #include <Input/BsMouse.h>
 #include <Platform/BsCursor.h>
-#include <fstream>
-#include <streambuf>
 #include <thirdparty/alflib/file/file_io.hpp>
 
 // ========================================================================== //
@@ -92,6 +94,19 @@ std::string Util::repeat(char c, u32 n) {
 // -------------------------------------------------------------------------- //
 
 bs::UUID Util::randUUID() { return bs::UUIDGenerator::generateRandom(); }
+
+// -------------------------------------------------------------------------- //
+
+bool Util::fileExist(const String &path) {
+  const std::filesystem::path p = path.c_str();
+  return std::filesystem::exists(p);
+}
+
+// -------------------------------------------------------------------------- //
+
+bool Util::fileExist(const bs::Path &path) {
+  return fileExist(path.toString());
+}
 
 // -------------------------------------------------------------------------- //
 

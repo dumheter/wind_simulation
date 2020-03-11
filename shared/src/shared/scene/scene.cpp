@@ -134,17 +134,23 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   auto itMat = value.find("material");
   if (itMat != value.end()) {
     json mat = *itMat;
-    const String tex = mat.value("texture", "").c_str();
+
+    // Shader and tint
     const Vec4F color =
         JsonUtil::getVec4F(mat, "color", Vec4F(1.0f, 1.0f, 1.0f, 1.0f));
     const String shaderStr = mat.value("shader", "").c_str();
     const ObjectBuilder::ShaderKind shaderKind =
         ObjectBuilder::shaderKindFromString(shaderStr);
 
+    // Texture
+    const String tex = mat.value("texture", "").c_str();
+    Vec2F tiling = Vec2F::ONE;
     if (!tex.empty()) {
-      const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
-      builder.withMaterial(shaderKind, tex, tiling);
+      tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
     }
+
+    // Set material
+    builder.withMaterial(shaderKind, tex, tiling, color);
   }
 
   // Physics (collider)

@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "shared/log.hpp"
+#include "shared/utility/util.hpp"
 
 #include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
@@ -46,6 +47,10 @@ namespace wind {
 
 bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr,
                                 bool mipmaps) {
+  if (!Util::fileExist(path)) {
+    return nullptr;
+  }
+
   bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
@@ -82,6 +87,10 @@ bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr,
 // -------------------------------------------------------------------------- //
 
 bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
+  if (!Util::fileExist(path)) {
+    return nullptr;
+  }
+
   bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
@@ -119,6 +128,10 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
 // -------------------------------------------------------------------------- //
 
 bs::HMesh Asset::loadMesh(const bs::Path &path, f32 scale, bool cpuCached) {
+  if (!Util::fileExist(path)) {
+    return nullptr;
+  }
+
   bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
 
@@ -153,6 +166,10 @@ bs::HMesh Asset::loadMesh(const bs::Path &path, f32 scale, bool cpuCached) {
 
 std::tuple<bs::HMesh, bs::HPhysicsMesh>
 Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached) {
+  if (!Util::fileExist(path)) {
+    return std::make_tuple(nullptr, nullptr);
+  }
+
   bs::Path assetPath = path;
   assetPath.setExtension(path.getExtension() + ".asset");
   bs::Path physAssetPath = path;
