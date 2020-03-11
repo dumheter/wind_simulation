@@ -8,7 +8,7 @@ int main() {
   wind::logInfo("¸,ø¤º°`°º¤ø,¸  {}  ¸,ø¤º°`°º¤ø,¸", "W I N D");
   wind::Common::InitNetwork();
   {
-    wind::World world{wind::App::Info{"Demo", 360, 250}};
+    wind::World world{wind::App::Info{"Demo", 640, 360}};
     world.run();
   }
   wind::Common::KillNetwork();

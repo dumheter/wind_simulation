@@ -62,6 +62,9 @@ ObjectBuilder::ObjectBuilder(Kind kind)
 
   // Create by kind
   switch (kind) {
+  case Kind::kEmpty: {
+    break;
+  }
   case Kind::kPlane: {
     const bs::HMesh mesh =
         bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Quad);
@@ -69,7 +72,6 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCube: {
-    withName("cube");
     const bs::HMesh mesh =
         bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
     withMesh(mesh);
@@ -105,11 +107,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   }
   case Kind::kRotor: {
     bs::HMesh mesh = Asset::loadMesh("res/meshes/rotor.fbx", 0.1f);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
-    break;
-  }
-  case Kind::kEmpty: {
+    withMesh(mesh);
     break;
   }
   case Kind::kCylinder: {
@@ -117,6 +115,11 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     withMesh(mesh);
     break;
   }
+    case Kind::kWindVolume: {
+      Vec3F pos{0.0f, 0.0f, 0.0f};
+      withDebugCube(pos, scale, rot);
+      break;
+    }
   default: {
     Util::panic("Invalid type when building object ({})", kind);
   }
@@ -319,9 +322,14 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &
-ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions, Vec3F volume, Vec4F color, Vec3F offset) {
   auto wind = m_handle->addComponent<CWindSource>();
   wind->addFunctions(functions);
+  logInfo("[builder] built windsource with {} functions",
+          wind->getFunctions().size());
+
+  withObject(windVolume);
+
   return *this;
 }
 
@@ -460,6 +468,8 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kRotor;
   } else if (kindString == "cylinder") {
     return Kind::kCylinder;
+  } else if (kindString == "windVolume") {
+    return Kind::kWindVolume;
   }
   return Kind::kInvalid;
 }
@@ -484,6 +494,8 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "rotor";
   case Kind::kCylinder:
     return "cylinder";
+  case Kind::kWindVolume:
+    return "windVolume";
   case Kind::kInvalid:
   default: {
     return "invalid";

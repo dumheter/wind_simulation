@@ -99,7 +99,9 @@ public:
   /// Adds wind
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
-  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions);
+  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions,
+                                Vec3F volume, Vec4F color,
+                                Vec3F offset);
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,

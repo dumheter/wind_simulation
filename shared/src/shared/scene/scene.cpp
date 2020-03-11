@@ -184,16 +184,26 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
 
   // Wind
   if (value.find("wind") != value.end()) {
-    json wind = value["wind"];
+    const json wind = value["wind"];
 
     std::vector<BaseFn> functions{};
-    for (const auto fn : wind) {
-      String windType = JsonUtil::getString(fn, "type", "constant");
-      Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
-      f32 mag = fn.value("magnitude", 0.0f);
-      functions.push_back(BaseFn::fnConstant(dir, mag));
+    const Vec3F volume = JsonUtil::getVec3F(wind, "volume", Vec3F::ONE);
+    const Vec4F color =
+        JsonUtil::getVec4F(wind, "color", Vec4F{1.0f, 1.0f, 1.0f, 1.0f});
+    const Vec3F offset = JsonUtil::getVec3F(wind, "offset", Vec3F::ZERO);
+
+    if (wind.find("functions") != wind.end()) {
+      const json fns = wind["functions"];
+
+      for (const auto fn : fns) {
+        const String windType = JsonUtil::getString(fn, "type", "constant");
+        const f32 mag = fn.value("magnitude", 0.0f);
+        const Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
+        functions.push_back(BaseFn::fnConstant(dir, mag));
+      }
     }
-    builder.withWindSource(functions);
+
+    builder.withWindSource(functions, volume, color, offset);
   }
 
   // Spline

@@ -96,6 +96,7 @@ bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {
 
 void CWindSource::fixedUpdate() {
   if (!m_collisions.empty()) {
+    logInfo("[windSource] collision");
     const f32 dt = bs::gTime().getFixedFrameDelta();
     for (auto &collision : m_collisions) {
       if (collision.netComp) {

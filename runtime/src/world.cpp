@@ -289,7 +289,7 @@ void World::buildObject(const CreateInfo &info) {
     } else if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
-      obj.withWindSource(wind.functions);
+      obj.withWindSource(wind.functions, wind.volume, wind.color, wind.offset);
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
       const auto &render = component.renderableData();
