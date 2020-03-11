@@ -61,6 +61,9 @@ public:
   /// Set the name
   ObjectBuilder &withName(const String &name);
 
+  /// Set whether object is saved
+  ObjectBuilder &withSave(bool save = true);
+
   /// Set the position
   ObjectBuilder &withPosition(const Vec3F &position);
 
@@ -99,7 +102,8 @@ public:
   ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions);
 
   /// Adds a spline component to the object
-  ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree);
+  ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
+                            u32 samples);
 
   /// Add rotor
   ObjectBuilder &withRotor(Vec3F rotation);

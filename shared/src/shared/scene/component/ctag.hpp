@@ -76,6 +76,7 @@ private:
 
   /// Additional data required to be stored for objects
   struct Data {
+    bool save = true; ///< Whether object should be saved
     String skybox = "";
     struct Material {
       String shader = "standard";

@@ -34,7 +34,8 @@
 
 namespace wind {
 
-Spline::Spline(const std::vector<Vec3F> &points, u32 degree) {
+Spline::Spline(const std::vector<Vec3F> &points, u32 degree)
+    : m_points(points), m_degree(degree) {
   // Initialize BSpline
   m_spline = ts_bspline_init();
   tsError error =

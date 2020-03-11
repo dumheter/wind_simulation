@@ -85,6 +85,9 @@ public:
   /// Set Quat
   static void setValue(nlohmann::json &value, const String &key,
                        const Quat &quat);
+
+  /// Create JSON from Vec3F.
+  static nlohmann::json create(const Vec3F &vec);
 };
 
 // -------------------------------------------------------------------------- //

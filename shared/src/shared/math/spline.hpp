@@ -49,7 +49,18 @@ public:
   /// Sample the spline at time 't' (0.0 -> 1.0).
   Vec3F sample(f32 t);
 
+  /// Returns the points of the spline.
+  const std::vector<Vec3F> &getPoints() const { return m_points; }
+
+  /// Returns the degree of the spline.
+  u32 getDegree() const { return m_degree; }
+
 private:
+  /// Control points
+  std::vector<Vec3F> m_points;
+  /// Degree of spline
+  u32 m_degree;
+
   /// Spline handle
   tsBSpline m_spline = {};
   /// DeBoor net

@@ -29,6 +29,7 @@
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
+#include "shared/scene/component/cspline.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
@@ -128,19 +129,16 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   auto itMat = value.find("material");
   if (itMat != value.end()) {
     json mat = *itMat;
-    const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
+    const String tex = mat.value("texture", "").c_str();
     const Vec4F color =
         JsonUtil::getVec4F(mat, "color", Vec4F(1.0f, 1.0f, 1.0f, 1.0f));
-    const String tex = mat.value("texture", "").c_str();
     const String shaderStr = mat.value("shader", "").c_str();
     const ObjectBuilder::ShaderKind shaderKind =
         ObjectBuilder::shaderKindFromString(shaderStr);
 
     if (!tex.empty()) {
+      const Vec2F tiling = JsonUtil::getVec2F(mat, "tiling", Vec2F::ONE);
       builder.withMaterial(shaderKind, tex, tiling);
-    } else {
-      logWarning("Object has tiling specified but no texture: {}",
-                 value.dump());
     }
   }
 
@@ -150,7 +148,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     f32 mass = value["physics"].value("mass", 0.0f);
     builder.withCollider(restitution, mass);
 
-    if (value["physics"].value("rigidbody", true)) {
+    if (value["physics"].value("rigidbody", false)) {
       builder.withRigidbody();
     }
   }
@@ -187,6 +185,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     json spline = *itSpline;
 
     u32 degree = JsonUtil::getU32(spline, "degree", 2);
+    u32 samples = JsonUtil::getU32(spline, "samples", 10);
     const auto splinePointsIt = spline.find("points");
     if (splinePointsIt != spline.end()) {
       const nlohmann::json splinePoints = *splinePointsIt;
@@ -195,7 +194,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
         for (const nlohmann::json &splinePoint : splinePoints) {
           points.push_back(JsonUtil::getVec3F(splinePoint));
         }
-        builder.withSpline(points, degree);
+        builder.withSpline(points, degree, samples);
       }
     } else {
       logError("spline must contain a list of control points");
@@ -248,15 +247,17 @@ nlohmann::json Scene::saveScene(const bs::HSceneObject &scene) {
   value["name"] = scene->getName().c_str();
 
   // Objects
-  if (u32 cnt = scene->getNumChildren(); cnt > 0) {
-    json objArrValue;
-    for (u32 i = 0; i < cnt; i++) {
-      bs::HSceneObject object = scene->getChild(i);
+  const u32 cnt = scene->getNumChildren();
+  json objArrValue = std::vector<json>{};
+  for (u32 i = 0; i < cnt; i++) {
+    bs::HSceneObject object = scene->getChild(i);
+    HCTag tag = object->getComponent<CTag>();
+    if (tag->getData().save) {
       objArrValue.push_back(saveObject(object));
     }
+  }
+  if (objArrValue.size() > 0) {
     value["objects"] = objArrValue;
-  } else {
-    value["objects"] = std::vector<json>{};
   }
 
   return value;
@@ -296,8 +297,8 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
   {
     // json mat = value["material"];
 
-    if (!tag->getData().physics.rigidbody) {
-      value["physics"]["rigidbody"] = false;
+    if (tag->getData().physics.rigidbody) {
+      value["physics"]["rigidbody"] = true;
     }
     if (tag->getData().physics.collider) {
       value["physics"]["restitution"] = tag->getData().physics.restitution;
@@ -321,19 +322,31 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value, "rotation", rotation);
   }
 
-  // Sub-objects
-  u32 cnt = object->getNumChildren();
-  if (cnt > 0) {
-    json objArrValue;
-    for (u32 i = 0; i < cnt; i++) {
-      bs::HSceneObject subObject = object->getChild(i);
-      objArrValue.push_back(saveObject(subObject));
+  // Spline
+  const HCSpline splineComp = object->getComponent<CSpline>();
+  if (splineComp) {
+    Spline *spline = splineComp->getSpline();
+    value["spline"]["degree"] = spline->getDegree();
+    json splinePoints = std::vector<json>{};
+    for (const Vec3F &point : spline->getPoints()) {
+      splinePoints.push_back(JsonUtil::create(point));
     }
-    value["objects"] = objArrValue;
-  } else {
-    value["objects"] = std::vector<json>{};
+    value["spline"]["points"] = splinePoints;
   }
 
+  // Sub-objects
+  const u32 cnt = object->getNumChildren();
+  json objArrValue = std::vector<json>{};
+  for (u32 i = 0; i < cnt; i++) {
+    bs::HSceneObject subObject = object->getChild(i);
+    HCTag subTag = subObject->getComponent<CTag>();
+    if (subTag->getData().save) {
+      objArrValue.push_back(saveObject(subObject));
+    }
+  }
+  if (objArrValue.size() > 0) {
+    value["objects"] = objArrValue;
+  }
   return value;
 }
 

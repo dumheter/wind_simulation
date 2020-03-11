@@ -213,4 +213,14 @@ void JsonUtil::setValue(nlohmann::json &value, const String &key,
   value[key.c_str()]["z"] = quat.z;
 }
 
+// -------------------------------------------------------------------------- //
+
+nlohmann::json JsonUtil::create(const Vec3F &vec) {
+  nlohmann::json value;
+  value["x"] = vec.x;
+  value["y"] = vec.y;
+  value["z"] = vec.z;
+  return value;
+}
+
 } // namespace wind

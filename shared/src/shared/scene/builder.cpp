@@ -34,7 +34,6 @@
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
-#include "shared/scene/mesh.hpp"
 #include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
@@ -125,6 +124,15 @@ ObjectBuilder::ObjectBuilder(Kind kind)
 
 ObjectBuilder &ObjectBuilder::withName(const String &name) {
   m_handle->setName(name);
+
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withSave(bool save) {
+  const HCTag ctag = m_handle->getComponent<CTag>();
+  ctag->getData().save = save;
 
   return *this;
 }
@@ -313,15 +321,27 @@ ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
-                                         u32 degree) {
+                                         u32 degree, u32 samples) {
   // Spline component
   HCSpline spline = m_handle->addComponent<CSpline>(points, degree);
 
-  // Add sub-object to render spline
-  const bs::HMesh mesh = MeshManager::createSplineMesh(*spline->getSpline());
-  const bs::HSceneObject obj =
-      ObjectBuilder{ObjectType::kModel}.withMesh(mesh).build();
-  withObject(obj);
+  // Add sub-objects to render spline
+  Spline *s = spline->getSpline();
+  const f32 step = 1.0f / samples;
+  for (u32 i = 0; i <= samples; i++) {
+    f32 t = step * i;
+    Vec3F pos = s->sample(t);
+
+    const bs::HSceneObject obj =
+        ObjectBuilder{ObjectType::kCube}
+            .withSave(false)
+            .withMaterial(ShaderKind::kStandard,
+                          "res/textures/spline_waypoint.png")
+            .withPosition(pos)
+            .withScale(Vec3F(0.1f, 0.1f, 0.1f))
+            .build();
+    withObject(obj);
+  }
 
   return *this;
 }
