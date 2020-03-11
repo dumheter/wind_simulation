@@ -115,10 +115,11 @@
     <None Include="res\scenes\default.json" />
     <None Include="res\scenes\tornado.json" />
     <None Include="res\scenes\world.json" />
+    <None Include="res\shaders\diffuse_ext.bsl" />
+    <None Include="res\shaders\transparent_ext.bsl" />
     <None Include="res\shaders\wireframe.bsl" />
     <None Include="res\textures\grid.png.asset" />
     <None Include="res\textures\grid_2.png.asset" />
-    <None Include="res\textures\wire.png.asset" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\scenes\spline.json" />
@@ -127,7 +128,9 @@
     <Image Include="res\textures\grid.png" />
     <Image Include="res\textures\grid_2.png" />
     <Image Include="res\textures\spline_waypoint.png" />
-    <Image Include="res\textures\wire.png" />
+    <Image Include="res\textures\transparent.png" />
+    <Image Include="res\textures\transparent_yellow.png" />
+    <Image Include="res\textures\wall.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

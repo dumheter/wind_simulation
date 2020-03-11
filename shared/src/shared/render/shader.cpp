@@ -31,16 +31,12 @@
 namespace wind {
 
 ShaderManager::ShaderManager() {
-  //
-  m_shaderWireframe = loadWireframe();
-}
-
-// -------------------------------------------------------------------------- //
-
-bs::HShader ShaderManager::loadWireframe() {
-  bs::HShader shader =
+  m_shaderDiffuse =
+      bs::gImporter().import<bs::Shader>("res/shaders/diffuse_ext.bsl");
+  m_shaderTransparent =
+      bs::gImporter().import<bs::Shader>("res/shaders/transparent_ext.bsl");
+  m_shaderWireframe =
       bs::gImporter().import<bs::Shader>("res/shaders/wireframe.bsl");
-  return shader;
 }
 
 } // namespace wind

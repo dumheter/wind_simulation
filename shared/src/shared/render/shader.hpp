@@ -36,6 +36,12 @@ namespace wind {
 
 class ShaderManager {
 public:
+  /// Returns the diffuse shader
+  static bs::HShader getDiffuse() { return instance().m_shaderDiffuse; }
+
+  /// Returns the transparent shader
+  static bs::HShader getTransparent() { return instance().m_shaderTransparent; }
+
   /// Returns the wireframe shader
   static bs::HShader getWireframe() { return instance().m_shaderWireframe; }
 
@@ -43,15 +49,17 @@ private:
   /// Construct shader manager
   ShaderManager();
 
-  /// Load the wireframe shader
-  bs::HShader loadWireframe();
-
   /// Returns the static instance of the Shader class
   static ShaderManager &instance() {
     static ShaderManager shader;
     return shader;
   }
 
+  /// Diffuse shader
+  bs::HShader m_shaderDiffuse;
+  /// Transparent shader
+  bs::HShader m_shaderTransparent;
+  /// Wireframe shader
   bs::HShader m_shaderWireframe;
 };
 

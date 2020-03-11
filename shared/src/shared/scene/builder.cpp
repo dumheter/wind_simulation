@@ -189,13 +189,14 @@ ObjectBuilder &ObjectBuilder::withMesh(const bs::HMesh &mesh) {
 ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
                                            const String &texPath,
                                            const Vec2F &tiling,
-                                           const Vec4F &color) {
+                                           const Vec4F &color, f32 opacity) {
   // Determine shader
   bs::HShader shader;
   switch (shaderKind) {
   case ShaderKind::kTransparent: {
-    shader = bs::gBuiltinResources().getBuiltinShader(
-        bs::BuiltinShader::Transparent);
+    // shader = bs::gBuiltinResources().getBuiltinShader(
+    //    bs::BuiltinShader::Transparent);
+    shader = ShaderManager::getTransparent();
     break;
   }
   case ShaderKind::kWireframe: {
@@ -204,8 +205,9 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
   }
   case ShaderKind::kStandard:
   default: {
-    shader =
-        bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
+    // shader =
+    //   bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
+    shader = ShaderManager::getDiffuse();
     break;
   }
   }
@@ -216,9 +218,11 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
     const bs::HTexture texture = AssetManager::loadTexture(texPath);
     m_material->setTexture("gAlbedoTex", texture);
     m_material->setVec2("gUVTile", tiling);
-  } else {
-    m_material->setVec4("gWireColor", color);
   }
+  if (shaderKind == ShaderKind::kTransparent) {
+    m_material->setFloat("gOpacity", opacity);
+  }
+  m_material->setVec4("gTintColor", color);
 
   const HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().mat.albedo = texPath;
@@ -380,6 +384,40 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
   m_handle->addComponent<CNetComponent>(state);
   HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().id = std::make_optional(id);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
+                                            const Vec3F &position,
+                                            const Vec3F &rotation) {
+  const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCube)
+                                   .withSave(false)
+                                   .withMaterial(ShaderKind::kTransparent,
+                                                 "res/textures/transparent.png")
+                                   .withPosition(position)
+                                   .withScale(size)
+                                   .withRotation(rotation)
+                                   .build();
+  withObject(obj);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withDebugCylinder(f32 radius, f32 height,
+                                                const Vec3F &position,
+                                                const Vec3F &rotation) {
+  const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCylinder)
+                                   .withSave(false)
+                                   .withMaterial(ShaderKind::kTransparent,
+                                                 "res/textures/transparent.png")
+                                   .withPosition(position)
+                                   .withScale(Vec3F(radius, height, radius))
+                                   .withRotation(rotation)
+                                   .build();
+  withObject(obj);
   return *this;
 }
 
