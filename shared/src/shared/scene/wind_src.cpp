@@ -45,6 +45,12 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
   auto so = ObjectBuilder(ObjectType::kEmpty).build();
   so->setParent(parent);
 
+  const auto setCommonSettings = [this](auto &collider) {
+    collider->setIsTrigger(true);
+    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    collider->setLayer(WindSystem::kWindVolumeLayer);
+  };
+
   switch (volumeType) {
   case WindSystem::VolumeType::kCylinder: {
     logInfo("[CWindSource] cylinder volume");
@@ -53,8 +59,7 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
                                                  1.0f, false, true);
     auto collider = so->addComponent<bs::CMeshCollider>();
     collider->setMesh(pmesh);
-    collider->setIsTrigger(true);
-    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    setCommonSettings(collider);
     setupCollision(collider);
     break;
   }
@@ -63,8 +68,7 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
   default: {
     logInfo("[CWindSource] cube volume");
     auto collider = so->addComponent<bs::CBoxCollider>();
-    collider->setIsTrigger(true);
-    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    setCommonSettings(collider);
     setupCollision(collider);
   }
   }
@@ -90,7 +94,6 @@ bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {
 
 void CWindSource::fixedUpdate() {
   if (!m_collisions.empty()) {
-    logInfo("[windSource] collision");
     const f32 dt = bs::gTime().getFixedFrameDelta();
     for (auto &collision : m_collisions) {
       if (collision.netComp) {
