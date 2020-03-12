@@ -96,8 +96,8 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     auto prep = ObjectBuilder{ObjectType::kCylinder}
                     .withSave(false)
                     .withName("playerRep")
-                    .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
-                    .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
+                    .withPosition(bs::Vector3(0.0f, -0.1f, 0.0f))
+                    .withScale(bs::Vector3(0.7f, 1.8f, 0.7f))
                     .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                                   "res/textures/grid_bg.png")
                     .build();
