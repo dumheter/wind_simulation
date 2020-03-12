@@ -35,6 +35,8 @@ ShaderManager::ShaderManager() {
       bs::gImporter().import<bs::Shader>("res/shaders/diffuse_ext.bsl");
   m_shaderTransparent =
       bs::gImporter().import<bs::Shader>("res/shaders/transparent_ext.bsl");
+  m_shaderTransparentNoCull =
+      bs::gImporter().import<bs::Shader>("res/shaders/transparent_no_cull.bsl");
   m_shaderWireframe =
       bs::gImporter().import<bs::Shader>("res/shaders/wireframe.bsl");
 }

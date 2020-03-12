@@ -44,11 +44,15 @@ struct MoveableState;
 
 class ObjectBuilder {
 public:
+  /// Invalid number of samples. Used as default
+  static constexpr u32 kSplineSamplesInvalid = std::numeric_limits<u32>::max();
+
   /// Enumeration of shader kinds. An object material uses one of these.
   enum class ShaderKind {
-    kStandard,    ///< Standard PBR shader.
-    kTransparent, ///< Transparent PBR shader.
-    kWireframe    ///< Wireframe shader.
+    kStandard,          ///< Standard PBR shader.
+    kTransparent,       ///< Transparent shader.
+    kTransparentNoCull, ///< Transparent shader with no back-face culling
+    kWireframe          ///< Wireframe shader.
   };
 
   /// Object kind
@@ -103,7 +107,7 @@ public:
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
-                            u32 samples);
+                            u32 samples = kSplineSamplesInvalid);
 
   /// Add rotor
   ObjectBuilder &withRotor(Vec3F rotation);

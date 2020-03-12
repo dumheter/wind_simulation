@@ -25,7 +25,11 @@
               "name": "house0_wall_north0",
               "type": "cube",
               "material": {
-                "texture": "res/textures/wall.png"
+                "texture": "res/textures/wall.png",
+                "tiling": {
+                  "u": 4,
+                  "v": 8
+                }
               },
               "scale": [ 1.0, 2.0, 0.1 ],
               "position": [ 0.0, 1.0, -4.0 ]
@@ -34,7 +38,11 @@
               "name": "house0_wall_north1",
               "type": "cube",
               "material": {
-                "texture": "res/textures/wall.png"
+                "texture": "res/textures/wall.png",
+                "tiling": {
+                  "u": 12,
+                  "v": 8
+                }
               },
               "scale": [ 3.0, 2.0, 0.1 ],
               "position": [ 3.0, 1.0, -4.0 ]
@@ -43,16 +51,24 @@
               "name": "house0_wall_north2",
               "type": "cube",
               "material": {
-                "texture": "res/textures/wall.png"
+                "texture": "res/textures/wall.png",
+                "tiling": {
+                  "u": 4,
+                  "v": 1
+                }
               },
-              "scale": [ 1.0, 0.2, 0.1 ],
-              "position": [ 1.0, 1.9, -4.0 ]
+              "scale": [ 1.0, 0.25, 0.1 ],
+              "position": [ 1.0, 1.875, -4.0 ]
             },
             {
               "name": "house0_wall_south",
               "type": "cube",
               "material": {
-                "texture": "res/textures/wall.png"
+                "texture": "res/textures/wall.png",
+                "tiling": {
+                  "u": 20,
+                  "v": 8
+                }
               },
               "scale": [ 5.0, 2.0, 0.1 ],
               "position": [ 2.0, 1.0, -8.0 ]
@@ -61,7 +77,11 @@
               "name": "house0_wall_west",
               "type": "cube",
               "material": {
-                "texture": "res/textures/wall.png"
+                "texture": "res/textures/wall.png",
+                "tiling": {
+                  "u": 16,
+                  "v": 8
+                }
               },
               "scale": [ 0.1, 2.0, 4.0 ],
               "position": [ -0.5, 1.0, -6.0 ]
@@ -70,7 +90,11 @@
               "name": "house0_wall_east",
               "type": "cube",
               "material": {
-                "texture": "res/textures/wall.png"
+                "texture": "res/textures/wall.png",
+                "tiling": {
+                  "u": 16,
+                  "v": 8
+                }
               },
               "scale": [ 0.1, 2.0, 4.0 ],
               "position": [ 4.5, 1.0, -6.0 ]
@@ -82,12 +106,39 @@
     {
       "type": "cube",
       "material": {
-        "shader": "transparent",
+        "shader": "transparent_no_cull",
         "opacity": 0.2,
         "color": [ 1.0, 1.0, 0.0, 1.0 ]
       },
-      "position": [ 2, 1, -6 ],
+      "position": [ 2.01, 1.01, -6.01 ],
       "scale": [ 5, 2, 4 ]
+    },
+    {
+      "type": "cylinder",
+      "material": {
+        "shader": "transparent_no_cull",
+        "opacity": 0.1,
+        "color": [ 0.2, 0.0, 0.8, 1.0 ]
+      },
+      "position": [ -5, 0.01, 0 ],
+      "scale": [ 2, 4, 2 ]
+    },
+    {
+      "name": "spline0",
+      "type": "empty",
+      "spline": {
+        "degree": 2,
+        "points": [
+          [ 0, 1, 0 ],
+          [ -5, 1, -10 ],
+          [ 15, 1, -10 ],
+          [ 0, 1, 5 ],
+          [ 10, 1, 10 ]
+        ]
+      },
+      "spline-follow": {
+        "speed": 1.0
+      }
     }
   ]
 }

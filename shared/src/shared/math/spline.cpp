@@ -36,6 +36,10 @@ namespace wind {
 
 Spline::Spline(const std::vector<Vec3F> &points, u32 degree)
     : m_points(points), m_degree(degree) {
+  AlfAssert(
+      points.size() > degree,
+      "Spline must consist of at least 'degree + 1' number of control points");
+
   // Initialize BSpline
   m_spline = ts_bspline_init();
   tsError error =
@@ -69,7 +73,7 @@ Spline::~Spline() {
 
 // -------------------------------------------------------------------------- //
 
-Vec3F Spline::sample(f32 t) {
+Vec3F Spline::sample(f32 t) const {
   AlfAssert(t >= 0.0 && t <= 1.0, "t must be within the range [0.0, 1.0]");
 
   // Evaluate spline
@@ -86,6 +90,30 @@ Vec3F Spline::sample(f32 t) {
   const Vec3F out(x, y, z);
   free(result);
   return out;
+}
+
+// -------------------------------------------------------------------------- //
+
+f32 Spline::calcLenEst() const {
+  const Vec3F &prev = m_points[0];
+  f32 len = 0.0f;
+  for (const Vec3F &point : m_points) {
+    len += (point - prev).length();
+  }
+  return len;
+}
+
+// -------------------------------------------------------------------------- //
+
+f32 Spline::calcLen(u32 samples) const {
+  const Vec3F &prev = sample(0);
+  const f32 delta = 1.0f / samples;
+  f32 len = 0.0f;
+  for (u32 i = 0; i < samples + 1; i++) {
+    const f32 t = delta * i;
+    len += (sample(t) - prev).length();
+  }
+  return len;
 }
 
 } // namespace wind
