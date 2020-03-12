@@ -338,8 +338,9 @@ void World::buildObject(const CreateInfo &info) {
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
-      const auto &wind = component.windSourceData();
-      obj.withWindSource(wind.functions);
+      // const auto &wind = component.windSourceData();
+      // obj.withWindSource(wind.functions);
+      logError("[world:buildObject] withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
       const auto &render = component.renderableData();

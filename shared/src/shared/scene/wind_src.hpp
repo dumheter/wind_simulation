@@ -28,10 +28,12 @@
 
 #include "shared/scene/rtti.hpp"
 
+#include "shared/log.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/component_handles.hpp"
 #include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
+#include "shared/wind/wind_system.hpp"
 
 #include <Material/BsMaterial.h>
 #include <RTTI/BsMathRTTI.h>
@@ -60,7 +62,8 @@ public:
   CWindSource() = default;
 
   /// @size Size of the cube volume where wind interacts.
-  CWindSource(const bs::HSceneObject &parent);
+  CWindSource(const bs::HSceneObject &parent,
+              WindSystem::VolumeType volumeType);
 
   void addFunction(BaseFn function);
 
@@ -83,6 +86,9 @@ public:
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
+  template <typename T> void setupCollision(const T &collider);
+
+private:
   std::vector<BaseFn> m_functions{};
   std::vector<Collision> m_collisions{};
 };
@@ -91,6 +97,38 @@ private:
 
 /// CWindSource handle type
 using HCWindSource = bs::GameObjectHandle<CWindSource>;
+
+template <typename T> void CWindSource::setupCollision(const T &collider) {
+  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
+    if (data.collider[1] == nullptr) {
+      return;
+    }
+    auto so = data.collider[1]->SO();
+    HCNetComponent netComp = so->getComponent<CNetComponent>();
+    if (netComp) {
+      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
+    } else {
+      logWarning("[windSource] col with non net component");
+    }
+  });
+
+  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
+    if (data.collider[1] == nullptr) {
+      return;
+    }
+    auto so = data.collider[1]->SO();
+    auto netComp = so->getComponent<CNetComponent>();
+    if (netComp) {
+      const auto id = netComp->getUniqueId();
+      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
+        if (it->id == id) {
+          m_collisions.erase(it);
+          break;
+        }
+      }
+    }
+  });
+}
 
 } // namespace wind
 

@@ -25,9 +25,12 @@
 #include "Components/BsCRenderable.h"
 #include "Scene/BsSceneObject.h"
 #include "Utility/BsTime.h"
+#include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/cnet_component.hpp"
+
+#include <Components/BsCMeshCollider.h>
 
 // ========================================================================== //
 // CWindSource Implementation
@@ -35,45 +38,36 @@
 
 namespace wind {
 
-CWindSource::CWindSource(const bs::HSceneObject &parent)
+CWindSource::CWindSource(const bs::HSceneObject &parent,
+                         WindSystem::VolumeType volumeType)
     : bs::Component(parent) {
   setName("WindComponent");
   auto so = ObjectBuilder(ObjectType::kEmpty).build();
   so->setParent(parent);
 
-  auto collider = so->addComponent<bs::CBoxCollider>();
-  collider->setIsTrigger(true);
-  collider->setCollisionReportMode(bs::CollisionReportMode::Report);
-
-  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    auto so = data.collider[1]->SO();
-    HCNetComponent netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
-    } else {
-      logWarning("[windSource] col with non net component");
-    }
-  });
-
-  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    auto so = data.collider[1]->SO();
-    auto netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      const auto id = netComp->getUniqueId();
-      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
-        if (it->id == id) {
-          m_collisions.erase(it);
-          break;
-        }
-      }
-    }
-  });
+  switch (volumeType) {
+  case WindSystem::VolumeType::kCylinder: {
+    logInfo("[CWindSource] cylinder volume");
+    // TODO only load the physics mesh
+    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
+                                                 1.0f, false, true);
+    auto collider = so->addComponent<bs::CMeshCollider>();
+    collider->setMesh(pmesh);
+    collider->setIsTrigger(true);
+    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    setupCollision(collider);
+    break;
+  }
+  case WindSystem::VolumeType::kCube:
+    [[fallthrough]];
+  default: {
+    logInfo("[CWindSource] cube volume");
+    auto collider = so->addComponent<bs::CBoxCollider>();
+    collider->setIsTrigger(true);
+    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    setupCollision(collider);
+  }
+  }
 }
 
 void CWindSource::addFunction(BaseFn function) {

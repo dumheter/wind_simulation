@@ -129,7 +129,6 @@ void Client::handlePacket() {
       so = Scene::load(s.GetUTF8());
       m_world->setDynamicScene(so);
       m_world->scanForNetComps();
-      logInfo("\n**********************\n{}", s.GetUTF8());
     }
   } else if (header == PacketHeaderTypes::kSceneChange) {
     auto mr = m_packet.GetMemoryReader();

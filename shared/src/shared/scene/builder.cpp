@@ -111,7 +111,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCylinder: {
-    bs::HMesh mesh = Asset::loadMesh("res/meshes/cylinder.fbx", 0.1f);
+    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f, false, true);
     withMesh(mesh);
     break;
   }
@@ -313,8 +313,8 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &
-ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
-  auto wind = m_handle->addComponent<CWindSource>();
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions, WindSystem::VolumeType volumeType) {
+  auto wind = m_handle->addComponent<CWindSource>(volumeType);
   wind->addFunctions(functions);
   return *this;
 }

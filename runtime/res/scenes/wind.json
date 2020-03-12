@@ -80,8 +80,8 @@
           "wind": {
             "functions": [{
               "type": "constant",
-              "magnitude": 25,
-              "direction": [ 0.0, 0.0, 1.0 ]
+              "magnitude": 10,
+              "direction": [ 0.0, 1.0, 0 ]
             }],
             "volume": {
               "type": "cylinder",

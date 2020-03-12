@@ -164,7 +164,8 @@ bs::HMesh Asset::loadMesh(const bs::Path &path, f32 scale, bool cpuCached) {
 // -------------------------------------------------------------------------- //
 
 std::tuple<bs::HMesh, bs::HPhysicsMesh>
-Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached) {
+Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached,
+                           bool isConvex) {
   if (!Util::fileExist(path)) {
     return std::make_tuple(nullptr, nullptr);
   }
@@ -189,13 +190,15 @@ Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached) {
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);
     if (bs::rtti_is_of_type<bs::MeshImportOptions>(_impOpt)) {
+      auto meshType = isConvex ? bs::CollisionMeshType::Convex
+                               : bs::CollisionMeshType::Normal;
       bs::MeshImportOptions *impOpt =
-          static_cast<bs::MeshImportOptions *>(_impOpt.get());
+                     static_cast<bs::MeshImportOptions *>(_impOpt.get());
       impOpt->cpuCached = cpuCached;
       impOpt->importNormals = true;
       impOpt->importTangents = true;
       impOpt->importScale = scale;
-      impOpt->collisionMeshType = bs::CollisionMeshType::Normal;
+      impOpt->collisionMeshType = meshType;
     }
 
     // Import mesh and physics mesh
