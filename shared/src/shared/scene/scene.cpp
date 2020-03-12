@@ -140,10 +140,9 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     const ObjectBuilder::ShaderKind shaderKind =
         ObjectBuilder::shaderKindFromString(shaderStr);
 
-    // Color and opacity
+    // Color
     const Vec4F color =
         JsonUtil::getVec4F(mat, "color", Vec4F(1.0f, 1.0f, 1.0f, 1.0f));
-    const f32 opacity = mat.value("opacity", 1.0f);
 
     // Texture
     const String defTex = shaderKind == ObjectBuilder::ShaderKind::kTransparent
@@ -156,7 +155,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     }
 
     // Set material
-    builder.withMaterial(shaderKind, tex, tiling, color, opacity);
+    builder.withMaterial(shaderKind, tex, tiling, color);
   }
 
   // Physics (collider)

@@ -55,7 +55,6 @@ shader Surface
 		
 		cbuffer MaterialParams
 		{
-			float gOpacity = 1.0f;
 			[color][hdr]
 			float3 gEmissiveColor = { 1.0f, 1.0f, 1.0f };
 			float2 gUVOffset = { 0.0f, 0.0f };
@@ -82,7 +81,7 @@ shader Surface
 			float3 lighting = calcLighting(input.worldPosition.xyz, input.position, uv, surfaceData);
 			float3 emissive = gEmissiveColor * gEmissiveMaskTex.Sample(gEmissiveMaskSamp, uv).x;
 
-			float4 result = float4(emissive + lighting, surfaceData.albedo.a * gOpacity);
+			float4 result = float4(emissive + lighting, surfaceData.albedo.a * gTintColor.a);
 			result.rgb = gTintColor.rgb * albedo.rgb;
 			return result;
 		}	

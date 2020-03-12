@@ -128,7 +128,8 @@
         ]
       },
       "spline-follow": {
-        "speed": 1.0
+        "speed": 1.0,
+        "wrap": "wrap"
       }
     }
   ]

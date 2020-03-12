@@ -9,26 +9,20 @@
       "name": "geometry",
       "objects": [
         {
-          "name": "floor",
           "type": "plane",
           "material": {
             "shader": "standard",
             "texture": "res/textures/grid.png",
             "tiling": { "uv": 16.0 }
           },
-          "scale": [ 40.0, 1.0, 40.0 ],
+          "scale": [ 4.0, 1.0, 4.0 ],
           "position": {
             "xz": 4.0,
-            "y": -0.4
+            "y": 0.4
           },
-          "tiling": { "uv": 160.0 },
-          "physics": {
-            "restitution": 0.5,
-            "rigidbody": false
-          }
+          "physics": { "restitution": 0.5, "rigidbody": false }
         },
         {
-          "name": "tall cube",
           "type": "cube",
           "material": {
             "shader": "standard",
@@ -47,6 +41,25 @@
             "restitution": 0.5,
             "mass": 25.0
           }
+        },
+        {
+          "name": "fan",
+          "type": "cube",
+          "material": {
+            "shader": "wireframe",
+            "color": [ 1.0, 0.0, 1.0, 0.0 ]
+          },
+          "scale": { "xyz": 0.5 },
+          "position": {
+            "xz": 4.0,
+            "y": 1.0
+          },
+          "wind": [
+            {
+              "type": "constant",
+              "direction": [ 0.0, 0.0, 0.0 ]
+            }
+          ]
         }
       ]
     }
