@@ -32,6 +32,7 @@
 #include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
+#include <Importer/BsShaderImportOptions.h>
 #include <Importer/BsTextureImportOptions.h>
 #include <Reflection/BsRTTIType.h>
 #include <Resources/BsResourceHandle.h>
@@ -193,7 +194,7 @@ Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached,
       auto meshType = isConvex ? bs::CollisionMeshType::Convex
                                : bs::CollisionMeshType::Normal;
       bs::MeshImportOptions *impOpt =
-                     static_cast<bs::MeshImportOptions *>(_impOpt.get());
+          static_cast<bs::MeshImportOptions *>(_impOpt.get());
       impOpt->cpuCached = cpuCached;
       impOpt->importNormals = true;
       impOpt->importTangents = true;
@@ -216,6 +217,39 @@ Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached,
   //    physMesh.getUUID(), assetPath);
 
   return std::make_tuple(mesh, physMesh);
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::HShader Asset::loadShader(const bs::Path &path) {
+  if (!Util::fileExist(path)) {
+    return nullptr;
+  }
+
+  bs::Path assetPath = path;
+  assetPath.setExtension(path.getExtension() + ".asset");
+  bs::HShader shader = bs::gResources().load<bs::Shader>(assetPath);
+
+  if (!shader) {
+    bs::gDebug().log(
+        "Shader '" + path.toString() +
+            "' has not yet been imported. This process can take a while",
+        bs::LogVerbosity::Warning);
+
+    const bs::SPtr<bs::ImportOptions> _impOpt =
+        bs::Importer::instance().createImportOptions(path);
+    if (bs::rtti_is_of_type<bs::ShaderImportOptions>(_impOpt)) {
+      const bs::ShaderImportOptions *impOpt =
+          static_cast<bs::ShaderImportOptions *>(_impOpt.get());
+    }
+    shader = bs::gImporter().import<bs::Shader>(path, _impOpt);
+    bs::gResources().save(shader, assetPath, true);
+  }
+
+  bs::gResources().getResourceManifest("Default")->registerResource(
+      shader.getUUID(), assetPath);
+
+  return shader;
 }
 
 } // namespace wind

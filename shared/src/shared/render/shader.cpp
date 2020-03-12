@@ -22,7 +22,11 @@
 
 #include "shader.hpp"
 
-#include <Importer/BsImporter.h>
+// ========================================================================== //
+// Header
+// ========================================================================== //
+
+#include "shared/asset.hpp"
 
 // ========================================================================== //
 // ShaderManager Implementation
@@ -31,14 +35,11 @@
 namespace wind {
 
 ShaderManager::ShaderManager() {
-  m_shaderDiffuse =
-      bs::gImporter().import<bs::Shader>("res/shaders/diffuse_ext.bsl");
-  m_shaderTransparent =
-      bs::gImporter().import<bs::Shader>("res/shaders/transparent_ext.bsl");
+  m_shaderDiffuse = Asset::loadShader("res/shaders/diffuse_ext.bsl");
+  m_shaderTransparent = Asset::loadShader("res/shaders/transparent_ext.bsl");
   m_shaderTransparentNoCull =
-      bs::gImporter().import<bs::Shader>("res/shaders/transparent_no_cull.bsl");
-  m_shaderWireframe =
-      bs::gImporter().import<bs::Shader>("res/shaders/wireframe.bsl");
+      Asset::loadShader("res/shaders/transparent_no_cull.bsl");
+  m_shaderWireframe = Asset::loadShader("res/shaders/wireframe.bsl");
 }
 
 } // namespace wind
