@@ -79,6 +79,10 @@ World::World(const App::Info &info) : App(info), m_server(this) {
 
   setupMyPlayer();
   setupInput();
+
+  std::filesystem::file_time_type time =
+      std::filesystem::last_write_time(m_scenePath);
+  m_sceneEditTime = time;
 }
 
 void World::onPreUpdate(f32) {
@@ -114,6 +118,19 @@ void World::onFixedUpdate(f32) {
     i = 0;
     m_server.broadcastServerTick(m_netComps);
   }
+
+  // Check current file modification date
+  if (!m_scenePath.empty()) {
+    std::filesystem::path path = m_scenePath.c_str();
+    if (std::filesystem::exists(path)) {
+      std::filesystem::file_time_type time =
+          std::filesystem::last_write_time(path);
+      if (time != m_sceneEditTime) {
+        reloadStaticScene();
+      }
+      m_sceneEditTime = time;
+    }
+  }
 }
 
 void World::onWindowResize() { updateAimPosition(m_width, m_height); }
@@ -122,9 +139,37 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
+  std::filesystem::file_time_type time =
+      std::filesystem::last_write_time(m_scenePath);
+  m_sceneEditTime = time;
 
   m_dynamicScene = SceneBuilder{}.withName("dynamicScene").build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
+}
+
+void World::reloadStaticScene() {
+  if (m_server.isActive()) {
+    m_staticScene->destroy();
+    m_staticScene = Scene::loadFile(m_scenePath);
+
+    logInfo(
+        "[world:reloadStaticScene] (server) broadcasting reload scene packet");
+    std::filesystem::file_time_type time =
+        std::filesystem::last_write_time(m_scenePath);
+    m_sceneEditTime = time;
+
+    auto &packet = m_server.getPacket();
+    packet.ClearPayload();
+    packet.SetHeader(PacketHeaderTypes::kSceneChange);
+    auto mw = packet.GetMemoryWriter();
+    nlohmann::json json = Scene::saveScene(m_staticScene);
+    mw->Write(alflib::String(json.dump().c_str()));
+    mw.Finalize();
+    m_server.PacketBroadcast(packet, SendStrategy::kReliable);
+  } else {
+    logWarning("[world:reloadStaticScene] cannot reload scene because we have "
+               "no active server");
+  }
 }
 
 HCNetComponent World::getPlayerNetComp() {
@@ -241,6 +286,11 @@ void World::onPlayerInput(UniqueId uid, PlayerInput input,
   }
 }
 
+void World::onSceneChange(const String &scene) {
+  m_staticScene->destroy();
+  m_staticScene = Scene::load(scene);
+}
+
 void World::onDisconnect() {
   logVerbose("[world] onDisconnect, clearing the world of {} netComps",
              m_netComps.size());
@@ -288,8 +338,9 @@ void World::buildObject(const CreateInfo &info) {
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
-      const auto &wind = component.windSourceData();
-      obj.withWindSource(wind.functions);
+      // const auto &wind = component.windSourceData();
+      // obj.withWindSource(wind.functions);
+      logError("[world:buildObject] withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
       const auto &render = component.renderableData();

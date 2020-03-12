@@ -32,6 +32,7 @@
 #include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
 #include "shared/wind/base_functions.hpp"
+#include "shared/wind/wind_system.hpp"
 
 #include <vector>
 
@@ -103,7 +104,8 @@ public:
   /// Adds wind
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
-  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions);
+  ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions,
+                                WindSystem::VolumeType volumeType);
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
@@ -125,13 +127,18 @@ public:
   /// Construct from only an id
   ObjectBuilder &withNetComponent(UniqueId id);
 
+  ObjectBuilder &withWindVolume(WindSystem::VolumeType type, Vec4F color);
+
   ObjectBuilder &withDebugCube(const Vec3F &size = Vec3F::ONE,
                                const Vec3F &position = Vec3F::ZERO,
-                               const Vec3F &rotation = Vec3F::ZERO);
+                               const Vec3F &rotation = Vec3F::ZERO,
+                               const Vec4F &color = Vec4F{1.0f, 0.0f, 1.0f,
+                                                          0.15f});
 
-  ObjectBuilder &withDebugCylinder(f32 radius, f32 height,
-                                   const Vec3F &position = Vec3F::ZERO,
-                                   const Vec3F &rotation = Vec3F::ZERO);
+  ObjectBuilder &
+  withDebugCylinder(f32 radius, f32 height, const Vec3F &position = Vec3F::ZERO,
+                    const Vec3F &rotation = Vec3F::ZERO,
+                    const Vec4F &color = Vec4F{1.0f, 0.0f, 1.0f, 0.15f});
 
   /// Build the scene object
   bs::HSceneObject build();

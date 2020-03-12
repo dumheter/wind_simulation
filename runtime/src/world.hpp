@@ -12,6 +12,7 @@
 #include "shared/utility/unique_id.hpp"
 #include <GUI/BsGUILabel.h>
 #include <GUI/BsGUITexture.h>
+#include <filesystem>
 #include <unordered_map>
 
 namespace wind {
@@ -67,6 +68,8 @@ public:
   void onPlayerInput(UniqueId uid, PlayerInput input,
                      std::optional<bs::Quaternion> maybeRot);
 
+  void onSceneChange(const String& scene);
+
   void onDisconnect();
 
   void buildObject(const CreateInfo &info);
@@ -90,6 +93,8 @@ public:
    * Load the default scene.
    */
   void setupScene();
+
+  void reloadStaticScene();
 
   HCNetComponent getPlayerNetComp();
 
@@ -154,11 +159,12 @@ private:
   HCMyPlayer m_player;
   NetDebugInfo m_netDebugInfo{};
   bs::GUITexture *m_aim;
-  String m_scenePath{"res/scenes/wind.json"};
   bs::HSceneObject m_staticScene;
   bs::HSceneObject m_dynamicScene;
   bs::GUISliderHorz *m_shootForce;
   bs::VirtualAxis m_scroll;
+  String m_scenePath{"res/scenes/wind.json"};
+  std::filesystem::file_time_type m_sceneEditTime;
 };
 
 } // namespace wind

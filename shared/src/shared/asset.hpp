@@ -79,7 +79,7 @@ public:
    * file for the path, otherwise the resource will be imported */
   static std::tuple<bs::HMesh, bs::HPhysicsMesh>
   loadMeshWithPhysics(const bs::Path &path, f32 scale = 1.0f,
-                      bool cpuCached = false);
+                      bool cpuCached = false, bool isConvex = false);
 
   /// Returns whether or not a handle is of a specific type
   template <typename T> static bool isType(const Handle &handle) {

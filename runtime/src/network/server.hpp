@@ -77,6 +77,9 @@ public:
   void broadcastServerTick(
       const std::unordered_map<UniqueId, HCNetComponent> &netComps);
 
+  Packet &getPacket() { return m_packet; }
+  const Packet &getPacket() const { return m_packet; }
+
 private:
   void PollSocketStateChanges();
 

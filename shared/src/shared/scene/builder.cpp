@@ -62,6 +62,9 @@ ObjectBuilder::ObjectBuilder(Kind kind)
 
   // Create by kind
   switch (kind) {
+  case Kind::kEmpty: {
+    break;
+  }
   case Kind::kPlane: {
     const bs::HMesh mesh =
         bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Quad);
@@ -69,7 +72,6 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCube: {
-    withName("cube");
     const bs::HMesh mesh =
         bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Box);
     withMesh(mesh);
@@ -105,16 +107,16 @@ ObjectBuilder::ObjectBuilder(Kind kind)
   }
   case Kind::kRotor: {
     bs::HMesh mesh = Asset::loadMesh("res/meshes/rotor.fbx", 0.1f);
-    m_renderable = m_handle->addComponent<bs::CRenderable>();
-    m_renderable->setMesh(mesh);
-    break;
-  }
-  case Kind::kEmpty: {
+    withMesh(mesh);
     break;
   }
   case Kind::kCylinder: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f, false, true);
     withMesh(mesh);
+    break;
+  }
+  case Kind::kWindVolume: {
+    /* does nothing, call withWindVolume() */
     break;
   }
   default: {
@@ -307,8 +309,8 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &
-ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
-  auto wind = m_handle->addComponent<CWindSource>();
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions, WindSystem::VolumeType volumeType) {
+  auto wind = m_handle->addComponent<CWindSource>(volumeType);
   wind->addFunctions(functions);
   return *this;
 }
@@ -397,17 +399,42 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
+                                             Vec4F color) {
+  Vec3F pos{0.0f, 0.0f, 0.0f};
+  Vec3F rot{1.0f, 1.0f, 1.0f};
+
+  switch (type) {
+  case WindSystem::VolumeType::kCube: {
+    Vec3F scale{1.0f, 1.0f, 1.0f};
+    withDebugCube(scale, pos, rot, color);
+    break;
+  }
+  case WindSystem::VolumeType::kCylinder: {
+    f32 radius = 1.0f;
+    f32 height = 1.0f;
+    withDebugCylinder(radius, height, pos, rot, color);
+    break;
+  }
+  }
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
                                             const Vec3F &position,
-                                            const Vec3F &rotation) {
-  const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCube)
-                                   .withSave(false)
-                                   .withMaterial(ShaderKind::kTransparent,
-                                                 "res/textures/transparent.png")
-                                   .withPosition(position)
-                                   .withScale(size)
-                                   .withRotation(rotation)
-                                   .build();
+                                            const Vec3F &rotation,
+                                            const Vec4F &color) {
+  const bs::HSceneObject obj =
+      ObjectBuilder(ObjectType::kCube)
+          .withSave(false)
+          .withMaterial(ShaderKind::kTransparentNoCull,
+                        "res/textures/white.png", Vec2F::ONE, color, color.w)
+          .withPosition(position)
+          .withScale(size)
+          .withRotation(rotation)
+          .build();
   withObject(obj);
   return *this;
 }
@@ -416,15 +443,17 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
 
 ObjectBuilder &ObjectBuilder::withDebugCylinder(f32 radius, f32 height,
                                                 const Vec3F &position,
-                                                const Vec3F &rotation) {
-  const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCylinder)
-                                   .withSave(false)
-                                   .withMaterial(ShaderKind::kTransparent,
-                                                 "res/textures/transparent.png")
-                                   .withPosition(position)
-                                   .withScale(Vec3F(radius, height, radius))
-                                   .withRotation(rotation)
-                                   .build();
+                                                const Vec3F &rotation,
+                                                const Vec4F &color) {
+  const bs::HSceneObject obj =
+      ObjectBuilder(ObjectType::kCylinder)
+          .withSave(false)
+          .withMaterial(ShaderKind::kTransparentNoCull,
+                        "res/textures/white.png", Vec2F::ONE, color, color.w)
+          .withPosition(position)
+          .withScale(Vec3F(radius, height, radius))
+          .withRotation(rotation)
+          .build();
   withObject(obj);
   return *this;
 }
@@ -468,6 +497,8 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kRotor;
   } else if (kindString == "cylinder") {
     return Kind::kCylinder;
+  } else if (kindString == "windVolume") {
+    return Kind::kWindVolume;
   }
   return Kind::kInvalid;
 }
@@ -492,6 +523,8 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "rotor";
   case Kind::kCylinder:
     return "cylinder";
+  case Kind::kWindVolume:
+    return "windVolume";
   case Kind::kInvalid:
   default: {
     return "invalid";

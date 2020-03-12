@@ -121,6 +121,7 @@
     <ClCompile Include="src\shared\state\player_input.cpp" />
     <ClCompile Include="src\shared\utility\bsprinter.cpp" />
     <ClCompile Include="src\shared\utility\json_util.cpp" />
+    <ClCompile Include="src\shared\wind\wind_system.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\assert.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\buffer.cpp" />
     <ClCompile Include="src\thirdparty\alflib\core\console.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="src\shared\state\moveable_state.hpp" />
     <ClInclude Include="src\shared\state\player_input.hpp" />
     <ClInclude Include="src\shared\utility\json_util.hpp" />
+    <ClInclude Include="src\shared\wind\wind_system.hpp" />
     <ClInclude Include="src\thirdparty\nlohmann\json.hpp" />
     <ClInclude Include="src\shared\types.hpp" />
     <ClInclude Include="src\shared\macros.hpp" />
