@@ -76,13 +76,15 @@
             "xz": 8.0,
             "y": 1
           },
-          "scale": [ 2, 2, 2],
+          "scale": [ 2, 2, 2 ],
           "wind": {
-            "functions": [{
-              "type": "constant",
-              "magnitude": 10,
-              "direction": [ 0.0, 1.0, 0 ]
-            }],
+            "functions": [
+              {
+                "type": "constant",
+                "magnitude": 10,
+                "direction": [ 0.0, 1.0, 0 ]
+              }
+            ],
             "volume": {
               "type": "cylinder",
               "color": [ 1.0, 1.0, 0, 0.15 ]
@@ -109,11 +111,13 @@
             "mass": 20.0
           },
           "wind": {
-            "functions": [{
-              "type": "constant",
-              "magnitude": 70,
-              "direction": [ 0.0, -1.0, 0.0 ]
-            }],
+            "functions": [
+              {
+                "type": "constant",
+                "magnitude": 70,
+                "direction": [ 0.0, -1.0, 0.0 ]
+              }
+            ],
             "volume": {
               "type": "cube",
               "color": [ 1.0, 0, 0, 0.15 ]
