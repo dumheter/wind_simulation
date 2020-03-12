@@ -116,10 +116,6 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     withMesh(mesh);
     break;
   }
-  case Kind::kWindVolume: {
-    /* does nothing, call withWindVolume() */
-    break;
-  }
   default: {
     Util::panic("Invalid type when building object ({})", kind);
   }
@@ -499,8 +495,6 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kRotor;
   } else if (kindString == "cylinder") {
     return Kind::kCylinder;
-  } else if (kindString == "windVolume") {
-    return Kind::kWindVolume;
   }
   return Kind::kInvalid;
 }
@@ -525,8 +519,6 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "rotor";
   case Kind::kCylinder:
     return "cylinder";
-  case Kind::kWindVolume:
-    return "windVolume";
   case Kind::kInvalid:
   default: {
     return "invalid";
