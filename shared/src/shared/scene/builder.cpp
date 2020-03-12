@@ -327,12 +327,15 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
     samples = u32(len);
   }
 
+  ObjectBuilder splineObjBuilder(ObjectType::kEmpty);
+  splineObjBuilder.withName("spline_waypoints");
+
   const f32 step = 1.0f / samples;
   for (u32 i = 0; i <= samples; i++) {
     f32 t = step * i;
     Vec3F pos = spline->sample(t);
 
-    const bs::HSceneObject obj =
+    const bs::HSceneObject waypointObj =
         ObjectBuilder{ObjectType::kCube}
             .withSave(false)
             .withMaterial(ShaderKind::kStandard, "res/textures/white.png",
@@ -340,8 +343,20 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
             .withPosition(pos)
             .withScale(Vec3F(0.02f, 0.02f, 0.02f))
             .build();
-    withObject(obj);
+
+    splineObjBuilder.withObject(waypointObj);
   }
+  const bs::HSceneObject splineObj = splineObjBuilder.build();
+  withObject(splineObj);
+
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withSplineFollow(f32 speed, CSplineFollow::WrapMode wrapMode) {
+  HCSplineFollow comp = m_handle->addComponent<CSplineFollow>(speed, wrapMode);
 
   return *this;
 }
