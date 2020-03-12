@@ -209,9 +209,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
         const Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
         functions.push_back(BaseFn::fnConstant(dir, mag));
       }
+      builder.withWindSource(functions, volumeType);
     }
-
-    builder.withWindSource(functions, volumeType);
   }
 
   // Spline

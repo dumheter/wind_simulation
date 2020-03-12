@@ -72,7 +72,8 @@ bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
     mw.Write(std::get<WindSourceData>(m_data).color.w);
     mw.Write(std::get<WindSourceData>(m_data).offset.x);
     mw.Write(std::get<WindSourceData>(m_data).offset.y);
-    return mw.Write(std::get<WindSourceData>(m_data).offset.z);
+    mw.Write(std::get<WindSourceData>(m_data).offset.z);
+    return mw.Write(std::get<WindSourceData>(m_data).volumeType);
   } else if (std::holds_alternative<RenderableData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kRenderable));
     return mw.Write(
@@ -108,7 +109,8 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
     auto color =
         Vec4F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     auto offset = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
-    return asWindSource(functions, volume, color, offset);
+    auto volumeType = mr.Read<u8>();
+    return asWindSource(functions, volume, color, offset, volumeType);
   }
   case ComponentType::kRenderable: {
     auto pathTexture = mr.Read<alflib::String>();
@@ -143,9 +145,9 @@ ComponentData ComponentData::asRigidbody() {
 
 ComponentData ComponentData::asWindSource(const std::vector<BaseFn> &functions,
                                           Vec3F volume, Vec4F color,
-                                          Vec3F offset) {
+                                          Vec3F offset, u8 volumeType) {
   ComponentData data;
-  data.m_data = WindSourceData{functions, volume, color, offset};
+  data.m_data = WindSourceData{functions, volume, color, offset, volumeType};
   return data;
 }
 
