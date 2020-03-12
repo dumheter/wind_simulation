@@ -3,6 +3,25 @@
 
 namespace wind {
 
+String WindSystem::volumeTypeToString(VolumeType type) {
+  switch (type) {
+  case VolumeType::kCylinder: {
+    return "cylinder";
+  }
+  case VolumeType::kCube:
+    [[fallthrough]];
+  default:
+    return "cube";
+  }
+}
+
+WindSystem::VolumeType WindSystem::stringToVolumeType(const String &type) {
+  if (type == "cylinder") {
+    return VolumeType::kCylinder;
+  }
+  return VolumeType::kCube;
+}
+
 void WindSystem::addWindVolume(bs::HSceneObject windVolume) {
   m_windVolumes.push_back(windVolume);
 }

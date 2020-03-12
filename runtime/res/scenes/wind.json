@@ -14,19 +14,18 @@
           "material": {
             "shader": "standard",
             "texture": "res/textures/grid.png",
-            "tiling": { "uv": 16.0 }
+            "tiling": { "uv": 80.0 }
           },
           "scale": [ 40.0, 1.0, 40.0 ],
           "position": {
             "xz": 4.0,
-            "y": -0.4
+            "y": 0
           },
-          "tiling": { "uv": 160.0 },
           "physics": { "restitution": 0.5 }
         },
 
         {
-          "name": "regular cube",
+          "name": "pillar cube",
           "type": "cube",
           "material": {
             "shader": "standard",
@@ -75,17 +74,19 @@
           "type": "windVolume",
           "position": {
             "xz": 8.0,
-            "y": 2
+            "y": 1
           },
-          "scale": [ 4, 4, 4],
+          "scale": [ 2, 2, 2],
           "wind": {
             "functions": [{
               "type": "constant",
               "magnitude": 25,
               "direction": [ 0.0, 0.0, 1.0 ]
             }],
-            "volume": [4, 4, 4],
-            "color": [ 1.0, 0, 1.0, 1 ]
+            "volume": {
+              "type": "cylinder",
+              "color": [ 1.0, 1.0, 0, 0.15 ]
+            }
           }
         },
 
@@ -113,9 +114,10 @@
               "magnitude": 70,
               "direction": [ 0.0, -1.0, 0.0 ]
             }],
-            "volume": [3, 5, 3],
-            "color": [ 1.0, 0 ,1.0, 1 ],
-            "offset": [0, -0.5, 0]
+            "volume": {
+              "type": "cube",
+              "color": [ 1.0, 0, 0, 0.15 ]
+            }
           },
           "rotor": {
             "x": 0,

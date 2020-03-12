@@ -111,15 +111,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCylinder: {
-    bs::HMesh mesh = bs::gBuiltinResources().getMesh(bs::BuiltinMesh::Cylinder);
+    bs::HMesh mesh = Asset::loadMesh("res/meshes/cylinder.fbx", 0.1f);
     withMesh(mesh);
     break;
   }
   case Kind::kWindVolume: {
-    Vec3F pos{0.0f, 0.0f, 0.0f};
-    Vec3F scale{1.0f, 1.0f, 1.0f};
-    Vec3F rot{1.0f, 1.0f, 1.0f};
-    withDebugCube(scale, pos, rot);
+    /* does nothing, call withWindVolume() */
     break;
   }
   default: {
@@ -316,16 +313,9 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &
-ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
-                              Vec3F volume, Vec4F color, Vec3F offset) {
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions) {
   auto wind = m_handle->addComponent<CWindSource>();
   wind->addFunctions(functions);
-  logInfo("[builder] built windsource with {} functions",
-          wind->getFunctions().size());
-
-  // TODO
-  // withObject(windVolume);
-
   return *this;
 }
 
@@ -398,19 +388,42 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
 
 // -------------------------------------------------------------------------- //
 
+ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
+                                             Vec4F color) {
+  Vec3F pos{0.0f, 0.0f, 0.0f};
+  Vec3F rot{1.0f, 1.0f, 1.0f};
+
+  switch (type) {
+  case WindSystem::VolumeType::kCube: {
+    Vec3F scale{1.0f, 1.0f, 1.0f};
+    withDebugCube(scale, pos, rot, color);
+    break;
+  }
+  case WindSystem::VolumeType::kCylinder: {
+    f32 radius = 1.0f;
+    f32 height = 1.0f;
+    withDebugCylinder(radius, height, pos, rot, color);
+    break;
+  }
+  }
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
 ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
                                             const Vec3F &position,
-                                            const Vec3F &rotation) {
-  const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCube)
-                                   .withSave(false)
-                                   .withMaterial(ShaderKind::kTransparentNoCull,
-                                                 "res/textures/white.png",
-                                                 Vec2F::ONE, Vec4F{1.0f, 1.0f, 0.0f, 1.0f},
-                                                 0.1f)
-                                   .withPosition(position)
-                                   .withScale(size)
-                                   .withRotation(rotation)
-                                   .build();
+                                            const Vec3F &rotation,
+                                            const Vec4F &color) {
+  const bs::HSceneObject obj =
+      ObjectBuilder(ObjectType::kCube)
+          .withSave(false)
+          .withMaterial(ShaderKind::kTransparentNoCull,
+                        "res/textures/white.png", Vec2F::ONE, color, color.w)
+          .withPosition(position)
+          .withScale(size)
+          .withRotation(rotation)
+          .build();
   withObject(obj);
   return *this;
 }
@@ -419,15 +432,17 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
 
 ObjectBuilder &ObjectBuilder::withDebugCylinder(f32 radius, f32 height,
                                                 const Vec3F &position,
-                                                const Vec3F &rotation) {
-  const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCylinder)
-                                   .withSave(false)
-                                   .withMaterial(ShaderKind::kTransparent,
-                                                 "res/textures/transparent.png")
-                                   .withPosition(position)
-                                   .withScale(Vec3F(radius, height, radius))
-                                   .withRotation(rotation)
-                                   .build();
+                                                const Vec3F &rotation,
+                                                const Vec4F &color) {
+  const bs::HSceneObject obj =
+      ObjectBuilder(ObjectType::kCylinder)
+          .withSave(false)
+          .withMaterial(ShaderKind::kTransparentNoCull,
+                        "res/textures/white.png", Vec2F::ONE, color, color.w)
+          .withPosition(position)
+          .withScale(Vec3F(radius, height, radius))
+          .withRotation(rotation)
+          .build();
   withObject(obj);
   return *this;
 }
