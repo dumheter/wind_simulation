@@ -22,6 +22,17 @@
           "name": "house0",
           "objects": [
             {
+              "name": "debug_volume",
+              "type": "cube",
+              "material": {
+                "shader": "transparent_no_cull",
+                "opacity": 0.2,
+                "color": [ 1.0, 1.0, 0.0, 1.0 ]
+              },
+              "position": [ 2.01, 1.01, -6.01 ],
+              "scale": [ 5, 2, 4 ]
+            },
+            {
               "name": "house0_wall_north0",
               "type": "cube",
               "material": {
@@ -102,26 +113,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "cube",
-      "material": {
-        "shader": "transparent_no_cull",
-        "opacity": 0.2,
-        "color": [ 1.0, 1.0, 0.0, 1.0 ]
-      },
-      "position": [ 2.01, 1.01, -6.01 ],
-      "scale": [ 5, 2, 4 ]
-    },
-    {
-      "type": "cylinder",
-      "material": {
-        "shader": "transparent_no_cull",
-        "opacity": 0.1,
-        "color": [ 0.2, 0.0, 0.8, 1.0 ]
-      },
-      "position": [ -5, 0.01, 0 ],
-      "scale": [ 2, 4, 2 ]
     },
     {
       "name": "spline0",
