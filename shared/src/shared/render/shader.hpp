@@ -42,6 +42,11 @@ public:
   /// Returns the transparent shader
   static bs::HShader getTransparent() { return instance().m_shaderTransparent; }
 
+  /// Returns the transparent shader with back-face culling disabled
+  static bs::HShader getTransparentNoCull() {
+    return instance().m_shaderTransparentNoCull;
+  }
+
   /// Returns the wireframe shader
   static bs::HShader getWireframe() { return instance().m_shaderWireframe; }
 
@@ -59,6 +64,8 @@ private:
   bs::HShader m_shaderDiffuse;
   /// Transparent shader
   bs::HShader m_shaderTransparent;
+  /// Transparent shader (No back-face culling)
+  bs::HShader m_shaderTransparentNoCull;
   /// Wireframe shader
   bs::HShader m_shaderWireframe;
 };

@@ -212,7 +212,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     json spline = *itSpline;
 
     u32 degree = JsonUtil::getU32(spline, "degree", 2);
-    u32 samples = JsonUtil::getU32(spline, "samples", 10);
+    u32 samples = JsonUtil::getU32(spline, "samples",
+                                   ObjectBuilder::kSplineSamplesInvalid);
     const auto splinePointsIt = spline.find("points");
     if (splinePointsIt != spline.end()) {
       const nlohmann::json splinePoints = *splinePointsIt;

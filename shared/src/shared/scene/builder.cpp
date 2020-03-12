@@ -199,9 +199,11 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
   bs::HShader shader;
   switch (shaderKind) {
   case ShaderKind::kTransparent: {
-    // shader = bs::gBuiltinResources().getBuiltinShader(
-    //    bs::BuiltinShader::Transparent);
     shader = ShaderManager::getTransparent();
+    break;
+  }
+  case ShaderKind::kTransparentNoCull: {
+    shader = ShaderManager::getTransparentNoCull();
     break;
   }
   case ShaderKind::kWireframe: {
@@ -210,8 +212,6 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
   }
   case ShaderKind::kStandard:
   default: {
-    // shader =
-    //   bs::gBuiltinResources().getBuiltinShader(bs::BuiltinShader::Standard);
     shader = ShaderManager::getDiffuse();
     break;
   }
@@ -224,7 +224,8 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
     m_material->setTexture("gAlbedoTex", texture);
     m_material->setVec2("gUVTile", tiling);
   }
-  if (shaderKind == ShaderKind::kTransparent) {
+  if (shaderKind == ShaderKind::kTransparent ||
+      shaderKind == ShaderKind::kTransparentNoCull) {
     m_material->setFloat("gOpacity", opacity);
   }
   m_material->setVec4("gTintColor", color);
@@ -234,15 +235,6 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
   ctag->getData().mat.tiling = tiling;
   ctag->getData().mat.shader = stringFromShaderKind(shaderKind);
   ctag->getData().mat.color = color;
-
-  // Sampler
-  // bs::SAMPLER_STATE_DESC samplerDesc;
-  // samplerDesc.minFilter = bs::FilterOptions::FO_LINEAR;
-  // samplerDesc.magFilter = bs::FilterOptions::FO_LINEAR;
-  // samplerDesc.mipFilter = bs::FilterOptions::FO_LINEAR;
-  // const bs::SPtr<bs::SamplerState> sampler =
-  //    bs::SamplerState::create(samplerDesc);
-  // m_material->setSamplerState("gAlbedoSamp", sampler);
 
   // Set
   if (m_renderable != nullptr) {
@@ -342,22 +334,27 @@ ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
 ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
                                          u32 degree, u32 samples) {
   // Spline component
-  HCSpline spline = m_handle->addComponent<CSpline>(points, degree);
+  HCSpline splineComp = m_handle->addComponent<CSpline>(points, degree);
 
   // Add sub-objects to render spline
-  Spline *s = spline->getSpline();
+  Spline *spline = splineComp->getSpline();
+  const f32 len = spline->calcLen(spline->getPoints().size() * 10);
+  if (samples == kSplineSamplesInvalid) {
+    samples = u32(len);
+  }
+
   const f32 step = 1.0f / samples;
   for (u32 i = 0; i <= samples; i++) {
     f32 t = step * i;
-    Vec3F pos = s->sample(t);
+    Vec3F pos = spline->sample(t);
 
     const bs::HSceneObject obj =
         ObjectBuilder{ObjectType::kCube}
             .withSave(false)
-            .withMaterial(ShaderKind::kStandard,
-                          "res/textures/spline_waypoint.png")
+            .withMaterial(ShaderKind::kStandard, "res/textures/white.png",
+                          Vec2F::ONE, Vec4F(1.0f, 0.0f, 0.0f, 1.0f))
             .withPosition(pos)
-            .withScale(Vec3F(0.1f, 0.1f, 0.1f))
+            .withScale(Vec3F(0.02f, 0.02f, 0.02f))
             .build();
     withObject(obj);
   }
@@ -516,6 +513,9 @@ ObjectBuilder::shaderKindFromString(const String &kind) {
   if (kind == "transparent") {
     return ShaderKind::kTransparent;
   }
+  if (kind == "transparent_no_cull") {
+    return ShaderKind::kTransparentNoCull;
+  }
   if (kind == "wireframe") {
     return ShaderKind::kWireframe;
   }
@@ -530,6 +530,8 @@ String ObjectBuilder::stringFromShaderKind(ShaderKind kind) {
     return "standard";
   case ShaderKind::kTransparent:
     return "transparent";
+  case ShaderKind::kTransparentNoCull:
+    return "transparent_no_cull";
   case ShaderKind::kWireframe:
     return "wireframe";
   default:
