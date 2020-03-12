@@ -26,8 +26,7 @@
               "type": "cube",
               "material": {
                 "shader": "transparent_no_cull",
-                "opacity": 0.2,
-                "color": [ 1.0, 1.0, 0.0, 1.0 ]
+                "color": [ 1.0, 1.0, 0.0, 0.2 ]
               },
               "position": [ 2.01, 1.01, -6.01 ],
               "scale": [ 5, 2, 4 ]
@@ -116,7 +115,7 @@
     },
     {
       "name": "spline0",
-      "type": "empty",
+      "type": "cube",
       "spline": {
         "degree": 2,
         "points": [
@@ -128,8 +127,8 @@
         ]
       },
       "spline-follow": {
-        "speed": 1.0,
-        "wrap": "wrap"
+        "speed": 0.001,
+        "wrap": "oscillate"
       }
     }
   ]

@@ -27,6 +27,7 @@
 // ========================================================================== //
 
 #include "shared/math/math.hpp"
+#include "shared/scene/component/cspline_follow.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
@@ -107,6 +108,9 @@ public:
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
                             u32 samples = kSplineSamplesInvalid);
+
+  /// Adds a spline follow component to the object
+  ObjectBuilder &withSplineFollow(f32 speed, CSplineFollow::WrapMode wrapMode);
 
   /// Add rotor
   ObjectBuilder &withRotor(Vec3F rotation);

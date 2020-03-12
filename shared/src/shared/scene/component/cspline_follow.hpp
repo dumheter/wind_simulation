@@ -27,7 +27,6 @@
 // ========================================================================== //
 
 #include "shared/math/math.hpp"
-#include "shared/math/spline.hpp"
 #include "shared/scene/rtti.hpp"
 
 #include <Reflection/BsRTTIType.h>
@@ -47,11 +46,25 @@ class CSplineFollow final : public bs::Component {
   friend class CTagRTTI;
 
 public:
+  /// Enumeration of wrapping modes
+  enum class WrapMode {
+    kWrap,      ///< Wrap back to beginning.
+    kOscillate, ///< Oscillate back and forth.
+    kStop,      ///< Stop at the end
+  };
+
   /// Default constructor for serialization
   CSplineFollow() = default;
 
   /// Construct a spline-follow component.
-  CSplineFollow(const bs::HSceneObject &parent);
+  CSplineFollow(const bs::HSceneObject &parent, f32 speed,
+                WrapMode wrapMode = WrapMode::kWrap);
+
+  /// Update object to follow spline.
+  void fixedUpdate() override;
+
+  /// Clamp the position based on the wrap mode.
+  void clampPos();
 
   /// Returns a reference to the static RTTI object that represents this
   /// component
@@ -59,6 +72,17 @@ public:
 
   /// \copydoc bs::IReflectable::getRTTI
   bs::RTTITypeBase *getRTTI() const override { return getRTTIStatic(); }
+
+  /// Returns wrap mode from a string
+  static WrapMode wrapModeFromString(const String &str);
+
+private:
+  /// Wrapping mode.
+  WrapMode m_wrapMode;
+  /// Position on spline (0.0 -> 1.0).
+  f32 m_pos;
+  /// Speed to move along spline at
+  f32 m_speed;
 };
 
 // -------------------------------------------------------------------------- //
@@ -89,7 +113,7 @@ public:
   }
 
   /// \copydoc bs::RTTITypeBase::getRTTIId
-  bs::UINT32 getRTTIId() override { return TID_CSpline; }
+  bs::UINT32 getRTTIId() override { return TID_CSplineFollow; }
 
   /// \copydoc bs::RTTITypeBase::newRTTIObject
   bs::SPtr<bs::IReflectable> newRTTIObject() override {

@@ -50,5 +50,7 @@ constexpr u32 TID_CWindSource = 2005;
 constexpr u32 TID_CTag = 2006;
 /// RTTI Type ID of CSpline component
 constexpr u32 TID_CSpline = 2007;
+/// RTTI Type ID of CSplineFollow component
+constexpr u32 TID_CSplineFollow = 2008;
 
 } // namespace wind

@@ -37,6 +37,8 @@
 #include <Components/BsCSkybox.h>
 #include <Scene/BsSceneObject.h>
 
+#include "component/cspline_follow.hpp"
+
 // ========================================================================== //
 // Scene Implementation
 // ========================================================================== //
@@ -216,6 +218,17 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     } else {
       logError("spline must contain a list of control points");
     }
+  }
+
+  // Spline follow
+  auto itSplineFollow = value.find("spline-follow");
+  if (itSplineFollow != value.end()) {
+    json splineFollow = *itSplineFollow;
+    const f32 speed = splineFollow.value("speed", 0.0f);
+    const String wrapStr = JsonUtil::getString(splineFollow, "wrap", "wrap");
+    CSplineFollow::WrapMode wrapMode =
+        CSplineFollow::wrapModeFromString(wrapStr);
+    builder.withSplineFollow(speed, wrapMode);
   }
 
   // Rotor
