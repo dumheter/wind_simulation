@@ -149,19 +149,28 @@ void World::setupScene() {
 
 void World::reloadStaticScene() {
   if (m_server.isActive()) {
-    logInfo("[world:reloadStaticScene] reloading static scene");
     m_staticScene->destroy();
     m_staticScene = Scene::loadFile(m_scenePath);
+
+    logInfo(
+        "[world:reloadStaticScene] (server) broadcasting reload scene packet");
     std::filesystem::file_time_type time =
         std::filesystem::last_write_time(m_scenePath);
     m_sceneEditTime = time;
+
+    auto &packet = m_server.getPacket();
+    packet.ClearPayload();
+    packet.SetHeader(PacketHeaderTypes::kSceneChange);
+    auto mw = packet.GetMemoryWriter();
+    nlohmann::json json = Scene::saveScene(m_staticScene);
+    mw->Write(alflib::String(json.dump().c_str()));
+    mw.Finalize();
+    m_server.PacketBroadcast(packet, SendStrategy::kReliable);
   } else {
     logWarning("[world:reloadStaticScene] cannot reload scene because we have "
                "no active server");
   }
 }
-
-// void World::reloadStaticScene()
 
 HCNetComponent World::getPlayerNetComp() {
   if (m_player) {
@@ -275,6 +284,11 @@ void World::onPlayerInput(UniqueId uid, PlayerInput input,
       walker->applyRotation(*maybeRot);
     }
   }
+}
+
+void World::onSceneChange(const String &scene) {
+  m_staticScene->destroy();
+  m_staticScene = Scene::load(scene);
 }
 
 void World::onDisconnect() {

@@ -304,7 +304,7 @@ void Server::OnSteamNetConnectionStatusChanged(
       nlohmann::json json = Scene::saveScene(m_world->getStaticScene());
       mw->Write(alflib::String(json.dump().c_str()));
       json = Scene::saveScene(m_world->getDynamicScene());
-      mw->Write(alflib::String(json.dump(2).c_str()));
+      mw->Write(alflib::String(json.dump().c_str()));
       mw.Finalize();
       PacketUnicast(m_packet, SendStrategy::kReliable, status->m_hConn);
 

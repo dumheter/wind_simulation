@@ -9,8 +9,9 @@ namespace wind {
 
 /**
  * When adding a new packet type:
+ *   0. Add the new packet type.
  *   1. Handle them both in client and server.
- *   2. Write the producer.
+ *   2. Write the producer (send the new packet).
  */
 using PacketHeaderTypesUnderlying = u32;
 enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
@@ -23,6 +24,7 @@ enum class PacketHeaderTypes : PacketHeaderTypesUnderlying {
   // kLookup,
   // kLookupResponse,
   kHello,
+  kSceneChange,
 };
 
 struct PacketHeader {

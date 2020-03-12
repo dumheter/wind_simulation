@@ -77,7 +77,7 @@
             "xz": 8.0,
             "y": 2
           },
-          "scale": [ 4, 4, 8],
+          "scale": [ 4, 4, 4],
           "wind": {
             "functions": [{
               "type": "constant",
