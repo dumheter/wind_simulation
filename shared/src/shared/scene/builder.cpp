@@ -403,7 +403,7 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
                                             const Vec3F &rotation) {
   const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCube)
                                    .withSave(false)
-                                   .withMaterial(ShaderKind::kTransparent,
+                                   .withMaterial(ShaderKind::kTransparentNoCull,
                                                  "res/textures/white.png",
                                                  Vec2F::ONE, Vec4F{1.0f, 1.0f, 0.0f, 1.0f},
                                                  0.1f)

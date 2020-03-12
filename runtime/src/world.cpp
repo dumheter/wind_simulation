@@ -79,6 +79,10 @@ World::World(const App::Info &info) : App(info), m_server(this) {
 
   setupMyPlayer();
   setupInput();
+
+  std::filesystem::file_time_type time =
+      std::filesystem::last_write_time(m_scenePath);
+  m_sceneEditTime = time;
 }
 
 void World::onPreUpdate(f32) {
@@ -114,6 +118,19 @@ void World::onFixedUpdate(f32) {
     i = 0;
     m_server.broadcastServerTick(m_netComps);
   }
+
+  // Check current file modification date
+  if (!m_scenePath.empty()) {
+    std::filesystem::path path = m_scenePath.c_str();
+    if (std::filesystem::exists(path)) {
+      std::filesystem::file_time_type time =
+          std::filesystem::last_write_time(path);
+      if (time != m_sceneEditTime) {
+        reloadStaticScene();
+      }
+      m_sceneEditTime = time;
+    }
+  }
 }
 
 void World::onWindowResize() { updateAimPosition(m_width, m_height); }
@@ -122,10 +139,29 @@ void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
+  std::filesystem::file_time_type time =
+      std::filesystem::last_write_time(m_scenePath);
+  m_sceneEditTime = time;
 
   m_dynamicScene = SceneBuilder{}.withName("dynamicScene").build();
   m_player->SO()->setPosition(bs::Vector3::ZERO);
 }
+
+void World::reloadStaticScene() {
+  if (m_server.isActive()) {
+    logInfo("[world:reloadStaticScene] reloading static scene");
+    m_staticScene->destroy();
+    m_staticScene = Scene::loadFile(m_scenePath);
+    std::filesystem::file_time_type time =
+        std::filesystem::last_write_time(m_scenePath);
+    m_sceneEditTime = time;
+  } else {
+    logWarning("[world:reloadStaticScene] cannot reload scene because we have "
+               "no active server");
+  }
+}
+
+// void World::reloadStaticScene()
 
 HCNetComponent World::getPlayerNetComp() {
   if (m_player) {
