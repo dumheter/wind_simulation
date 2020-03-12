@@ -81,6 +81,8 @@ public:
   loadMeshWithPhysics(const bs::Path &path, f32 scale = 1.0f,
                       bool cpuCached = false, bool isConvex = false);
 
+  static bs::HShader loadShader(const bs::Path &path);
+
   /// Returns whether or not a handle is of a specific type
   template <typename T> static bool isType(const Handle &handle) {
     return std::holds_alternative<T>(handle);
