@@ -9,6 +9,7 @@ shader wireframe
 	raster
 	{
 		fill = wire;
+		cull = none;
 	};
 
 	code

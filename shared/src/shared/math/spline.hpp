@@ -47,13 +47,19 @@ public:
   ~Spline();
 
   /// Sample the spline at time 't' (0.0 -> 1.0).
-  Vec3F sample(f32 t);
+  Vec3F sample(f32 t) const;
 
   /// Returns the points of the spline.
   const std::vector<Vec3F> &getPoints() const { return m_points; }
 
   /// Returns the degree of the spline.
   u32 getDegree() const { return m_degree; }
+
+  /// Calculate an estimated length of the spline
+  f32 calcLenEst() const;
+
+  /// Calculate a length from an interpolated spline with N samples
+  f32 calcLen(u32 samples) const;
 
 private:
   /// Control points
@@ -64,7 +70,7 @@ private:
   /// Spline handle
   tsBSpline m_spline = {};
   /// DeBoor net
-  tsDeBoorNet m_net = {};
+  mutable tsDeBoorNet m_net = {};
 };
 
 } // namespace wind
