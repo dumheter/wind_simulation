@@ -119,7 +119,7 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     Vec3F pos{0.0f, 0.0f, 0.0f};
     Vec3F scale{1.0f, 1.0f, 1.0f};
     Vec3F rot{1.0f, 1.0f, 1.0f};
-    withDebugCube(pos, scale, rot);
+    withDebugCube(scale, pos, rot);
     break;
   }
   default: {
@@ -324,13 +324,15 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &
-ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions, Vec3F volume, Vec4F color, Vec3F offset) {
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
+                              Vec3F volume, Vec4F color, Vec3F offset) {
   auto wind = m_handle->addComponent<CWindSource>();
   wind->addFunctions(functions);
   logInfo("[builder] built windsource with {} functions",
           wind->getFunctions().size());
 
-  withObject(windVolume);
+  // TODO
+  // withObject(windVolume);
 
   return *this;
 }
@@ -405,7 +407,9 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
   const bs::HSceneObject obj = ObjectBuilder(ObjectType::kCube)
                                    .withSave(false)
                                    .withMaterial(ShaderKind::kTransparent,
-                                                 "res/textures/transparent.png")
+                                                 "res/textures/white.png",
+                                                 Vec2F::ONE, Vec4F{1.0f, 1.0f, 0.0f, 1.0f},
+                                                 0.1f)
                                    .withPosition(position)
                                    .withScale(size)
                                    .withRotation(rotation)
