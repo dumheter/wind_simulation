@@ -111,7 +111,8 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCylinder: {
-    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f, false, true);
+    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f,
+                                                false, true);
     withMesh(mesh);
     break;
   }
@@ -309,7 +310,8 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &
-ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions, WindSystem::VolumeType volumeType) {
+ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
+                              WindSystem::VolumeType volumeType) {
   auto wind = m_handle->addComponent<CWindSource>(volumeType);
   wind->addFunctions(functions);
   return *this;
@@ -430,7 +432,7 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
       ObjectBuilder(ObjectType::kCube)
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE, color, color.w)
+                        "res/textures/white.png", Vec2F::ONE, color)
           .withPosition(position)
           .withScale(size)
           .withRotation(rotation)
@@ -449,7 +451,7 @@ ObjectBuilder &ObjectBuilder::withDebugCylinder(f32 radius, f32 height,
       ObjectBuilder(ObjectType::kCylinder)
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE, color, color.w)
+                        "res/textures/white.png", Vec2F::ONE, color)
           .withPosition(position)
           .withScale(Vec3F(radius, height, radius))
           .withRotation(rotation)
