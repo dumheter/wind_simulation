@@ -88,8 +88,7 @@ public:
   ObjectBuilder &withMaterial(ShaderKind shaderKind, const String &texPath,
                               const Vec2F &tiling = Vec2F::ONE,
                               const Vec4F &color = Vec4F(1.0f, 1.0f, 1.0f,
-                                                         1.0f),
-                              f32 opacity = 1.0f);
+                                                         1.0f));
 
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);

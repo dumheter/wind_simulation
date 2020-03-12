@@ -16,7 +16,7 @@ shader wireframe
 	{
 		cbuffer MaterialParams 
 		{
-			float4 gWireColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+			float4 gTintColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 		};
 
 		void fsmain(
@@ -25,7 +25,7 @@ shader wireframe
 			out GBufferData OutGBuffer)
 		{
 			SurfaceData surfaceData;
-			surfaceData.albedo = gWireColor;
+			surfaceData.albedo = gTintColor;
 			surfaceData.worldNormal.xyz = input.tangentToWorldZ;
 			surfaceData.roughness = 1.0f;
 			surfaceData.metalness = 0.0f;

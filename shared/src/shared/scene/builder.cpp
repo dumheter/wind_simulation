@@ -189,7 +189,7 @@ ObjectBuilder &ObjectBuilder::withMesh(const bs::HMesh &mesh) {
 ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
                                            const String &texPath,
                                            const Vec2F &tiling,
-                                           const Vec4F &color, f32 opacity) {
+                                           const Vec4F &color) {
   // Determine shader
   bs::HShader shader;
   switch (shaderKind) {
@@ -218,10 +218,6 @@ ObjectBuilder &ObjectBuilder::withMaterial(ShaderKind shaderKind,
     const bs::HTexture texture = AssetManager::loadTexture(texPath);
     m_material->setTexture("gAlbedoTex", texture);
     m_material->setVec2("gUVTile", tiling);
-  }
-  if (shaderKind == ShaderKind::kTransparent ||
-      shaderKind == ShaderKind::kTransparentNoCull) {
-    m_material->setFloat("gOpacity", opacity);
   }
   m_material->setVec4("gTintColor", color);
 
@@ -326,7 +322,7 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
 
   // Add sub-objects to render spline
   Spline *spline = splineComp->getSpline();
-  const f32 len = spline->calcLen(spline->getPoints().size() * 10);
+  const f32 len = spline->calcLen(u32(spline->getPoints().size()) * 10u);
   if (samples == kSplineSamplesInvalid) {
     samples = u32(len);
   }
