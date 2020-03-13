@@ -337,8 +337,8 @@ void World::buildObject(const CreateInfo &info) {
       MICROPROFILE_SCOPEI("World", "WindData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
       const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
-      obj.withWindVolume(volumeType, wind.color);
-      obj.withWindSource(wind.functions, volumeType);
+      obj.withWindVolume(volumeType);
+      obj.withWindSource(wind.functions, volumeType, wind.offset);
       logError("[world:buildObject] withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);

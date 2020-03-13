@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,21 @@
 // Headers
 // ========================================================================== //
 
+#include <variant>
+
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
+#include "shared/math/math.hpp"
 #include "shared/wind/base_functions.hpp"
 
 // ========================================================================== //
 // ComponentData Declaration
 // ========================================================================== //
+
+namespace alflib {
+	class RawMemoryReader;
+	class RawMemoryWriter;
+}
 
 namespace wind {
 
@@ -46,9 +54,7 @@ public:
   struct RigidbodyData {};
 
   struct WindData {
-    std::vector<BaseFn> functions = {};
-    Vec3F volume = Vec3F::ONE;
-    Vec4F color{1.0f, 1.0f, 1.0f, 1.0f};
+    std::vector<BaseFn> functions;
     Vec3F offset = Vec3F::ZERO;
     u8 volumeType = 0;
   };
@@ -94,8 +100,7 @@ public:
 
   /// Creates a component data representing wind source data
   static ComponentData asWind(const std::vector<BaseFn> &functions,
-                              Vec3F volume, Vec4F color, Vec3F offset,
-                              u8 volumeType);
+                                    Vec3F offset, u8 volumeType);
 
   static ComponentData asRenderable(const String &pathTexture);
 

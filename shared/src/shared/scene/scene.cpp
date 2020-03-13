@@ -30,6 +30,7 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cspline.hpp"
+#include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
@@ -185,34 +186,31 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   }
 
   // Wind
+  Vec3F maybeWindOffset = Vec3F::ZERO;
   if (value.find("wind") != value.end()) {
     const json wind = value["wind"];
 
     // Volume
     WindSystem::VolumeType volumeType = WindSystem::VolumeType::kCube;
+
     if (wind.find("volume") != wind.end()) {
       const json volume = wind["volume"];
-
       volumeType = WindSystem::stringToVolumeType(
           JsonUtil::getString(volume, "type", "cube"));
-      const Vec4F color =
-          JsonUtil::getVec4F(volume, "color", Vec4F{1.0f, 0.0f, 0.0f, 0.3f});
+      maybeWindOffset = JsonUtil::getVec3F(volume, "offset", Vec3F::ZERO);
 
-      builder.withWindVolume(volumeType, color);
+      builder.withWindVolume(volumeType);
     }
 
     // Basic functions
-    std::vector<BaseFn> functions{};
     if (wind.find("functions") != wind.end()) {
-      const json fns = wind["functions"];
+      std::vector<BaseFn> functions{};
 
+      const json fns = wind["functions"];
       for (const auto fn : fns) {
-        const String windType = JsonUtil::getString(fn, "type", "constant");
-        const f32 mag = fn.value("magnitude", 0.0f);
-        const Vec3F dir = JsonUtil::getVec3F(fn, "direction", Vec3F::ZERO);
-        functions.push_back(BaseFn::fnConstant(dir, mag));
+        functions.push_back(BaseFn::fromJson(fn));
       }
-      builder.withWindSource(functions, volumeType);
+      builder.withWindSource(functions, volumeType, maybeWindOffset);
     }
 
     // Occluder
@@ -295,7 +293,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   }
 
   // Transform - MUST BE LAST
-  builder.withPosition(JsonUtil::getVec3F(value, "position"));
+  builder.withPosition(JsonUtil::getVec3F(value, "position") + maybeWindOffset);
   builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
   builder.withRotation(JsonUtil::getVec3F(value, "rotation"));
 
@@ -405,9 +403,25 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     value["spline"]["points"] = splinePoints;
   }
 
-  // Wind (Volume)
+  // Wind
+  if (auto wind = object->getComponent<CWind>(); wind) {
+    value["wind"]["volume"]["type"] =
+        WindSystem::volumeTypeToString(wind->getVolumeType());
 
-  // Wind (Source)
+    if (const auto offset = wind->getOffset(); offset != Vec3F::ZERO) {
+      JsonUtil::setValue(value["wind"]["volume"], "offset", offset);
+    }
+
+    if (!wind->getFunctions().empty()) {
+      std::vector<json> fns{};
+      for (const auto &fn : wind->getFunctions()) {
+        json jfn{};
+        fn.toJson(jfn);
+        fns.push_back(std::move(jfn));
+      }
+      value["wind"]["functions"] = fns;
+    }
+  }
 
   // Wind (Occluder)
   const HCWindOccluder windOccluderComp = object->getComponent<CWindOccluder>();

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -38,8 +38,8 @@
 
 namespace wind {
 
-CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType)
-    : Component(parent) {
+CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, Vec3F offset)
+    : Component(parent), m_volumeType(volumeType), m_offset(offset) {
   setName("WindComponent");
 
   // Determine collider object type
@@ -57,6 +57,7 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType)
 
   // Build trigger collider
   auto so = ObjectBuilder(ObjectType::kEmpty)
+                .withSave(false)
                 .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
                 .build();
   so->setParent(parent);

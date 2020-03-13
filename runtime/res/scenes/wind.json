@@ -71,7 +71,6 @@
 
         {
           "name": "wind volume",
-          "type": "empty",
           "position": {
             "xz": 8.0,
             "y": 1
@@ -81,13 +80,12 @@
             "functions": [
               {
                 "type": "constant",
-                "magnitude": 20,
-                "direction": [ 0.0, 1.0, 1.0 ]
+                "magnitude": 12,
+                "direction": [ 0.0, 1.0, 0.1 ]
               }
             ],
             "volume": {
-              "type": "cylinder",
-              "color": [ 1.0, 1.0, 0, 0.15 ]
+              "type": "cylinder"
             }
           }
         },
@@ -120,7 +118,7 @@
             ],
             "volume": {
               "type": "cube",
-              "color": [ 1.0, 0, 0, 0.15 ]
+              "offset": [ 0, 0, -1]
             }
           },
           "rotor": {

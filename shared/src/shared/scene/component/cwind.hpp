@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,9 @@ public:
   CWind() = default;
 
   /// @size Size of the cube volume where wind interacts.
-  CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType);
+  CWind(const bs::HSceneObject &parent,
+              WindSystem::VolumeType volumeType,
+              Vec3F offset = Vec3F::ZERO);
 
   void addFunction(BaseFn function);
 
@@ -81,6 +83,10 @@ public:
 
   std::vector<BaseFn> &getFunctions() { return m_functions; }
 
+  WindSystem::VolumeType getVolumeType() const { return m_volumeType; }
+
+  Vec3F getOffset() const { return m_offset; }
+
   static bs::RTTITypeBase *getRTTIStatic();
 
   bs::RTTITypeBase *getRTTI() const override;
@@ -92,6 +98,10 @@ private:
 private:
   std::vector<BaseFn> m_functions{};
   std::vector<Collision> m_collisions{};
+  /// Used when saving the wind source
+  WindSystem::VolumeType m_volumeType = WindSystem::VolumeType::kCube;
+  /// Used when saving the wind source
+  Vec3F m_offset = Vec3F::ZERO;
 };
 
 // -------------------------------------------------------------------------- //
