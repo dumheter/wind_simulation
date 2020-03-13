@@ -80,7 +80,7 @@
             "functions": [
               {
                 "type": "constant",
-                "magnitude": 20,
+                "magnitude": 12,
                 "direction": [ 0.0, 1.0, 0.1 ]
               }
             ],

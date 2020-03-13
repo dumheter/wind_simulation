@@ -432,8 +432,6 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
 
 // -------------------------------------------------------------------------- //
 
-<<<<<<< HEAD
-=======
 ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
                                              Vec4F color) {
   Vec3F pos{0.0f, 0.0f, 0.0f};
@@ -473,7 +471,6 @@ ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
 
 // -------------------------------------------------------------------------- //
 
->>>>>>> master
 ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
                                             const Vec3F &position,
                                             const Vec3F &rotation,

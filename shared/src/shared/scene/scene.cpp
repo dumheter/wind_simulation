@@ -202,11 +202,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       builder.withWindVolume(volumeType);
     }
 
-<<<<<<< HEAD
-=======
     // Basic functions
-    std::vector<BaseFn> functions{};
->>>>>>> master
     if (wind.find("functions") != wind.end()) {
       std::vector<BaseFn> functions{};
 
