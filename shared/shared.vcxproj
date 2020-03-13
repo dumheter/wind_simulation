@@ -105,6 +105,7 @@
     <ClCompile Include="src\shared\render\shader.cpp" />
     <ClCompile Include="src\shared\scene\component\cspline.cpp" />
     <ClCompile Include="src\shared\scene\component\cspline_follow.cpp" />
+    <ClCompile Include="src\shared\scene\component\cwind_affectable.cpp" />
     <ClCompile Include="src\shared\scene\component\cwind_occluder.cpp" />
     <ClCompile Include="src\shared\scene\component_data.cpp" />
     <ClCompile Include="src\shared\scene\fps_camera.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\shared\math\spline.hpp" />
     <ClInclude Include="src\shared\render\shader.hpp" />
     <ClInclude Include="src\shared\scene\component\cspline.hpp" />
+    <ClInclude Include="src\shared\scene\component\cwind_affectable.hpp" />
     <ClInclude Include="src\shared\scene\component\cwind_occluder.hpp" />
     <ClInclude Include="src\shared\scene\component_data.hpp" />
     <ClInclude Include="src\shared\scene\component\cspline_follow.hpp" />

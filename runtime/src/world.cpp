@@ -331,37 +331,34 @@ void World::buildObject(const CreateInfo &info) {
                  .withRotation(info.state.rotation);
   for (const auto &component : info.components) {
     if (component.isType<ComponentData::RigidbodyData>()) {
-      MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindSourceData>()) {
-      MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
       const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
       obj.withWindVolume(volumeType);
       obj.withWindSource(wind.functions, volumeType, wind.offset);
       logError("[world:buildObject] withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
-      MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
       const auto &render = component.renderableData();
       obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
                        render.pathTexture);
     } else if (component.isType<ComponentData::RotorData>()) {
-      MICROPROFILE_SCOPEI("World", "RotorData", MP_TURQUOISE4);
       const auto &rotor = component.rotorData();
       // TODO how to convert rotor, quat -> vec3
-      Vec3F v{rotor.rot.x, rotor.rot.y, rotor.rot.z};
+      const Vec3F v{rotor.rot.x, rotor.rot.y, rotor.rot.z};
       obj.withRotor(v);
     } else if (component.isType<ComponentData::ColliderData>()) {
-      MICROPROFILE_SCOPEI("World", "ColliderData", MP_TURQUOISE4);
       const auto &collider = component.colliderData();
       obj.withCollider(collider.restitution, collider.mass);
+    } else if (component.isType<ComponentData::WindAffectableData>()) {
+      obj.withWindAffectable();
     }
   }
 
   obj.withNetComponent(info.state);
 
   auto so = obj.build();
-  auto netComp = so->getComponent<CNetComponent>();
+  const auto netComp = so->getComponent<CNetComponent>();
   addNetComp(netComp);
   so->setParent(m_dynamicScene);
 }

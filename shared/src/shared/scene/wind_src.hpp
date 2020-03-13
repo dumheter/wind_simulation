@@ -48,12 +48,6 @@
 
 namespace wind {
 
-struct Collision {
-  UniqueId id;
-  HCNetComponent netComp;
-};
-
-///
 class CWindSource : public bs::Component {
   friend class CWindSourceRTTI;
 
@@ -70,13 +64,8 @@ public:
 
   void addFunctions(const std::vector<BaseFn> &functions);
 
-  bs::Vector3 getWindForce(bs::Vector3 pos) const;
-
-  void fixedUpdate() override;
-
-  void onCreated() override;
-
-  void onCollision();
+  /// If point is outside wind volume, retval is Vec3F::ZERO
+  Vec3F getWindAtPoint(Vec3F pos) const;
 
   const std::vector<BaseFn> &getFunctions() const { return m_functions; }
 
@@ -91,53 +80,14 @@ public:
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
-  template <typename T> void setupCollision(const T &collider);
-
-private:
   std::vector<BaseFn> m_functions{};
-  std::vector<Collision> m_collisions{};
   /// Used when saving the wind source
   WindSystem::VolumeType m_volumeType = WindSystem::VolumeType::kCube;
   /// Used when saving the wind source
   Vec3F m_offset = Vec3F::ZERO;
 };
 
-// -------------------------------------------------------------------------- //
-
-/// CWindSource handle type
 using HCWindSource = bs::GameObjectHandle<CWindSource>;
-
-template <typename T> void CWindSource::setupCollision(const T &collider) {
-  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    auto so = data.collider[1]->SO();
-    HCNetComponent netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
-    } else {
-      logWarning("[windSource] col with non net component");
-    }
-  });
-
-  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    auto so = data.collider[1]->SO();
-    auto netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      const auto id = netComp->getUniqueId();
-      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
-        if (it->id == id) {
-          m_collisions.erase(it);
-          break;
-        }
-      }
-    }
-  });
-}
 
 } // namespace wind
 
@@ -156,7 +106,7 @@ private:
 
 public:
   const bs::String &getRTTIName() override {
-    static bs::String name = "CNetComponent";
+    static bs::String name = "CWindSource";
     return name;
   }
 

@@ -56,6 +56,10 @@ const ComponentData::ColliderData &ComponentData::colliderData() const {
   return std::get<ColliderData>(m_data);
 }
 
+const ComponentData::WindAffectableData &ComponentData::windAffectableData() const {
+  return std::get<WindAffectableData>(m_data);
+}
+
 // -------------------------------------------------------------------------- //
 
 bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
@@ -82,6 +86,8 @@ bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
     mw.Write(static_cast<TagType>(ComponentType::kCollider));
     mw.Write(std::get<ColliderData>(m_data).restitution);
     return mw.Write(std::get<ColliderData>(m_data).mass);
+  } else if (std::holds_alternative<WindAffectableData>(m_data)) {
+    return mw.Write(static_cast<TagType>(ComponentType::kWindAffectable));
   } else {
     Util::panic("Invalid ComponentData variant");
   }
@@ -120,6 +126,9 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
     f32 mass = mr.Read<f32>();
     return asCollider(restitution, mass);
   }
+  case ComponentType::kWindAffectable: {
+    return asWindAffectable();
+  }
   default: {
     Util::panic("Invalid ComponentData variant: {}", type);
   }
@@ -156,6 +165,12 @@ ComponentData ComponentData::asRotor(const Quat &q) {
 ComponentData ComponentData::asCollider(f32 restitution, f32 mass) {
   ComponentData data;
   data.m_data = ColliderData{restitution, mass};
+  return data;
+}
+
+ComponentData ComponentData::asWindAffectable() {
+  ComponentData data;
+  data.m_data = WindAffectableData{};
   return data;
 }
 

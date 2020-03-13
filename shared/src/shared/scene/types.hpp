@@ -57,6 +57,7 @@ enum class ComponentType : u32 {
   kRenderable,
   kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
   kCollider,
+  kWindAffectable,
 };
 
 } // namespace wind

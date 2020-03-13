@@ -72,6 +72,8 @@ public:
     f32 mass = 0.0f;
   };
 
+  struct WindAffectableData {};
+
 public:
   template <typename T> bool isType() const {
     return std::holds_alternative<T>(m_data);
@@ -88,6 +90,8 @@ public:
   const RotorData &rotorData() const;
 
   const ColliderData &colliderData() const;
+
+  const WindAffectableData &windAffectableData() const;
 
   /// Serializes to bytes
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
@@ -108,10 +112,12 @@ public:
 
   static ComponentData asCollider(f32 restitution, f32 mass);
 
+  static ComponentData asWindAffectable();
+
 private:
   /// Variant
   std::variant<RigidbodyData, WindSourceData, RenderableData, RotorData,
-               ColliderData>
+               ColliderData, WindAffectableData>
       m_data;
 };
 

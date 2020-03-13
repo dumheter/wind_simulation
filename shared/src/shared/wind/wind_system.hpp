@@ -24,7 +24,6 @@
 
 #include "shared/math/math.hpp"
 #include "shared/types.hpp"
-#include <vector>
 
 // ========================================================================== //
 // WindSystem Declaration
@@ -35,7 +34,7 @@ namespace wind {
 /// Singleton wind system
 class WindSystem {
 public:
-  /// Physics layer for wind volumes
+  /// Physics layer for wind sources
   static constexpr u64 kWindVolumeLayer = 1024;
   /// Physics layer for wind occluders
   static constexpr u64 kWindOccluerLayer = 1025;
@@ -54,16 +53,21 @@ public:
 
   static VolumeType u8ToVolumeType(u8 type);
 
-  /**
-   * @pre Make sure wind volume is in layer kWindVolumeLayer
-   */
-  void addWindVolume(bs::HSceneObject windVolume);
+  // ============================================================ //
 
-  void removeWindVolume(bs::HSceneObject windVolume);
+ public:
+  /// @note Can also access via gWindSystem()
+  static WindSystem &instance();
 
   Vec3F getWindAtPoint(Vec3F point) const;
 
-private:
-  std::vector<bs::HSceneObject> m_windVolumes;
+ private:
+  WindSystem() = default;
+
+  WindSystem(const WindSystem& other) = delete;
+  WindSystem& operator=(const WindSystem &other) = delete;
 };
+
+inline WindSystem &gWindSystem() { return WindSystem::instance(); }
+
 } // namespace wind

@@ -51,7 +51,6 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
 
   const auto setCommonSettings = [this](auto &collider) {
     collider->setIsTrigger(true);
-    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
     collider->setLayer(WindSystem::kWindVolumeLayer);
   };
 
@@ -64,7 +63,6 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
     auto collider = so->addComponent<bs::CMeshCollider>();
     collider->setMesh(pmesh);
     setCommonSettings(collider);
-    setupCollision(collider);
     break;
   }
   case WindSystem::VolumeType::kCube:
@@ -73,7 +71,6 @@ CWindSource::CWindSource(const bs::HSceneObject &parent,
     logInfo("[CWindSource] cube volume");
     auto collider = so->addComponent<bs::CBoxCollider>();
     setCommonSettings(collider);
-    setupCollision(collider);
   }
   }
 }
@@ -88,34 +85,13 @@ void CWindSource::addFunctions(const std::vector<BaseFn> &functions) {
   }
 }
 
-bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {
-  bs::Vector3 force{bs::Vector3::ZERO};
+Vec3F CWindSource::getWindAtPoint(Vec3F pos) const {
+  Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
-    force += fn(pos);
+    wind += fn(pos);
   }
-  return force;
+  return wind;
 }
-
-void CWindSource::fixedUpdate() {
-  if (!m_collisions.empty()) {
-    const f32 dt = bs::gTime().getFixedFrameDelta();
-    for (auto &collision : m_collisions) {
-      if (collision.netComp) {
-        bs::Vector3 force =
-            dt * getWindForce(collision.netComp->getState().position);
-        bs::Transform t = SO()->getTransform();
-        t.setScale(bs::Vector3::ONE);
-        t.setPosition(bs::Vector3::ZERO);
-        auto newforce = t.getMatrix().multiply(force);
-        collision.netComp->addForce(newforce, bs::ForceMode::Velocity);
-      }
-    }
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-void CWindSource::onCreated() {}
 
 // -------------------------------------------------------------------------- //
 
