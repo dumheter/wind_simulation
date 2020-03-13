@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@
 #include "shared/wind/wind_system.hpp"
 
 #include <Material/BsMaterial.h>
+#include <Physics/BsPhysicsCommon.h>
 #include <RTTI/BsMathRTTI.h>
 #include <Reflection/BsRTTIPlain.h>
 #include <Reflection/BsRTTIType.h>
@@ -43,20 +44,22 @@
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
-// CWindSource Declaration
+// CWind Declaration
 // ========================================================================== //
 
 namespace wind {
 
-class CWindSource : public bs::Component {
+
+/// Class that represents a wind component
+class CWind : public bs::Component {
   friend class CWindSourceRTTI;
 
 public:
   /// Default constructor required for serialization
-  CWindSource() = default;
+  CWind() = default;
 
   /// @size Size of the cube volume where wind interacts.
-  CWindSource(const bs::HSceneObject &parent,
+  CWind(const bs::HSceneObject &parent,
               WindSystem::VolumeType volumeType,
               Vec3F offset = Vec3F::ZERO);
 
@@ -87,7 +90,8 @@ private:
   Vec3F m_offset = Vec3F::ZERO;
 };
 
-using HCWindSource = bs::GameObjectHandle<CWindSource>;
+/// CWind handle type
+using HCWindSource = bs::GameObjectHandle<CWind>;
 
 } // namespace wind
 
@@ -99,7 +103,7 @@ namespace wind {
 
 ///
 class CWindSourceRTTI
-    : public bs::RTTIType<CWindSource, bs::Component, CWindSourceRTTI> {
+    : public bs::RTTIType<CWind, bs::Component, CWindSourceRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
   BS_END_RTTI_MEMBERS
@@ -113,7 +117,7 @@ public:
   bs::UINT32 getRTTIId() override { return TID_CWindSource; }
 
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CWindSource>();
+    return bs::SceneObject::createEmptyComponent<CWind>();
   }
 };
 

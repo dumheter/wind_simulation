@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@ public:
 
   struct RigidbodyData {};
 
-  struct WindSourceData {
+  struct WindData {
     std::vector<BaseFn> functions;
     Vec3F offset = Vec3F::ZERO;
     u8 volumeType = 0;
@@ -83,7 +83,7 @@ public:
   const RigidbodyData &rigidbodyData() const;
 
   /// Returns the WindSource data
-  const WindSourceData &windSourceData() const;
+  const WindData &windSourceData() const;
 
   const RenderableData &renderableData() const;
 
@@ -103,7 +103,7 @@ public:
   static ComponentData asRigidbody();
 
   /// Creates a component data representing wind source data
-  static ComponentData asWindSource(const std::vector<BaseFn> &functions,
+  static ComponentData asWind(const std::vector<BaseFn> &functions,
                                     Vec3F offset, u8 volumeType);
 
   static ComponentData asRenderable(const String &pathTexture);
@@ -116,8 +116,8 @@ public:
 
 private:
   /// Variant
-  std::variant<RigidbodyData, WindSourceData, RenderableData, RotorData,
-               ColliderData, WindAffectableData>
+  std::variant<RigidbodyData, WindData, RenderableData, RotorData, ColliderData,
+               WindAffectableData>
       m_data;
 };
 

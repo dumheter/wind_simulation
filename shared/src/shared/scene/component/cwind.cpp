@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "wind_src.hpp"
+#include "cwind.hpp"
 #include "Components/BsCBoxCollider.h"
 #include "Components/BsCRenderable.h"
 #include "Scene/BsSceneObject.h"
@@ -33,59 +33,52 @@
 #include <Components/BsCMeshCollider.h>
 
 // ========================================================================== //
-// CWindSource Implementation
+// CWind Implementation
 // ========================================================================== //
 
 namespace wind {
 
-CWindSource::CWindSource(const bs::HSceneObject &parent,
-                         WindSystem::VolumeType volumeType,
-                         Vec3F offset)
-    : bs::Component(parent), m_volumeType(volumeType), m_offset(offset) {
+CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, Vec3F offset)
+    : Component(parent), m_volumeType(volumeType), m_offset(offset) {
   setName("WindComponent");
-  auto so = ObjectBuilder(ObjectType::kEmpty)
-            .withSave(false)
-            .withName("WindSrcCollider")
-            .build();
-  so->setParent(parent);
 
-  const auto setCommonSettings = [this](auto &collider) {
-    collider->setIsTrigger(true);
-    collider->setLayer(WindSystem::kWindVolumeLayer);
-  };
-
+  // Determine collider object type
+  ObjectType colliderType = ObjectType::kCube;
   switch (volumeType) {
   case WindSystem::VolumeType::kCylinder: {
-    logInfo("[CWindSource] cylinder volume");
-    // TODO only load the physics mesh
-    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
-                                                 1.0f, false, true);
-    auto collider = so->addComponent<bs::CMeshCollider>();
-    collider->setMesh(pmesh);
-    setCommonSettings(collider);
+    colliderType = ObjectType::kCylinder;
     break;
   }
   case WindSystem::VolumeType::kCube:
-    [[fallthrough]];
-  default: {
-    logInfo("[CWindSource] cube volume");
-    auto collider = so->addComponent<bs::CBoxCollider>();
-    setCommonSettings(collider);
+    break;
+  default:
+    break;
   }
-  }
+
+  // Build trigger collider
+  auto so = ObjectBuilder(ObjectType::kEmpty)
+                .withSave(false)
+                .withName("WindCollider")
+                .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
+                .build();
+  so->setParent(parent);
 }
 
-void CWindSource::addFunction(BaseFn function) {
+// -------------------------------------------------------------------------- //
+
+void CWind::addFunction(BaseFn function) {
   m_functions.emplace_back(std::move(function));
 }
 
-void CWindSource::addFunctions(const std::vector<BaseFn> &functions) {
+// -------------------------------------------------------------------------- //
+
+void CWind::addFunctions(const std::vector<BaseFn> &functions) {
   for (const auto &function : functions) {
     addFunction(function);
   }
 }
 
-Vec3F CWindSource::getWindAtPoint(Vec3F pos) const {
+Vec3F CWind::getWindAtPoint(Vec3F pos) const {
   Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
     wind += fn(pos);
@@ -95,10 +88,8 @@ Vec3F CWindSource::getWindAtPoint(Vec3F pos) const {
 
 // -------------------------------------------------------------------------- //
 
-bs::RTTITypeBase *CWindSource::getRTTIStatic() {
-  return CWindSourceRTTI::instance();
-}
+bs::RTTITypeBase *CWind::getRTTIStatic() { return CWindSourceRTTI::instance(); }
 
-bs::RTTITypeBase *CWindSource::getRTTI() const { return getRTTIStatic(); }
+bs::RTTITypeBase *CWind::getRTTI() const { return getRTTIStatic(); }
 
 } // namespace wind

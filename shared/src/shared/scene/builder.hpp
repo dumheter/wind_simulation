@@ -96,8 +96,18 @@ public:
   /// Sets skybox texture
   ObjectBuilder &withSkybox(const String &path);
 
-  /// Sets physics options
-  ObjectBuilder &withCollider(f32 restitution = 1.0f, f32 mass = 0.0f);
+  /// Adds a collider according to object kind
+  ObjectBuilder &withCollider(f32 restitution = 1.0f, f32 mass = 0.0f,
+                              u32 layer = 0, bool trigger = false,
+                              bool report = false);
+
+  /// Adds a collider
+  ObjectBuilder &withCollider(Kind kind, f32 restitution = 1.0f,
+                              f32 mass = 0.0f, u32 layer = 0,
+                              bool trigger = false, bool report = false);
+
+  /// Add a trigger collider
+  ObjectBuilder &withTriggerCollider(Kind kind, u32 layer = 0, bool report = false);
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();

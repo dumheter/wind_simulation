@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/scene/wind_src.hpp"
+#include "shared/scene/component/cwind.hpp"
 #include <Physics/BsPhysics.h>
 #include <Scene/BsSceneManager.h>
 #include <Components/BsCCollider.h>
@@ -81,7 +81,7 @@ Vec3F WindSystem::getWindAtPoint(Vec3F point) const {
   const auto colliders = physicsScene->sphereOverlap(sphere, kWindVolumeLayer);
   for (const auto& collider : colliders) {
     bs::HSceneObject so = collider->SO()->getParent();
-    const HCWindSource windSource = so->getComponent<CWindSource>();
+    const HCWind windSource = so->getComponent<CWind>();
     wind += windSource->getWindAtPoint(point);
   }
 
