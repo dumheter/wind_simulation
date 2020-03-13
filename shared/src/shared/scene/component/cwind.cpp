@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "wind_src.hpp"
+#include "cwind.hpp"
 #include "Components/BsCBoxCollider.h"
 #include "Components/BsCRenderable.h"
 #include "Scene/BsSceneObject.h"
@@ -33,58 +33,53 @@
 #include <Components/BsCMeshCollider.h>
 
 // ========================================================================== //
-// CWindSource Implementation
+// CWind Implementation
 // ========================================================================== //
 
 namespace wind {
 
-CWindSource::CWindSource(const bs::HSceneObject &parent,
-                         WindSystem::VolumeType volumeType)
-    : bs::Component(parent) {
+CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType)
+    : Component(parent) {
   setName("WindComponent");
-  auto so = ObjectBuilder(ObjectType::kEmpty).build();
-  so->setParent(parent);
 
-  const auto setCommonSettings = [this](auto &collider) {
-    collider->setIsTrigger(true);
-    collider->setCollisionReportMode(bs::CollisionReportMode::Report);
-    collider->setLayer(WindSystem::kWindVolumeLayer);
-  };
-
+  // Determine collider object type
+  ObjectType colliderType = ObjectType::kCube;
   switch (volumeType) {
   case WindSystem::VolumeType::kCylinder: {
-    logInfo("[CWindSource] cylinder volume");
-    // TODO only load the physics mesh
-    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
-                                                 1.0f, false, true);
-    auto collider = so->addComponent<bs::CMeshCollider>();
-    collider->setMesh(pmesh);
-    setCommonSettings(collider);
-    setupCollision(collider);
+    colliderType = ObjectType::kCylinder;
     break;
   }
   case WindSystem::VolumeType::kCube:
-    [[fallthrough]];
-  default: {
-    logInfo("[CWindSource] cube volume");
-    auto collider = so->addComponent<bs::CBoxCollider>();
-    setCommonSettings(collider);
-    setupCollision(collider);
+    break;
+  default:
+    break;
   }
-  }
+
+  // Build trigger collider
+  auto so = ObjectBuilder(ObjectType::kEmpty)
+                .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
+                .build();
+  so->setParent(parent);
+  setupColl(so->getComponent<bs::CCollider>());
 }
 
-void CWindSource::addFunction(BaseFn function) {
+// -------------------------------------------------------------------------- //
+
+void CWind::addFunction(BaseFn function) {
   m_functions.emplace_back(std::move(function));
 }
 
-void CWindSource::addFunctions(const std::vector<BaseFn> &functions) {
+// -------------------------------------------------------------------------- //
+
+void CWind::addFunctions(const std::vector<BaseFn> &functions) {
   for (const auto &function : functions) {
     addFunction(function);
   }
 }
 
-bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {
+// -------------------------------------------------------------------------- //
+
+bs::Vector3 CWind::getWindForce(bs::Vector3 pos) const {
   bs::Vector3 force{bs::Vector3::ZERO};
   for (auto fn : m_functions) {
     force += fn(pos);
@@ -92,7 +87,9 @@ bs::Vector3 CWindSource::getWindForce(bs::Vector3 pos) const {
   return force;
 }
 
-void CWindSource::fixedUpdate() {
+// -------------------------------------------------------------------------- //
+
+void CWind::fixedUpdate() {
   if (!m_collisions.empty()) {
     const f32 dt = bs::gTime().getFixedFrameDelta();
     for (auto &collision : m_collisions) {
@@ -111,14 +108,46 @@ void CWindSource::fixedUpdate() {
 
 // -------------------------------------------------------------------------- //
 
-void CWindSource::onCreated() {}
+void CWind::onCreated() {}
 
 // -------------------------------------------------------------------------- //
 
-bs::RTTITypeBase *CWindSource::getRTTIStatic() {
-  return CWindSourceRTTI::instance();
-}
+bs::RTTITypeBase *CWind::getRTTIStatic() { return CWindSourceRTTI::instance(); }
 
-bs::RTTITypeBase *CWindSource::getRTTI() const { return getRTTIStatic(); }
+bs::RTTITypeBase *CWind::getRTTI() const { return getRTTIStatic(); }
+
+// -------------------------------------------------------------------------- //
+
+void CWind::setupColl(const bs::HCollider &collider) {
+  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
+    if (data.collider[1] == nullptr) {
+      return;
+    }
+    bs::HSceneObject so = data.collider[1]->SO();
+    const HCNetComponent netComp = so->getComponent<CNetComponent>();
+    if (netComp) {
+      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
+    } else {
+      logWarning("[windSource] col with non net component");
+    }
+  });
+
+  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
+    if (data.collider[1] == nullptr) {
+      return;
+    }
+    bs::HSceneObject so = data.collider[1]->SO();
+    const HCNetComponent netComp = so->getComponent<CNetComponent>();
+    if (netComp) {
+      const UniqueId id = netComp->getUniqueId();
+      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
+        if (it->id == id) {
+          m_collisions.erase(it);
+          break;
+        }
+      }
+    }
+  });
+}
 
 } // namespace wind

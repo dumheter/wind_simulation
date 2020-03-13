@@ -36,6 +36,7 @@
 #include "shared/wind/wind_system.hpp"
 
 #include <Material/BsMaterial.h>
+#include <Physics/BsPhysicsCommon.h>
 #include <RTTI/BsMathRTTI.h>
 #include <Reflection/BsRTTIPlain.h>
 #include <Reflection/BsRTTIType.h>
@@ -43,7 +44,7 @@
 #include <Scene/BsSceneObject.h>
 
 // ========================================================================== //
-// CWindSource Declaration
+// CWind Declaration
 // ========================================================================== //
 
 namespace wind {
@@ -53,17 +54,18 @@ struct Collision {
   HCNetComponent netComp;
 };
 
-///
-class CWindSource : public bs::Component {
+// -------------------------------------------------------------------------- //
+
+/// Class that represents a wind component
+class CWind : public bs::Component {
   friend class CWindSourceRTTI;
 
 public:
   /// Default constructor required for serialization
-  CWindSource() = default;
+  CWind() = default;
 
   /// @size Size of the cube volume where wind interacts.
-  CWindSource(const bs::HSceneObject &parent,
-              WindSystem::VolumeType volumeType);
+  CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType);
 
   void addFunction(BaseFn function);
 
@@ -75,8 +77,6 @@ public:
 
   void onCreated() override;
 
-  void onCollision();
-
   const std::vector<BaseFn> &getFunctions() const { return m_functions; }
 
   std::vector<BaseFn> &getFunctions() { return m_functions; }
@@ -86,7 +86,8 @@ public:
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
-  template <typename T> void setupCollision(const T &collider);
+  /// Setup collider callbacks
+  void setupColl(const bs::HCollider &collider);
 
 private:
   std::vector<BaseFn> m_functions{};
@@ -95,40 +96,8 @@ private:
 
 // -------------------------------------------------------------------------- //
 
-/// CWindSource handle type
-using HCWindSource = bs::GameObjectHandle<CWindSource>;
-
-template <typename T> void CWindSource::setupCollision(const T &collider) {
-  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    auto so = data.collider[1]->SO();
-    HCNetComponent netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
-    } else {
-      logWarning("[windSource] col with non net component");
-    }
-  });
-
-  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    auto so = data.collider[1]->SO();
-    auto netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      const auto id = netComp->getUniqueId();
-      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
-        if (it->id == id) {
-          m_collisions.erase(it);
-          break;
-        }
-      }
-    }
-  });
-}
+/// CWind handle type
+using HCWindSource = bs::GameObjectHandle<CWind>;
 
 } // namespace wind
 
@@ -140,7 +109,7 @@ namespace wind {
 
 ///
 class CWindSourceRTTI
-    : public bs::RTTIType<CWindSource, bs::Component, CWindSourceRTTI> {
+    : public bs::RTTIType<CWind, bs::Component, CWindSourceRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
   BS_END_RTTI_MEMBERS
@@ -154,7 +123,7 @@ public:
   bs::UINT32 getRTTIId() override { return TID_CWindSource; }
 
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CWindSource>();
+    return bs::SceneObject::createEmptyComponent<CWind>();
   }
 };
 

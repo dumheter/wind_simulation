@@ -39,8 +39,8 @@ const ComponentData::RigidbodyData &ComponentData::rigidbodyData() const {
   return std::get<RigidbodyData>(m_data);
 }
 
-const ComponentData::WindSourceData &ComponentData::windSourceData() const {
-  return std::get<WindSourceData>(m_data);
+const ComponentData::WindData &ComponentData::windSourceData() const {
+  return std::get<WindData>(m_data);
 }
 
 const ComponentData::RenderableData &ComponentData::renderableData() const {
@@ -60,20 +60,20 @@ const ComponentData::ColliderData &ComponentData::colliderData() const {
 bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
   if (std::holds_alternative<RigidbodyData>(m_data)) {
     return mw.Write(static_cast<TagType>(ComponentType::kRigidbody));
-  } else if (std::holds_alternative<WindSourceData>(m_data)) {
+  } else if (std::holds_alternative<WindData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kWindSource));
-    mw.Write(std::get<WindSourceData>(m_data).functions);
-    mw.Write(std::get<WindSourceData>(m_data).volume.x);
-    mw.Write(std::get<WindSourceData>(m_data).volume.y);
-    mw.Write(std::get<WindSourceData>(m_data).volume.z);
-    mw.Write(std::get<WindSourceData>(m_data).color.x);
-    mw.Write(std::get<WindSourceData>(m_data).color.y);
-    mw.Write(std::get<WindSourceData>(m_data).color.z);
-    mw.Write(std::get<WindSourceData>(m_data).color.w);
-    mw.Write(std::get<WindSourceData>(m_data).offset.x);
-    mw.Write(std::get<WindSourceData>(m_data).offset.y);
-    mw.Write(std::get<WindSourceData>(m_data).offset.z);
-    return mw.Write(std::get<WindSourceData>(m_data).volumeType);
+    mw.Write(std::get<WindData>(m_data).functions);
+    mw.Write(std::get<WindData>(m_data).volume.x);
+    mw.Write(std::get<WindData>(m_data).volume.y);
+    mw.Write(std::get<WindData>(m_data).volume.z);
+    mw.Write(std::get<WindData>(m_data).color.x);
+    mw.Write(std::get<WindData>(m_data).color.y);
+    mw.Write(std::get<WindData>(m_data).color.z);
+    mw.Write(std::get<WindData>(m_data).color.w);
+    mw.Write(std::get<WindData>(m_data).offset.x);
+    mw.Write(std::get<WindData>(m_data).offset.y);
+    mw.Write(std::get<WindData>(m_data).offset.z);
+    return mw.Write(std::get<WindData>(m_data).volumeType);
   } else if (std::holds_alternative<RenderableData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kRenderable));
     return mw.Write(
@@ -110,7 +110,7 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
         Vec4F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     auto offset = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     auto volumeType = mr.Read<u8>();
-    return asWindSource(functions, volume, color, offset, volumeType);
+    return asWind(functions, volume, color, offset, volumeType);
   }
   case ComponentType::kRenderable: {
     auto pathTexture = mr.Read<alflib::String>();
@@ -143,11 +143,11 @@ ComponentData ComponentData::asRigidbody() {
   return data;
 }
 
-ComponentData ComponentData::asWindSource(const std::vector<BaseFn> &functions,
+ComponentData ComponentData::asWind(const std::vector<BaseFn> &functions,
                                           Vec3F volume, Vec4F color,
                                           Vec3F offset, u8 volumeType) {
   ComponentData data;
-  data.m_data = WindSourceData{functions, volume, color, offset, volumeType};
+  data.m_data = WindData{functions, volume, color, offset, volumeType};
   return data;
 }
 

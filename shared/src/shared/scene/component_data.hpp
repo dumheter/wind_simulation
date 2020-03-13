@@ -45,7 +45,7 @@ public:
 
   struct RigidbodyData {};
 
-  struct WindSourceData {
+  struct WindData {
     std::vector<BaseFn> functions = {};
     Vec3F volume = Vec3F::ONE;
     Vec4F color{1.0f, 1.0f, 1.0f, 1.0f};
@@ -75,7 +75,7 @@ public:
   const RigidbodyData &rigidbodyData() const;
 
   /// Returns the WindSource data
-  const WindSourceData &windSourceData() const;
+  const WindData &windSourceData() const;
 
   const RenderableData &renderableData() const;
 
@@ -93,9 +93,9 @@ public:
   static ComponentData asRigidbody();
 
   /// Creates a component data representing wind source data
-  static ComponentData asWindSource(const std::vector<BaseFn> &functions,
-                                    Vec3F volume, Vec4F color,
-                                    Vec3F offset, u8 volumeType);
+  static ComponentData asWind(const std::vector<BaseFn> &functions,
+                              Vec3F volume, Vec4F color, Vec3F offset,
+                              u8 volumeType);
 
   static ComponentData asRenderable(const String &pathTexture);
 
@@ -105,8 +105,7 @@ public:
 
 private:
   /// Variant
-  std::variant<RigidbodyData, WindSourceData, RenderableData, RotorData,
-               ColliderData>
+  std::variant<RigidbodyData, WindData, RenderableData, RotorData, ColliderData>
       m_data;
 };
 

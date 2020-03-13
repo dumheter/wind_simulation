@@ -32,9 +32,9 @@
 #include "shared/scene/cnet_component.hpp"
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
+#include "shared/scene/component/cwind.hpp"
 #include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
-#include "shared/scene/wind_src.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
 
@@ -249,26 +249,48 @@ ObjectBuilder &ObjectBuilder::withSkybox(const String &path) {
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
+ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass, u32 layer,
+                                           bool trigger, bool report) {
+  return withCollider(m_kind, restitution, mass, layer, trigger, report);
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
+                                           u32 layer, bool trigger,
+                                           bool report) {
+  // Store tag information
   const HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().physics.collider = true;
   ctag->getData().physics.restitution = restitution;
   ctag->getData().physics.mass = mass;
 
+  // Setup physics material
   const bs::HPhysicsMaterial material =
       bs::PhysicsMaterial::create(1.0f, 1.0f, restitution);
 
-  switch (m_kind) {
+  // Setup collider
+  switch (kind) {
   case Kind::kPlane: {
     bs::HPlaneCollider collider = m_handle->addComponent<bs::CPlaneCollider>();
     collider->setMaterial(material);
     collider->setMass(mass);
+    collider->setIsTrigger(trigger);
+    collider->setLayer(layer);
+    if (report) {
+      collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    }
     break;
   }
   case Kind::kCube: {
     bs::HBoxCollider collider = m_handle->addComponent<bs::CBoxCollider>();
     collider->setMaterial(material);
     collider->setMass(mass);
+    collider->setIsTrigger(trigger);
+    collider->setLayer(layer);
+    if (report) {
+      collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    }
     break;
   }
   case Kind::kBall: {
@@ -276,6 +298,11 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
         m_handle->addComponent<bs::CSphereCollider>();
     collider->setMaterial(material);
     collider->setMass(mass);
+    collider->setIsTrigger(trigger);
+    collider->setLayer(layer);
+    if (report) {
+      collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    }
     break;
   }
   case Kind::kRotor: {
@@ -283,6 +310,11 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
     collider->setMaterial(material);
     collider->setMass(mass);
     collider->setExtents(Vec3F(1.8f, 0.1f, 1.8f));
+    collider->setIsTrigger(trigger);
+    collider->setLayer(layer);
+    if (report) {
+      collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    }
     break;
   }
   case Kind::kCylinder: {
@@ -292,6 +324,11 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
     collider->setMesh(pmesh);
     collider->setMaterial(material);
     collider->setMass(mass);
+    collider->setIsTrigger(trigger);
+    collider->setLayer(layer);
+    if (report) {
+      collider->setCollisionReportMode(bs::CollisionReportMode::Report);
+    }
     break;
   }
   default: {
@@ -300,6 +337,12 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
   }
 
   return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u32 layer) {
+  return withCollider(kind, 1.0f, 0.0f, layer, true, true);
 }
 
 // -------------------------------------------------------------------------- //
@@ -318,7 +361,7 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 ObjectBuilder &
 ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
                               WindSystem::VolumeType volumeType) {
-  auto wind = m_handle->addComponent<CWindSource>(volumeType);
+  auto wind = m_handle->addComponent<CWind>(volumeType);
   wind->addFunctions(functions);
   return *this;
 }

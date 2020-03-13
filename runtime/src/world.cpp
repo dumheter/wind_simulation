@@ -3,8 +3,8 @@
 #include "shared/log.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
+#include "shared/scene/component/cwind.hpp"
 #include "shared/scene/scene.hpp"
-#include "shared/scene/wind_src.hpp"
 #include "shared/utility/util.hpp"
 
 #include <Components/BsCCamera.h>
@@ -333,8 +333,8 @@ void World::buildObject(const CreateInfo &info) {
     if (component.isType<ComponentData::RigidbodyData>()) {
       MICROPROFILE_SCOPEI("World", "RigidbodyData", MP_TURQUOISE4);
       obj.withRigidbody();
-    } else if (component.isType<ComponentData::WindSourceData>()) {
-      MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
+    } else if (component.isType<ComponentData::WindData>()) {
+      MICROPROFILE_SCOPEI("World", "WindData", MP_TURQUOISE4);
       const auto &wind = component.windSourceData();
       const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
       obj.withWindVolume(volumeType, wind.color);
