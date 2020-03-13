@@ -91,6 +91,7 @@ void Editor::onStartup() {
 
   // Setup default scene
   setScene(Scene::loadFile(kDefaultSceneName));
+  Scene::saveFile("res/scenes/out.json", getScene());
 
   // Create simulation
   m_windSim = new WindSimulation(u32(kGroundPlaneScale * 2.0f), 6,

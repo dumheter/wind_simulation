@@ -405,6 +405,29 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     value["spline"]["points"] = splinePoints;
   }
 
+  // Wind (Volume)
+
+  // Wind (Source)
+
+  // Wind (Occluder)
+  const HCWindOccluder windOccluderComp = object->getComponent<CWindOccluder>();
+  if (windOccluderComp) {
+    if (windOccluderComp->getKind() == CWindOccluder::VolumeKind::kCube) {
+      const CWindOccluder::Cube &occCube = windOccluderComp->getAsCube();
+      value["wind"]["occluder"]["type"] = "cube";
+      JsonUtil::setValue(value["wind"]["occluder"], "dim", occCube.dim);
+    } else if (windOccluderComp->getKind() ==
+               CWindOccluder::VolumeKind::kCylinder) {
+      const CWindOccluder::Cylinder &occCylinder =
+          windOccluderComp->getAsCylinder();
+      value["wind"]["occluder"]["type"] = "cylinder";
+      value["wind"]["occluder"]["radius"] = occCylinder.radius;
+      value["wind"]["occluder"]["height"] = occCylinder.height;
+    } else {
+      Util::panic("Invalid wind occluder type");
+    }
+  }
+
   // Sub-objects
   const u32 cnt = object->getNumChildren();
   json objArrValue = std::vector<json>{};

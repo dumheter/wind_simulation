@@ -39,7 +39,7 @@
 namespace wind {
 
 CWindOccluder::CWindOccluder(const bs::HSceneObject &parent, const Cube &cube)
-    : Component(parent) {
+    : Component(parent), m_volumeKind(VolumeKind::kCube), m_data(cube) {
   // Debug object
   const bs::HSceneObject obj =
       ObjectBuilder(ObjectType::kCube)
@@ -64,7 +64,7 @@ CWindOccluder::CWindOccluder(const bs::HSceneObject &parent, const Cube &cube)
 
 CWindOccluder::CWindOccluder(const bs::HSceneObject &parent,
                              const Cylinder &cylinder)
-    : Component(parent) {
+    : Component(parent), m_volumeKind(VolumeKind::kCylinder), m_data(cylinder) {
   // Debug object
   const bs::HSceneObject obj =
       ObjectBuilder(ObjectType::kCylinder)

@@ -29,6 +29,8 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/rtti.hpp"
 
+#include <variant>
+
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 #include <Scene/BsSceneObject.h>
@@ -53,13 +55,13 @@ public:
 
   /// Cube description.
   struct Cube {
-    Vec3F dim; ///< Dimension of cube (x, y and z radii)
+    Vec3F dim = Vec3F::ONE; ///< Dimension of cube (x, y and z radii)
   };
 
   /// Cylinder description
   struct Cylinder {
-    f32 height; ///< Cylinder height.
-    f32 radius; ///< Cylinder radius.
+    f32 height = 1.0f; ///< Cylinder height.
+    f32 radius = 1.0f; ///< Cylinder radius.
   };
 
   /// Default constructor for serialization
@@ -71,6 +73,15 @@ public:
   /// Construct a wind occluder component.
   CWindOccluder(const bs::HSceneObject &parent, const Cylinder &cylinder);
 
+  /// Get occluder kind
+  VolumeKind getKind() const { return m_volumeKind; }
+
+  /// Get the occluder cube info
+  const Cube &getAsCube() const { return std::get<Cube>(m_data); }
+
+  /// Get the occluder cylinder info
+  const Cylinder &getAsCylinder() const { return std::get<Cylinder>(m_data); }
+
   /// Returns a reference to the static RTTI object that represents this
   /// component
   static bs::RTTITypeBase *getRTTIStatic();
@@ -81,6 +92,8 @@ public:
 private:
   /// Volume Kind
   VolumeKind m_volumeKind = VolumeKind::kCube;
+  /// Data for volumes
+  std::variant<Cube, Cylinder> m_data;
 };
 
 // -------------------------------------------------------------------------- //
