@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,17 +40,25 @@ const ComponentData::RigidbodyData &ComponentData::rigidbodyData() const {
   return std::get<RigidbodyData>(m_data);
 }
 
-const ComponentData::WindSourceData &ComponentData::windSourceData() const {
-  return std::get<WindSourceData>(m_data);
+// -------------------------------------------------------------------------- //
+
+const ComponentData::WindData &ComponentData::windSourceData() const {
+  return std::get<WindData>(m_data);
 }
+
+// -------------------------------------------------------------------------- //
 
 const ComponentData::RenderableData &ComponentData::renderableData() const {
   return std::get<RenderableData>(m_data);
 }
 
+// -------------------------------------------------------------------------- //
+
 const ComponentData::RotorData &ComponentData::rotorData() const {
   return std::get<RotorData>(m_data);
 }
+
+// -------------------------------------------------------------------------- //
 
 const ComponentData::ColliderData &ComponentData::colliderData() const {
   return std::get<ColliderData>(m_data);
@@ -61,13 +69,13 @@ const ComponentData::ColliderData &ComponentData::colliderData() const {
 bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
   if (std::holds_alternative<RigidbodyData>(m_data)) {
     return mw.Write(static_cast<TagType>(ComponentType::kRigidbody));
-  } else if (std::holds_alternative<WindSourceData>(m_data)) {
+  } else if (std::holds_alternative<WindData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kWindSource));
-    mw.Write(std::get<WindSourceData>(m_data).functions);
-    mw.Write(std::get<WindSourceData>(m_data).offset.x);
-    mw.Write(std::get<WindSourceData>(m_data).offset.y);
-    mw.Write(std::get<WindSourceData>(m_data).offset.z);
-    return mw.Write(std::get<WindSourceData>(m_data).volumeType);
+    mw.Write(std::get<WindData>(m_data).functions);
+    mw.Write(std::get<WindData>(m_data).offset.x);
+    mw.Write(std::get<WindData>(m_data).offset.y);
+    mw.Write(std::get<WindData>(m_data).offset.z);
+    return mw.Write(std::get<WindData>(m_data).volumeType);
   } else if (std::holds_alternative<RenderableData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kRenderable));
     return mw.Write(
@@ -101,7 +109,7 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
     std::vector<BaseFn> functions = mr.ReadStdVector<BaseFn>();
     auto offset = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     auto volumeType = mr.Read<u8>();
-    return asWindSource(functions, offset, volumeType);
+    return asWind(functions, offset, volumeType);
   }
   case ComponentType::kRenderable: {
     auto pathTexture = mr.Read<alflib::String>();
@@ -134,12 +142,16 @@ ComponentData ComponentData::asRigidbody() {
   return data;
 }
 
-ComponentData ComponentData::asWindSource(const std::vector<BaseFn> &functions,
-                                          Vec3F offset, u8 volumeType) {
+// -------------------------------------------------------------------------- //
+
+ComponentData ComponentData::asWind(const std::vector<BaseFn> &functions,
+                                    Vec3F offset, u8 volumeType) {
   ComponentData data;
-  data.m_data = WindSourceData{functions, offset, volumeType};
+  data.m_data = WindData{functions, offset, volumeType};
   return data;
 }
+
+// -------------------------------------------------------------------------- //
 
 ComponentData ComponentData::asRenderable(const String &pathTexture) {
   ComponentData data;
@@ -147,11 +159,15 @@ ComponentData ComponentData::asRenderable(const String &pathTexture) {
   return data;
 }
 
+// -------------------------------------------------------------------------- //
+
 ComponentData ComponentData::asRotor(const Quat &q) {
   ComponentData data;
   data.m_data = RotorData{q};
   return data;
 }
+
+// -------------------------------------------------------------------------- //
 
 ComponentData ComponentData::asCollider(f32 restitution, f32 mass) {
   ComponentData data;

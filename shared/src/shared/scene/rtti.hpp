@@ -44,7 +44,7 @@ constexpr u32 TID_CMyPlayer = 2002;
 constexpr u32 TID_FPSWalker = 2003;
 /// RTTI Type ID of FPSCamera component
 constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWindSource component
+/// RTTI Type ID of CWind component
 constexpr u32 TID_CWindSource = 2005;
 /// RTTI Type ID of CTag component
 constexpr u32 TID_CTag = 2006;

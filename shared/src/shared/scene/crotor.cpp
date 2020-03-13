@@ -1,5 +1,5 @@
 #include "crotor.hpp"
-#include "shared/scene/wind_src.hpp"
+#include "shared/scene/component/cwind.hpp"
 
 namespace wind {
 
@@ -11,9 +11,7 @@ CRotor::CRotor(const bs::HSceneObject &parent, Vec3F rotation)
   setRotation(rotation);
 }
 
-void CRotor::fixedUpdate() {
-  SO()->rotate(m_rotation);
-}
+void CRotor::fixedUpdate() { SO()->rotate(m_rotation); }
 
 void CRotor::setRotation(Vec3F rot) {
   m_rotation =

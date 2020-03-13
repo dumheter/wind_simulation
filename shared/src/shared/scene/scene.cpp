@@ -30,10 +30,10 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cspline.hpp"
+#include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
-#include "shared/scene/wind_src.hpp"
 
 #include <Components/BsCRenderable.h>
 #include <Components/BsCSkybox.h>
@@ -351,26 +351,6 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     value["skybox"]["cubemap"] = tag->getData().skybox;
   }
 
-  // Wind
-  if (auto wind = object->getComponent<CWindSource>(); wind) {
-    value["wind"]["volume"]["type"] =
-        WindSystem::volumeTypeToString(wind->getVolumeType());
-
-    if (const auto offset = wind->getOffset(); offset != Vec3F::ZERO) {
-      JsonUtil::setValue(value["wind"]["volume"], "offset", offset);
-    }
-
-    if (!wind->getFunctions().empty()) {
-      std::vector<json> fns{};
-      for (const auto &fn : wind->getFunctions()) {
-        json jfn{};
-        fn.toJson(jfn);
-        fns.push_back(std::move(jfn));
-      }
-      value["wind"]["functions"] = fns;
-    }
-  }
-
   // Material
   if (object->getComponent<bs::CRenderable>()) {
     if (!tag->getData().mat.albedo.empty()) {
@@ -423,9 +403,25 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     value["spline"]["points"] = splinePoints;
   }
 
-  // Wind (Volume)
+  // Wind
+  if (auto wind = object->getComponent<CWind>(); wind) {
+    value["wind"]["volume"]["type"] =
+        WindSystem::volumeTypeToString(wind->getVolumeType());
 
-  // Wind (Source)
+    if (const auto offset = wind->getOffset(); offset != Vec3F::ZERO) {
+      JsonUtil::setValue(value["wind"]["volume"], "offset", offset);
+    }
+
+    if (!wind->getFunctions().empty()) {
+      std::vector<json> fns{};
+      for (const auto &fn : wind->getFunctions()) {
+        json jfn{};
+        fn.toJson(jfn);
+        fns.push_back(std::move(jfn));
+      }
+      value["wind"]["functions"] = fns;
+    }
+  }
 
   // Wind (Occluder)
   const HCWindOccluder windOccluderComp = object->getComponent<CWindOccluder>();
