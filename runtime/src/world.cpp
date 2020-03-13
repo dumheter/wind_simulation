@@ -166,9 +166,6 @@ void World::reloadStaticScene() {
     mw->Write(alflib::String(json.dump().c_str()));
     mw.Finalize();
     m_server.PacketBroadcast(packet, SendStrategy::kReliable);
-  } else {
-    logWarning("[world:reloadStaticScene] cannot reload scene because we have "
-               "no active server");
   }
 }
 
@@ -338,8 +335,10 @@ void World::buildObject(const CreateInfo &info) {
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindSourceData>()) {
       MICROPROFILE_SCOPEI("World", "WindSourceData", MP_TURQUOISE4);
-      // const auto &wind = component.windSourceData();
-      // obj.withWindSource(wind.functions);
+      const auto &wind = component.windSourceData();
+      const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
+      obj.withWindVolume(volumeType, wind.color);
+      obj.withWindSource(wind.functions, volumeType);
       logError("[world:buildObject] withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
       MICROPROFILE_SCOPEI("World", "RenderableData", MP_TURQUOISE4);
