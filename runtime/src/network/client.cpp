@@ -134,8 +134,8 @@ void Client::handlePacket() {
     auto mr = m_packet.GetMemoryReader();
     if (!m_world->serverIsActive()) {
       logVerbose("[client:p SceneChange] scene change");
-      auto scene = mr.Read<alflib::String>().GetUTF8();
-      m_world->onSceneChange(scene);
+      auto scene = mr.Read<alflib::String>();
+      m_world->onSceneChange(scene.GetUTF8());
     }
   } else {
     logError("[client:p] unknown packet");

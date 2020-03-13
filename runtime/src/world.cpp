@@ -166,9 +166,6 @@ void World::reloadStaticScene() {
     mw->Write(alflib::String(json.dump().c_str()));
     mw.Finalize();
     m_server.PacketBroadcast(packet, SendStrategy::kReliable);
-  } else {
-    logWarning("[world:reloadStaticScene] cannot reload scene because we have "
-               "no active server");
   }
 }
 

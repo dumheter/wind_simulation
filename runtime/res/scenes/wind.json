@@ -19,7 +19,7 @@
           "scale": [ 40.0, 1.0, 40.0 ],
           "position": {
             "xz": 4.0,
-            "y": 0
+            "y": -0.4
           },
           "physics": { "restitution": 0.5 }
         },
@@ -76,12 +76,12 @@
             "xz": 8.0,
             "y": 1
           },
-          "scale": [ 2, 2, 2],
+          "scale": [ 2, 4, 2],
           "wind": {
             "functions": [{
               "type": "constant",
-              "magnitude": 10,
-              "direction": [ 0.0, 1.0, 0 ]
+              "magnitude": 20,
+              "direction": [ 0.0, 1.0, 1.0 ]
             }],
             "volume": {
               "type": "cylinder",
