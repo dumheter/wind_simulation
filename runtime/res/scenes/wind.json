@@ -77,11 +77,13 @@
           },
           "scale": [ 2, 4, 2],
           "wind": {
-            "functions": [{
-              "type": "constant",
-              "magnitude": 100,
-              "direction": [ 0.0, 1.0, 1.0 ]
-            }],
+            "functions": [
+              {
+                "type": "constant",
+                "magnitude": 20,
+                "direction": [ 0.0, 1.0, 0.1 ]
+              }
+            ],
             "volume": {
               "type": "cylinder"
             }
@@ -107,11 +109,13 @@
             "mass": 20.0
           },
           "wind": {
-            "functions": [{
-              "type": "constant",
-              "magnitude": 70,
-              "direction": [ 0.0, -1.0, 0.0 ]
-            }],
+            "functions": [
+              {
+                "type": "constant",
+                "magnitude": 70,
+                "direction": [ 0.0, -1.0, 0.0 ]
+              }
+            ],
             "volume": {
               "type": "cube",
               "offset": [ 0, 0, -1]

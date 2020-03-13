@@ -41,6 +41,7 @@
 
 #include <Components/BsCBoxCollider.h>
 #include <Components/BsCCharacterController.h>
+#include <Components/BsCMeshCollider.h>
 #include <Components/BsCPlaneCollider.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
@@ -285,6 +286,15 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
     collider->setExtents(Vec3F(1.8f, 0.1f, 1.8f));
     break;
   }
+  case Kind::kCylinder: {
+    bs::HMeshCollider collider = m_handle->addComponent<bs::CMeshCollider>();
+    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
+                                                 1.0f, false, true);
+    collider->setMesh(pmesh);
+    collider->setMaterial(material);
+    collider->setMass(mass);
+    break;
+  }
   default: {
     break;
   }
@@ -422,6 +432,48 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
 
 // -------------------------------------------------------------------------- //
 
+<<<<<<< HEAD
+=======
+ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
+                                             Vec4F color) {
+  Vec3F pos{0.0f, 0.0f, 0.0f};
+  Vec3F rot{1.0f, 1.0f, 1.0f};
+
+  switch (type) {
+  case WindSystem::VolumeType::kCube: {
+    Vec3F scale{1.0f, 1.0f, 1.0f};
+    withDebugCube(scale, pos, rot, color);
+    break;
+  }
+  case WindSystem::VolumeType::kCylinder: {
+    f32 radius = 1.0f;
+    f32 height = 1.0f;
+    withDebugCylinder(radius, height, pos, rot, color);
+    break;
+  }
+  }
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withWindOccluder(const CWindOccluder::Cube &cube) {
+  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cube);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
+  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cylinder);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+>>>>>>> master
 ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
                                             const Vec3F &position,
                                             const Vec3F &rotation,
