@@ -32,7 +32,6 @@
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
-#include "shared/wind/base_functions.hpp"
 #include "shared/wind/wind_system.hpp"
 
 #include <vector>
@@ -43,6 +42,7 @@
 
 namespace wind {
 
+struct BaseFn;
 struct MoveableState;
 
 class ObjectBuilder {
@@ -106,7 +106,10 @@ public:
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
   ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions,
-                                WindSystem::VolumeType volumeType);
+                                WindSystem::VolumeType volumeType,
+                                Vec3F offset);
+
+  ObjectBuilder &withWindVolume(WindSystem::VolumeType type);
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,

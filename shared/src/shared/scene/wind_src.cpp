@@ -39,10 +39,14 @@
 namespace wind {
 
 CWindSource::CWindSource(const bs::HSceneObject &parent,
-                         WindSystem::VolumeType volumeType)
-    : bs::Component(parent) {
+                         WindSystem::VolumeType volumeType,
+                         Vec3F offset)
+    : bs::Component(parent), m_volumeType(volumeType), m_offset(offset) {
   setName("WindComponent");
-  auto so = ObjectBuilder(ObjectType::kEmpty).build();
+  auto so = ObjectBuilder(ObjectType::kEmpty)
+            .withSave(false)
+            .withName("WindSrcCollider")
+            .build();
   so->setParent(parent);
 
   const auto setCommonSettings = [this](auto &collider) {

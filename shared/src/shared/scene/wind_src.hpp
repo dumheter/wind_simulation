@@ -63,7 +63,8 @@ public:
 
   /// @size Size of the cube volume where wind interacts.
   CWindSource(const bs::HSceneObject &parent,
-              WindSystem::VolumeType volumeType);
+              WindSystem::VolumeType volumeType,
+              Vec3F offset = Vec3F::ZERO);
 
   void addFunction(BaseFn function);
 
@@ -81,6 +82,10 @@ public:
 
   std::vector<BaseFn> &getFunctions() { return m_functions; }
 
+  WindSystem::VolumeType getVolumeType() const { return m_volumeType; }
+
+  Vec3F getOffset() const { return m_offset; }
+
   static bs::RTTITypeBase *getRTTIStatic();
 
   bs::RTTITypeBase *getRTTI() const override;
@@ -91,6 +96,10 @@ private:
 private:
   std::vector<BaseFn> m_functions{};
   std::vector<Collision> m_collisions{};
+  /// Used when saving the wind source
+  WindSystem::VolumeType m_volumeType = WindSystem::VolumeType::kCube;
+  /// Used when saving the wind source
+  Vec3F m_offset = Vec3F::ZERO;
 };
 
 // -------------------------------------------------------------------------- //
