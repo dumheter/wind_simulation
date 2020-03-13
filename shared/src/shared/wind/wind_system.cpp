@@ -53,6 +53,14 @@ WindSystem::VolumeType WindSystem::stringToVolumeType(const String &type) {
   return VolumeType::kCube;
 }
 
+u8 WindSystem::volumeTypeToU8(VolumeType type) {
+  return static_cast<u8>(type);
+}
+
+WindSystem::VolumeType WindSystem::u8ToVolumeType(u8 type) {
+  return static_cast<VolumeType>(type);
+}
+
 void WindSystem::addWindVolume(bs::HSceneObject windVolume) {
   m_windVolumes.push_back(windVolume);
 }

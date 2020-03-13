@@ -97,8 +97,8 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     auto prep = ObjectBuilder{ObjectType::kCylinder}
                     .withSave(false)
                     .withName("playerRep")
-                    .withPosition(bs::Vector3(0.0f, -1.0f, 0.0f))
-                    .withScale(bs::Vector3(0.3f, 2.0f, 0.3f))
+                    .withPosition(bs::Vector3(0.0f, -0.1f, 0.0f))
+                    .withScale(bs::Vector3(0.7f, 1.8f, 0.7f))
                     .withMaterial(ObjectBuilder::ShaderKind::kStandard,
                                   "res/textures/grid_bg.png")
                     .build();
@@ -115,10 +115,6 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f,
                                                 false, true);
     withMesh(mesh);
-    break;
-  }
-  case Kind::kWindVolume: {
-    /* does nothing, call withWindVolume() */
     break;
   }
   default: {
@@ -525,8 +521,6 @@ ObjectBuilder::Kind ObjectBuilder::kindFromString(const String &kindString) {
     return Kind::kRotor;
   } else if (kindString == "cylinder") {
     return Kind::kCylinder;
-  } else if (kindString == "windVolume") {
-    return Kind::kWindVolume;
   }
   return Kind::kInvalid;
 }
@@ -551,8 +545,6 @@ String ObjectBuilder::stringFromKind(Kind kind) {
     return "rotor";
   case Kind::kCylinder:
     return "cylinder";
-  case Kind::kWindVolume:
-    return "windVolume";
   case Kind::kInvalid:
   default: {
     return "invalid";

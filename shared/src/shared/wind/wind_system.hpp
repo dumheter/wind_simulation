@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bjï¿½rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 #pragma once
 
 #include "shared/math/math.hpp"
+#include "shared/types.hpp"
 #include <vector>
 
 // ========================================================================== //
@@ -41,13 +42,17 @@ public:
 
   /// Enumeration of volume types
   enum class VolumeType {
-    kCube,     ///< Cube volume.
+    kCube = 0,     ///< Cube volume.
     kCylinder, ///< Cylinder volume.
   };
 
   static String volumeTypeToString(VolumeType type);
 
   static VolumeType stringToVolumeType(const String &type);
+
+  static u8 volumeTypeToU8(VolumeType type);
+
+  static VolumeType u8ToVolumeType(u8 type);
 
   /**
    * @pre Make sure wind volume is in layer kWindVolumeLayer

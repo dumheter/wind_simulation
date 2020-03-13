@@ -46,7 +46,6 @@ enum class ObjectType : u32 {
   kPlayer,      ///< Player with corresponding components
   kRotor,       ///< Helicopter rotor
   kCylinder,
-  kWindVolume,  ///< Holds the wind source and related obj's
 };
 
 // -------------------------------------------------------------------------- //
