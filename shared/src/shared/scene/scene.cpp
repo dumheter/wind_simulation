@@ -30,6 +30,7 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cspline.hpp"
+#include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
@@ -187,6 +188,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   if (value.find("wind") != value.end()) {
     const json wind = value["wind"];
 
+    // Volume
     WindSystem::VolumeType volumeType = WindSystem::VolumeType::kCube;
     if (wind.find("volume") != wind.end()) {
       const json volume = wind["volume"];
@@ -199,6 +201,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       builder.withWindVolume(volumeType, color);
     }
 
+    // Basic functions
     std::vector<BaseFn> functions{};
     if (wind.find("functions") != wind.end()) {
       const json fns = wind["functions"];
@@ -210,6 +213,22 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
         functions.push_back(BaseFn::fnConstant(dir, mag));
       }
       builder.withWindSource(functions, volumeType);
+    }
+
+    // Occluder
+    auto itWindOcc = wind.find("occluder");
+    if (itWindOcc != wind.end()) {
+      json windOcc = *itWindOcc;
+
+      const String occType = JsonUtil::getString(windOcc, "type", "cube");
+      if (occType == "cube") {
+        const Vec3F occDim = JsonUtil::getVec3F(windOcc, "dim", Vec3F::ONE);
+        builder.withWindOccluder(CWindOccluder::Cube{occDim});
+      } else if (occType == "cylinder") {
+        f32 occHeight = JsonUtil::getF32(windOcc, "height", 1.0f);
+        f32 occRadius = JsonUtil::getF32(windOcc, "radius", 1.0f);
+        builder.withWindOccluder(CWindOccluder::Cylinder{occHeight, occRadius});
+      }
     }
   }
 

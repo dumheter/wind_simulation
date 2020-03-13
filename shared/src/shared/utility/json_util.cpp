@@ -39,6 +39,17 @@ u32 JsonUtil::getU32(const nlohmann::json &value, const String &key,
 
 // -------------------------------------------------------------------------- //
 
+f32 JsonUtil::getF32(const nlohmann::json &value, const String &key,
+                     f32 fallback) {
+  const auto it = value.find(key.c_str());
+  if (it != value.end()) {
+    return value[key.c_str()];
+  }
+  return fallback;
+}
+
+// -------------------------------------------------------------------------- //
+
 Vec2F JsonUtil::getVec2F(const nlohmann::json &value, const String &key,
                          const Vec2F &fallback) {
   auto it = value.find(key.c_str());

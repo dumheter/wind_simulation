@@ -28,6 +28,7 @@
 
 #include "shared/math/math.hpp"
 #include "shared/scene/component/cspline_follow.hpp"
+#include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
 #include "shared/utility/unique_id.hpp"
@@ -128,6 +129,12 @@ public:
   ObjectBuilder &withNetComponent(UniqueId id);
 
   ObjectBuilder &withWindVolume(WindSystem::VolumeType type, Vec4F color);
+
+  /// Add a wind occluder component
+  ObjectBuilder &withWindOccluder(const CWindOccluder::Cube &cube);
+
+  /// Add a wind occluder component
+  ObjectBuilder &withWindOccluder(const CWindOccluder::Cylinder &cylinder);
 
   ObjectBuilder &withDebugCube(const Vec3F &size = Vec3F::ONE,
                                const Vec3F &position = Vec3F::ZERO,
