@@ -30,6 +30,7 @@
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cspline.hpp"
+#include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
@@ -187,6 +188,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   if (value.find("wind") != value.end()) {
     const json wind = value["wind"];
 
+    // Volume
     WindSystem::VolumeType volumeType = WindSystem::VolumeType::kCube;
     if (wind.find("volume") != wind.end()) {
       const json volume = wind["volume"];
@@ -199,6 +201,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       builder.withWindVolume(volumeType, color);
     }
 
+    // Basic functions
     std::vector<BaseFn> functions{};
     if (wind.find("functions") != wind.end()) {
       const json fns = wind["functions"];
@@ -210,6 +213,22 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
         functions.push_back(BaseFn::fnConstant(dir, mag));
       }
       builder.withWindSource(functions, volumeType);
+    }
+
+    // Occluder
+    auto itWindOcc = wind.find("occluder");
+    if (itWindOcc != wind.end()) {
+      json windOcc = *itWindOcc;
+
+      const String occType = JsonUtil::getString(windOcc, "type", "cube");
+      if (occType == "cube") {
+        const Vec3F occDim = JsonUtil::getVec3F(windOcc, "dim", Vec3F::ONE);
+        builder.withWindOccluder(CWindOccluder::Cube{occDim});
+      } else if (occType == "cylinder") {
+        f32 occHeight = JsonUtil::getF32(windOcc, "height", 1.0f);
+        f32 occRadius = JsonUtil::getF32(windOcc, "radius", 1.0f);
+        builder.withWindOccluder(CWindOccluder::Cylinder{occHeight, occRadius});
+      }
     }
   }
 
@@ -384,6 +403,29 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
       splinePoints.push_back(JsonUtil::create(point));
     }
     value["spline"]["points"] = splinePoints;
+  }
+
+  // Wind (Volume)
+
+  // Wind (Source)
+
+  // Wind (Occluder)
+  const HCWindOccluder windOccluderComp = object->getComponent<CWindOccluder>();
+  if (windOccluderComp) {
+    if (windOccluderComp->getKind() == CWindOccluder::VolumeKind::kCube) {
+      const CWindOccluder::Cube &occCube = windOccluderComp->getAsCube();
+      value["wind"]["occluder"]["type"] = "cube";
+      JsonUtil::setValue(value["wind"]["occluder"], "dim", occCube.dim);
+    } else if (windOccluderComp->getKind() ==
+               CWindOccluder::VolumeKind::kCylinder) {
+      const CWindOccluder::Cylinder &occCylinder =
+          windOccluderComp->getAsCylinder();
+      value["wind"]["occluder"]["type"] = "cylinder";
+      value["wind"]["occluder"]["radius"] = occCylinder.radius;
+      value["wind"]["occluder"]["height"] = occCylinder.height;
+    } else {
+      Util::panic("Invalid wind occluder type");
+    }
   }
 
   // Sub-objects

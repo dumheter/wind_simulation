@@ -51,6 +51,9 @@ public:
   static u32 getU32(const nlohmann::json &value, const String &key,
                     u32 fallback = 0);
 
+  static f32 getF32(const nlohmann::json &value, const String &key,
+                    f32 fallback = 0);
+
   /// Read a vector from a JSON value or return the default value
   static Vec2F getVec2F(const nlohmann::json &value, const String &key,
                         const Vec2F &fallback = Vec2F::ZERO);

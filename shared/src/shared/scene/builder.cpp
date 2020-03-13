@@ -40,6 +40,7 @@
 
 #include <Components/BsCBoxCollider.h>
 #include <Components/BsCCharacterController.h>
+#include <Components/BsCMeshCollider.h>
 #include <Components/BsCPlaneCollider.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
@@ -284,6 +285,15 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass) {
     collider->setExtents(Vec3F(1.8f, 0.1f, 1.8f));
     break;
   }
+  case Kind::kCylinder: {
+    bs::HMeshCollider collider = m_handle->addComponent<bs::CMeshCollider>();
+    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
+                                                 1.0f, false, true);
+    collider->setMesh(pmesh);
+    collider->setMaterial(material);
+    collider->setMass(mass);
+    break;
+  }
   default: {
     break;
   }
@@ -415,6 +425,22 @@ ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
     break;
   }
   }
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withWindOccluder(const CWindOccluder::Cube &cube) {
+  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cube);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
+  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cylinder);
   return *this;
 }
 
