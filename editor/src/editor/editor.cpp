@@ -44,13 +44,15 @@
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
+#include "shared/scene/component/cpaint.hpp"
+
 // ========================================================================== //
 // Editor Implementation
 // ========================================================================== //
 
 namespace wind {
 
-Editor::Editor() : App(MakeInfo("Editor", kWindowWidth, kWindowHeight, 20)) {}
+Editor::Editor() : App(makeInfo("Editor", kWindowWidth, kWindowHeight, 20)) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -59,44 +61,60 @@ Editor::~Editor() { delete m_ui; }
 // -------------------------------------------------------------------------- //
 
 void Editor::onStartup() {
-  using namespace bs;
-
-  const SPtr<RenderWindow> window = gApplication().getPrimaryWindow();
-  const RenderWindowProperties &windowProp = window->getProperties();
+  const bs::SPtr<bs::RenderWindow> window =
+      bs::gApplication().getPrimaryWindow();
+  const bs::RenderWindowProperties &windowProp = window->getProperties();
 
   // Register controls
   registerControls();
 
   // Setup root
-  m_root = SceneObject::create("root");
+  m_root = bs::SceneObject::create("root");
 
   // Create camera
-  m_camera = SceneObject::create("camera");
+  m_camera = bs::SceneObject::create("camera");
   m_camera->setParent(m_root);
   m_camera->setPosition(
       Vec3F(kGroundPlaneScale, 2.5f, kGroundPlaneScale - 4.0f) * 0.65f);
   m_camera->lookAt(Vec3F(.0f, 1.5f, .0f));
-  HCamera cameraComp = m_camera->addComponent<CCamera>();
+  bs::HCamera cameraComp = m_camera->addComponent<bs::CCamera>();
   cameraComp->getViewport()->setTarget(window);
   cameraComp->setNearClipDistance(0.005f);
   cameraComp->setFarClipDistance(1000);
   cameraComp->setAspectRatio(windowProp.width / f32(windowProp.height));
-  const SPtr<RenderSettings> renderSettings = cameraComp->getRenderSettings();
+  const bs::SPtr<bs::RenderSettings> renderSettings =
+      cameraComp->getRenderSettings();
   renderSettings->enableIndirectLighting = true;
   cameraComp->setRenderSettings(renderSettings);
-  const HCameraFlyer cameraFlyerComp = m_camera->addComponent<CameraFlyer>();
+  const bs::HCameraFlyer cameraFlyerComp =
+      m_camera->addComponent<bs::CameraFlyer>();
 
   // Setup UI
   m_ui = new UI(this);
 
   // Setup default scene
   setScene(Scene::loadFile(kDefaultSceneName));
+
+  // TMP: Save scene
   // Scene::saveFile("res/scenes/out.json", getScene());
+
+  // TMP: Paint component
+  // bs::HSceneObject obj = getScene()->findPath("structures/house0/occluder");
+  // if (obj) {
+  //  HCPaint cpaint = obj->addComponent<CPaint>();
+  //  cpaint->setPaintCallback([obj](Painter &painter) {
+  //    //
+  //    painter.setColor(Color::sRed);
+  //    painter.drawArrow(Vec3F(0.0f, 1.0f, 0.0f), Vec3F(1.0f, 1.0f, 1.0f));
+  //    painter.setColor(Color::sGreen);
+  //    painter.drawArrow(Vec3F(2.0f, 1.0f, 2.0f), Vec3F(2.0f, 2.0f, 2.0f));
+  //  });
+  //}
 
   // Create simulation
   m_windSim = new WindSimulation(u32(kGroundPlaneScale * 2.0f), 6,
                                  u32(kGroundPlaneScale * 2.0f), 0.25f);
-  m_windSim->buildForScene(SceneManager::instance().getMainScene());
+  m_windSim->buildForScene(bs::SceneManager::instance().getMainScene());
 }
 
 // -------------------------------------------------------------------------- //

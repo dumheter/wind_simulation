@@ -20,41 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "cpaint.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/types.hpp"
-
 // ========================================================================== //
-// RTTI Types
+// CSpline Implementation
 // ========================================================================== //
 
 namespace wind {
 
-/// RTTI Type ID of CRotor component
-constexpr u32 TID_CRotor = 2000;
-/// RTTI Type ID of CNetComponent component
-constexpr u32 TID_CNetComponent = 2001;
-/// RTTI Type ID of CMyPlayer component
-constexpr u32 TID_CMyPlayer = 2002;
-/// RTTI Type ID of FPSWalker component
-constexpr u32 TID_FPSWalker = 2003;
-/// RTTI Type ID of FPSCamera component
-constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWind component
-constexpr u32 TID_CWindSource = 2005;
-/// RTTI Type ID of CTag component
-constexpr u32 TID_CTag = 2006;
-/// RTTI Type ID of CSpline component
-constexpr u32 TID_CSpline = 2007;
-/// RTTI Type ID of CSplineFollow component
-constexpr u32 TID_CSplineFollow = 2008;
-/// RTTI Type ID of CWindOccluder component
-constexpr u32 TID_CWindOccluder = 2009;
-/// RTTI Type ID of CPaint component
-constexpr u32 TID_CPaint = 2010;
+CPaint::CPaint() { s_Components.push_back(this); }
+
+// -------------------------------------------------------------------------- //
+
+CPaint::~CPaint() {
+  s_Components.erase(
+      std::remove(s_Components.begin(), s_Components.end(), this),
+      s_Components.end());
+}
+
+// -------------------------------------------------------------------------- //
+
+CPaint::CPaint(const bs::HSceneObject &parent) : Component(parent) {
+  s_Components.push_back(this);
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CPaint::getRTTIStatic() { return CPaintRTTI::instance(); }
+
+// -------------------------------------------------------------------------- //
+
+std::vector<CPaint *> CPaint::s_Components = std::vector<CPaint *>{};
 
 } // namespace wind

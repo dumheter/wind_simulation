@@ -26,6 +26,7 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/render/painter.hpp"
 #include "shared/types.hpp"
 
 #include <BsApplication.h>
@@ -118,9 +119,13 @@ public:
   /// Tick callback
   virtual void onTick() {}
 
-public:
   /// Make an application information structure
-  static Info MakeInfo(const bs::String &title, u32 width, u32 height, u32 tps);
+  static Info makeInfo(const bs::String &title, u32 width, u32 height, u32 tps);
+
+private:
+  /// Paint the application. This will allow all CPaint components to paint
+  /// with a painter object.
+  void paint();
 
 private:
   static App *g_app;
@@ -145,6 +150,9 @@ protected:
 
   /* Whether app is fullscreen */
   bool m_isFullscreen = false;
+
+  /// Painter
+  Painter m_painter;
 };
 
 } // namespace wind
