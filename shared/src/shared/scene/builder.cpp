@@ -38,6 +38,7 @@
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
 #include "shared/wind/base_functions.hpp"
+#include "shared/scene/component/cwind_affectable.hpp"
 
 #include <Components/BsCBoxCollider.h>
 #include <Components/BsCCharacterController.h>
@@ -342,8 +343,8 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u32 layer) {
-  return withCollider(kind, 1.0f, 0.0f, layer, true, true);
+ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u32 layer, bool report) {
+  return withCollider(kind, 1.0f, 0.0f, layer, true, report);
 }
 
 // -------------------------------------------------------------------------- //
@@ -388,6 +389,29 @@ ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type) {
     break;
   }
   }
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withWindAffectable() {
+  auto comp = m_handle->addComponent<CWindAffectable>();
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withWindOccluder(const CWindOccluder::Cube &cube) {
+  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cube);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &
+ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
+  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cylinder);
   return *this;
 }
 
@@ -470,45 +494,6 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
   m_handle->addComponent<CNetComponent>(state);
   HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().id = std::make_optional(id);
-  return *this;
-}
-
-// -------------------------------------------------------------------------- //
-
-ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
-                                             Vec4F color) {
-  Vec3F pos{0.0f, 0.0f, 0.0f};
-  Vec3F rot{1.0f, 1.0f, 1.0f};
-
-  switch (type) {
-  case WindSystem::VolumeType::kCube: {
-    Vec3F scale{1.0f, 1.0f, 1.0f};
-    withDebugCube(scale, pos, rot, color);
-    break;
-  }
-  case WindSystem::VolumeType::kCylinder: {
-    f32 radius = 1.0f;
-    f32 height = 1.0f;
-    withDebugCylinder(radius, height, pos, rot, color);
-    break;
-  }
-  }
-  return *this;
-}
-
-// -------------------------------------------------------------------------- //
-
-ObjectBuilder &
-ObjectBuilder::withWindOccluder(const CWindOccluder::Cube &cube) {
-  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cube);
-  return *this;
-}
-
-// -------------------------------------------------------------------------- //
-
-ObjectBuilder &
-ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
-  HCWindOccluder comp = m_handle->addComponent<CWindOccluder>(cylinder);
   return *this;
 }
 
