@@ -27,9 +27,9 @@
 // ========================================================================== //
 
 #include "shared/scene/component/cwind.hpp"
+#include <Components/BsCCollider.h>
 #include <Physics/BsPhysics.h>
 #include <Scene/BsSceneManager.h>
-#include <Components/BsCCollider.h>
 
 // ========================================================================== //
 // WindSystem Implementation
@@ -49,6 +49,8 @@ String WindSystem::volumeTypeToString(VolumeType type) {
   }
 }
 
+// -------------------------------------------------------------------------- //
+
 WindSystem::VolumeType WindSystem::stringToVolumeType(const String &type) {
   if (type == "cylinder") {
     return VolumeType::kCylinder;
@@ -56,30 +58,40 @@ WindSystem::VolumeType WindSystem::stringToVolumeType(const String &type) {
   return VolumeType::kCube;
 }
 
-u8 WindSystem::volumeTypeToU8(VolumeType type) {
-  return static_cast<u8>(type);
-}
+// -------------------------------------------------------------------------- //
+
+u8 WindSystem::volumeTypeToU8(VolumeType type) { return static_cast<u8>(type); }
+
+// -------------------------------------------------------------------------- //
 
 WindSystem::VolumeType WindSystem::u8ToVolumeType(u8 type) {
   return static_cast<VolumeType>(type);
 }
 
-// ============================================================ //
+// -------------------------------------------------------------------------- //
 
 WindSystem &WindSystem::instance() {
   static WindSystem windSystem{};
   return windSystem;
 }
 
+// -------------------------------------------------------------------------- //
+
 Vec3F WindSystem::getWindAtPoint(Vec3F point) const {
-  Vec3F wind = Vec3F::ZERO;
-  constexpr f32 r = 0.01f;
-  const bs::Sphere sphere{point, r};
+  constexpr f32 radius = 0.01f;
+  const bs::Sphere sphere{point, radius};
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
-	  bs::gSceneManager().getMainScene()->getPhysicsScene();
-	
+      bs::gSceneManager().getMainScene()->getPhysicsScene();
+
+  // Done if occluded
+  if (physicsScene->sphereOverlapAny(sphere, kWindOccluerLayer)) {
+    return Vec3F::ZERO;
+  }
+
+  // Add effects of each volume
+  Vec3F wind = Vec3F::ZERO;
   const auto colliders = physicsScene->sphereOverlap(sphere, kWindVolumeLayer);
-  for (const auto& collider : colliders) {
+  for (const auto &collider : colliders) {
     bs::HSceneObject so = collider->SO()->getParent();
     const HCWind windSource = so->getComponent<CWind>();
     wind += windSource->getWindAtPoint(point);
