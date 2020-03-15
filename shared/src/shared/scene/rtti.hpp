@@ -58,5 +58,7 @@ constexpr u32 TID_CWindOccluder = 2009;
 constexpr u32 TID_CWindAffectable = 2010;
 /// RTTI Type ID of CPaint component
 constexpr u32 TID_CPaint = 2011;
+/// RTTI Type ID of CPaint component
+constexpr u32 TID_CSim = 2012;
 
 } // namespace wind

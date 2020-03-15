@@ -57,7 +57,7 @@ public:
 
   /// Draw arrow at the specified position. The direction also determines the
   /// magnitude.
-  void drawArrow(const Vec3F &pos, const Vec3F &dir);
+  void drawArrow(const Vec3F &pos, const Vec3F &dir, f32 scale = 1.0f);
 
   ///
   void drawLine(const Vec3F &start, const Vec3F &end);
@@ -66,17 +66,17 @@ public:
   void drawLines(const bs::Vector<Vec3F> &lines);
 
   /// Draw an arrow
-  void draw(const Arrow &arrow);
+  void draw(const Arrow &arrow, f32 scale = 1.0f);
 
   /// Draw a line
   void draw(const Line &line);
 
   /// Build an arrow by adding the necessary lines to the list.
   static void buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
-                         const Vec3F &dir);
+                         const Vec3F &dir, f32 scale = 1.0f);
 
   /// Build an arrow by adding the necessary lines to the list.
-  void build(bs::Vector<Vec3F> &lines, const Arrow &arrow);
+  void build(bs::Vector<Vec3F> &lines, const Arrow &arrow, f32 scale = 1.0f);
 
   /// Set the color
   void setColor(Color color);

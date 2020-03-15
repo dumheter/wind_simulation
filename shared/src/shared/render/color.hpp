@@ -60,7 +60,7 @@ public:
   explicit Color();
 
   /// Construct RGBA color
-  Color(u8 r, u8 g, u8 b, u8 a = 1.0f);
+  Color(u8 r, u8 g, u8 b, u8 a = 255);
 
   /// Returns the red channel
   u8 getRed() const { return m_r; }

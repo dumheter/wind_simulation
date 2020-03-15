@@ -26,15 +26,20 @@
 // Headers
 // ========================================================================== //
 
-#include "editor/sim/density_field.hpp"
-#include "editor/sim/obstruction_field.hpp"
-#include "editor/sim/vector_field.hpp"
+#include "shared/macros.hpp"
+#include "shared/sim/density_field.hpp"
+#include "shared/sim/obstruction_field.hpp"
+#include "shared/sim/vector_field.hpp"
 
 // ========================================================================== //
 // Editor Declaration
 // ========================================================================== //
 
 namespace wind {
+
+WIND_FORWARD_DECLARE(Painter);
+
+// -------------------------------------------------------------------------- //
 
 /// Class representing the main wind simulation. The wind simulation works with
 /// a couple of different buffers. The buffers that are updated are also
@@ -73,6 +78,18 @@ namespace wind {
 ///
 class WindSimulation {
 public:
+  /// Key for debug variable used to determine whether to run simulation.
+  static constexpr char kDebugRun[] = "SimDebugRun";
+  /// Key for debug variable used to determine the speed to run the sim at.
+  static constexpr char kDebugRunSpeed[] = "SimDebugRunSpeed";
+
+  /// Key for debug variable used to determine whether to paint debug info.
+  static constexpr char kDebugPaintKey[] = "SimDebugPaint";
+  /// Key for debug variable used to determine whether to paint frames
+  static constexpr char kDebugPaintFrameKey[] = "SimDebugPaintFrame";
+  /// Key for debug variable that is used to determine what field to draw
+  static constexpr char kDebugFieldTypeKey[] = "SimDebugFieldType";
+
   /// Enumeration of the different fields that make up the simulation.
   enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 
@@ -80,8 +97,12 @@ public:
   enum class EdgeKind { DENSITY, VELOCITY_X, VELOCITY_Y, VELOCITY_Z };
 
 public:
-  /// Private constructor
+  /// Construct wind simulation of given dimensions
   WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize = 1.0f);
+
+  /// Construct wind simulation of given dimensions
+  explicit WindSimulation(const Vec3I &dim, f32 cellSize = 1.0f)
+      : WindSimulation(dim.x, dim.y, dim.z, cellSize) {}
 
   /// Destruct wind simulation along with data
   ~WindSimulation();
@@ -107,10 +128,9 @@ public:
   /// Step velocity simulation
   void stepVelocity(f32 delta);
 
-  /// Draw debug information
-  void debugDraw(FieldKind kind,
-                 const bs::Vector3 &offset = bs::Vector3(0, 0, 0),
-                 bool drawFrame = true);
+  /// Paint simulation
+  void paint(Painter &painter,
+             const bs::Vector3 &offset = bs::Vector3(0, 0, 0));
 
   /// Returns the density field for the current step in the simulation
   DensityField *D() { return m_d; }

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor/sim/wind_sim.hpp"
+#include "shared/sim/wind_sim.hpp"
 
 // ========================================================================== //
 // Headers
@@ -28,6 +28,8 @@
 
 #include "shared/log.hpp"
 #include "shared/math/math.hpp"
+
+#include "microprofile/microprofile.h"
 
 // ========================================================================== //
 // Editor Declaration
@@ -106,8 +108,12 @@ void WindSimulation::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
 // -------------------------------------------------------------------------- //
 
 void WindSimulation::step(f32 delta) {
-  stepDensity(delta);
-  stepVelocity(delta);
+  MICROPROFILE_SCOPEI("Sim", "step", MP_ORANGE1);
+  if (DebugManager::getBool(kDebugRun)) {
+    delta *= DebugManager::getF32(kDebugRunSpeed);
+    stepDensity(delta);
+    stepVelocity(delta);
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -214,26 +220,37 @@ void WindSimulation::stepVelocity(f32 delta) {
 
 // -------------------------------------------------------------------------- //
 
-void WindSimulation::debugDraw(FieldKind kind, const bs::Vector3 &offset,
-                               bool drawFrame) {
-  bs::DebugDraw::instance().clear();
+void WindSimulation::paint(Painter &painter, const bs::Vector3 &offset) {
+  // Do we draw?
+  if (!DebugManager::getBool(kDebugPaintKey)) {
+    return;
+  }
 
   // Draw correct type
+  const FieldKind kind =
+      static_cast<FieldKind>(DebugManager::getS32(kDebugFieldTypeKey));
   switch (kind) {
   case FieldKind::DENSITY: {
-    m_d->debugDraw(offset, drawFrame, Vec3F(1, 1, 1));
+    m_d->paint(painter, offset, Vec3F(1, 1, 1));
     break;
   }
   case FieldKind::VELOCITY: {
-    m_v->debugDraw(offset, m_o, drawFrame, Vec3F(1, 1, 1));
+    m_v->paint(painter, offset, m_o, Vec3F(1, 1, 1));
     break;
   }
   case FieldKind::OBSTRUCTION: {
-    m_o->debugDraw(offset, drawFrame, Vec3F(1, 1, 1));
+    m_o->paint(painter, offset, Vec3F(1, 1, 1));
     break;
   }
   default:
     break;
+  }
+
+  // Draw frame
+  if (DebugManager::getBool(kDebugPaintFrameKey)) {
+    const Vec3I dim(m_width, m_height, m_depth);
+    // TODO(Filip Björklund): No template type PLEASE!
+    Field<u32>::paintFrame(painter, dim, m_cellSize, offset);
   }
 }
 

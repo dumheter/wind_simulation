@@ -38,8 +38,8 @@ Painter::Painter() {}
 
 // -------------------------------------------------------------------------- //
 
-void Painter::drawArrow(const Vec3F &pos, const Vec3F &dir) {
-  buildArrow(m_lines, pos, dir);
+void Painter::drawArrow(const Vec3F &pos, const Vec3F &dir, f32 scale) {
+  buildArrow(m_lines, pos, dir, scale);
 }
 
 // -------------------------------------------------------------------------- //
@@ -57,7 +57,9 @@ void Painter::drawLines(const bs::Vector<Vec3F> &lines) {
 
 // -------------------------------------------------------------------------- //
 
-void Painter::draw(const Arrow &arrow) { drawArrow(arrow.pos, arrow.dir); }
+void Painter::draw(const Arrow &arrow, f32 scale) {
+  drawArrow(arrow.pos, arrow.dir, scale);
+}
 
 // -------------------------------------------------------------------------- //
 
@@ -66,26 +68,26 @@ void Painter::draw(const Line &line) { drawLine(line.start, line.end); }
 // -------------------------------------------------------------------------- //
 
 void Painter::buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
-                         const Vec3F &dir) {
+                         const Vec3F &dir, f32 scale) {
   Vec3F dirNorm = dir;
   dirNorm.normalize();
 
   // Main arrow line
-  const Vec3F aStart = pos - dir / 4.0f;
-  const Vec3F aEnd = pos + dir / 4.0f;
+  const Vec3F aStart = pos - scale * (dir / 4.0f);
+  const Vec3F aEnd = pos + scale * (dir / 4.0f);
   lines.push_back(aStart);
   lines.push_back(aEnd);
 
   // Vectors perpendicular to direction
   Vec3F perp0 = dir.cross(Vec3F(0.0f, 1.0f, 0.0f));
   perp0.normalize();
-  perp0 *= 0.05f;
+  perp0 *= 0.05f * scale;
   Vec3F perp1 = perp0.cross(dir);
   perp1.normalize();
-  perp1 *= 0.05f;
+  perp1 *= 0.05f * scale;
 
   // Add corners
-  const Vec3F aHeadStart = aEnd - dirNorm * 0.2f;
+  const Vec3F aHeadStart = aEnd - dirNorm * 0.2f * scale;
   const Vec3F corner0 = aHeadStart + perp0 + perp1;
   const Vec3F corner1 = aHeadStart - perp0 + perp1;
   const Vec3F corner2 = aHeadStart + perp0 - perp1;
@@ -112,8 +114,8 @@ void Painter::buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
 
 // -------------------------------------------------------------------------- //
 
-void Painter::build(bs::Vector<Vec3F> &lines, const Arrow &arrow) {
-  buildArrow(lines, arrow.pos, arrow.dir);
+void Painter::build(bs::Vector<Vec3F> &lines, const Arrow &arrow, f32 scale) {
+  buildArrow(lines, arrow.pos, arrow.dir, scale);
 }
 
 // -------------------------------------------------------------------------- //
@@ -121,8 +123,8 @@ void Painter::build(bs::Vector<Vec3F> &lines, const Arrow &arrow) {
 void Painter::setColor(Color color) {
   // Flush
   if (m_color != color) {
-    end();
-    begin();
+    bs::DebugDraw::instance().drawLineList(m_lines);
+    m_lines.clear();
     m_color = color;
   }
 
@@ -134,7 +136,10 @@ void Painter::setColor(Color color) {
 
 // -------------------------------------------------------------------------- //
 
-void Painter::begin() { m_lines.clear(); }
+void Painter::begin() {
+  m_lines.clear();
+  bs::DebugDraw::instance().clear();
+}
 
 // -------------------------------------------------------------------------- //
 

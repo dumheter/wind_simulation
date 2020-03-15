@@ -20,35 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "csim.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/math/field.hpp"
-#include "shared/types.hpp"
+#include "shared/scene/builder.hpp"
 
-#include <Math/BsVector3.h>
+#include "microprofile/microprofile.h"
 
 // ========================================================================== //
-// VectorField Declaration
+// CSpline Implementation
 // ========================================================================== //
 
 namespace wind {
 
-/* Class that represents a density field. This field represents density at
- * different discrete points in 3D-space */
-class DensityField : public Field<f32> {
-public:
-  /* Construct an obstruction field with the specified 'width', 'height' and
-   * 'depth' (in number of cells). The size of a cell (in meters) can also be
-   * specified.  */
-  DensityField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
+CSim::CSim(const bs::HSceneObject &parent) : CPaint(parent) {}
 
-  /* \copydoc Field::debugDrawObject */
-  void debugDrawObject(const Vec3F &offset = Vec3F(),
-                       const Vec3F &padding = Vec3F(0, 0, 0)) override;
-};
+// -------------------------------------------------------------------------- //
+
+void CSim::build(s32 width, s32 height, s32 depth, f32 cellSize,
+                 const bs::SPtr<bs::SceneInstance> &scene) {
+  bs::SPtr<bs::SceneInstance> _scene = scene;
+  if (!scene) {
+    _scene = bs::SceneManager::instance().getMainScene();
+  }
+
+  m_sim = new WindSimulation(width, height, depth, cellSize);
+  m_sim->buildForScene(_scene);
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::HSceneObject CSim::bake() {
+  return ObjectBuilder(ObjectType::kEmpty).build();
+}
+
+// -------------------------------------------------------------------------- //
+
+void CSim::paint(Painter &painter) { m_sim->paint(painter); }
+
+// -------------------------------------------------------------------------- //
+
+void CSim::fixedUpdate() {
+  const f32 delta = bs::gTime().getFixedFrameDelta();
+  m_sim->step(delta);
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CSim::getRTTIStatic() { return CSimRTTI::instance(); }
 
 } // namespace wind

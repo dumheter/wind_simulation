@@ -26,8 +26,9 @@
 // Headers
 // ========================================================================== //
 
-#include "editor/sim/wind_sim.hpp"
 #include "shared/app.hpp"
+#include "shared/scene/component/csim.hpp"
+#include "shared/sim/wind_sim.hpp"
 
 #include <Renderer/BsCamera.h>
 
@@ -57,20 +58,8 @@ public:
   /// \copydoc App::onFixedUpdate
   void onFixedUpdate(f32 delta) override;
 
-  /// Enable running the simulation
-  void simEnable() { m_runSim = true; }
-
-  /// Disable running the simulation
-  void simDisable() { m_runSim = true; }
-
-  /// Set the simulation speed
-  void setSimSpeed(f32 speed) { m_simSpeed = speed; }
-
-  /// Set number of simulation steps to run for
-  void setSimNumSteps(u32 numSteps) { m_simSteps = numSteps; }
-
-  /// Returns a pointer to the wind simulation
-  WindSimulation *getSim() const { return m_windSim; }
+  /// \copydoc App::onPaint
+  void onPaint(Painter &painter) override;
 
   /// Returns the root scene
   const bs::HSceneObject &getSceneRoot() { return m_root; }
@@ -92,14 +81,6 @@ private:
   /// Editor UI
   UI *m_ui = nullptr;
 
-  /// Whether to run simulation
-  bool m_runSim = false;
-  /// Speed at which simulation is running
-  f32 m_simSpeed = 1.0f;
-  /// Number of steps to the run the simulation for. With this set to 0 and the
-  /// m_runSim flag set to true, the simulation will run continuously
-  s32 m_simSteps = 0;
-
   /// Scene root
   bs::HSceneObject m_root;
   /// GUI camera
@@ -108,9 +89,6 @@ private:
   bs::HSceneObject m_scene;
   /// Camera object
   bs::HSceneObject m_camera;
-
-  /// Wind simulation field
-  WindSimulation *m_windSim = nullptr;
 
 public:
   /// Name of the default scene
