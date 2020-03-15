@@ -26,37 +26,63 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/types.hpp"
+#include <RTTI/BsMathRTTI.h>
+#include <Reflection/BsRTTIPlain.h>
+#include <Reflection/BsRTTIType.h>
+#include <Scene/BsComponent.h>
+#include <Scene/BsSceneObject.h>
+
+#include "shared/scene/rtti.hpp"
 
 // ========================================================================== //
-// RTTI Types
+// CWindAffectable Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// RTTI Type ID of CRotor component
-constexpr u32 TID_CRotor = 2000;
-/// RTTI Type ID of CNetComponent component
-constexpr u32 TID_CNetComponent = 2001;
-/// RTTI Type ID of CMyPlayer component
-constexpr u32 TID_CMyPlayer = 2002;
-/// RTTI Type ID of FPSWalker component
-constexpr u32 TID_FPSWalker = 2003;
-/// RTTI Type ID of FPSCamera component
-constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWind component
-constexpr u32 TID_CWindSource = 2005;
-/// RTTI Type ID of CTag component
-constexpr u32 TID_CTag = 2006;
-/// RTTI Type ID of CSpline component
-constexpr u32 TID_CSpline = 2007;
-/// RTTI Type ID of CSplineFollow component
-constexpr u32 TID_CSplineFollow = 2008;
-/// RTTI Type ID of CWindOccluder component
-constexpr u32 TID_CWindOccluder = 2009;
-/// RTTI Type ID of CWindAffectable component
-constexpr u32 TID_CWindAffectable = 2010;
-/// RTTI Type ID of CPaint component
-constexpr u32 TID_CPaint = 2011;
+/// A component that will make the object be affected by wind.
+/// It querys the global wind system, and applies any wind force.
+class CWindAffectable : public bs::Component {
+  friend class CWindAffectableRTTI;
+
+public:
+  /// Default constructor required for serialization
+  CWindAffectable() = default;
+
+  CWindAffectable(const bs::HSceneObject &parent);
+
+  void fixedUpdate() override;
+
+  static bs::RTTITypeBase *getRTTIStatic();
+
+  bs::RTTITypeBase *getRTTI() const override;
+};
+
+} // namespace wind
+
+// ========================================================================== //
+// CWindAffectableRTTI Declaration
+// ========================================================================== //
+namespace wind {
+
+/// CWindAffectable RTTI
+class CWindAffectableRTTI
+    : public bs::RTTIType<CWindAffectable, bs::Component, CWindAffectableRTTI> {
+private:
+  BS_BEGIN_RTTI_MEMBERS
+  BS_END_RTTI_MEMBERS
+
+public:
+  const bs::String &getRTTIName() override {
+    static bs::String name = "CWindAffectable";
+    return name;
+  }
+
+  bs::UINT32 getRTTIId() override { return TID_CWindAffectable; }
+
+  bs::SPtr<bs::IReflectable> newRTTIObject() override {
+    return bs::SceneObject::createEmptyComponent<CWindAffectable>();
+  }
+};
 
 } // namespace wind

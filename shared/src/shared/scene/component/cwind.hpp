@@ -49,12 +49,6 @@
 
 namespace wind {
 
-struct Collision {
-  UniqueId id;
-  HCNetComponent netComp;
-};
-
-// -------------------------------------------------------------------------- //
 
 /// Class that represents a wind component
 class CWind : public bs::Component {
@@ -73,11 +67,8 @@ public:
 
   void addFunctions(const std::vector<BaseFn> &functions);
 
-  bs::Vector3 getWindForce(bs::Vector3 pos) const;
-
-  void fixedUpdate() override;
-
-  void onCreated() override;
+  /// If point is outside wind volume, retval is Vec3F::ZERO
+  Vec3F getWindAtPoint(Vec3F pos) const;
 
   const std::vector<BaseFn> &getFunctions() const { return m_functions; }
 
@@ -92,19 +83,12 @@ public:
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
-  /// Setup collider callbacks
-  void setupColl(const bs::HCollider &collider);
-
-private:
   std::vector<BaseFn> m_functions{};
-  std::vector<Collision> m_collisions{};
   /// Used when saving the wind source
   WindSystem::VolumeType m_volumeType = WindSystem::VolumeType::kCube;
   /// Used when saving the wind source
   Vec3F m_offset = Vec3F::ZERO;
 };
-
-// -------------------------------------------------------------------------- //
 
 /// CWind handle type
 using HCWindSource = bs::GameObjectHandle<CWind>;
@@ -126,7 +110,7 @@ private:
 
 public:
   const bs::String &getRTTIName() override {
-    static bs::String name = "CNetComponent";
+    static bs::String name = "CWindSource";
     return name;
   }
 

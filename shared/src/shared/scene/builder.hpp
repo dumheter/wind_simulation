@@ -107,7 +107,7 @@ public:
                               bool trigger = false, bool report = false);
 
   /// Add a trigger collider
-  ObjectBuilder &withTriggerCollider(Kind kind, u32 layer = 0);
+  ObjectBuilder &withTriggerCollider(Kind kind, u32 layer = 0, bool report = false);
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();
@@ -120,6 +120,14 @@ public:
                                 Vec3F offset);
 
   ObjectBuilder &withWindVolume(WindSystem::VolumeType type);
+
+  ObjectBuilder &withWindAffectable();
+
+  /// Add a wind occluder component
+  ObjectBuilder &withWindOccluder(const CWindOccluder::Cube &cube);
+
+  /// Add a wind occluder component
+  ObjectBuilder &withWindOccluder(const CWindOccluder::Cylinder &cylinder);
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
@@ -140,14 +148,6 @@ public:
   /// @post Must register netcomp in world
   /// Construct from only an id
   ObjectBuilder &withNetComponent(UniqueId id);
-
-  ObjectBuilder &withWindVolume(WindSystem::VolumeType type, Vec4F color);
-
-  /// Add a wind occluder component
-  ObjectBuilder &withWindOccluder(const CWindOccluder::Cube &cube);
-
-  /// Add a wind occluder component
-  ObjectBuilder &withWindOccluder(const CWindOccluder::Cylinder &cylinder);
 
   ObjectBuilder &withDebugCube(const Vec3F &size = Vec3F::ONE,
                                const Vec3F &position = Vec3F::ZERO,

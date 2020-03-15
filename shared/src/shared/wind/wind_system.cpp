@@ -26,7 +26,10 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
+#include "shared/scene/component/cwind.hpp"
+#include <Physics/BsPhysics.h>
+#include <Scene/BsSceneManager.h>
+#include <Components/BsCCollider.h>
 
 // ========================================================================== //
 // WindSystem Implementation
@@ -61,21 +64,27 @@ WindSystem::VolumeType WindSystem::u8ToVolumeType(u8 type) {
   return static_cast<VolumeType>(type);
 }
 
-void WindSystem::addWindVolume(bs::HSceneObject windVolume) {
-  m_windVolumes.push_back(windVolume);
-}
+// ============================================================ //
 
-void WindSystem::removeWindVolume(bs::HSceneObject windVolume) {
-  // TODO uniquely identify a volume, use unique id?
-  logError("[windSystem] remove TODO");
+WindSystem &WindSystem::instance() {
+  static WindSystem windSystem{};
+  return windSystem;
 }
 
 Vec3F WindSystem::getWindAtPoint(Vec3F point) const {
   Vec3F wind = Vec3F::ZERO;
-  for (const auto &windVolume : m_windVolumes) {
-    // TODO
-    // wind += windVolume->getWindAtPoint(point);
+  constexpr f32 r = 0.01f;
+  const bs::Sphere sphere{point, r};
+  const bs::SPtr<bs::PhysicsScene> &physicsScene =
+	  bs::gSceneManager().getMainScene()->getPhysicsScene();
+	
+  const auto colliders = physicsScene->sphereOverlap(sphere, kWindVolumeLayer);
+  for (const auto& collider : colliders) {
+    bs::HSceneObject so = collider->SO()->getParent();
+    const HCWind windSource = so->getComponent<CWind>();
+    wind += windSource->getWindAtPoint(point);
   }
+
   return wind;
 }
 

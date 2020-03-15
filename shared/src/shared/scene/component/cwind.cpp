@@ -58,10 +58,10 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, 
   // Build trigger collider
   auto so = ObjectBuilder(ObjectType::kEmpty)
                 .withSave(false)
+                .withName("WindCollider")
                 .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
                 .build();
   so->setParent(parent);
-  setupColl(so->getComponent<bs::CCollider>());
 }
 
 // -------------------------------------------------------------------------- //
@@ -78,77 +78,18 @@ void CWind::addFunctions(const std::vector<BaseFn> &functions) {
   }
 }
 
-// -------------------------------------------------------------------------- //
-
-bs::Vector3 CWind::getWindForce(bs::Vector3 pos) const {
-  bs::Vector3 force{bs::Vector3::ZERO};
+Vec3F CWind::getWindAtPoint(Vec3F pos) const {
+  Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
-    force += fn(pos);
+    wind += fn(pos);
   }
-  return force;
+  return wind;
 }
-
-// -------------------------------------------------------------------------- //
-
-void CWind::fixedUpdate() {
-  if (!m_collisions.empty()) {
-    const f32 dt = bs::gTime().getFixedFrameDelta();
-    for (auto &collision : m_collisions) {
-      if (collision.netComp) {
-        bs::Vector3 force =
-            dt * getWindForce(collision.netComp->getState().position);
-        bs::Transform t = SO()->getTransform();
-        t.setScale(bs::Vector3::ONE);
-        t.setPosition(bs::Vector3::ZERO);
-        auto newforce = t.getMatrix().multiply(force);
-        collision.netComp->addForce(newforce, bs::ForceMode::Velocity);
-      }
-    }
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-void CWind::onCreated() {}
 
 // -------------------------------------------------------------------------- //
 
 bs::RTTITypeBase *CWind::getRTTIStatic() { return CWindSourceRTTI::instance(); }
 
 bs::RTTITypeBase *CWind::getRTTI() const { return getRTTIStatic(); }
-
-// -------------------------------------------------------------------------- //
-
-void CWind::setupColl(const bs::HCollider &collider) {
-  collider->onCollisionBegin.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    bs::HSceneObject so = data.collider[1]->SO();
-    const HCNetComponent netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      m_collisions.emplace_back(Collision{netComp->getUniqueId(), netComp});
-    } else {
-      logWarning("[windSource] col with non net component");
-    }
-  });
-
-  collider->onCollisionEnd.connect([this](const bs::CollisionData &data) {
-    if (data.collider[1] == nullptr) {
-      return;
-    }
-    bs::HSceneObject so = data.collider[1]->SO();
-    const HCNetComponent netComp = so->getComponent<CNetComponent>();
-    if (netComp) {
-      const UniqueId id = netComp->getUniqueId();
-      for (auto it = m_collisions.begin(); it < m_collisions.end(); ++it) {
-        if (it->id == id) {
-          m_collisions.erase(it);
-          break;
-        }
-      }
-    }
-  });
-}
 
 } // namespace wind

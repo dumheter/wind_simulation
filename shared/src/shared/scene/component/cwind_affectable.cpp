@@ -20,43 +20,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "cwind_affectable.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/types.hpp"
+#include "shared/wind/wind_system.hpp"
+#include <Components/BsCRigidbody.h>
+#include <limits>
 
 // ========================================================================== //
-// RTTI Types
+// CWindAffectable Implementation
 // ========================================================================== //
 
 namespace wind {
 
-/// RTTI Type ID of CRotor component
-constexpr u32 TID_CRotor = 2000;
-/// RTTI Type ID of CNetComponent component
-constexpr u32 TID_CNetComponent = 2001;
-/// RTTI Type ID of CMyPlayer component
-constexpr u32 TID_CMyPlayer = 2002;
-/// RTTI Type ID of FPSWalker component
-constexpr u32 TID_FPSWalker = 2003;
-/// RTTI Type ID of FPSCamera component
-constexpr u32 TID_FPSCamera = 2004;
-/// RTTI Type ID of CWind component
-constexpr u32 TID_CWindSource = 2005;
-/// RTTI Type ID of CTag component
-constexpr u32 TID_CTag = 2006;
-/// RTTI Type ID of CSpline component
-constexpr u32 TID_CSpline = 2007;
-/// RTTI Type ID of CSplineFollow component
-constexpr u32 TID_CSplineFollow = 2008;
-/// RTTI Type ID of CWindOccluder component
-constexpr u32 TID_CWindOccluder = 2009;
-/// RTTI Type ID of CWindAffectable component
-constexpr u32 TID_CWindAffectable = 2010;
-/// RTTI Type ID of CPaint component
-constexpr u32 TID_CPaint = 2011;
+CWindAffectable::CWindAffectable(const bs::HSceneObject &parent)
+    : bs::Component(parent) {
+  setName("WindAffectable");
+}
+
+// -------------------------------------------------------------------------- //
+
+void CWindAffectable::fixedUpdate() {
+  const Vec3F pos = SO()->getTransform().pos();
+  const Vec3F windAtPos = gWindSystem().getWindAtPoint(pos);
+  if (std::abs(windAtPos.x) > std::numeric_limits<f32>::min() ||
+      std::abs(windAtPos.y) > std::numeric_limits<f32>::min() ||
+      std::abs(windAtPos.z) > std::numeric_limits<f32>::min()) {
+
+    auto rigid = SO()->getComponent<bs::CRigidbody>();
+    if (rigid && !rigid->getIsKinematic()) {
+      const f32 dt = bs::gTime().getFixedFrameDelta();
+      rigid->addForce(windAtPos * dt, bs::ForceMode::Velocity);
+    }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CWindAffectable::getRTTIStatic() {
+  return CWindAffectableRTTI::instance();
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::RTTITypeBase *CWindAffectable::getRTTI() const { return getRTTIStatic(); }
 
 } // namespace wind

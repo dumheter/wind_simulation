@@ -14,7 +14,7 @@ class FPSCamera;
 using HCNetComponent = bs::GameObjectHandle<CNetComponent>;
 using HCRotor = bs::GameObjectHandle<CRotor>;
 using HCMyPlayer = bs::GameObjectHandle<CMyPlayer>;
-using HCWindSource = bs::GameObjectHandle<CWind>;
+using HCWind = bs::GameObjectHandle<CWind>;
 using HFPSWalker = bs::GameObjectHandle<FPSWalker>;
 using HFPSCamera = bs::GameObjectHandle<FPSCamera>;
 

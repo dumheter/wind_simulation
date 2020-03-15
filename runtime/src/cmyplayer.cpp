@@ -95,6 +95,7 @@ void CMyPlayer::onShoot() {
     info.components.emplace_back(ComponentData::asCollider(0.5f, 8.0f));
     info.components.emplace_back(
         ComponentData::asRenderable("res/textures/grid_og.png"));
+    info.components.emplace_back(ComponentData::asWindAffectable());
     PacketBuilder::RequestCreate(packet, info);
     m_client->PacketSend(packet, SendStrategy::kUnreliable);
   };
