@@ -29,7 +29,7 @@
 #include "shared/math/field.hpp"
 #include "shared/types.hpp"
 
-#include <Scene/BsSceneManager.h>
+#include <Math/BsVector3.h>
 
 // ========================================================================== //
 // VectorField Declaration
@@ -37,22 +37,18 @@
 
 namespace wind {
 
-/// Class that represents an obstruction field. This field represents whether
-/// or not a cell has an obstruction in it.
-class ObstructionField : public Field<bool> {
+/* Class that represents a density field. This field represents density at
+ * different discrete points in 3D-space */
+class DensityField : public Field<f32> {
 public:
-  // Construct an obstruction field with the specified 'width', 'height' and
-  // 'depth' (in number of cells). The size of a cell (in meters) can also be
-  // specified.
-  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
+  /* Construct an obstruction field with the specified 'width', 'height' and
+   * 'depth' (in number of cells). The size of a cell (in meters) can also be
+   * specified.  */
+  DensityField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  ///
-  void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
-                     const bs::Vector3 &position = bs::Vector3());
-
-  /// \copydoc Field::debugDrawObject
-  void debugDrawObject(const Vec3F &offset = Vec3F(),
-                       const Vec3F &padding = Vec3F(0, 0, 0)) override;
+  /* \copydoc Field::paintObject */
+  void paintObject(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+                   const Vec3F &padding = Vec3F(0, 0, 0)) override;
 };
 
 } // namespace wind

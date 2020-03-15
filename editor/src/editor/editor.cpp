@@ -44,7 +44,9 @@
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
+#include "shared/scene/builder.hpp"
 #include "shared/scene/component/cpaint.hpp"
+#include "shared/scene/component/csim.hpp"
 
 // ========================================================================== //
 // Editor Implementation
@@ -95,12 +97,20 @@ void Editor::onStartup() {
   // Setup default scene
   setScene(Scene::loadFile(kDefaultSceneName));
 
+  // TMP: Create sim object
+  bs::HSceneObject simObj =
+      ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
+  simObj->setParent(getScene());
+  HCSim sim = simObj->addComponent<CSim>();
+  sim->build(u32(kGroundPlaneScale * 2.0f), 6, u32(kGroundPlaneScale * 2.0f),
+             0.25f, bs::SceneManager::instance().getMainScene());
+
   // TMP: Save scene
   // Scene::saveFile("res/scenes/out.json", getScene());
 
   // TMP: Paint component
-  // bs::HSceneObject obj = getScene()->findPath("structures/house0/occluder");
-  // if (obj) {
+  // bs::HSceneObject obj =
+  // getScene()->findPath("structures/house0/occluder"); if (obj) {
   //  HCPaint cpaint = obj->addComponent<CPaint>();
   //  cpaint->setPaintCallback([obj](Painter &painter) {
   //    //
@@ -110,11 +120,6 @@ void Editor::onStartup() {
   //    painter.drawArrow(Vec3F(2.0f, 1.0f, 2.0f), Vec3F(2.0f, 2.0f, 2.0f));
   //  });
   //}
-
-  // Create simulation
-  m_windSim = new WindSimulation(u32(kGroundPlaneScale * 2.0f), 6,
-                                 u32(kGroundPlaneScale * 2.0f), 0.25f);
-  m_windSim->buildForScene(bs::SceneManager::instance().getMainScene());
 }
 
 // -------------------------------------------------------------------------- //
@@ -145,23 +150,23 @@ void Editor::onPreUpdate(f32 delta) {
 
   // Add density source 'X'
   if (gInput().isButtonHeld(ButtonCode::BC_X)) {
-    m_windSim->addDensitySource();
+    // m_windSim->addDensitySource();
     logVerbose("Added density sources");
   }
   // Add density sink 'Z'
   if (gInput().isButtonHeld(ButtonCode::BC_Z)) {
-    m_windSim->addDensitySink();
+    // m_windSim->addDensitySink();
     logVerbose("Added density sinks");
   }
 
   // Add velocity source 'V'
   if (gInput().isButtonHeld(ButtonCode::BC_V)) {
-    m_windSim->addVelocitySource();
+    // m_windSim->addVelocitySource();
     logVerbose("Added velocity sources");
   }
   // Add velocity sink 'C'
   if (gInput().isButtonHeld(ButtonCode::BC_C)) {
-    m_windSim->addVelocitySink();
+    // m_windSim->addVelocitySink();
     logVerbose("Added velocity sinks");
   }
 }
@@ -170,22 +175,12 @@ void Editor::onPreUpdate(f32 delta) {
 
 void Editor::onFixedUpdate(f32 delta) {
   using namespace bs;
-
-  // Run simulation step
-  if (m_runSim) {
-    MICROPROFILE_SCOPEI("Sim", "step", MP_ORANGE1);
-    if (m_simSteps == 1) {
-      m_runSim = false;
-      m_ui->setRunToggle(false);
-      logVerbose("Finished simulating steps");
-    }
-    m_simSteps--;
-    m_windSim->step(delta * m_simSpeed);
-  }
-
-  // Update UI
   m_ui->onFixedUpdate(delta);
 }
+
+// -------------------------------------------------------------------------- //
+
+void Editor::onPaint(Painter &painter) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -233,14 +228,12 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
   m_scene->setActive(true);
 
   // Recreate simulation
-  delete m_windSim;
-  m_windSim = new WindSimulation(u32(kGroundPlaneScale * 2.0f), 6,
-                                 u32(kGroundPlaneScale * 2.0f), 0.25f);
-  m_windSim->buildForScene(bs::SceneManager::instance().getMainScene());
-
-  // Debug dump
-  // logInfo("Dumping scene structure");
-  // Util::dumpScene(m_root);
+  bs::HSceneObject simObj =
+      ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
+  simObj->setParent(getScene());
+  HCSim sim = simObj->addComponent<CSim>();
+  sim->build(u32(kGroundPlaneScale * 2.0f), 6, u32(kGroundPlaneScale * 2.0f),
+             0.25f, bs::SceneManager::instance().getMainScene());
 }
 
 } // namespace wind

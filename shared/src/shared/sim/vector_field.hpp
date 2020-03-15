@@ -26,8 +26,9 @@
 // Headers
 // ========================================================================== //
 
-#include "editor/sim/obstruction_field.hpp"
+#include "shared/macros.hpp"
 #include "shared/math/field.hpp"
+#include "shared/sim/obstruction_field.hpp"
 #include "shared/types.hpp"
 
 #include <Math/BsVector3.h>
@@ -38,7 +39,11 @@
 
 namespace wind {
 
-/* Class that represents a vector field */
+WIND_FORWARD_DECLARE(Painter);
+
+// -------------------------------------------------------------------------- //
+
+/// Class that represents a vector field
 
 class VectorField {
 public:
@@ -51,9 +56,9 @@ public:
   VectorField(u32 width, u32 height, u32 depth, f32 cellSize = 1.0f);
 
   ///
-  void debugDraw(const Vec3F &offset = Vec3F(),
-                 ObstructionField *obstructionField = nullptr,
-                 bool drawFrame = false, const Vec3F &padding = Vec3F(0, 0, 0));
+  void paint(Painter &painter, const Vec3F &offset = Vec3F(),
+             ObstructionField *obstructionField = nullptr,
+             const Vec3F &padding = Vec3F(0, 0, 0));
 
   /// Returns the X component of the vector field
   Comp *getX() { return m_x; }

@@ -48,6 +48,8 @@
 #include <Resources/BsResources.h>
 #include <Scene/BsSceneObject.h>
 
+#include "shared/debug/debug_manager.hpp"
+
 // ========================================================================== //
 // UI Implementation
 // ========================================================================== //
@@ -99,12 +101,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     listBox->setPosition(120, height);
     listBox->setWidth(100);
     listBox->onSelectionToggled.connect([=](UINT32 idx, bool _b) {
-      m_debugFieldKind = static_cast<WindSimulation::FieldKind>(idx);
-      DebugDraw::instance().clear();
-      if (m_debugDraw) {
-        m_editor->getSim()->debugDraw(m_debugFieldKind, Vec3F(),
-                                      m_debugDrawFrame);
-      }
+      DebugManager::setS32(WindSimulation::kDebugFieldTypeKey, idx);
     });
     height += listBox->getBounds().height + 2;
   }
@@ -117,12 +114,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("Debug Draw"));
     toggle->setPosition(120, height);
     toggle->onToggled.connect([this](bool t) {
-      DebugDraw::instance().clear();
-      m_debugDraw = t;
-      if (m_debugDraw) {
-        m_editor->getSim()->debugDraw(m_debugFieldKind, Vec3F(),
-                                      m_debugDrawFrame);
-      }
+      DebugManager::setBool(WindSimulation::kDebugPaintKey, t);
     });
 
     height += toggle->getBounds().height + 2;
@@ -137,12 +129,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
         panel->addNewElement<GUIToggle>(HString("DebugDrawFrame"));
     toggle->setPosition(120, height);
     toggle->onToggled.connect([this](bool t) {
-      DebugDraw::instance().clear();
-      m_debugDrawFrame = t;
-      if (m_debugDraw) {
-        m_editor->getSim()->debugDraw(m_debugFieldKind, Vec3F(),
-                                      m_debugDrawFrame);
-      }
+      DebugManager::setBool(WindSimulation::kDebugPaintFrameKey, t);
     });
 
     height += toggle->getBounds().height + 2;
@@ -156,12 +143,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     m_runToggle = panel->addNewElement<GUIToggle>(HString("DebugRunSim"));
     m_runToggle->setPosition(120, height);
     m_runToggle->onToggled.connect([this](bool t) {
-      if (t) {
-        m_editor->simEnable();
-      } else {
-        m_editor->simDisable();
-      }
-      // logVerbose("Simulation {}", t ? "running" : "stopped");
+      DebugManager::setBool(WindSimulation::kDebugRun, t);
     });
 
     GUILabel *label1 = panel->addNewElement<GUILabel>(HString("(1.0)"));
@@ -173,7 +155,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     slider->setRange(0.0, 10.0f);
     slider->setValue(1.0f);
     slider->onChanged.connect([this, label1](f32 value) {
-      m_editor->setSimSpeed(value);
+      DebugManager::setF32(WindSimulation::kDebugRunSpeed, value);
       std::stringstream sstr;
       sstr << "(" << std::fixed << std::setprecision(2) << value << ")";
       label1->setContent(GUIContent(HString(sstr.str().c_str())));
@@ -206,9 +188,9 @@ UI::UI(Editor *editor) : m_editor(editor) {
       const String &s = input->getText();
       u32 num = std::stoul(s.c_str());
       if (num > 0) {
-        m_editor->setSimNumSteps(num);
-        m_editor->simEnable();
-        m_runToggle->toggleOn();
+        // m_editor->setSimNumSteps(num);
+        // m_editor->simEnable();
+        // m_runToggle->toggleOn();
         // logVerbose("Starting to run simulation for {} steps", num);
       }
     });
@@ -227,7 +209,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setWidth(90);
       button->setPosition(120, height);
       button->onClick.connect([this]() {
-        m_editor->getSim()->addDensitySource();
+        // m_editor->getSim()->addDensitySource();
         // logVerbose("Added density sources");
       });
     }
@@ -237,7 +219,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setWidth(90);
       button->setPosition(214, height);
       button->onClick.connect([this]() {
-        m_editor->getSim()->addDensitySink();
+        // m_editor->getSim()->addDensitySink();
         // logVerbose("Added density sinks");
       });
     }
@@ -246,12 +228,12 @@ UI::UI(Editor *editor) : m_editor(editor) {
     button->setWidth(90);
     button->setPosition(308, height);
     button->onClick.connect([this]() {
-      DensityField *d = m_editor->getSim()->D();
-      DensityField *d0 = m_editor->getSim()->D0();
-      for (u32 i = 0; i < d->getDataSize(); i++) {
-        d->get(i) = 0;
-        d0->get(i) = 0;
-      }
+      // DensityField *d = m_editor->getSim()->D();
+      // DensityField *d0 = m_editor->getSim()->D0();
+      // for (u32 i = 0; i < d->getDataSize(); i++) {
+      //  d->get(i) = 0;
+      //  d0->get(i) = 0;
+      //}
       // logVerbose("Cleared density");
     });
 
@@ -270,7 +252,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setWidth(90);
       button->setPosition(120, height);
       button->onClick.connect([this]() {
-        m_editor->getSim()->addVelocitySource();
+        // m_editor->getSim()->addVelocitySource();
         // logVerbose("Added velocity sources");
       });
     }
@@ -280,7 +262,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setWidth(90);
       button->setPosition(214, height);
       button->onClick.connect([this]() {
-        m_editor->getSim()->addVelocitySink();
+        // m_editor->getSim()->addVelocitySink();
         // logVerbose("Added velocity sinks");
       });
     }
@@ -289,12 +271,12 @@ UI::UI(Editor *editor) : m_editor(editor) {
     button->setWidth(90);
     button->setPosition(308, height);
     button->onClick.connect([this]() {
-      VectorField *v = m_editor->getSim()->V();
-      VectorField *v0 = m_editor->getSim()->V0();
-      for (u32 i = 0; i < v->getDataSize(); i++) {
-        v->set(i, Vec3F(0.4f, 0.05f, 0.3f));
-        v0->set(i, Vec3F(0.4f, 0.05f, 0.3f));
-      }
+      // VectorField *v = m_editor->getSim()->V();
+      // VectorField *v0 = m_editor->getSim()->V0();
+      // for (u32 i = 0; i < v->getDataSize(); i++) {
+      //  v->set(i, Vec3F(0.4f, 0.05f, 0.3f));
+      //  v0->set(i, Vec3F(0.4f, 0.05f, 0.3f));
+      //}
       // logVerbose("Cleared velocity");
     });
 
@@ -311,7 +293,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
           panel->addNewElement<GUIToggle>(HString("DebugSimDensDif"));
       toggle->setPosition(120, height);
       toggle->onToggled.connect([this](bool t) {
-        m_editor->getSim()->setDensityDiffusionActive(t);
+        // m_editor->getSim()->setDensityDiffusionActive(t);
         // logVerbose("Density diffusion: {}", t ? "ENABLED" : "DISABLED");
       });
       toggle->toggleOn();
@@ -323,7 +305,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
         panel->addNewElement<GUIToggle>(HString("DebugSimDensAdv"));
     toggle->setPosition(220, height);
     toggle->onToggled.connect([this](bool t) {
-      m_editor->getSim()->setDensityAdvectionActive(t);
+      // m_editor->getSim()->setDensityAdvectionActive(t);
       // logVerbose("Density advection: {}", t ? "ENABLED" : "DISABLED");
     });
     toggle->toggleOn();
@@ -340,7 +322,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
           panel->addNewElement<GUIToggle>(HString("DebugSimVelDif"));
       toggle->setPosition(120, height);
       toggle->onToggled.connect([this](bool t) {
-        m_editor->getSim()->setVelocityDiffusionActive(t);
+        // m_editor->getSim()->setVelocityDiffusionActive(t);
         // logVerbose("Velocity diffusion: {}", t ? "ENABLED" : "DISABLED");
       });
       toggle->toggleOn();
@@ -352,7 +334,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
         panel->addNewElement<GUIToggle>(HString("DebugSimVelAdv"));
     toggle->setPosition(220, height);
     toggle->onToggled.connect([this](bool t) {
-      m_editor->getSim()->setVelocityAdvectionActive(t);
+      // m_editor->getSim()->setVelocityAdvectionActive(t);
       // logVerbose("Velocity advection: {}", t ? "ENABLED" : "DISABLED");
     });
     toggle->toggleOn();
@@ -420,12 +402,6 @@ UI::UI(Editor *editor) : m_editor(editor) {
 // -------------------------------------------------------------------------- //
 
 void UI::onFixedUpdate(f32 delta) {
-  // Redraw debug overlay each frame
-  if (m_debugDraw) {
-    MICROPROFILE_SCOPEI("Sim", "draw", MP_ORANGE1);
-    m_editor->getSim()->debugDraw(m_debugFieldKind, Vec3F(), m_debugDrawFrame);
-  }
-
   // Check current file modification date
   if (!m_scenePath.empty() && m_sceneAutoReload) {
     std::filesystem::path path = m_scenePath.c_str();

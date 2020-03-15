@@ -26,54 +26,33 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/sim/wind_sim.hpp"
+#include "shared/math/field.hpp"
 #include "shared/types.hpp"
 
-#include <filesystem>
-
-#include <GUI/BsGUIToggle.h>
+#include <Scene/BsSceneManager.h>
 
 // ========================================================================== //
-// UI Declaration
+// VectorField Declaration
 // ========================================================================== //
 
 namespace wind {
 
-class Editor;
-
-///	Class that represents the Editor UI
-class UI {
+/// Class that represents an obstruction field. This field represents whether
+/// or not a cell has an obstruction in it.
+class ObstructionField : public Field<bool> {
 public:
-  /// Construct the UI with the editor for which it should be displayed
-  explicit UI(Editor *editor);
+  // Construct an obstruction field with the specified 'width', 'height' and
+  // 'depth' (in number of cells). The size of a cell (in meters) can also be
+  // specified.
+  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  /// Update UI
-  void onFixedUpdate(f32 delta);
+  ///
+  void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
+                     const bs::Vector3 &position = bs::Vector3());
 
-  /// Updates the toggle status of the run button
-  void setRunToggle(bool toggled);
-
-private:
-  /// Pointer to the editor instance
-  Editor *m_editor;
-
-  /// Run toggle button
-  bs::GUIToggle *m_runToggle;
-
-  /// Current scene path
-  String m_scenePath = "";
-  /// Whether scene auto-reload is enabled
-  bool m_sceneAutoReload = false;
-  /// Time that the scene file was last edited
-  std::filesystem::file_time_type m_sceneEditTime;
-
-  /// Debug type
-  WindSimulation::FieldKind m_debugFieldKind =
-      WindSimulation::FieldKind::DENSITY;
-  /// Whether to draw debug data
-  bool m_debugDraw = false;
-  /// Whether to draw debug data frame
-  bool m_debugDrawFrame = false;
+  /// \copydoc Field::paintObject
+  void paintObject(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+                   const Vec3F &padding = Vec3F(0, 0, 0)) override;
 };
 
 } // namespace wind

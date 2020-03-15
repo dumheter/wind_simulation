@@ -246,18 +246,24 @@ void App::hideProfiler() {
 
 void App::paint() {
   m_painter.begin();
+
+  /// Let all CPaint components paint
   std::vector<CPaint *> objects = CPaint::getAll();
   for (auto &object : objects) {
     object->paint(m_painter);
   }
+
+  /// Paint self
+  onPaint(m_painter);
+
   m_painter.end();
 }
 
 // -------------------------------------------------------------------------- //
 
-wind::App::Info App::makeInfo(const bs::String &title, u32 width, u32 height,
-                              u32 tps) {
-  return App::Info{title, width, height, tps};
+App::Info App::makeInfo(const bs::String &title, u32 width, u32 height,
+                        u32 tps) {
+  return Info{title, width, height, tps};
 }
 
 } // namespace wind

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2019-2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,54 +26,59 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/sim/wind_sim.hpp"
 #include "shared/types.hpp"
 
-#include <filesystem>
-
-#include <GUI/BsGUIToggle.h>
+#include <unordered_map>
 
 // ========================================================================== //
-// UI Declaration
+// DebugManager Declaration
 // ========================================================================== //
 
 namespace wind {
 
-class Editor;
-
-///	Class that represents the Editor UI
-class UI {
+/// Debug manager. Has global debug variables.
+class DebugManager {
 public:
-  /// Construct the UI with the editor for which it should be displayed
-  explicit UI(Editor *editor);
+  /// Get s32.
+  static s32 getS32(const String &name);
 
-  /// Update UI
-  void onFixedUpdate(f32 delta);
+  /// Set s32.
+  static void setS32(const String &name, s32 value);
 
-  /// Updates the toggle status of the run button
-  void setRunToggle(bool toggled);
+  /// Get f32.
+  static f32 getF32(const String &name);
+
+  /// Set f32.
+  static void setF32(const String &name, f32 value);
+
+  /// Get bool.
+  static bool getBool(const String &name);
+
+  /// Set bool.
+  static void setBool(const String &name, bool value);
+
+  /// Get String.
+  static String getString(const String &name);
+
+  /// Set String.
+  static void setString(const String &name, const String &value);
+
+  /// Returns the debug manager instance.
+  static DebugManager &instance();
 
 private:
-  /// Pointer to the editor instance
-  Editor *m_editor;
+  DebugManager() = default;
 
-  /// Run toggle button
-  bs::GUIToggle *m_runToggle;
+  ~DebugManager() = default;
 
-  /// Current scene path
-  String m_scenePath = "";
-  /// Whether scene auto-reload is enabled
-  bool m_sceneAutoReload = false;
-  /// Time that the scene file was last edited
-  std::filesystem::file_time_type m_sceneEditTime;
-
-  /// Debug type
-  WindSimulation::FieldKind m_debugFieldKind =
-      WindSimulation::FieldKind::DENSITY;
-  /// Whether to draw debug data
-  bool m_debugDraw = false;
-  /// Whether to draw debug data frame
-  bool m_debugDrawFrame = false;
+  /// S32 map
+  std::unordered_map<String, s32> m_mapS32;
+  /// F32 map
+  std::unordered_map<String, f32> m_mapF32;
+  /// Bool map
+  std::unordered_map<String, bool> m_mapBool;
+  /// String map
+  std::unordered_map<String, String> m_mapString;
 };
 
 } // namespace wind
