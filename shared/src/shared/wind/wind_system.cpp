@@ -84,7 +84,7 @@ Vec3F WindSystem::getWindAtPoint(Vec3F point) const {
       bs::gSceneManager().getMainScene()->getPhysicsScene();
 
   // Done if occluded
-  if (physicsScene->sphereOverlapAny(sphere, kWindOccluerLayer)) {
+  if (physicsScene->sphereOverlapAny(sphere, kWindOccluderLayer)) {
     return Vec3F::ZERO;
   }
 
