@@ -388,8 +388,14 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value, "scale", scale);
   }
 
-  const Quat rotation = object->getTransform().getRotation();
-  if (rotation != Quat::IDENTITY) {
+  Vec3F rotation;
+  {
+    const Quat qrot = object->getTransform().getRotation();
+    bs::Radian x, y, z;
+    qrot.toEulerAngles(x, y, z);
+    rotation = Vec3F{ x.valueDegrees(), y.valueDegrees(), z.valueDegrees() };
+  }
+  if (rotation != Vec3F::ZERO) {
     JsonUtil::setValue(value, "rotation", rotation);
   }
 
