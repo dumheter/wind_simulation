@@ -370,7 +370,7 @@ void Field<T>::paintFrame(Painter &painter, const Vec3I &dim, f32 cellSize,
     }
   }
 
-  painter.setColor(Color::sWhite);
+  painter.setColor(Color::white());
   painter.drawLines(points);
 }
 

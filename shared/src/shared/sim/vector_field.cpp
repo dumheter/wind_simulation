@@ -83,9 +83,9 @@ void VectorField::paint(Painter &painter, const Vec3F &offset,
   }
 
   // Draw normal vectors
-  painter.setColor(Color::sRed);
+  painter.setColor(Color::red());
   painter.drawLines(linesRed);
-  painter.setColor(Color::sYellow);
+  painter.setColor(Color::yellow());
   painter.drawLines(linesYellow);
 }
 

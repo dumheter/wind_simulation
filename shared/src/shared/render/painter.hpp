@@ -92,7 +92,7 @@ private:
   /// Lines to draw.
   bs::Vector<Vec3F> m_lines;
   /// Current brush color
-  Color m_color = Color::sWhite;
+  Color m_color = Color::white();
 };
 
 } // namespace wind
