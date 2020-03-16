@@ -34,10 +34,10 @@ namespace wind {
 /// Singleton wind system
 class WindSystem {
 public:
-  /// Physics layer for wind sources
-  static constexpr u64 kWindVolumeLayer = 1024;
-  /// Physics layer for wind occluders
-  static constexpr u64 kWindOccluderLayer = 2048;
+
+  /// Layers must be < Physics::CollisionMapSize (64)
+  static constexpr u64 kWindVolumeLayer = 16;
+  static constexpr u64 kWindOccluderLayer = 32;
 
   /// Enumeration of volume types
   enum class VolumeType {
