@@ -96,19 +96,11 @@
     <ClCompile Include="src\editor\editor.cpp" />
     <ClCompile Include="src\editor\factory.cpp" />
     <ClCompile Include="src\editor\main.cpp" />
-    <ClCompile Include="src\editor\sim\density_field.cpp" />
-    <ClCompile Include="src\editor\sim\obstruction_field.cpp" />
-    <ClCompile Include="src\editor\sim\vector_field.cpp" />
-    <ClCompile Include="src\editor\sim\wind_sim.cpp" />
     <ClCompile Include="src\editor\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\editor\editor.hpp" />
     <ClInclude Include="src\editor\factory.hpp" />
-    <ClInclude Include="src\editor\sim\density_field.hpp" />
-    <ClInclude Include="src\editor\sim\obstruction_field.hpp" />
-    <ClInclude Include="src\editor\sim\vector_field.hpp" />
-    <ClInclude Include="src\editor\sim\wind_sim.hpp" />
     <ClInclude Include="src\editor\ui.hpp" />
   </ItemGroup>
   <ItemGroup>

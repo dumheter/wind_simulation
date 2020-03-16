@@ -20,16 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "obstruction_field.hpp"
+#include "shared/sim/vector_field.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include <Components/BsCRenderable.h>
-#include <CoreThread/BsCoreThread.h>
+#include "shared/math/math.hpp"
+#include "shared/render/painter.hpp"
+
 #include <Debug/BsDebugDraw.h>
-#include <Physics/BsPhysics.h>
+
+#include "shared/debug/debug_manager.hpp"
 
 // ========================================================================== //
 // VectorField Implementation
@@ -37,55 +39,29 @@
 
 namespace wind {
 
-ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
-                                   f32 cellsize)
-    : Field(width, height, depth, cellsize) {
+VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize) {
   using namespace bs;
-  for (u32 i = 0; i < m_dataSize; i++) {
-    m_data[i] = false;
-  }
+
+  m_x = new Comp(width, height, depth, cellSize);
+  m_y = new Comp(width, height, depth, cellSize);
+  m_z = new Comp(width, height, depth, cellSize);
+  m_dim = m_x->getDim();
+  m_cellSize = m_x->getCellSize();
 }
 
 // -------------------------------------------------------------------------- //
 
-void ObstructionField::buildForScene(
-    const bs::SPtr<bs::SceneInstance> &scene,
-    const bs::Vector3 &position /*= bs::Vector3()*/) {
-  using namespace bs;
+void VectorField::paint(Painter &painter, const Vec3F &offset,
+                        ObstructionField *obstructionField,
+                        const Vec3F &padding) {
+  bs::Vector<bs::Vector3> linesRed;
+  bs::Vector<bs::Vector3> linesYellow;
 
-  // Physics scene
-  const SPtr<PhysicsScene> physicsScene = scene->getPhysicsScene();
+  const u32 xPad = u32(padding.x);
+  const u32 yPad = u32(padding.y);
+  const u32 zPad = u32(padding.z);
 
-  // Check for collisions in each cell
-  for (u32 z = 0; z < m_dim.depth; z++) {
-    f32 zPos = position.z + (z * m_cellSize);
-    for (u32 y = 0; y < m_dim.height; y++) {
-      f32 yPos = position.y + (y * m_cellSize);
-      for (u32 x = 0; x < m_dim.width; x++) {
-        f32 xPos = position.x + (x * m_cellSize);
-        f32 offMin = 0.05f * m_cellSize;
-        f32 offMax = 0.95f * m_cellSize;
-        AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
-                   Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
-        if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
-          get(x, y, z) = true;
-        }
-      }
-    }
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-void ObstructionField::debugDrawObject(const Vec3F &offset,
-                                       const Vec3F &padding) {
-  bs::DebugDraw::instance().setColor(bs::Color::BansheeOrange);
-
-  u32 xPad = u32(padding.x);
-  u32 yPad = u32(padding.y);
-  u32 zPad = u32(padding.z);
-
-  // Draw obstructions
+  // Draw vectors
   for (u32 z = zPad; z < m_dim.depth - zPad; z++) {
     const f32 zPos = offset.z + (z * m_cellSize);
     for (u32 y = yPad; y < m_dim.height - yPad; y++) {
@@ -96,14 +72,21 @@ void ObstructionField::debugDrawObject(const Vec3F &offset,
             Vec3F(xPos + (m_cellSize / 2.0f), yPos + (m_cellSize / 2.0f),
                   zPos + (m_cellSize / 2.0f)) -
             (padding * m_cellSize);
-        const bool obstructed = get(x, y, z);
-        if (obstructed) {
-          bs::DebugDraw::instance().drawCube(base, bs::Vector3::ONE *
-                                                       (m_cellSize * 0.05f));
+        const bs::Vector3 &vec = get(x, y, z);
+        if (obstructionField->get(x, y, z)) {
+          Painter::buildArrow(linesYellow, base, vec, 0.3f);
+        } else {
+          Painter::buildArrow(linesRed, base, vec, 0.3f);
         }
       }
     }
   }
+
+  // Draw normal vectors
+  painter.setColor(Color::red());
+  painter.drawLines(linesRed);
+  painter.setColor(Color::yellow());
+  painter.drawLines(linesYellow);
 }
 
 } // namespace wind

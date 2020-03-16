@@ -20,69 +20,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "cpaint.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include <RTTI/BsMathRTTI.h>
-#include <Reflection/BsRTTIPlain.h>
-#include <Reflection/BsRTTIType.h>
-#include <Scene/BsComponent.h>
-#include <Scene/BsSceneObject.h>
-
-#include "shared/scene/rtti.hpp"
-
 // ========================================================================== //
-// CWindAffectable Declaration
+// CSpline Implementation
 // ========================================================================== //
 
 namespace wind {
 
-/// A component that will make the object be affected by wind.
-/// It querys the global wind system, and applies any wind force.
-class CWindAffectable : public bs::Component {
-  friend class CWindAffectableRTTI;
+CPaint::CPaint() { s_Components.push_back(this); }
 
-public:
-  /// Default constructor required for serialization
-  CWindAffectable() = default;
+// -------------------------------------------------------------------------- //
 
-  CWindAffectable(const bs::HSceneObject &parent);
+CPaint::~CPaint() {
+  s_Components.erase(
+      std::remove(s_Components.begin(), s_Components.end(), this),
+      s_Components.end());
+}
 
-  void fixedUpdate() override;
+// -------------------------------------------------------------------------- //
 
-  static bs::RTTITypeBase *getRTTIStatic();
+CPaint::CPaint(const bs::HSceneObject &parent) : Component(parent) {
+  s_Components.push_back(this);
+}
 
-  bs::RTTITypeBase *getRTTI() const override;
-};
+// -------------------------------------------------------------------------- //
 
-} // namespace wind
+bs::RTTITypeBase *CPaint::getRTTIStatic() { return CPaintRTTI::instance(); }
 
-// ========================================================================== //
-// CWindAffectableRTTI Declaration
-// ========================================================================== //
-namespace wind {
+// -------------------------------------------------------------------------- //
 
-/// CWindAffectable RTTI
-class CWindAffectableRTTI
-    : public bs::RTTIType<CWindAffectable, bs::Component, CWindAffectableRTTI> {
-private:
-  BS_BEGIN_RTTI_MEMBERS
-  BS_END_RTTI_MEMBERS
-
-public:
-  const bs::String &getRTTIName() override {
-    static bs::String name = "CWindAffectable";
-    return name;
-  }
-
-  bs::UINT32 getRTTIId() override { return TID_CWindAffectable; }
-
-  bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CWindAffectable>();
-  }
-};
+std::vector<CPaint *> CPaint::s_Components = std::vector<CPaint *>{};
 
 } // namespace wind

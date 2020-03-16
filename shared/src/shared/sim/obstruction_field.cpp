@@ -20,15 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor/sim/vector_field.hpp"
+#include "obstruction_field.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/math/math.hpp"
-
+#include <Components/BsCRenderable.h>
+#include <CoreThread/BsCoreThread.h>
 #include <Debug/BsDebugDraw.h>
+#include <Physics/BsPhysics.h>
 
 // ========================================================================== //
 // VectorField Implementation
@@ -36,32 +37,56 @@
 
 namespace wind {
 
-VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize) {
+ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
+                                   f32 cellsize)
+    : Field(width, height, depth, cellsize) {
   using namespace bs;
-
-  m_x = new Comp(width, height, depth, cellSize);
-  m_y = new Comp(width, height, depth, cellSize);
-  m_z = new Comp(width, height, depth, cellSize);
-  m_dim = m_x->getDim();
-  m_cellSize = m_x->getCellSize();
+  for (u32 i = 0; i < m_dataSize; i++) {
+    m_data[i] = false;
+  }
 }
 
 // -------------------------------------------------------------------------- //
 
-void VectorField::debugDraw(const Vec3F &offset,
-                            ObstructionField *obstructionField, bool drawFrame,
-                            const Vec3F &padding) {
-  bs::Vector<bs::Vector3> points;
-  bs::Vector<bs::Vector3> pointsHead;
+void ObstructionField::buildForScene(
+    const bs::SPtr<bs::SceneInstance> &scene,
+    const bs::Vector3 &position /*= bs::Vector3()*/) {
+  using namespace bs;
 
-  bs::Vector<bs::Vector3> points0;
-  bs::Vector<bs::Vector3> pointsHead0;
+  // Physics scene
+  const SPtr<PhysicsScene> physicsScene = scene->getPhysicsScene();
+
+  // Check for collisions in each cell
+  for (u32 z = 0; z < m_dim.depth; z++) {
+    f32 zPos = position.z + (z * m_cellSize);
+    for (u32 y = 0; y < m_dim.height; y++) {
+      f32 yPos = position.y + (y * m_cellSize);
+      for (u32 x = 0; x < m_dim.width; x++) {
+        f32 xPos = position.x + (x * m_cellSize);
+        f32 offMin = 0.05f * m_cellSize;
+        f32 offMax = 0.95f * m_cellSize;
+        AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
+                   Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
+        if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
+          get(x, y, z) = true;
+        }
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+void ObstructionField::paintObject(Painter &painter, const Vec3F &offset,
+                                   const Vec3F &padding) {
+  /*
+  bs::DebugDraw::instance().setColor(bs::Color::BansheeOrange);
 
   u32 xPad = u32(padding.x);
   u32 yPad = u32(padding.y);
   u32 zPad = u32(padding.z);
 
-  // Draw vectors
+  // Draw obstructions
   for (u32 z = zPad; z < m_dim.depth - zPad; z++) {
     const f32 zPos = offset.z + (z * m_cellSize);
     for (u32 y = yPad; y < m_dim.height - yPad; y++) {
@@ -72,41 +97,15 @@ void VectorField::debugDraw(const Vec3F &offset,
             Vec3F(xPos + (m_cellSize / 2.0f), yPos + (m_cellSize / 2.0f),
                   zPos + (m_cellSize / 2.0f)) -
             (padding * m_cellSize);
-        const bs::Vector3 &vec = get(x, y, z);
-        const bs::Vector3 first = base + (vec * .2f);
-        const bs::Vector3 second = first + (vec * .05f);
-
-        if (obstructionField->get(x, y, z)) {
-          points0.push_back(base);
-          points0.push_back(first);
-          pointsHead0.push_back(first);
-          pointsHead0.push_back(second);
-        } else {
-          points.push_back(base);
-          points.push_back(first);
-          pointsHead.push_back(first);
-          pointsHead.push_back(second);
+        const bool obstructed = get(x, y, z);
+        if (obstructed) {
+          bs::DebugDraw::instance().drawCube(base, bs::Vector3::ONE *
+                                                       (m_cellSize * 0.05f));
         }
       }
     }
   }
-
-  // Draw normal vectors
-  bs::DebugDraw::instance().setColor(bs::Color::Red);
-  bs::DebugDraw::instance().drawLineList(points);
-  bs::DebugDraw::instance().setColor(bs::Color::Blue);
-  bs::DebugDraw::instance().drawLineList(pointsHead);
-
-  // Draw obstructed vectors
-  bs::DebugDraw::instance().setColor(bs::Color(1.0f, 1.0f, 0.0f));
-  bs::DebugDraw::instance().drawLineList(points0);
-  bs::DebugDraw::instance().setColor(bs::Color::Green);
-  bs::DebugDraw::instance().drawLineList(pointsHead0);
-
-  // Draw frame
-  if (drawFrame) {
-    m_x->debugDrawFrame();
-  }
+  */
 }
 
 } // namespace wind

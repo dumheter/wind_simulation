@@ -26,12 +26,16 @@
 // Headers
 // ========================================================================== //
 
+#include "scene/component/cpaint.hpp"
+
 #include "microprofile/microprofile.h"
 
 #include <Components/BsCCamera.h>
 #include <RenderAPI/BsRenderAPI.h>
 #include <RenderAPI/BsRenderWindow.h>
 #include <Renderer/BsCamera.h>
+#include <Scene/BsSceneManager.h>
+#include <Scene/BsSceneObject.h>
 #include <Utility/BsTime.h>
 
 // ========================================================================== //
@@ -80,8 +84,9 @@ protected:
   void postUpdate() override {
     MICROPROFILE_SCOPEI("App", "onPostUpdate", MP_GREEN);
     Application::postUpdate();
-    f32 delta = bs::gTime().getFrameDelta();
+    const f32 delta = bs::gTime().getFrameDelta();
     App::g_app->onPostUpdate(delta);
+    App::g_app->paint();
   }
 };
 
@@ -239,9 +244,26 @@ void App::hideProfiler() {
 
 // -------------------------------------------------------------------------- //
 
-wind::App::Info App::MakeInfo(const bs::String &title, u32 width, u32 height,
-                              u32 tps) {
-  return App::Info{title, width, height, tps};
+void App::paint() {
+  m_painter.begin();
+
+  /// Let all CPaint components paint
+  std::vector<CPaint *> objects = CPaint::getAll();
+  for (auto &object : objects) {
+    object->paint(m_painter);
+  }
+
+  /// Paint self
+  onPaint(m_painter);
+
+  m_painter.end();
+}
+
+// -------------------------------------------------------------------------- //
+
+App::Info App::makeInfo(const bs::String &title, u32 width, u32 height,
+                        u32 tps) {
+  return Info{title, width, height, tps};
 }
 
 } // namespace wind

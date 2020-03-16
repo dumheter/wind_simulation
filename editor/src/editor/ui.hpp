@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "editor/sim/wind_sim.hpp"
+#include "shared/sim/wind_sim.hpp"
 #include "shared/types.hpp"
 
 #include <filesystem>

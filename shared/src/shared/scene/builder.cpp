@@ -33,12 +33,12 @@
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/component/cwind.hpp"
+#include "shared/scene/component/cwind_affectable.hpp"
 #include "shared/scene/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
 #include "shared/wind/base_functions.hpp"
-#include "shared/scene/component/cwind_affectable.hpp"
 
 #include <Components/BsCBoxCollider.h>
 #include <Components/BsCCharacterController.h>
@@ -343,7 +343,8 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u32 layer, bool report) {
+ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u32 layer,
+                                                  bool report) {
   return withCollider(kind, 1.0f, 0.0f, layer, true, report);
 }
 
@@ -362,8 +363,7 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 
 ObjectBuilder &
 ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
-                              WindSystem::VolumeType volumeType,
-                              Vec3F offset) {
+                              WindSystem::VolumeType volumeType, Vec3F offset) {
   auto wind = m_handle->addComponent<CWind>(volumeType, offset);
   wind->addFunctions(functions);
   return *this;
@@ -494,6 +494,14 @@ ObjectBuilder &ObjectBuilder::withNetComponent(UniqueId id) {
   m_handle->addComponent<CNetComponent>(state);
   HCTag ctag = m_handle->getComponent<CTag>();
   ctag->getData().id = std::make_optional(id);
+  return *this;
+}
+
+// -------------------------------------------------------------------------- //
+
+ObjectBuilder &ObjectBuilder::withPainter(CPaint::PainterFun &&fun) {
+  HCPaint paint = m_handle->addComponent<CPaint>();
+  paint->setPaintCallback(fun);
   return *this;
 }
 

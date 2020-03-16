@@ -26,63 +26,33 @@
 // Headers
 // ========================================================================== //
 
-#include <RTTI/BsMathRTTI.h>
-#include <Reflection/BsRTTIPlain.h>
-#include <Reflection/BsRTTIType.h>
-#include <Scene/BsComponent.h>
-#include <Scene/BsSceneObject.h>
+#include "shared/math/field.hpp"
+#include "shared/types.hpp"
 
-#include "shared/scene/rtti.hpp"
+#include <Scene/BsSceneManager.h>
 
 // ========================================================================== //
-// CWindAffectable Declaration
+// VectorField Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// A component that will make the object be affected by wind.
-/// It querys the global wind system, and applies any wind force.
-class CWindAffectable : public bs::Component {
-  friend class CWindAffectableRTTI;
-
+/// Class that represents an obstruction field. This field represents whether
+/// or not a cell has an obstruction in it.
+class ObstructionField : public Field<bool> {
 public:
-  /// Default constructor required for serialization
-  CWindAffectable() = default;
+  // Construct an obstruction field with the specified 'width', 'height' and
+  // 'depth' (in number of cells). The size of a cell (in meters) can also be
+  // specified.
+  ObstructionField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  CWindAffectable(const bs::HSceneObject &parent);
+  ///
+  void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
+                     const bs::Vector3 &position = bs::Vector3());
 
-  void fixedUpdate() override;
-
-  static bs::RTTITypeBase *getRTTIStatic();
-
-  bs::RTTITypeBase *getRTTI() const override;
-};
-
-} // namespace wind
-
-// ========================================================================== //
-// CWindAffectableRTTI Declaration
-// ========================================================================== //
-namespace wind {
-
-/// CWindAffectable RTTI
-class CWindAffectableRTTI
-    : public bs::RTTIType<CWindAffectable, bs::Component, CWindAffectableRTTI> {
-private:
-  BS_BEGIN_RTTI_MEMBERS
-  BS_END_RTTI_MEMBERS
-
-public:
-  const bs::String &getRTTIName() override {
-    static bs::String name = "CWindAffectable";
-    return name;
-  }
-
-  bs::UINT32 getRTTIId() override { return TID_CWindAffectable; }
-
-  bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CWindAffectable>();
-  }
+  /// \copydoc Field::paintObject
+  void paintObject(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+                   const Vec3F &padding = Vec3F(0, 0, 0)) override;
 };
 
 } // namespace wind

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2019-2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,52 +20,64 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "cwind_affectable.hpp"
+#include "debug_manager.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "shared/wind/wind_system.hpp"
-#include <Components/BsCRigidbody.h>
-#include <limits>
-
-// ========================================================================== //
-// CWindAffectable Implementation
+// DebugManager Implementation
 // ========================================================================== //
 
 namespace wind {
 
-CWindAffectable::CWindAffectable(const bs::HSceneObject &parent)
-    : bs::Component(parent) {
-  setName("WindAffectable");
+s32 DebugManager::getS32(const String &name) {
+  return instance().m_mapS32[name];
 }
 
 // -------------------------------------------------------------------------- //
 
-void CWindAffectable::fixedUpdate() {
-  const Vec3F pos = SO()->getTransform().pos();
-  const Vec3F windAtPos = gWindSystem().getWindAtPoint(pos);
-  if (std::abs(windAtPos.x) > std::numeric_limits<f32>::min() ||
-      std::abs(windAtPos.y) > std::numeric_limits<f32>::min() ||
-      std::abs(windAtPos.z) > std::numeric_limits<f32>::min()) {
-
-    auto rigid = SO()->getComponent<bs::CRigidbody>();
-    if (rigid && !rigid->getIsKinematic()) {
-      const f32 dt = bs::gTime().getFixedFrameDelta();
-      rigid->addForce(windAtPos * dt, bs::ForceMode::Velocity);
-    }
-  }
+void DebugManager::setS32(const String &name, s32 value) {
+  instance().m_mapS32[name] = value;
 }
 
 // -------------------------------------------------------------------------- //
 
-bs::RTTITypeBase *CWindAffectable::getRTTIStatic() {
-  return CWindAffectableRTTI::instance();
+f32 DebugManager::getF32(const String &name) {
+  return instance().m_mapF32[name];
 }
 
 // -------------------------------------------------------------------------- //
 
-bs::RTTITypeBase *CWindAffectable::getRTTI() const { return getRTTIStatic(); }
+void DebugManager::setF32(const String &name, f32 value) {
+  instance().m_mapF32[name] = value;
+}
+// -------------------------------------------------------------------------- //
+
+bool DebugManager::getBool(const String &name) {
+  return instance().m_mapBool[name];
+}
+
+// -------------------------------------------------------------------------- //
+
+void DebugManager::setBool(const String &name, bool value) {
+  instance().m_mapBool[name] = value;
+}
+
+// -------------------------------------------------------------------------- //
+
+String DebugManager::getString(const String &name) {
+  return instance().m_mapString[name];
+}
+
+// -------------------------------------------------------------------------- //
+
+void DebugManager::setString(const String &name, const String &value) {
+  instance().m_mapString[name] = value;
+}
+
+// -------------------------------------------------------------------------- //
+
+DebugManager &DebugManager::instance() {
+  static DebugManager manager;
+  return manager;
+}
 
 } // namespace wind

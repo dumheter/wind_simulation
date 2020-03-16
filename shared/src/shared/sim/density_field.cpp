@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor/sim/density_field.hpp"
+#include "shared/sim/density_field.hpp"
 
 // ========================================================================== //
 // Headers
@@ -41,7 +41,9 @@ DensityField::DensityField(u32 width, u32 height, u32 depth, f32 cellsize)
 
 // -------------------------------------------------------------------------- //
 
-void DensityField::debugDrawObject(const Vec3F &offset, const Vec3F &padding) {
+void DensityField::paintObject(Painter &painter, const Vec3F &offset,
+                               const Vec3F &padding) {
+  /*
   bs::DebugDraw::instance().setColor(bs::Color::Blue);
 
   u32 xPad = u32(padding.x);
@@ -129,6 +131,7 @@ void DensityField::debugDrawObject(const Vec3F &offset, const Vec3F &padding) {
       }
     }
   }
+  */
 }
 
 } // namespace wind

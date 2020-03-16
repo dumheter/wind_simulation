@@ -26,62 +26,101 @@
 // Headers
 // ========================================================================== //
 
-#include <RTTI/BsMathRTTI.h>
-#include <Reflection/BsRTTIPlain.h>
+#include "shared/math/math.hpp"
+#include "shared/scene/component/cpaint.hpp"
+#include "shared/scene/rtti.hpp"
+#include "shared/sim/wind_sim.hpp"
+
 #include <Reflection/BsRTTIType.h>
 #include <Scene/BsComponent.h>
 #include <Scene/BsSceneObject.h>
 
-#include "shared/scene/rtti.hpp"
-
 // ========================================================================== //
-// CWindAffectable Declaration
+// CSim Declaration
 // ========================================================================== //
 
 namespace wind {
 
-/// A component that will make the object be affected by wind.
-/// It querys the global wind system, and applies any wind force.
-class CWindAffectable : public bs::Component {
-  friend class CWindAffectableRTTI;
+/// Class that represents a component which handles simulation of wind.
+class CSim : public CPaint {
+  friend class CTagRTTI;
 
 public:
-  /// Default constructor required for serialization
-  CWindAffectable() = default;
+  /// Construct simulation component.
+  CSim() = default;
 
-  CWindAffectable(const bs::HSceneObject &parent);
+  /// Construct a simulation component.
+  explicit CSim(const bs::HSceneObject &parent);
 
+  /// Build the simualation for a specific scene. Nullptr can be passed to build
+  /// for default scene.
+  void build(s32 width, s32 height, s32 depth, f32 cellSize = 1.0f,
+             const bs::SPtr<bs::SceneInstance> &scene = nullptr);
+
+  /// Build the simualation for a specific scene. Nullptr can be passed to build
+  /// for default scene.
+  void build(const Vec3I &dim, f32 cellSize = 1.0f,
+             const bs::SPtr<bs::SceneInstance> &scene = nullptr) {
+    build(dim.x, dim.y, dim.z, cellSize, scene);
+  }
+
+  /// Bake the simulation out into an object that represents the individual
+  /// objects generated.
+  bs::HSceneObject bake();
+
+  /// Returns a pointer to the simulation object.
+  WindSimulation *getSim() const { return m_sim; }
+
+  /// Paint simulation
+  void paint(Painter &painter) override;
+
+  /// Fixed update
   void fixedUpdate() override;
 
+  /// Returns a reference to the static RTTI object that represents this
+  /// component
   static bs::RTTITypeBase *getRTTIStatic();
 
-  bs::RTTITypeBase *getRTTI() const override;
+  /// \copydoc bs::IReflectable::getRTTI
+  bs::RTTITypeBase *getRTTI() const override { return getRTTIStatic(); }
+
+private:
+  /// Simulation
+  WindSimulation *m_sim = nullptr;
 };
+
+// -------------------------------------------------------------------------- //
+
+/// CSim handle type
+using HCSim = bs::GameObjectHandle<CSim>;
 
 } // namespace wind
 
 // ========================================================================== //
-// CWindAffectableRTTI Declaration
+// CSimRTTI Declaration
 // ========================================================================== //
+
 namespace wind {
 
-/// CWindAffectable RTTI
-class CWindAffectableRTTI
-    : public bs::RTTIType<CWindAffectable, bs::Component, CWindAffectableRTTI> {
+/// CSim component RTTI
+class CSimRTTI : public bs::RTTIType<CSim, bs::Component, CSimRTTI> {
 private:
   BS_BEGIN_RTTI_MEMBERS
   BS_END_RTTI_MEMBERS
 
 public:
+  /// \copydoc bs::RTTITypeBase::getRTTIName
   const bs::String &getRTTIName() override {
-    static bs::String name = "CWindAffectable";
+    static bs::String name = "CSim";
     return name;
   }
 
-  bs::UINT32 getRTTIId() override { return TID_CWindAffectable; }
+  /// \copydoc bs::RTTITypeBase::getRTTIId
+  bs::UINT32 getRTTIId() override { return TID_CSim; }
 
+  /// \copydoc bs::RTTITypeBase::newRTTIObject
   bs::SPtr<bs::IReflectable> newRTTIObject() override {
-    return bs::SceneObject::createEmptyComponent<CWindAffectable>();
+    return bs::SceneObject::createEmptyComponent<CSim>();
   }
 };
 

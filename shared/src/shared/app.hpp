@@ -26,6 +26,7 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/render/painter.hpp"
 #include "shared/types.hpp"
 
 #include <BsApplication.h>
@@ -60,77 +61,88 @@ public:
   };
 
 public:
-  /* Create application */
-  App(const Info &info);
+  /// Create application
+  explicit App(const Info &info);
 
-  /* Virtual destructor */
+  /// Virtual destructor
   virtual ~App() = default;
 
-  /* Run application */
+  /// Run application
   void run();
 
-  /* Hide application window */
+  /// Hide application window
   void hide();
 
-  /* Show application window */
+  /// Show application window
   void show();
 
   /// Quit the application
   void quit();
 
-  /* Enter fullscreen */
+  /// Enter fullscreen
   void enterFullscreen(VideoMode videoMode = VideoMode{0, 0},
                        u32 monitorIdx = 0);
 
-  /* Exit fullscreen */
+  /// Exit fullscreen
   void exitFullscreen();
 
-  /* Returns whether or not the application is currently fullscreen */
+  /// Returns whether or not the application is currently fullscreen
   bool isFullscreen() { return m_isFullscreen; }
 
-  /* Show profiler overlay (GPU) */
+  /// Show profiler overlay (GPU)
   void showProfilerGPU(bs::HCamera camera);
 
-  /* Show profiler overlay (CPU) */
+  /// Show profiler overlay (CPU)
   void showProfilerCPU(bs::HCamera camera);
 
-  /* Hide profiler (GPU or CPU depending on which is active) */
+  /// Hide profiler (GPU or CPU depending on which is active)
   void hideProfiler();
 
-  /* Startup callback */
+  /// Startup callback
   virtual void onStartup() {}
 
-  /* Shutdown callback */
+  /// Shutdown callback
   virtual void onShutdown() {}
 
-  /* Pre-update callback */
+  /// Pre-update callback
   virtual void onPreUpdate(f32 delta) {}
 
-  /* Post-update callback */
+  /// Post-update callback
   virtual void onPostUpdate(f32 delta) {}
 
-  /* Fixed-update callback */
+  /// Fixed-update callback
   virtual void onFixedUpdate(f32 delta) {}
 
-  /* New dimensions stored in m_width and m_height */
+  /// New dimensions stored in m_width and m_height
   virtual void onWindowResize() {}
 
   /// Tick callback
   virtual void onTick() {}
 
-public:
+  /// Paint callback
+  virtual void onPaint(Painter &painter) {}
+
   /// Make an application information structure
-  static Info MakeInfo(const bs::String &title, u32 width, u32 height, u32 tps);
+  static Info makeInfo(const bs::String &title, u32 width, u32 height, u32 tps);
 
 private:
+  /// Paint the application. This will allow all CPaint components to paint
+  /// with a painter object.
+  void paint();
+
+private:
+  /// Global app instance
   static App *g_app;
 
+  /// Painter
+  Painter m_painter;
+
 protected:
-  /* Application title */
+  /// Application title
   bs::String m_title;
-  /* Window width */
+  /// Window width
   u32 m_width;
-  /* Window height */
+  /// Window height
   u32 m_height;
 
   /// TPS
@@ -138,12 +150,12 @@ protected:
   /// Number of updates to skip
   u32 m_tpsSkip = 0;
 
-  /* Window width, pre-fullscreen */
+  /// Window width, pre-fullscreen
   u32 m_widthPreFullscreen;
-  /* Window height, pre-fullscreen */
+  /// Window height, pre-fullscreen
   u32 m_heightPreFullscreen;
 
-  /* Whether app is fullscreen */
+  /// Whether app is fullscreen
   bool m_isFullscreen = false;
 };
 
