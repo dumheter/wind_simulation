@@ -107,6 +107,7 @@
     <ClCompile Include="src\shared\render\painter.cpp" />
     <ClCompile Include="src\shared\render\shader.cpp" />
     <ClCompile Include="src\shared\scene\component\cpaint.cpp" />
+    <ClCompile Include="src\shared\scene\component\crotor.cpp" />
     <ClCompile Include="src\shared\scene\component\csim.cpp" />
     <ClCompile Include="src\shared\scene\component\cspline.cpp" />
     <ClCompile Include="src\shared\scene\component\cspline_follow.cpp" />
@@ -119,7 +120,6 @@
     <ClCompile Include="src\shared\scene\builder.cpp" />
     <ClCompile Include="src\shared\scene\cnet_component.cpp" />
     <ClCompile Include="src\shared\scene\component\ctag.cpp" />
-    <ClCompile Include="src\shared\scene\crotor.cpp" />
     <ClCompile Include="src\shared\log.cpp" />
     <ClCompile Include="src\shared\scene\mesh.cpp" />
     <ClCompile Include="src\shared\scene\scene.cpp" />
@@ -180,6 +180,7 @@
     <ClInclude Include="src\shared\render\painter.hpp" />
     <ClInclude Include="src\shared\render\shader.hpp" />
     <ClInclude Include="src\shared\scene\component\cpaint.hpp" />
+    <ClInclude Include="src\shared\scene\component\crotor.hpp" />
     <ClInclude Include="src\shared\scene\component\csim.hpp" />
     <ClInclude Include="src\shared\scene\component\cspline.hpp" />
     <ClInclude Include="src\shared\scene\component\cwind.hpp" />
@@ -198,7 +199,6 @@
     <ClInclude Include="src\shared\scene\types.hpp" />
     <ClInclude Include="src\shared\scene\cnet_component.hpp" />
     <ClInclude Include="src\shared\scene\component_handles.hpp" />
-    <ClInclude Include="src\shared\scene\crotor.hpp" />
     <ClInclude Include="src\shared\sim\density_field.hpp" />
     <ClInclude Include="src\shared\sim\obstruction_field.hpp" />
     <ClInclude Include="src\shared\sim\vector_field.hpp" />

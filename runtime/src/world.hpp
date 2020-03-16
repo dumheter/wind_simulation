@@ -6,7 +6,7 @@
 #include "network/util.hpp"
 #include "shared/app.hpp"
 #include "shared/scene/cnet_component.hpp"
-#include "shared/scene/crotor.hpp"
+#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/fps_camera.hpp"
 #include "shared/state/player_input.hpp"
 #include "shared/utility/unique_id.hpp"

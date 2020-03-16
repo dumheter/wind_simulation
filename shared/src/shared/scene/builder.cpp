@@ -34,7 +34,7 @@
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_affectable.hpp"
-#include "shared/scene/crotor.hpp"
+#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"

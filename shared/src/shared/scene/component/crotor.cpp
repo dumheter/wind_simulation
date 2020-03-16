@@ -6,7 +6,7 @@ namespace wind {
 CRotor::CRotor() : m_rotation() {}
 
 CRotor::CRotor(const bs::HSceneObject &parent, Vec3F rotation)
-    : bs::Component(parent), m_rotation() {
+    : bs::Component(parent), m_rotation(), m_inputRotation(rotation) {
   setName("CRotor");
   setRotation(rotation);
 }
