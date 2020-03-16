@@ -74,12 +74,15 @@ bool ComponentData::ToBytes(alflib::RawMemoryWriter &mw) const {
   if (std::holds_alternative<RigidbodyData>(m_data)) {
     return mw.Write(static_cast<TagType>(ComponentType::kRigidbody));
   } else if (std::holds_alternative<WindData>(m_data)) {
-    mw.Write(static_cast<TagType>(ComponentType::kWindSource));
+    mw.Write(static_cast<TagType>(ComponentType::kWind));
     mw.Write(std::get<WindData>(m_data).functions);
-    mw.Write(std::get<WindData>(m_data).offset.x);
-    mw.Write(std::get<WindData>(m_data).offset.y);
-    mw.Write(std::get<WindData>(m_data).offset.z);
-    return mw.Write(std::get<WindData>(m_data).volumeType);
+    mw.Write(std::get<WindData>(m_data).volumeType);
+    mw.Write(std::get<WindData>(m_data).pos.x);
+    mw.Write(std::get<WindData>(m_data).pos.y);
+    mw.Write(std::get<WindData>(m_data).pos.z);
+    mw.Write(std::get<WindData>(m_data).scale.x);
+    mw.Write(std::get<WindData>(m_data).scale.y);
+    return mw.Write(std::get<WindData>(m_data).scale.z);
   } else if (std::holds_alternative<RenderableData>(m_data)) {
     mw.Write(static_cast<TagType>(ComponentType::kRenderable));
     return mw.Write(
@@ -111,11 +114,12 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
   case ComponentType::kRigidbody: {
     return asRigidbody();
   }
-  case ComponentType::kWindSource: {
+  case ComponentType::kWind: {
     std::vector<BaseFn> functions = mr.ReadStdVector<BaseFn>();
-    auto offset = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     auto volumeType = mr.Read<u8>();
-    return asWind(functions, offset, volumeType);
+    auto pos = Vec3F { mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>() };
+    auto scale = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
+    return asWind(functions, volumeType, pos, scale);
   }
   case ComponentType::kRenderable: {
     auto pathTexture = mr.Read<alflib::String>();
@@ -154,9 +158,9 @@ ComponentData ComponentData::asRigidbody() {
 // -------------------------------------------------------------------------- //
 
 ComponentData ComponentData::asWind(const std::vector<BaseFn> &functions,
-                                    Vec3F offset, u8 volumeType) {
+                                    u8 volumeType, Vec3F pos, Vec3F scale) {
   ComponentData data;
-  data.m_data = WindData{functions, offset, volumeType};
+  data.m_data = WindData{functions, volumeType, pos, scale};
   return data;
 }
 

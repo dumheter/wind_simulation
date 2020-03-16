@@ -73,19 +73,19 @@
           "name": "wind volume",
           "position": {
             "xz": 8.0,
-            "y": 1
+            "y": 2
           },
-          "scale": [ 16, 16, 16 ],
+          "scale": [ 4, 4, 4 ],
           "wind": {
             "functions": [
               {
                 "type": "constant",
-                "magnitude": 12,
-                "direction": [ 0.0, 1.0, 1.0 ]
+                "magnitude": 8,
+                "direction": [ 0.0, 0.5, 1.0 ]
               }
             ],
             "volume": {
-              "type": "cylinder"
+              "type": "cube"
             }
           }
         },
@@ -119,23 +119,24 @@
             "restitution": 0.5,
             "mass": 20.0
           },
-          "wind": {
-            "functions": [
-              {
-                "type": "constant",
-                "magnitude": 70,
-                "direction": [ 0.0, -1.0, 0.0 ]
-              }
-            ],
-            "volume": {
-              "type": "cube",
-              "offset": [ 0, 0, -1 ]
-            }
-          },
           "rotor": {
             "x": 0,
             "z": 0.0,
             "y": 1.0
+          },
+          "wind": {
+            "position": [0, 3.2, 0],
+            "scale": [ 3.2, 6.4, 3.2],
+            "functions": [
+              {
+                "type": "constant",
+                "magnitude": 20,
+                "direction": [ 0.0, 1.0, 0.0 ]
+              }
+            ],
+            "volume": {
+              "type": "cylinder"
+            }
           }
         }
 

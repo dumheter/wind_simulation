@@ -53,7 +53,7 @@ enum class ObjectType : u32 {
 /// Enumeration of component types.
 enum class ComponentType : u32 {
   kRigidbody,  ///< Rigidbody { "restitution", "mass" }
-  kWindSource, ///< Wind source { ["basic function"] }
+  kWind, ///< Wind source { ["basic function"] }
   kRenderable,
   kRotor, ///< Rotor { "x-rot", "y-rot", "z-rot" }
   kCollider,

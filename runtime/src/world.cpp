@@ -333,10 +333,12 @@ void World::buildObject(const CreateInfo &info) {
     if (component.isType<ComponentData::RigidbodyData>()) {
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindData>()) {
+      logError("[world:buildObject] trying to build a windComponet, but not "
+               "supported");
       const auto &wind = component.windSourceData();
       const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
-      obj.withWindVolume(volumeType);
-      obj.withWindSource(wind.functions, volumeType, wind.offset);
+      obj.withWindVolume(volumeType, wind.pos, wind.scale);
+      obj.withWindSource(wind.functions, volumeType, wind.pos, wind.scale);
       logError("[world:buildObject] withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
       const auto &render = component.renderableData();

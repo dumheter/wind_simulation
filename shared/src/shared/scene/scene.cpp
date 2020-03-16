@@ -186,9 +186,12 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   }
 
   // Wind
-  Vec3F maybeWindOffset = Vec3F::ZERO;
   if (value.find("wind") != value.end()) {
     const json wind = value["wind"];
+
+    const Vec3F pos = JsonUtil::getVec3F(wind, "position", Vec3F::ZERO);
+
+    const Vec3F scale = JsonUtil::getVec3F(wind, "scale", Vec3F::ONE);
 
     // Volume
     WindSystem::VolumeType volumeType = WindSystem::VolumeType::kCube;
@@ -197,9 +200,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       const json volume = wind["volume"];
       volumeType = WindSystem::stringToVolumeType(
           JsonUtil::getString(volume, "type", "cube"));
-      maybeWindOffset = JsonUtil::getVec3F(volume, "offset", Vec3F::ZERO);
 
-      builder.withWindVolume(volumeType);
+      builder.withWindVolume(volumeType, pos, scale);
     }
 
     // Basic functions
@@ -210,7 +212,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       for (const auto fn : fns) {
         functions.push_back(BaseFn::fromJson(fn));
       }
-      builder.withWindSource(functions, volumeType, maybeWindOffset);
+      builder.withWindSource(functions, volumeType, pos, scale);
     }
 
     // Occluder
@@ -293,7 +295,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   }
 
   // Transform - MUST BE LAST
-  builder.withPosition(JsonUtil::getVec3F(value, "position") + maybeWindOffset);
+  builder.withPosition(JsonUtil::getVec3F(value, "position"));
   builder.withScale(JsonUtil::getVec3F(value, "scale", Vec3F::ONE));
   builder.withRotation(JsonUtil::getVec3F(value, "rotation"));
 
@@ -408,9 +410,8 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     value["wind"]["volume"]["type"] =
         WindSystem::volumeTypeToString(wind->getVolumeType());
 
-    if (const auto offset = wind->getOffset(); offset != Vec3F::ZERO) {
-      JsonUtil::setValue(value["wind"]["volume"], "offset", offset);
-    }
+    JsonUtil::setValue(value["wind"], "position", wind->getPos());
+    JsonUtil::setValue(value["wind"], "scale", wind->getScale());
 
     if (!wind->getFunctions().empty()) {
       std::vector<json> fns{};

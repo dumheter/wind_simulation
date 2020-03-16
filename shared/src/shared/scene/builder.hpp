@@ -120,9 +120,10 @@ public:
   /// mesh for the wind collision trigger volume.
   ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions,
                                 WindSystem::VolumeType volumeType,
-                                Vec3F offset);
+                                Vec3F pos, Vec3F scale);
 
-  ObjectBuilder &withWindVolume(WindSystem::VolumeType type);
+  ObjectBuilder &withWindVolume(WindSystem::VolumeType type, Vec3F pos,
+                                Vec3F scale);
 
   ObjectBuilder &withWindAffectable();
 
