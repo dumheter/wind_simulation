@@ -27,6 +27,7 @@
 #include "Utility/BsTime.h"
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
+#include "shared/render/color.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 
@@ -38,7 +39,8 @@
 
 namespace wind {
 
-CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, Vec3F pos, Vec3F scale)
+CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
+             Vec3F pos, Vec3F scale)
     : Component(parent), m_volumeType(volumeType), m_pos(pos), m_scale(scale) {
   setName("WindComponent");
 
@@ -56,13 +58,37 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, 
   }
 
   // Build trigger collider
-  auto so = ObjectBuilder(ObjectType::kEmpty)
-                .withSave(false)
-                .withPosition(pos)
-                .withScale(scale)
-                .withName("WindCollider")
-                .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
-                .build();
+  auto so =
+      ObjectBuilder(ObjectType::kEmpty)
+          .withSave(false)
+          .withPosition(pos)
+          .withScale(scale)
+          .withName("WindCollider")
+          .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
+          .withPainter([this, pos, scale](auto &painter) {
+            constexpr Color arrowColor{255, 0, 255};
+            painter.setColor(arrowColor);
+
+            auto t = SO()->getTransform();
+            t.moveRelative(pos);
+            const auto s = t.getScale() * scale;
+            const Vec3F origo = t.pos();
+            const Vec3F a = origo - s / 2.0f;
+            const s32 count = dclamp<s32>(static_cast<s32>((s.x + s.y + s.z) / 3.0f), 2, 8);
+            const f32 dx = s.x / (count - 1);
+            const f32 dy = s.y / (count - 1);
+            const f32 dz = s.z / (count - 1);
+            constexpr f32 arrowScale = 0.1f;
+            for (s32 x = 0; x < count; ++x) {
+              for (s32 y = 0; y < count; ++y) {
+                for (s32 z = 0; z < count; ++z) {
+                  Vec3F point{a.x + dx * x, a.y + dy * y, a.z + dz * z};
+                  painter.drawArrow(point, getWindAtPoint(point) * arrowScale);
+                }
+              }
+            }
+          })
+          .build();
   so->setParent(parent);
 }
 
