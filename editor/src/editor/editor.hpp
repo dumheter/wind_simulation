@@ -28,7 +28,6 @@
 
 #include "shared/app.hpp"
 #include "shared/scene/component/csim.hpp"
-#include "shared/sim/wind_sim.hpp"
 
 #include <Renderer/BsCamera.h>
 

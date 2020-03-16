@@ -22,12 +22,12 @@
           "name": "house0",
           "objects": [
             {
-              "name": "occluder", 
+              "name": "occluder",
               "position": { "y": 0.01 },
               "wind": {
                 "occluder": {
                   "type": "cube",
-                  "dim": [ 5, 2, 4 ]
+                  "dim": [5, 2, 4]
                 }
               }
             },
@@ -41,8 +41,8 @@
                   "v": 8
                 }
               },
-              "scale": [ 1.0, 2.0, 0.1 ],
-              "position": [ -2.0, 0.0, 2.0 ]
+              "scale": [1.0, 2.0, 0.1],
+              "position": [-2.0, 0.0, 2.0]
             },
             {
               "name": "house0_wall_north1",
@@ -54,8 +54,8 @@
                   "v": 8
                 }
               },
-              "scale": [ 3.0, 2.0, 0.1 ],
-              "position": [ 1.0, 0.0, 2.0 ]
+              "scale": [3.0, 2.0, 0.1],
+              "position": [1.0, 0.0, 2.0]
             },
             {
               "name": "house0_wall_north2",
@@ -67,8 +67,8 @@
                   "v": 1
                 }
               },
-              "scale": [ 1.0, 0.25, 0.1 ],
-              "position": [ -1.0, 0.875, 2.0 ]
+              "scale": [1.0, 0.25, 0.1],
+              "position": [-1.0, 0.875, 2.0]
             },
             {
               "name": "house0_wall_south",
@@ -80,8 +80,8 @@
                   "v": 8
                 }
               },
-              "scale": [ 5.0, 2.0, 0.1 ],
-              "position": [ 0.0, 0.0, -2.0 ]
+              "scale": [5.0, 2.0, 0.1],
+              "position": [0.0, 0.0, -2.0]
             },
             {
               "name": "house0_wall_west",
@@ -93,8 +93,8 @@
                   "v": 8
                 }
               },
-              "scale": [ 0.1, 2.0, 4.0 ],
-              "position": [ -2.5, 0.0, 0.0 ]
+              "scale": [0.1, 2.0, 4.0],
+              "position": [-2.5, 0.0, 0.0]
             },
             {
               "name": "house0_wall_east",
@@ -106,31 +106,13 @@
                   "v": 8
                 }
               },
-              "scale": [ 0.1, 2.0, 4.0 ],
-              "position": [ 2.5, 0.0, 0.0 ]
+              "scale": [0.1, 2.0, 4.0],
+              "position": [2.5, 0.0, 0.0]
             }
           ],
-          "position":  [ 0, 1, 0 ]
+          "position": [0, 1, 0]
         }
       ]
-    },
-    {
-      "name": "spline0",
-      "type": "cube",
-      "spline": {
-        "degree": 2,
-        "points": [
-          [ 0, 1, 0 ],
-          [ -5, 1, -10 ],
-          [ 15, 1, -10 ],
-          [ 0, 1, 5 ],
-          [ 10, 1, 10 ]
-        ]
-      },
-      "spline-follow": {
-        "speed": 0.001,
-        "wrap": "oscillate"
-      }
     }
   ]
 }

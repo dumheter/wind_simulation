@@ -36,6 +36,8 @@
 
 #include <vector>
 
+#include "component/cpaint.hpp"
+
 // ========================================================================== //
 // ObjectBuilder
 // ========================================================================== //
@@ -107,7 +109,8 @@ public:
                               bool trigger = false, bool report = false);
 
   /// Add a trigger collider
-  ObjectBuilder &withTriggerCollider(Kind kind, u32 layer = 0, bool report = false);
+  ObjectBuilder &withTriggerCollider(Kind kind, u32 layer = 0,
+                                     bool report = false);
 
   /// Adds a rigidbody
   ObjectBuilder &withRigidbody();
@@ -149,6 +152,10 @@ public:
   /// Construct from only an id
   ObjectBuilder &withNetComponent(UniqueId id);
 
+  /// Add painter
+  ObjectBuilder &withPainter(CPaint::PainterFun &&fun);
+
+  ///
   ObjectBuilder &withDebugCube(const Vec3F &size = Vec3F::ONE,
                                const Vec3F &position = Vec3F::ZERO,
                                const Vec3F &rotation = Vec3F::ZERO,
