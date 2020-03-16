@@ -115,10 +115,10 @@
     <ClCompile Include="src\shared\scene\component\cwind_affectable.cpp" />
     <ClCompile Include="src\shared\scene\component\cwind_occluder.cpp" />
     <ClCompile Include="src\shared\scene\component_data.cpp" />
-    <ClCompile Include="src\shared\scene\fps_camera.cpp" />
-    <ClCompile Include="src\shared\scene\fps_walker.cpp" />
+    <ClCompile Include="src\shared\scene\component\fps_camera.cpp" />
+    <ClCompile Include="src\shared\scene\component\fps_walker.cpp" />
     <ClCompile Include="src\shared\scene\builder.cpp" />
-    <ClCompile Include="src\shared\scene\cnet_component.cpp" />
+    <ClCompile Include="src\shared\scene\component\cnet_component.cpp" />
     <ClCompile Include="src\shared\scene\component\ctag.cpp" />
     <ClCompile Include="src\shared\log.cpp" />
     <ClCompile Include="src\shared\scene\mesh.cpp" />
@@ -188,8 +188,8 @@
     <ClInclude Include="src\shared\scene\component\cwind_occluder.hpp" />
     <ClInclude Include="src\shared\scene\component_data.hpp" />
     <ClInclude Include="src\shared\scene\component\cspline_follow.hpp" />
-    <ClInclude Include="src\shared\scene\fps_camera.hpp" />
-    <ClInclude Include="src\shared\scene\fps_walker.hpp" />
+    <ClInclude Include="src\shared\scene\component\fps_camera.hpp" />
+    <ClInclude Include="src\shared\scene\component\fps_walker.hpp" />
     <ClInclude Include="src\shared\scene\builder.hpp" />
     <ClInclude Include="src\shared\scene\component\ctag.hpp" />
     <ClInclude Include="src\shared\scene\mesh.hpp" />
@@ -197,7 +197,7 @@
     <ClInclude Include="src\shared\scene\scene.hpp" />
     <ClInclude Include="src\shared\scene\serializer.hpp" />
     <ClInclude Include="src\shared\scene\types.hpp" />
-    <ClInclude Include="src\shared\scene\cnet_component.hpp" />
+    <ClInclude Include="src\shared\scene\component\cnet_component.hpp" />
     <ClInclude Include="src\shared\scene\component_handles.hpp" />
     <ClInclude Include="src\shared\sim\density_field.hpp" />
     <ClInclude Include="src\shared\sim\obstruction_field.hpp" />
