@@ -37,11 +37,11 @@ public:
   /// Physics layer for wind sources
   static constexpr u64 kWindVolumeLayer = 1024;
   /// Physics layer for wind occluders
-  static constexpr u64 kWindOccluerLayer = 1025;
+  static constexpr u64 kWindOccluderLayer = 2048;
 
   /// Enumeration of volume types
   enum class VolumeType {
-    kCube = 0,     ///< Cube volume.
+    kCube = 0, ///< Cube volume.
     kCylinder, ///< Cylinder volume.
   };
 
@@ -55,17 +55,17 @@ public:
 
   // ============================================================ //
 
- public:
+public:
   /// @note Can also access via gWindSystem()
   static WindSystem &instance();
 
   Vec3F getWindAtPoint(Vec3F point) const;
 
- private:
+private:
   WindSystem() = default;
 
-  WindSystem(const WindSystem& other) = delete;
-  WindSystem& operator=(const WindSystem &other) = delete;
+  WindSystem(const WindSystem &other) = delete;
+  WindSystem &operator=(const WindSystem &other) = delete;
 };
 
 inline WindSystem &gWindSystem() { return WindSystem::instance(); }

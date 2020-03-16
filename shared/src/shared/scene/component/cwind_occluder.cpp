@@ -57,7 +57,7 @@ CWindOccluder::CWindOccluder(const bs::HSceneObject &parent, const Cube &cube)
   bs::HCollider collider = obj->getComponent<bs::CCollider>();
   collider->setIsTrigger(true);
   collider->setCollisionReportMode(bs::CollisionReportMode::Report);
-  collider->setLayer(WindSystem::kWindOccluerLayer);
+  collider->setLayer(WindSystem::kWindOccluderLayer);
 }
 
 // -------------------------------------------------------------------------- //
@@ -82,7 +82,7 @@ CWindOccluder::CWindOccluder(const bs::HSceneObject &parent,
   bs::HCollider collider = obj->getComponent<bs::CCollider>();
   collider->setIsTrigger(true);
   collider->setCollisionReportMode(bs::CollisionReportMode::Report);
-  collider->setLayer(WindSystem::kWindOccluerLayer);
+  collider->setLayer(WindSystem::kWindOccluderLayer);
 }
 
 // -------------------------------------------------------------------------- //
