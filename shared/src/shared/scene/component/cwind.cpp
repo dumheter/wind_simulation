@@ -26,6 +26,7 @@
 #include "Scene/BsSceneObject.h"
 #include "Utility/BsTime.h"
 #include "shared/asset.hpp"
+#include "shared/debug/debug_manager.hpp"
 #include "shared/log.hpp"
 #include "shared/render/color.hpp"
 #include "shared/scene/builder.hpp"
@@ -70,21 +71,23 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
                 .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
                 .withPainter([this, pos, scale](auto &painter) {
                   MICROPROFILE_SCOPEI("CWind", "onPaint", MP_ORANGE2);
-                  constexpr Color arrowColor{255, 255, 0};
-                  painter.setColor(arrowColor);
-                  auto t = SO()->getTransform();
-                  t.moveRelative(pos);
-                  const auto s = t.getScale() * scale;
-                  const Vec3F origo = t.pos();
-                  const Vec3F a = origo - s / 2.0f;
-                  if (!m_filipFlag) {
-                    m_filipFlag = kBakeDone;
-                    bakeDebugArrows(pos, scale);
-                  }
-                  for (u32 i = 0; i < m_cachedLines.size(); i += 2) {
-                    const Vec3F start = m_cachedLines[i] + a;
-                    const Vec3F end = m_cachedLines[i + 1] + a;
-                    painter.drawLine(start, end);
+                  if (DebugManager::getBool("WVArrows")) {
+                    constexpr Color arrowColor{255, 255, 0};
+                    painter.setColor(arrowColor);
+                    auto t = SO()->getTransform();
+                    t.moveRelative(pos);
+                    const auto s = t.getScale() * scale;
+                    const Vec3F origo = t.pos();
+                    const Vec3F a = origo - s / 2.0f;
+                    if (!m_filipFlag) {
+                      m_filipFlag = kBakeDone;
+                      bakeDebugArrows(pos, scale);
+                    }
+                    for (u32 i = 0; i < m_cachedLines.size(); i += 2) {
+                      const Vec3F start = m_cachedLines[i] + a;
+                      const Vec3F end = m_cachedLines[i + 1] + a;
+                      painter.drawLine(start, end);
+                    }
                   }
                 })
                 .build();
