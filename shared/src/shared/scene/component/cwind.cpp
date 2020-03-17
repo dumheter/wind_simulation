@@ -32,6 +32,8 @@
 #include "shared/scene/component/cnet_component.hpp"
 
 #include <Components/BsCMeshCollider.h>
+#include <Physics/BsPhysics.h>
+#include <Scene/BsSceneManager.h>
 
 // ========================================================================== //
 // CWind Implementation
@@ -66,31 +68,22 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
           .withName("WindCollider")
           .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
           .withPainter([this, pos, scale](auto &painter) {
-            constexpr Color arrowColor{255, 0, 255};
-            painter.setColor(arrowColor);
+            // constexpr Color arrowColor{255, 0, 255};
+            // painter.setColor(arrowColor);
 
-            auto t = SO()->getTransform();
-            t.moveRelative(pos);
-            const auto s = t.getScale() * scale;
-            const Vec3F origo = t.pos();
-            const Vec3F a = origo - s / 2.0f;
-            const s32 count = dclamp<s32>(static_cast<s32>((s.x + s.y + s.z) / 3.0f), 2, 8);
-            const f32 dx = s.x / (count - 1);
-            const f32 dy = s.y / (count - 1);
-            const f32 dz = s.z / (count - 1);
-            constexpr f32 arrowScale = 0.1f;
-            for (s32 x = 0; x < count; ++x) {
-              for (s32 y = 0; y < count; ++y) {
-                for (s32 z = 0; z < count; ++z) {
-                  Vec3F point{a.x + dx * x, a.y + dy * y, a.z + dz * z};
-                  painter.drawArrow(point, getWindAtPoint(point) * arrowScale);
-                }
-              }
-            }
+            // auto t = SO()->getTransform();
+            // t.moveRelative(pos);
+            // const auto s = t.getScale() * scale;
+            // const Vec3F origo = t.pos();
+
+            painter.drawLines(m_cachedLines);
+            logVerbose("[cwind:painter lambda] {}", m_cachedLines.size());
           })
           .build();
   so->setParent(parent);
 }
+
+void CWind::onCreated() { bakeDebugArrows(m_pos, m_scale); }
 
 // -------------------------------------------------------------------------- //
 
@@ -112,6 +105,34 @@ Vec3F CWind::getWindAtPoint(Vec3F pos) const {
     wind += fn(pos);
   }
   return wind;
+}
+
+void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
+  auto t = SO()->getTransform();
+  t.moveRelative(pos);
+  const auto s = t.getScale() * scale;
+  const Vec3F origo = t.pos();
+  const Vec3F a = origo - s / 2.0f;
+  const s32 count = dclamp<s32>(static_cast<s32>((s.x + s.y + s.z) / 3.0f), 2, 8);
+  const f32 dx = s.x / (count - 1);
+  const f32 dy = s.y / (count - 1);
+  const f32 dz = s.z / (count - 1);
+  constexpr f32 arrowScale = 0.1f;
+  const bs::SPtr<bs::PhysicsScene> &physicsScene =
+      bs::gSceneManager().getMainScene()->getPhysicsScene();
+  for (s32 x = 0; x < count; ++x) {
+    for (s32 y = 0; y < count; ++y) {
+      for (s32 z = 0; z < count; ++z) {
+        const Vec3F point{a.x + dx * x, a.y + dy * y, a.z + dz * z};
+        constexpr f32 r = 0.001f;
+        const bs::Sphere sphere{point, r};
+        if (physicsScene->sphereOverlapAny(sphere, WindSystem::kWindVolumeLayer)) {
+          Painter::buildArrow(m_cachedLines, point, getWindAtPoint(point));
+        }
+      }
+    }
+  }
+  logInfo("[cwind:bakeDebugArrows] baked {} arrows", m_cachedLines.size());
 }
 
 // -------------------------------------------------------------------------- //

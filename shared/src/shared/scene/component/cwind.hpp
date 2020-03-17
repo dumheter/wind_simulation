@@ -63,6 +63,8 @@ public:
         WindSystem::VolumeType volumeType,
         Vec3F pos, Vec3F scale);
 
+  void onCreated() override;
+
   void addFunction(BaseFn function);
 
   void addFunctions(const std::vector<BaseFn> &functions);
@@ -80,6 +82,8 @@ public:
 
   Vec3F getScale() const { return m_scale; }
 
+  void bakeDebugArrows(Vec3F pos, Vec3F scale);
+
   static bs::RTTITypeBase *getRTTIStatic();
 
   bs::RTTITypeBase *getRTTI() const override;
@@ -90,6 +94,7 @@ private:
   WindSystem::VolumeType m_volumeType = WindSystem::VolumeType::kCube;
   Vec3F m_pos = Vec3F::ZERO;
   Vec3F m_scale = Vec3F::ONE;
+  bs::Vector<Vec3F> m_cachedLines;
 };
 
 /// CWind handle type
