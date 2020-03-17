@@ -32,6 +32,7 @@
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_occluder.hpp"
+#include "shared/scene/component/crotor.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
@@ -409,6 +410,10 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
       splinePoints.push_back(JsonUtil::create(point));
     }
     value["spline"]["points"] = splinePoints;
+  }
+
+  if (auto rotor = object->getComponent<CRotor>(); rotor) {
+    JsonUtil::setValue(value, "rotor", rotor->getInputRotation());
   }
 
   // Wind

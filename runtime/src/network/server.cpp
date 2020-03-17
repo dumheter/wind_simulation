@@ -1,7 +1,7 @@
 #include "server.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
-#include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
 #include "world.hpp"

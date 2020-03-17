@@ -28,7 +28,7 @@
 #include "shared/asset.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
-#include "shared/scene/cnet_component.hpp"
+#include "shared/scene/component/cnet_component.hpp"
 
 #include <Components/BsCMeshCollider.h>
 

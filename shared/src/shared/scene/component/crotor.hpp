@@ -27,11 +27,14 @@ public:
    */
   void setRotation(Vec3F rotation);
 
+  Vec3F getInputRotation() const { return m_inputRotation; }
+
   static bs::RTTITypeBase *getRTTIStatic();
   bs::RTTITypeBase *getRTTI() const override;
 
 private:
   bs::Quaternion m_rotation;
+  Vec3F m_inputRotation;
 };
 
 using HCRotor = bs::GameObjectHandle<CRotor>;

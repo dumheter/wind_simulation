@@ -5,7 +5,7 @@
 #include <Scene/BsComponent.h>
 #include <memory>
 
-#include "shared/scene/fps_walker.hpp"
+#include "shared/scene/component/fps_walker.hpp"
 #include "shared/scene/rtti.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/utility/unique_id.hpp"
