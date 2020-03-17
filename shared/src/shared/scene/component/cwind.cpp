@@ -88,6 +88,13 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
                       const Vec3F end = m_cachedLines[i + 1] + a;
                       painter.drawLine(start, end);
                     }
+
+                    painter.setColor(Color{255, 0, 0});
+                    painter.drawArrow(origo,Vec3F(1.0f, 0.0f, 0.0f), 0.5f);
+                    painter.setColor(Color{0, 255, 0});
+                    painter.drawArrow(origo, Vec3F(0.0f, 1.0f, 0.0f), 0.5f);
+                    painter.setColor(Color{0, 0, 255});
+                    painter.drawArrow(origo, Vec3F(0.0f, 0.0f, 1.0f), 0.5f);
                   }
                 })
                 .build();
@@ -115,6 +122,8 @@ void CWind::onTransformChanged(bs::TransformChangedFlags flags)
 { m_filipFlag = kRebake; }
 
 Vec3F CWind::getWindAtPoint(Vec3F pos) const {
+  const auto origo = SO()->getTransform().pos();
+  pos = pos - origo;
   Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
     wind += fn(pos);

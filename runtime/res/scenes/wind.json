@@ -14,9 +14,9 @@
           "material": {
             "shader": "standard",
             "texture": "res/textures/grid.png",
-            "tiling": { "uv": 80.0 }
+            "tiling": { "uv": 800.0 }
           },
-          "scale": [ 40.0, 1.0, 40.0 ],
+          "scale": [ 400.0, 1.0, 400.0 ],
           "position": {
             "xz": 4.0,
             "y": -0.4
@@ -72,10 +72,11 @@
         {
           "name": "wind volume",
           "position": {
-            "xz": 8.0,
-            "y": 1.6
+            "x": 10,
+            "y": 1.6,
+            "z": 8.0
           },
-          "scale": [ 4, 4, 4 ],
+          "scale": [ 6, 4, 8 ],
           "wind": {
             "functions": [
               {
@@ -91,10 +92,22 @@
         },
 
         {
-          "name": "wind volume #### double scale",
+          "name": "occluder",
+          "position": [ 8.5, 0.6, 10.0 ],
+          "scale": { "z": 1.7},
+          "wind": {
+            "occluder": {
+              "type": "cube",
+              "dim": [ 3, 2, 3 ]
+            }
+          }
+        },
+
+        {
+          "name": "wind volume cylinder",
           "position": {
             "x": 8.0,
-            "y": 1.6,
+            "y": 4.6,
             "z": 32
           },
           "scale": [ 10, 10, 10 ],
@@ -102,24 +115,20 @@
             "scale": [ 2, 2, 2 ],
             "functions": [
               {
-                "type": "constant",
-                "magnitude": 40,
-                "direction": [ 0.0, 1, -1.0 ]
+                "type": "polynomial",
+                "origo": [ 0, -4.6, 0 ],
+                "x0": 0,
+                "x1": -5,
+                "x2": 0,
+                "z0": 0,
+                "z1": -5,
+                "z2": 0,
+                "y0": 10,
+                "y1": 2
               }
             ],
             "volume": {
               "type": "cylinder"
-            }
-          }
-        },
-
-        {
-          "name": "occluder",
-          "position": [ 5.5, 0.6, 8.0 ],
-          "wind": {
-            "occluder": {
-              "type": "cube",
-              "dim": [ 3, 2, 3 ]
             }
           }
         },
