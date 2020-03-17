@@ -55,8 +55,9 @@ public:
 
   struct WindData {
     std::vector<BaseFn> functions;
-    Vec3F offset = Vec3F::ZERO;
     u8 volumeType = 0;
+    Vec3F pos;
+    Vec3F scale;
   };
 
   struct RenderableData {
@@ -104,7 +105,7 @@ public:
 
   /// Creates a component data representing wind source data
   static ComponentData asWind(const std::vector<BaseFn> &functions,
-                                    Vec3F offset, u8 volumeType);
+                              u8 volumeType, Vec3F pos, Vec3F scale);
 
   static ComponentData asRenderable(const String &pathTexture);
 

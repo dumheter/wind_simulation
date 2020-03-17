@@ -38,8 +38,8 @@
 
 namespace wind {
 
-CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, Vec3F offset)
-    : Component(parent), m_volumeType(volumeType), m_offset(offset) {
+CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, Vec3F pos, Vec3F scale)
+    : Component(parent), m_volumeType(volumeType), m_pos(pos), m_scale(scale) {
   setName("WindComponent");
 
   // Determine collider object type
@@ -58,6 +58,8 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType, 
   // Build trigger collider
   auto so = ObjectBuilder(ObjectType::kEmpty)
                 .withSave(false)
+                .withPosition(pos)
+                .withScale(scale)
                 .withName("WindCollider")
                 .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
                 .build();

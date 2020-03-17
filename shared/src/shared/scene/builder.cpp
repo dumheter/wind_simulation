@@ -363,28 +363,29 @@ ObjectBuilder &ObjectBuilder::withRigidbody() {
 
 ObjectBuilder &
 ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
-                              WindSystem::VolumeType volumeType, Vec3F offset) {
-  auto wind = m_handle->addComponent<CWind>(volumeType, offset);
+                              WindSystem::VolumeType volumeType, Vec3F pos,
+                              Vec3F scale) {
+  auto wind = m_handle->addComponent<CWind>(volumeType, pos, scale);
   wind->addFunctions(functions);
   return *this;
 }
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type) {
-  Vec3F pos{0.0f, 0.0f, 0.0f};
-  Vec3F rot{1.0f, 1.0f, 1.0f};
+ObjectBuilder &
+ObjectBuilder::withWindVolume(WindSystem::VolumeType type, Vec3F pos,
+                              Vec3F scale) {
+  constexpr Vec3F rot{1.0f, 1.0f, 1.0f};
   constexpr Vec4F color{1.0f, 1.0f, 0.0f, 0.15f};
 
   switch (type) {
   case WindSystem::VolumeType::kCube: {
-    Vec3F scale{1.0f, 1.0f, 1.0f};
     withDebugCube(scale, pos, rot, color);
     break;
   }
   case WindSystem::VolumeType::kCylinder: {
-    f32 radius = 1.0f;
-    f32 height = 1.0f;
+    const f32 radius = (scale.x + scale.z) / 2.0f;
+    const f32 height = scale.y;
     withDebugCylinder(radius, height, pos, rot, color);
     break;
   }

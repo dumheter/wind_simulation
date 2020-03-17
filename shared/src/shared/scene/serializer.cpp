@@ -12,7 +12,7 @@ namespace wind {
 bool writeWindSource(alflib::RawMemoryWriter *mw,
                      const std::vector<BaseFn> &fns) {
   mw->Write(static_cast<std::underlying_type<ComponentType>::type>(
-      ComponentType::kWindSource));
+      ComponentType::kWind));
   bool res = mw->Write(fns.size());
   for (auto &fn : fns) {
     res = mw->Write(fn);
