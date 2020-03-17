@@ -34,6 +34,7 @@
 #include <Components/BsCMeshCollider.h>
 #include <Physics/BsPhysics.h>
 #include <Scene/BsSceneManager.h>
+#include <microprofile/microprofile.h>
 
 // ========================================================================== //
 // CWind Implementation
@@ -45,6 +46,7 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
              Vec3F pos, Vec3F scale)
     : Component(parent), m_volumeType(volumeType), m_pos(pos), m_scale(scale) {
   setName("WindComponent");
+  mNotifyFlags = bs::TCF_Transform;
 
   // Determine collider object type
   ObjectType colliderType = ObjectType::kCube;
@@ -60,35 +62,42 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
   }
 
   // Build trigger collider
-  auto so =
-      ObjectBuilder(ObjectType::kEmpty)
-          .withSave(false)
-          .withPosition(pos)
-          .withScale(scale)
-          .withName("WindCollider")
-          .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
-          .withPainter([this, pos, scale](auto &painter) {
-            // constexpr Color arrowColor{255, 0, 255};
-            // painter.setColor(arrowColor);
-
-            // auto t = SO()->getTransform();
-            // t.moveRelative(pos);
-            // const auto s = t.getScale() * scale;
-            // const Vec3F origo = t.pos();
-
-            painter.drawLines(m_cachedLines);
-            logVerbose("[cwind:painter lambda] {}", m_cachedLines.size());
-          })
-          .build();
+  auto so = ObjectBuilder(ObjectType::kEmpty)
+                .withSave(false)
+                .withPosition(pos)
+                .withScale(scale)
+                .withName("WindCollider")
+                .withTriggerCollider(colliderType, WindSystem::kWindVolumeLayer)
+                .withPainter([this, pos, scale](auto &painter) {
+                  MICROPROFILE_SCOPEI("CWind", "onPaint", MP_ORANGE2);
+                  constexpr Color arrowColor{255, 255, 0};
+                  painter.setColor(arrowColor);
+                  auto t = SO()->getTransform();
+                  t.moveRelative(pos);
+                  const auto s = t.getScale() * scale;
+                  const Vec3F origo = t.pos();
+                  const Vec3F a = origo - s / 2.0f;
+                  if (!m_filipFlag) {
+                    m_filipFlag = kBakeDone;
+                    bakeDebugArrows(pos, scale);
+                  }
+                  for (u32 i = 0; i < m_cachedLines.size(); i += 2) {
+                    const Vec3F start = m_cachedLines[i] + a;
+                    const Vec3F end = m_cachedLines[i + 1] + a;
+                    painter.drawLine(start, end);
+                  }
+                })
+                .build();
   so->setParent(parent);
 }
 
-void CWind::onCreated() { bakeDebugArrows(m_pos, m_scale); }
+void CWind::onCreated() {  }
 
 // -------------------------------------------------------------------------- //
 
 void CWind::addFunction(BaseFn function) {
   m_functions.emplace_back(std::move(function));
+  m_filipFlag = kRebake;
 }
 
 // -------------------------------------------------------------------------- //
@@ -99,15 +108,23 @@ void CWind::addFunctions(const std::vector<BaseFn> &functions) {
   }
 }
 
+void CWind::onTransformChanged(bs::TransformChangedFlags flags)
+{ m_filipFlag = kRebake; }
+
 Vec3F CWind::getWindAtPoint(Vec3F pos) const {
   Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
     wind += fn(pos);
   }
-  return wind;
+  bs::Transform t = SO()->getTransform();
+  t.setScale(bs::Vector3::ONE);
+  t.setPosition(bs::Vector3::ZERO);
+  return t.getMatrix().multiply(wind);
 }
 
 void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
+  MICROPROFILE_SCOPEI("CWind", "bakeDebugArrows", MP_ORANGE1);
+  m_cachedLines.clear();
   auto t = SO()->getTransform();
   t.moveRelative(pos);
   const auto s = t.getScale() * scale;
@@ -118,21 +135,23 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
   const f32 dy = s.y / (count - 1);
   const f32 dz = s.z / (count - 1);
   constexpr f32 arrowScale = 0.1f;
+  constexpr f32 arrowHeadScale = 0.5f;
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
   for (s32 x = 0; x < count; ++x) {
     for (s32 y = 0; y < count; ++y) {
       for (s32 z = 0; z < count; ++z) {
-        const Vec3F point{a.x + dx * x, a.y + dy * y, a.z + dz * z};
+        const Vec3F point = Vec3F{dx * x, dy * y, dz * z};
+        const Vec3F pointR = Vec3F{a.x + dx * x, a.y + dy * y, a.z + dz * z};
         constexpr f32 r = 0.001f;
-        const bs::Sphere sphere{point, r};
+        const bs::Sphere sphere{pointR, r};
         if (physicsScene->sphereOverlapAny(sphere, WindSystem::kWindVolumeLayer)) {
-          Painter::buildArrow(m_cachedLines, point, getWindAtPoint(point));
+          Painter::buildArrow(m_cachedLines, point, getWindAtPoint(pointR) * arrowScale,
+                              arrowHeadScale);
         }
       }
     }
   }
-  logInfo("[cwind:bakeDebugArrows] baked {} arrows", m_cachedLines.size());
 }
 
 // -------------------------------------------------------------------------- //

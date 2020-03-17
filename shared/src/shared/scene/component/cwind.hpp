@@ -69,6 +69,8 @@ public:
 
   void addFunctions(const std::vector<BaseFn> &functions);
 
+  void onTransformChanged(bs::TransformChangedFlags flags) override;
+
   /// If point is outside wind volume, retval is Vec3F::ZERO
   Vec3F getWindAtPoint(Vec3F pos) const;
 
@@ -84,6 +86,8 @@ public:
 
   void bakeDebugArrows(Vec3F pos, Vec3F scale);
 
+
+
   static bs::RTTITypeBase *getRTTIStatic();
 
   bs::RTTITypeBase *getRTTI() const override;
@@ -95,6 +99,9 @@ private:
   Vec3F m_pos = Vec3F::ZERO;
   Vec3F m_scale = Vec3F::ONE;
   bs::Vector<Vec3F> m_cachedLines;
+  bool m_filipFlag;
+  static constexpr bool kRebake = false;
+  static constexpr bool kBakeDone = true;
 };
 
 /// CWind handle type
