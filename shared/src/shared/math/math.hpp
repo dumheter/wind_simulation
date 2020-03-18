@@ -60,6 +60,11 @@ inline constexpr T clamp(T value, S minValue, U maxValue) {
   return value < minValue ? minValue : value > maxValue ? maxValue : value;
 }
 
+template <typename T>
+inline constexpr T dclamp(T value, T minValue, T maxValue) {
+  return value < minValue ? minValue : value > maxValue ? maxValue : value;
+}
+
 // ============================================================ //
 
 /**

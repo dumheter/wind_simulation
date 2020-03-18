@@ -73,19 +73,42 @@
           "name": "wind volume",
           "position": {
             "xz": 8.0,
-            "y": 2
+            "y": 1.6
           },
           "scale": [ 4, 4, 4 ],
           "wind": {
             "functions": [
               {
                 "type": "constant",
-                "magnitude": 8,
-                "direction": [ 0.0, 0.5, 1.0 ]
+                "magnitude": 20,
+                "direction": [ 0.0, 0.5, 1 ]
               }
             ],
             "volume": {
               "type": "cube"
+            }
+          }
+        },
+
+        {
+          "name": "wind volume #### double scale",
+          "position": {
+            "x": 8.0,
+            "y": 1.6,
+            "z": 32
+          },
+          "scale": [ 10, 10, 10 ],
+          "wind": {
+            "scale": [ 2, 2, 2 ],
+            "functions": [
+              {
+                "type": "constant",
+                "magnitude": 40,
+                "direction": [ 0.0, 1, -1.0 ]
+              }
+            ],
+            "volume": {
+              "type": "cylinder"
             }
           }
         },
@@ -121,8 +144,8 @@
           },
           "rotor": {
             "x": 0,
-            "z": 0.0,
-            "y": 1.0
+            "z": 0,
+            "y": 1
           },
           "wind": {
             "position": [0, 3.2, 0],
@@ -130,8 +153,8 @@
             "functions": [
               {
                 "type": "constant",
-                "magnitude": 20,
-                "direction": [ 0.0, 1.0, 0.0 ]
+                "magnitude": 100,
+                "direction": [ 0, 1, 0 ]
               }
             ],
             "volume": {

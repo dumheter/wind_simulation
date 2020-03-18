@@ -259,7 +259,7 @@ ObjectBuilder &ObjectBuilder::withCollider(f32 restitution, f32 mass, u32 layer,
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
-                                           u32 layer, bool trigger,
+                                           u64 layer, bool trigger,
                                            bool report) {
   // Store tag information
   const HCTag ctag = m_handle->getComponent<CTag>();
@@ -343,7 +343,7 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u32 layer,
+ObjectBuilder &ObjectBuilder::withTriggerCollider(Kind kind, u64 layer,
                                                   bool report) {
   return withCollider(kind, 1.0f, 0.0f, layer, true, report);
 }

@@ -105,11 +105,11 @@ public:
 
   /// Adds a collider
   ObjectBuilder &withCollider(Kind kind, f32 restitution = 1.0f,
-                              f32 mass = 0.0f, u32 layer = 0,
+                              f32 mass = 0.0f, u64 layer = 0,
                               bool trigger = false, bool report = false);
 
   /// Add a trigger collider
-  ObjectBuilder &withTriggerCollider(Kind kind, u32 layer = 0,
+  ObjectBuilder &withTriggerCollider(Kind kind, u64 layer = 0,
                                      bool report = false);
 
   /// Adds a rigidbody
