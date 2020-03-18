@@ -1,5 +1,6 @@
 #include "world.hpp"
 #include "shared/asset.hpp"
+#include "shared/debug/debug_manager.hpp"
 #include "shared/log.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
@@ -15,6 +16,7 @@
 #include <GUI/BsGUILayoutX.h>
 #include <GUI/BsGUILayoutY.h>
 #include <GUI/BsGUIPanel.h>
+#include <GUI/BsGUIToggle.h>
 #include <GUI/BsGUISlider.h>
 #include <Image/BsSpriteTexture.h>
 #include <Importer/BsImporter.h>
@@ -550,6 +552,19 @@ bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
     m_shootForce->setPercent(0.3f);
     m_shootForce->onChanged.connect(
         [this](f32 percent) { m_player->setShootForce(100.0f * percent); });
+  }
+
+  // Debug draw type
+  {
+    auto l = layout->addNewElement<GUILayoutX>();
+    auto text = l->addNewElement<GUILabel>(HString{u8"Wind Volume Arrows"});
+    text->setWidth(105);
+    auto toggle = l->addNewElement<GUIToggle>(HString());
+    toggle->toggleOn();
+    DebugManager::setBool("WVArrows", true);
+    toggle->onToggled.connect([](bool value) {
+        DebugManager::setBool("WVArrows", value);
+      });
   }
 
   { // aim dot
