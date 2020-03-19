@@ -1,7 +1,7 @@
 #include "serializer.hpp"
-#include "shared/log.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/wind/base_functions.hpp"
+#include <dlog/dlog.hpp>
 #include <BsCorePrerequisites.h>
 #include <Components\BsCRigidbody.h>
 #include <alflib/memory/raw_memory_reader.hpp>
@@ -41,7 +41,7 @@ void readComponent(alflib::RawMemoryReader &mr, bs::HSceneObject &so) {
     // rigid->setPhysicsMaterial(physicsMaterial);
     // rigid->setMass(mass);
   } else {
-    logWarning("[serializer] could not read component");
+    DLOG_WARNING("could not read component");
   }
 }
 

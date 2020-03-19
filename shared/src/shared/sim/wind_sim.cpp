@@ -26,9 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
 #include "shared/math/math.hpp"
-
 #include "microprofile/microprofile.h"
 
 // ========================================================================== //

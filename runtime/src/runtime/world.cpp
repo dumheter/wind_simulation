@@ -1,12 +1,12 @@
 #include "world.hpp"
 #include "shared/asset.hpp"
-#include "shared/log.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
+#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <Components/BsCCharacterController.h>
 #include <Importer/BsImporter.h>
@@ -82,7 +82,7 @@ void World::onWindowResize() {
 }
 
 void World::setupScene() {
-  logVeryVerbose("[world:setupScene] loading scene");
+  DLOG_VERBOSE("loading scene");
   // TODO set file path in gui
   m_staticScene = Scene::loadFile(m_scenePath);
   std::filesystem::file_time_type time =
@@ -98,7 +98,7 @@ void World::reloadStaticScene() {
     m_staticScene->destroy();
     m_staticScene = Scene::loadFile(m_scenePath);
 
-    logInfo(
+    DLOG_VERBOSE(
         "[world:reloadStaticScene] (server) broadcasting reload scene packet");
     std::filesystem::file_time_type time =
         std::filesystem::last_write_time(m_scenePath);
@@ -158,7 +158,7 @@ void World::applyMoveableState(const MoveableState &moveableState) {
   if (it != m_netComps.end()) {
     it->second->setState(moveableState);
   } else {
-    logError("failed to find netcomp with id {}", moveableState.id.raw());
+    DLOG_ERROR("failed to find netcomp with id {}", moveableState.id.raw());
   }
 }
 
@@ -172,20 +172,20 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
     if (std::fabs(myPos.x - newPos.x) > kDivergeMax ||
         std::fabs(myPos.y - newPos.y) > kDivergeMax ||
         std::fabs(myPos.z - newPos.z) > kDivergeMax) {
-      logVerbose("[client] state diverged, correcting");
+      DLOG_INFO("[client] state diverged, correcting");
       it->second->setPosition(newPos);
     }
   } else {
-    logError("[world:applyMyMoveableState] failed to find netcomp with id {}",
+    DLOG_ERROR("[world:applyMyMoveableState] failed to find netcomp with id {}",
              moveableState.id.raw());
   }
 }
 
 void World::onPlayerJoin(const MoveableState &moveableState) {
-  logInfo("player {} joined", moveableState.id.raw());
+  DLOG_INFO("player {} joined", moveableState.id.raw());
 
   if (m_netComps.count(moveableState.id)) {
-    logVeryVerbose("[world:onPlayerJoin] duplicate player, not adding, {}",
+    DLOG_VERBOSE("[world:onPlayerJoin] duplicate player, not adding, {}",
                    moveableState.id.raw());
     return;
   }
@@ -203,7 +203,7 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
 }
 
 void World::onPlayerLeave(UniqueId uid) {
-  logInfo("player {} left", uid.raw());
+  DLOG_INFO("player {} left", uid.raw());
 
   {
     auto it = m_netComps.find(uid);
@@ -211,7 +211,7 @@ void World::onPlayerLeave(UniqueId uid) {
       it->second->SODestroy();
       m_netComps.erase(it);
     } else {
-      logWarning("(netComps) player left, but couldn't find them");
+      DLOG_WARNING("(netComps) player left, but couldn't find them");
     }
   }
 }
@@ -235,7 +235,7 @@ void World::onSceneChange(const String &scene) {
 }
 
 void World::onDisconnect() {
-  logVerbose("[world] onDisconnect, clearing the world of {} netComps",
+  DLOG_VERBOSE("onDisconnect, clearing the world of {} netComps",
              m_netComps.size());
 
   auto myNetComp = getPlayerNetComp();
@@ -266,7 +266,7 @@ void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
 
   if (m_netComps.count(info.state.id)) {
-    logVeryVerbose("[world:buildObject] duplicate object, not building, {}",
+    DLOG_VERBOSE("duplicate object, not building, {}",
                    info.state.id.raw());
     return;
   }
@@ -279,13 +279,13 @@ void World::buildObject(const CreateInfo &info) {
     if (component.isType<ComponentData::RigidbodyData>()) {
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindData>()) {
-      logError("[world:buildObject] trying to build a windComponet, but not "
+      DLOG_ERROR("trying to build a windComponet, but not "
                "supported");
       const auto &wind = component.windSourceData();
       const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
       obj.withWindVolume(volumeType, wind.pos, wind.scale);
       obj.withWindSource(wind.functions, volumeType, wind.pos, wind.scale);
-      logError("[world:buildObject] withWindSource is currently broke, TODO");
+      DLOG_ERROR("withWindSource is currently broke, TODO");
     } else if (component.isType<ComponentData::RenderableData>()) {
       const auto &render = component.renderableData();
       obj.withMaterial(ObjectBuilder::ShaderKind::kStandard,
@@ -379,11 +379,11 @@ void World::setupInput() {
     } else if (ev.buttonCode == BC_M) {
       Util::dumpScene(m_staticScene);
     } else if (ev.buttonCode == BC_N) {
-      logInfo("{}", Scene::save(m_staticScene));
+      DLOG_INFO("{}", Scene::save(m_staticScene));
     } else if (ev.buttonCode == BC_B) {
       Util::dumpScene(m_dynamicScene);
     } else if (ev.buttonCode == BC_V) {
-      logInfo("{}", Scene::save(m_dynamicScene));
+      DLOG_INFO("{}", Scene::save(m_dynamicScene));
     } else if (ev.buttonCode == BC_C) {
       dumpNetComps();
     }
@@ -417,7 +417,7 @@ void World::setupInput() {
 
 
 void World::addNetComp(HCNetComponent netComp) {
-  logVerbose("net component with id [{}] added", netComp->getUniqueId().raw());
+  DLOG_VERBOSE("net component with id [{}] added", netComp->getUniqueId().raw());
   auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add net comp");
 }
@@ -432,12 +432,12 @@ void World::scanForNetComps() {
   }
 
   const auto after = m_netComps.size();
-  logVerbose("[world:scanForNetComps] added {} netComps", after - before);
+  DLOG_VERBOSE("added {} netComps", after - before);
 }
 
 void World::dumpNetComps() {
   for (auto [uid, netComp] : m_netComps) {
-    logInfo("{}", uid.raw());
+    DLOG_INFO("{}", uid.raw());
   }
 }
 

@@ -26,7 +26,7 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
+#include "dlog/dlog.hpp"
 
 // ========================================================================== //
 // Main
@@ -35,7 +35,7 @@
 int main() {
   using namespace wind;
 
-  fixConsole();
+  DLOG_INIT();
   Editor editor;
   editor.run();
 

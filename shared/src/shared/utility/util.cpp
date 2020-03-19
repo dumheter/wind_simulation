@@ -26,12 +26,10 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
-
 #include <filesystem>
 #include <fstream>
 #include <streambuf>
-
+#include <dlog/dlog.hpp>
 #include <BsApplication.h>
 #include <Input/BsMouse.h>
 #include <Platform/BsCursor.h>
@@ -46,10 +44,10 @@ namespace wind {
 void dumpSceneAux(const bs::HSceneObject &o, u32 indent) {
   std::string pad = Util::repeat(' ', indent);
   const char *name = o->getName().c_str();
-  logInfo("{}{}", pad, name);
+  DLOG_INFO("{}{}", pad, name);
   const bs::Vector<bs::HComponent> &comps = o->getComponents();
   for (const bs::HComponent &comp : comps) {
-    logInfo("{}* {}", pad, comp);
+    DLOG_INFO("{}* {}", pad, comp);
   }
   for (u32 i = 0; i < o->getNumChildren(); ++i) {
     dumpSceneAux(o->getChild(i), indent + 2);

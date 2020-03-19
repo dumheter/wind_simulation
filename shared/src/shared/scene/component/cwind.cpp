@@ -27,7 +27,6 @@
 #include "Utility/BsTime.h"
 #include "shared/asset.hpp"
 #include "shared/debug/debug_manager.hpp"
-#include "shared/log.hpp"
 #include "shared/render/color.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cnet_component.hpp"

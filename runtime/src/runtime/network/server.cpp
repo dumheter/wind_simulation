@@ -1,10 +1,10 @@
 #include "server.hpp"
-#include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
 #include "runtime/world.hpp"
+#include <dlog/dlog.hpp>
 #include <ThirdParty/json.hpp>
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
@@ -49,15 +49,15 @@ void Server::StartServer(const u16 port) {
   addr.m_port = port;
   m_socket = m_socketInterface->CreateListenSocketIP(addr, 0, nullptr);
   if (m_socket == k_HSteamListenSocket_Invalid) {
-    logError("[server] failed to create a listen socket on port {}", port);
+    DLOG_ERROR("failed to create a listen socket on port {}", port);
   }
-  logVerbose("[server] listening on port {}.", port);
+  DLOG_VERBOSE("listening on port {}.", port);
   m_connectionState = ConnectionState::kConnected;
   m_world->setupScene();
 }
 
 void Server::StopServer() {
-  logInfo("[server] stopping server");
+  DLOG_INFO("stopping server");
 
   for (auto [connection, uid] : m_connections) {
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
@@ -181,12 +181,12 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
         }
       }
       if (!got_packet) {
-        logWarning(
-            "[server] received packet from unknown connection, dropping it");
+        DLOG_WARNING(
+            "received packet from unknown connection, dropping it");
         DisconnectConnection(msg->m_conn);
       }
     } else {
-      logError("[server] could not parse packet, too big [{}/{}]",
+      DLOG_WARNING("could not parse packet, too big [{}/{}]",
                msg->m_cbSize, packet_out.GetPacketCapacity());
     }
 
@@ -197,7 +197,7 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
     if (maybe_status &&
         maybe_status->m_eState == k_ESteamNetworkingConnectionState_Connected) {
 
-      logWarning("[server] failed to check for messages, closing connection");
+      DLOG_WARNING("failed to check for messages, closing connection");
       if (msg != nullptr) {
         m_socketInterface->CloseConnection(m_socket, 0, nullptr, false);
       }
@@ -214,10 +214,9 @@ void Server::handlePacket() {
       header == PacketHeaderTypes::kPlayerTick) {
     handlePacketPlayerTick();
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    // logVeryVerbose("[server:p requestcreate] ");
     handlePacketRequestCreate();
   } else {
-    logWarning("[server] got unknown packet {}",
+    DLOG_WARNING("got unknown packet {}",
                static_cast<u32>(m_packet.GetHeaderType()));
   }
 }
@@ -247,22 +246,22 @@ void Server::OnSteamNetConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t *status) {
   switch (status->m_info.m_eState) {
   case k_ESteamNetworkingConnectionState_None: {
-    logVeryVerbose("[server] state none");
+    DLOG_VERBOSE("state none");
     break;
   }
 
   case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
-    logWarning("[server] Problem detected locally.");
+    DLOG_WARNING("Problem detected locally.");
     [[fallthrough]];
   case k_ESteamNetworkingConnectionState_ClosedByPeer: {
     if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connected) {
-      logInfo(
-          "[server] Connection {}, [{}], disconnected with reason [{}], [{}].",
+      DLOG_INFO(
+          "Connection {}, [{}], disconnected with reason [{}], [{}].",
           status->m_hConn, status->m_info.m_szConnectionDescription,
           status->m_info.m_eEndReason, status->m_info.m_szEndDebug);
     } else if (status->m_eOldState !=
                k_ESteamNetworkingConnectionState_Connecting) {
-      logWarning("[server] unknown state");
+      DLOG_WARNING("unknown state");
     }
 
     DisconnectConnection(status->m_hConn);
@@ -271,10 +270,10 @@ void Server::OnSteamNetConnectionStatusChanged(
   }
 
   case k_ESteamNetworkingConnectionState_Connecting: {
-    logVerbose("[server] Connection from [{}], adding.",
+    DLOG_VERBOSE("Connection from [{}], adding.",
                status->m_info.m_szConnectionDescription);
     if (m_socketInterface->AcceptConnection(status->m_hConn) != k_EResultOK) {
-      logWarning("[server] Failed to accept a connection [{}] [{}]",
+      DLOG_WARNING("Failed to accept a connection [{}] [{}]",
                  status->m_info.m_szEndDebug,
                  status->m_info.m_szConnectionDescription);
       break;
@@ -283,15 +282,15 @@ void Server::OnSteamNetConnectionStatusChanged(
     if (!m_socketInterface->SetConnectionPollGroup(status->m_hConn,
                                                    m_pollGroup)) {
       m_socketInterface->CloseConnection(status->m_hConn, 0, nullptr, false);
-      logWarning("failed to assign connection to poll group");
+      DLOG_WARNING("failed to assign connection to poll group");
       break;
     }
 
     const auto uid = UniqueIdGenerator::next();
-    logVerbose("[server] player {} connected", uid.raw());
+    DLOG_VERBOSE("player {} connected", uid.raw());
     auto [it, ok] = m_connections.insert({status->m_hConn, uid});
     if (!ok) {
-      logWarning("failed to add connection to map");
+      DLOG_WARNING("failed to add connection to map");
       DisconnectConnection(status->m_hConn);
       break;
     }
@@ -333,13 +332,13 @@ void Server::OnSteamNetConnectionStatusChanged(
 
   case k_ESteamNetworkingConnectionState_Connected: {
     // TODO this never happens, why?!
-    logVerbose("[server] Connected !!");
+    DLOG_VERBOSE("[server] Connected !!");
 
     break;
   }
 
   default: {
-    logWarning("[server] default ??");
+    DLOG_WARNING("default ??");
   }
   }
 }
@@ -349,7 +348,7 @@ void Server::DisconnectConnection(ConnectionId connection) {
 
   auto it = m_connections.find(connection);
   if (it != m_connections.end()) {
-    logVerbose("[server] disconnecting {}", it->first);
+    DLOG_VERBOSE("disconnecting {}", it->first);
     leaveUid = it->second;
     m_connections.erase(it);
     m_socketInterface->CloseConnection(connection, 0, nullptr, false);
@@ -363,7 +362,7 @@ void Server::DisconnectConnection(ConnectionId connection) {
     mw.Finalize();
     PacketBroadcast(packet, SendStrategy::kReliable);
   } else {
-    logWarning("[server] attempted to disconnect a connection, but did not "
+    DLOG_WARNING("attempted to disconnect a connection, but did not "
                "find it (map size {})",
                m_connections.size());
   }

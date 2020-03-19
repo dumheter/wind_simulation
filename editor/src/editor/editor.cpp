@@ -31,10 +31,10 @@
 #include "microprofile/microprofile.h"
 #include "shared/asset.hpp"
 #include "shared/camera_flyer.h"
-#include "shared/log.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
+#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
@@ -151,23 +151,23 @@ void Editor::onPreUpdate(f32 delta) {
   // Add density source 'X'
   if (gInput().isButtonHeld(ButtonCode::BC_X)) {
     // m_windSim->addDensitySource();
-    logVerbose("Added density sources");
+    DLOG_VERBOSE("Added density sources");
   }
   // Add density sink 'Z'
   if (gInput().isButtonHeld(ButtonCode::BC_Z)) {
     // m_windSim->addDensitySink();
-    logVerbose("Added density sinks");
+    DLOG_VERBOSE("Added density sinks");
   }
 
   // Add velocity source 'V'
   if (gInput().isButtonHeld(ButtonCode::BC_V)) {
     // m_windSim->addVelocitySource();
-    logVerbose("Added velocity sources");
+    DLOG_VERBOSE("Added velocity sources");
   }
   // Add velocity sink 'C'
   if (gInput().isButtonHeld(ButtonCode::BC_C)) {
     // m_windSim->addVelocitySink();
-    logVerbose("Added velocity sinks");
+    DLOG_VERBOSE("Added velocity sinks");
   }
 }
 

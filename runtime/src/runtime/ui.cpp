@@ -2,12 +2,12 @@
 
 #include "shared/debug/debug_manager.hpp"
 #include "runtime/world.hpp"
-#include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/scene.hpp"
 #include "microprofile/microprofile.h"
 
+#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <GUI/BsCGUIWidget.h>
 #include <GUI/BsGUIButton.h>
@@ -125,7 +125,7 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
         l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
     startServerBtn->onClick.connect([input, world] {
       if (!world->serverIsActive()) {
-        logVerbose("start server on {}", input->getText().c_str());
+        DLOG_VERBOSE("start server on {}", input->getText().c_str());
         world->getServer().StartServer(std::atoi(input->getText().c_str()));
       }
     });
@@ -141,7 +141,7 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
         l->addNewElement<GUIButton>(GUIContent{HString{"connect"}});
     btn->onClick.connect([input, world] {
       if (!world->getMyPlayer()->isConnected()) {
-        logVerbose("connect to {}", input->getText().c_str());
+        DLOG_VERBOSE("connect to {}", input->getText().c_str());
         auto &t = input->getText();
         if (t.find(":") != std::string::npos && t.size() > 8) {
           world->getMyPlayer()->connect(input->getText().c_str());

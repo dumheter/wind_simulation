@@ -27,7 +27,6 @@
 // ========================================================================== //
 
 #include "shared/asset.hpp"
-#include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 
 #include <Material/BsMaterial.h>

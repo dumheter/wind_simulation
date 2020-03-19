@@ -27,7 +27,6 @@
 // ========================================================================== //
 
 #include "shared/asset.hpp"
-#include "shared/log.hpp"
 #include "shared/render/shader.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/component/cspline.hpp"

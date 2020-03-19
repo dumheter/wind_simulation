@@ -26,7 +26,8 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
+#include <alflib/memory/raw_memory_reader.hpp>
+#include <alflib/memory/raw_memory_writer.hpp>
 #include "shared/utility/util.hpp"
 #include "shared/wind/base_functions.hpp"
 

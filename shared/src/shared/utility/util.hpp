@@ -31,6 +31,7 @@
 
 #include <RenderAPI/BsRenderWindow.h>
 #include <Scene/BsSceneObject.h>
+#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // Util Declaration
@@ -78,7 +79,7 @@ public:
 
   template <typename... ARGS>
   [[noreturn]] static void panic(const String &message, ARGS &&... arguments) {
-    logError(message, std::forward<ARGS>(arguments)...);
+    DLOG_ERROR(message, std::forward<ARGS>(arguments)...);
     abort();
   }
 };
