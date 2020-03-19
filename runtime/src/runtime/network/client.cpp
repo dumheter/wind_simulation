@@ -1,7 +1,7 @@
 #include "client.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/scene.hpp"
-#include "world.hpp"
+#include "runtime/world.hpp"
 #include <microprofile/microprofile.h>
 
 namespace wind {

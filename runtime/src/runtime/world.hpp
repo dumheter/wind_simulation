@@ -1,10 +1,10 @@
 #pragma once
 
-#include "cmyplayer.hpp"
-#include "network/connection_id.hpp"
-#include "network/server.hpp"
-#include "network/util.hpp"
-#include "ui.hpp"
+#include "runtime/cmyplayer.hpp"
+#include "runtime/network/connection_id.hpp"
+#include "runtime/network/server.hpp"
+#include "runtime/network/util.hpp"
+#include "runtime/ui.hpp"
 #include "shared/app.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/component/crotor.hpp"
@@ -68,8 +68,6 @@ public:
   HCNetComponent getPlayerNetComp();
 
   void addNetComp(HCNetComponent netComp);
-
-  void removeNetComp(HCNetComponent netComp);
 
   /**
    * Use this if there are untracked netcomponents,

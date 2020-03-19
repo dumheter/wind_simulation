@@ -1,7 +1,7 @@
 #ifndef NET_COMMON_HPP_
 #define NET_COMMON_HPP_
 
-#include "network/packet.hpp"
+#include "runtime/network/packet.hpp"
 #include <steam/steamnetworkingsockets.h>
 
 namespace wind {

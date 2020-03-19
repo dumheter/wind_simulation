@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 #include "shared/debug/debug_manager.hpp"
-#include "world.hpp"
+#include "runtime/world.hpp"
 #include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cwind.hpp"
@@ -21,7 +21,6 @@
 #include <GUI/BsGUIToggle.h>
 #include <Image/BsSpriteTexture.h>
 #include <Importer/BsImporter.h>
-#include <Input/BsVirtualInput.h>
 #include <Scene/BsSceneManager.h>
 #include <regex>
 

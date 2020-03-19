@@ -1,7 +1,7 @@
-#include "network/net_common.hpp"
+#include "runtime/network/net_common.hpp"
+#include "runtime/world.hpp"
 #include "shared/app.hpp"
 #include "shared/log.hpp"
-#include "world.hpp"
 
 int main() {
   wind::fixConsole();

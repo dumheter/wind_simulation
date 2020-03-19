@@ -1,9 +1,9 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
-#include "network/connection_state.hpp"
-#include "network/net_common.hpp"
-#include "network/packet.hpp"
+#include "runtime/network/connection_state.hpp"
+#include "runtime/network/net_common.hpp"
+#include "runtime/network/packet.hpp"
 #include "shared/utility/unique_id.hpp"
 #include <optional>
 #include <steam/steamnetworkingsockets.h>

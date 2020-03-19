@@ -1,5 +1,5 @@
 #include "util.hpp"
-#include "network/packet.hpp"
+#include "runtime/network/packet.hpp"
 #include "shared/state/moveable_state.hpp"
 
 namespace wind {
@@ -17,7 +17,6 @@ void RequestCreate(Packet &packet, const RequestCreateInfo &info) {
   mw->Write(info.scale.z);
   mw->Write(info.state);
   mw->Write(static_cast<u32>(info.components.size()));
-  // writeRigidbody(*mw, 0.5f, 8.0f);
   for (auto &component : info.components) {
     mw->Write(component);
   }
@@ -35,7 +34,6 @@ void Create(Packet &packet, const CreateInfo &info) {
   mw->Write(info.scale.z);
   mw->Write(info.state);
   mw->Write(static_cast<u32>(info.components.size()));
-  // writeRigidbody(*mw, 0.5f, 8.0f);
   for (auto &component : info.components) {
     mw->Write(component);
   }

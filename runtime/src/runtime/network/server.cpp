@@ -4,7 +4,7 @@
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
-#include "world.hpp"
+#include "runtime/world.hpp"
 #include <ThirdParty/json.hpp>
 #include <alflib/core/assert.hpp>
 #include <microprofile/microprofile.h>
