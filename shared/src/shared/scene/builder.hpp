@@ -135,7 +135,8 @@ public:
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
-                            u32 samples = kSplineSamplesInvalid);
+                            u32 samples = kSplineSamplesInvalid,
+                            Vec4F color = Vec4F{1.0f, 0.0f, 0.0f, 1.0f}, Vec3F scale = Vec3F{0.2f, 0.2f, 0.2f});
 
   /// Adds a spline follow component to the object
   ObjectBuilder &withSplineFollow(f32 speed, CSplineFollow::WrapMode wrapMode);

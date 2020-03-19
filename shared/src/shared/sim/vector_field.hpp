@@ -31,7 +31,6 @@
 #include "shared/sim/obstruction_field.hpp"
 #include "shared/types.hpp"
 
-#include <Math/BsVector3.h>
 
 // ========================================================================== //
 // VectorField Declaration
@@ -102,6 +101,8 @@ public:
 
   /// Returns the dimension of the vector field
   Dim3D getDim() const { return m_x->getDim(); }
+
+  f32 getCellSize() const { return m_cellSize; }
 
 private:
   /// Dimension of field

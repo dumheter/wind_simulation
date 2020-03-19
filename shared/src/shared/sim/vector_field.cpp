@@ -31,8 +31,6 @@
 
 #include <Debug/BsDebugDraw.h>
 
-#include "shared/debug/debug_manager.hpp"
-
 // ========================================================================== //
 // VectorField Implementation
 // ========================================================================== //

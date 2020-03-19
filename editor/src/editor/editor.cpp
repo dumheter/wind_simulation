@@ -234,7 +234,7 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
       ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
   simObj->setParent(getScene());
   HCSim sim = simObj->addComponent<CSim>();
-  constexpr float cellSize = 0.75f;
+  constexpr float cellSize = 1.0f;
   sim->build(kGroundPlaneScale * 4, 6, kGroundPlaneScale * 4, cellSize,
              bs::SceneManager::instance().getMainScene());
 }

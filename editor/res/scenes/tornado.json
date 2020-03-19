@@ -15,14 +15,26 @@
             "texture": "res/textures/grid.png",
             "tiling": { "uv": 16.0 }
           },
-          "scale": [ 4.0, 1.0, 4.0 ],
+          "scale": [ 8.0, 1.0, 8.0 ],
           "position": {
-            "xz": 4.0,
+            "xz": 8.0,
             "y": 0.4
           },
           "physics": { "restitution": 0.5 }
         }
       ]
+    },
+
+    {
+      "name": "box",
+      "type": "empty",
+      "scale": {"y": 5, "xz": 6},
+      "position": { "xz": 12, "y": 5},
+      "wind": {
+        "occluder": {
+          "type": "cube"
+        }
+      }
     }
   ]
 }

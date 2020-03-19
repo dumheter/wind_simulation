@@ -418,7 +418,9 @@ ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
-                                         u32 degree, u32 samples) {
+                                         u32 degree, u32 samples,
+                                         Vec4F color,
+                                         Vec3F scale) {
   // Spline component
   HCSpline splineComp = m_handle->addComponent<CSpline>(points, degree);
 
@@ -441,9 +443,9 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
         ObjectBuilder{ObjectType::kCube}
             .withSave(false)
             .withMaterial(ShaderKind::kStandard, "res/textures/white.png",
-                          Vec2F::ONE, Vec4F(1.0f, 0.0f, 0.0f, 1.0f))
+                          Vec2F::ONE, color)
             .withPosition(pos)
-            .withScale(Vec3F(0.02f, 0.02f, 0.02f))
+            .withScale(scale)
             .build();
 
     splineObjBuilder.withObject(waypointObj);
