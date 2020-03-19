@@ -95,7 +95,6 @@
  */
 
 #include <fmt/format.h>
-//#include <fmt/printf.h>
 #include <cstdio>
 #include <string>
 #ifdef DLOG_MT
@@ -122,7 +121,7 @@
 /**
  * make this: "/path/to/file.x" into this: "file.x"
  */
-#if defined(WIN32)
+#if defined(_WIN32)
 #define DLOG_FILENAME \
   (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 #else
