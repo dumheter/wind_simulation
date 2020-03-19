@@ -56,7 +56,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;DLOG_FILESTAMP;DLOG_TIMESTAMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\thirdparty;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -78,7 +78,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;DLOG_FILESTAMP;DLOG_TIMESTAMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\thirdparty;$(ProjectDir)deps\bsf\include\bsfCore;$(ProjectDir)deps\bsf\include\bsfEngine;$(ProjectDir)deps\bsf\include\bsfUtility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -123,6 +123,7 @@
     <ClCompile Include="src\shared\scene\mesh.cpp" />
     <ClCompile Include="src\shared\scene\scene.cpp" />
     <ClCompile Include="src\shared\scene\serializer.cpp" />
+    <ClCompile Include="src\shared\sim\bake.cpp" />
     <ClCompile Include="src\shared\sim\density_field.cpp" />
     <ClCompile Include="src\shared\sim\obstruction_field.cpp" />
     <ClCompile Include="src\shared\sim\vector_field.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="src\shared\scene\types.hpp" />
     <ClInclude Include="src\shared\scene\component\cnet_component.hpp" />
     <ClInclude Include="src\shared\scene\component_handles.hpp" />
+    <ClInclude Include="src\shared\sim\bake.hpp" />
     <ClInclude Include="src\shared\sim\density_field.hpp" />
     <ClInclude Include="src\shared\sim\obstruction_field.hpp" />
     <ClInclude Include="src\shared\sim\vector_field.hpp" />

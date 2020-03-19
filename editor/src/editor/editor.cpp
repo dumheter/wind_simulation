@@ -98,12 +98,14 @@ void Editor::onStartup() {
   setScene(Scene::loadFile(kDefaultSceneName));
 
   // TMP: Create sim object
-  bs::HSceneObject simObj =
-      ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
-  simObj->setParent(getScene());
-  HCSim sim = simObj->addComponent<CSim>();
-  sim->build(u32(kGroundPlaneScale * 2.0f), 6, u32(kGroundPlaneScale * 2.0f),
-             0.25f, bs::SceneManager::instance().getMainScene());
+  // bs::HSceneObject simObj =
+  //     ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
+  // simObj->setParent(getScene());
+  // HCSim sim = simObj->addComponent<CSim>();
+  // constexpr float cellSize = 0.75;
+  // sim->build(u32(kGroundPlaneScale / cellSize) * 2 + 1, 6,
+  //            u32(kGroundPlaneScale / cellSize) * 2 + 1, cellSize,
+  //            bs::SceneManager::instance().getMainScene());
 
   // TMP: Save scene
   // Scene::saveFile("res/scenes/out.json", getScene());
@@ -232,8 +234,9 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
       ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
   simObj->setParent(getScene());
   HCSim sim = simObj->addComponent<CSim>();
-  sim->build(u32(kGroundPlaneScale * 2.0f), 6, u32(kGroundPlaneScale * 2.0f),
-             0.25f, bs::SceneManager::instance().getMainScene());
+  constexpr float cellSize = 0.75f;
+  sim->build(kGroundPlaneScale * 4, 6, kGroundPlaneScale * 4, cellSize,
+             bs::SceneManager::instance().getMainScene());
 }
 
 } // namespace wind

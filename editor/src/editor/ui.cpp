@@ -31,6 +31,7 @@
 #include "microprofile/microprofile.h"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/scene.hpp"
+#include "shared/sim/bake.hpp"
 
 #include <filesystem>
 
@@ -104,6 +105,8 @@ UI::UI(Editor *editor) : m_editor(editor) {
       DebugManager::setS32(WindSimulation::kDebugFieldTypeKey, idx);
     });
     height += listBox->getBounds().height + 2;
+    // TMP nicer default
+    DebugManager::setS32(WindSimulation::kDebugFieldTypeKey, 1);
   }
 
   // Debug drawing
@@ -113,6 +116,9 @@ UI::UI(Editor *editor) : m_editor(editor) {
 
     GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("Debug Draw"));
     toggle->setPosition(120, height);
+    // TMP nicer default
+    DebugManager::setBool(WindSimulation::kDebugPaintKey, true);
+    toggle->toggleOn();
     toggle->onToggled.connect([this](bool t) {
       DebugManager::setBool(WindSimulation::kDebugPaintKey, t);
     });
@@ -396,6 +402,17 @@ UI::UI(Editor *editor) : m_editor(editor) {
     });
 
     height += input->getBounds().height + 2;
+  }
+
+  // Bake
+  {
+    GUIButton *btn = panel->addNewElement<GUIButton>(HString("Bake"));
+    btn->setWidth(70);
+    btn->setPosition(138, height);
+    btn->onClick.connect([this]() {
+        bake();
+    });
+    height += btn->getBounds().height + 2;
   }
 }
 
