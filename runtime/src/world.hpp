@@ -4,48 +4,17 @@
 #include "network/connection_id.hpp"
 #include "network/server.hpp"
 #include "network/util.hpp"
+#include "ui.hpp"
 #include "shared/app.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/fps_camera.hpp"
 #include "shared/state/player_input.hpp"
 #include "shared/utility/unique_id.hpp"
-#include <GUI/BsGUILabel.h>
-#include <GUI/BsGUITexture.h>
 #include <filesystem>
 #include <unordered_map>
 
 namespace wind {
-
-class NetDebugInfo {
-public:
-  void setup(bs::GUILayoutY *layout);
-
-  void update(const Client &client);
-
-private:
-  bs::GUILabel *hCQL{};
-  bs::GUILabel *hCQR{};
-  bs::GUILabel *hBSCE{};
-  bs::GUILabel *hping{};
-  bs::GUILabel *houtBytes{};
-  bs::GUILabel *houtPackets{};
-  bs::GUILabel *hinBytes{};
-  bs::GUILabel *hinPackets{};
-  bs::GUILabel *hqueueTime{};
-
-  bs::String CQL{};
-  bs::String CQR{};
-  bs::String BSCE{};
-  bs::String ping{};
-  bs::String outBytes{};
-  bs::String outPackets{};
-  bs::String inBytes{};
-  bs::String inPackets{};
-  bs::String queueTime{};
-};
-
-// ============================================================ //
 
 class World : public App {
 public:
@@ -117,6 +86,9 @@ public:
 
   bool serverIsActive() const { return m_server.isActive(); }
 
+  Server &getServer() { return m_server; }
+  const Server &getServer() const { return m_server; }
+
   std::unordered_map<UniqueId, HCNetComponent> &getNetComps() {
     return m_netComps;
   }
@@ -127,8 +99,6 @@ public:
 
   const HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
 
-  bool getCursorMode() const { return m_cursorMode; }
-
   const String &getScenePath() const { return m_scenePath; }
 
   void setStaticScene(bs::HSceneObject so) { m_staticScene = so; }
@@ -137,32 +107,25 @@ public:
   void setDynamicScene(bs::HSceneObject so) { m_dynamicScene = so; }
   bs::HSceneObject getDynamicScene() const { return m_dynamicScene; }
 
+  HCMyPlayer &getMyPlayer() { return m_player; }
+  const HCMyPlayer &getMyPlayer() const { return m_player; }
+
 private:
   void setupInput();
 
   bs::HSceneObject createCamera(bs::HSceneObject player);
 
-  bs::HSceneObject createFloor(bs::HMaterial material,
-                               bs::HPhysicsMaterial physicsMaterial);
-  bs::HPhysicsMaterial createPhysicsMaterial();
-  bs::HMaterial createMaterial(const bs::String &path);
-  bs::HSceneObject createGUI(bs::HSceneObject camera);
-
-  /// Give full window width and height.
-  void updateAimPosition(u32 width, u32 height);
-
 private:
   std::unordered_map<UniqueId, HCNetComponent> m_netComps;
-  bool m_cursorMode = false;
-  HFPSCamera m_fpsCamera;
+  Ui m_ui{};
   Server m_server;
   HCMyPlayer m_player;
-  NetDebugInfo m_netDebugInfo{};
-  bs::GUITexture *m_aim;
+  HFPSCamera m_fpsCamera{};
+  bool m_cursorMode = false;
+  bs::VirtualAxis m_scroll{};
+
   bs::HSceneObject m_staticScene;
   bs::HSceneObject m_dynamicScene;
-  bs::GUISliderHorz *m_shootForce;
-  bs::VirtualAxis m_scroll;
   String m_scenePath{"res/scenes/wind.json"};
   std::filesystem::file_time_type m_sceneEditTime;
 };

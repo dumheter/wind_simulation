@@ -1,6 +1,5 @@
 #include "world.hpp"
 #include "shared/asset.hpp"
-#include "shared/debug/debug_manager.hpp"
 #include "shared/log.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
@@ -10,71 +9,14 @@
 
 #include <Components/BsCCamera.h>
 #include <Components/BsCCharacterController.h>
-#include <GUI/BsCGUIWidget.h>
-#include <GUI/BsGUIButton.h>
-#include <GUI/BsGUIInputBox.h>
-#include <GUI/BsGUILayoutX.h>
-#include <GUI/BsGUILayoutY.h>
-#include <GUI/BsGUIPanel.h>
-#include <GUI/BsGUIToggle.h>
-#include <GUI/BsGUISlider.h>
-#include <Image/BsSpriteTexture.h>
 #include <Importer/BsImporter.h>
 #include <Input/BsInput.h>
 #include <Math/BsQuaternion.h>
 #include <Platform/BsCursor.h>
-#include <Scene/BsSceneManager.h>
 #include <microprofile/microprofile.h>
 #include <regex>
 
 namespace wind {
-
-void NetDebugInfo::setup(bs::GUILayoutY *layout) {
-  hCQL = layout->addNewElement<bs::GUILabel>(bs::HString(CQL));
-  hCQR = layout->addNewElement<bs::GUILabel>(bs::HString(CQR));
-  hBSCE = layout->addNewElement<bs::GUILabel>(bs::HString(BSCE));
-  hping = layout->addNewElement<bs::GUILabel>(bs::HString(ping));
-  houtBytes = layout->addNewElement<bs::GUILabel>(bs::HString(outBytes));
-  houtPackets = layout->addNewElement<bs::GUILabel>(bs::HString(outPackets));
-  hinBytes = layout->addNewElement<bs::GUILabel>(bs::HString(inBytes));
-  hinPackets = layout->addNewElement<bs::GUILabel>(bs::HString(inPackets));
-  hqueueTime = layout->addNewElement<bs::GUILabel>(bs::HString(queueTime));
-}
-
-void NetDebugInfo::update(const Client &client) {
-  MICROPROFILE_SCOPEI("netdebuginfo", "update", MP_GREEN3);
-  auto status = client.GetConnectionStatus();
-  if (!status) {
-    return;
-  }
-
-  CQL = fmt::format("CQL {:.2f}", status->m_flConnectionQualityLocal);
-  CQR = fmt::format("CQR {:.2f}", status->m_flConnectionQualityRemote);
-  BSCE =
-      fmt::format("b/s cap estimation {}", status->m_nSendRateBytesPerSecond);
-  ping = fmt::format("ping {}", status->m_nPing);
-  outBytes = fmt::format("out b/s {:.2f}", status->m_flOutBytesPerSec);
-  outPackets = fmt::format("out p/s {:.2f}", status->m_flOutPacketsPerSec);
-  inBytes = fmt::format("in  b/s {}", status->m_flInBytesPerSec);
-  inPackets = fmt::format("in  p/s {}", status->m_flInPacketsPerSec);
-  queueTime = fmt::format("q time {}us", status->m_usecQueueTime);
-
-  hCQL->setContent(bs::HString(CQL));
-  hCQR->setContent(bs::HString(CQR));
-  hBSCE->setContent(bs::HString(BSCE));
-  hping->setContent(bs::HString(ping));
-  houtBytes->setContent(bs::HString(outBytes));
-  houtPackets->setContent(bs::HString(outPackets));
-  hinBytes->setContent(bs::HString(inBytes));
-  hinPackets->setContent(bs::HString(inPackets));
-  hqueueTime->setContent(bs::HString(queueTime));
-}
-
-// ============================================================ //
-
-constexpr u32 kAimDiameter = 8;
-
-// ============================================================ //
 
 World::World(const App::Info &info) : App(info), m_server(this) {
   using namespace bs;
@@ -100,8 +42,8 @@ void World::onPreUpdate(f32) {
     constexpr f32 kToExtreme = 0.1f;
     v = clamp(v, -kFromExtreme, kFromExtreme);
     v = map(v, -kFromExtreme, kFromExtreme, -kToExtreme, kToExtreme);
-    const f32 new_percent = m_shootForce->getPercent() + v;
-    m_shootForce->setPercent(new_percent);
+    const f32 new_percent = m_ui.getShootForce() + v;
+    m_ui.setShootForce(new_percent);
     m_player->setShootForce(100.0f * new_percent);
   }
 }
@@ -111,7 +53,7 @@ void World::onFixedUpdate(f32) {
   MICROPROFILE_SCOPEI("world", "onFixedUpdate", MP_BLUE3);
 
   if (m_player) {
-    m_netDebugInfo.update(m_player->getClient());
+    m_ui.getNetDebugInfo().update(m_player->getClient());
   }
 
   static u32 i = 0;
@@ -135,7 +77,9 @@ void World::onFixedUpdate(f32) {
   }
 }
 
-void World::onWindowResize() { updateAimPosition(m_width, m_height); }
+void World::onWindowResize() {
+  m_ui.updateAimPosition(m_width, m_height);
+}
 
 void World::setupScene() {
   logVeryVerbose("[world:setupScene] loading scene");
@@ -202,10 +146,10 @@ void World::setupMyPlayer() {
   charController->setRadius(0.4f);
   auto netComp = player->addComponent<CNetComponent>();
   auto camera = createCamera(player);
-  createGUI(camera);
   m_player = player->addComponent<CMyPlayer>(this);
   auto [it, ok] = m_netComps.insert({UniqueId::invalid(), netComp});
   AlfAssert(ok, "could not create my player");
+  m_ui.setup(this, camera, m_width, m_height);
 }
 
 void World::applyMoveableState(const MoveableState &moveableState) {
@@ -470,119 +414,7 @@ void World::setupInput() {
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseZ));
 }
 
-bs::HSceneObject World::createGUI(bs::HSceneObject camera) {
-  using namespace bs;
 
-  auto cameraComp = camera->getComponent<CCamera>();
-
-  auto gui = SceneObject::create("GUI");
-  HGUIWidget guiComp = gui->addComponent<CGUIWidget>(cameraComp);
-  GUIPanel *mainPanel = guiComp->getPanel();
-  GUILayoutY *layout = mainPanel->addNewElement<GUILayoutY>();
-  layout->setSize(300, 700);
-  layout->addNewElement<GUILabel>(HString{u8"Press the Escape key to quit"});
-
-  { // Start Server
-    GUILayoutX *l = layout->addNewElement<GUILayoutX>();
-    l->addNewElement<GUILabel>(HString{u8"port"});
-    GUIInputBox *input = l->addNewElement<GUIInputBox>();
-    input->setText("4040");
-    input->setFilter([](const String &str) {
-      return std::regex_match(str, std::regex("-?(\\d+)?"));
-    });
-
-    GUIButton *startServerBtn =
-        l->addNewElement<GUIButton>(GUIContent{HString{"start server"}});
-    startServerBtn->onClick.connect([input, this] {
-      if (!m_server.isActive()) {
-        logVerbose("start server on {}", input->getText().c_str());
-        m_server.StartServer(std::atoi(input->getText().c_str()));
-      }
-    });
-  }
-
-  { // Client network
-    GUILayoutX *l = layout->addNewElement<GUILayoutX>();
-    l->addNewElement<GUILabel>(HString{u8"ip:port"});
-    GUIInputBox *input = l->addNewElement<GUIInputBox>();
-    input->setText("127.0.0.1:4040");
-
-    GUIButton *btn =
-        l->addNewElement<GUIButton>(GUIContent{HString{"connect"}});
-    btn->onClick.connect([input, this] {
-      if (!m_player->isConnected()) {
-        logVerbose("connect to {}", input->getText().c_str());
-        auto &t = input->getText();
-        if (t.find(":") != std::string::npos && t.size() > 8) {
-          m_player->connect(input->getText().c_str());
-          // setupScene();
-        }
-      }
-    });
-    GUIButton *btn2 = l->addNewElement<GUIButton>(GUIContent{HString{"d/c"}});
-    btn2->onClick.connect([input, this] {
-      if (m_player->isConnected()) {
-        m_player->disconnect();
-      }
-    });
-  }
-
-  { // network info
-    m_netDebugInfo.setup(layout);
-  }
-
-  { // rotor slider
-    auto l = layout->addNewElement<GUILayoutX>();
-    auto text = l->addNewElement<GUILabel>(HString{u8"rotorSpeed"});
-    text->setWidth(70);
-    auto slider = l->addNewElement<GUISliderHorz>();
-    slider->onChanged.connect([](f32 percent) {
-      auto rotors = gSceneManager().findComponents<CRotor>(true);
-      for (auto &rotor : rotors) {
-        rotor->setRotation(bs::Vector3{0.0f, percent * percent * 1000, 0.0f});
-      }
-    });
-  }
-
-  { // shootForce slider
-    auto l = layout->addNewElement<GUILayoutX>();
-    auto text = l->addNewElement<GUILabel>(HString{u8"shootForce"});
-    text->setWidth(70);
-    m_shootForce = l->addNewElement<GUISliderHorz>();
-    m_shootForce->setPercent(0.3f);
-    m_shootForce->onChanged.connect(
-        [this](f32 percent) { m_player->setShootForce(100.0f * percent); });
-  }
-
-  // Debug draw type
-  {
-    auto l = layout->addNewElement<GUILayoutX>();
-    auto text = l->addNewElement<GUILabel>(HString{u8"Wind Volume Arrows"});
-    text->setWidth(105);
-    auto toggle = l->addNewElement<GUIToggle>(HString());
-    toggle->toggleOn();
-    DebugManager::setBool("WVArrows", true);
-    toggle->onToggled.connect([](bool value) {
-        DebugManager::setBool("WVArrows", value);
-      });
-  }
-
-  { // aim dot
-    HTexture dotTex = gImporter().import<Texture>("res/textures/dot.png");
-    HSpriteTexture dotSprite = SpriteTexture::create(dotTex);
-    m_aim = GUITexture::create(dotSprite);
-    m_aim->setSize(kAimDiameter, kAimDiameter);
-    updateAimPosition(m_width, m_height);
-    mainPanel->addElement(m_aim);
-  }
-
-  return gui;
-}
-
-void World::updateAimPosition(u32 width, u32 height) {
-  m_aim->setPosition(width / 2 - kAimDiameter / 2,
-                     height / 2 - kAimDiameter / 2);
-}
 
 void World::addNetComp(HCNetComponent netComp) {
   logVerbose("net component with id [{}] added", netComp->getUniqueId().raw());

@@ -104,6 +104,7 @@
     <ClCompile Include="src\network\side.cpp" />
     <ClCompile Include="src\network\util.cpp" />
     <ClCompile Include="src\world.cpp" />
+    <ClCompile Include="src\ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\cmyplayer.hpp" />
@@ -117,6 +118,7 @@
     <ClInclude Include="src\network\side.hpp" />
     <ClInclude Include="src\network\util.hpp" />
     <ClInclude Include="src\world.hpp" />
+    <ClInclude Include="src\ui.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
