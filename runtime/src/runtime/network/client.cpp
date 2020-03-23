@@ -1,7 +1,7 @@
 #include "client.hpp"
-#include "shared/log.hpp"
+#include <dlog/dlog.hpp>
 #include "shared/scene/scene.hpp"
-#include "world.hpp"
+#include "runtime/world.hpp"
 #include <microprofile/microprofile.h>
 
 namespace wind {
@@ -36,11 +36,11 @@ bool Client::Poll() {
 bool Client::Connect(const SteamNetworkingIPAddr &address) {
   m_connection = m_socketInterface->ConnectByIPAddress(address, 0, nullptr);
   if (m_connection != k_HSteamNetConnection_Invalid) {
-    logVeryVerbose("[client] connect initiated");
+    DLOG_VERBOSE("connect initiated");
     SetConnectionState(ConnectionState::kConnecting);
     return true;
   } else {
-    logWarning("[client] failed to connect");
+    DLOG_WARNING("failed to connect");
     return false;
   }
 }
@@ -58,7 +58,7 @@ void Client::CloseConnection() {
   if (m_connection != k_HSteamNetConnection_Invalid) {
     m_socketInterface->CloseConnection(m_connection, 0, nullptr, false);
     m_connection = k_HSteamNetConnection_Invalid;
-    logVerbose("[client] closed connection");
+    DLOG_VERBOSE("closed connection");
   }
   SetConnectionState(ConnectionState::kDisconnected);
   m_world->onDisconnect();
@@ -84,7 +84,7 @@ void Client::handlePacket() {
   MICROPROFILE_SCOPEI("client", "handlePacket", MP_BISQUE2);
   if (auto header = m_packet.GetHeaderType();
       header == PacketHeaderTypes::kPlayerJoin) {
-    logVerbose("[client:p PlayerJoin] packet playerjoin");
+    DLOG_VERBOSE("packet playerjoin");
     auto mr = m_packet.GetMemoryReader();
     auto uid = mr.Read<UniqueId>();
     auto state = MoveableState{uid};
@@ -108,17 +108,17 @@ void Client::handlePacket() {
       }
     }
   } else if (header == PacketHeaderTypes::kPlayerTick) {
-    logWarning("[client:p PlayerTick] got a playerTick packet");
+    DLOG_WARNING("got a playerTick packet");
   } else if (header == PacketHeaderTypes::kCreate) {
-    logVeryVerbose("[client:p Create] got a create packet");
+    DLOG_VERBOSE("got a create packet");
     CreateInfo info = PacketParser::Create(m_packet);
     m_world->buildObject(info);
   } else if (header == PacketHeaderTypes::kRequestCreate) {
-    logWarning("[client:p RequestCreate] got a requestcreate packet");
+    DLOG_WARNING("got a requestcreate packet");
   } else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
     const auto new_uid = mr.Read<UniqueId>();
-    logVerbose("[client:p Hello] changed uid from {} to {}", m_uid.raw(),
+    DLOG_VERBOSE("changed uid from {} to {}", m_uid.raw(),
                new_uid.raw());
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
@@ -133,12 +133,12 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kSceneChange) {
     auto mr = m_packet.GetMemoryReader();
     if (!m_world->serverIsActive()) {
-      logVerbose("[client:p SceneChange] scene change");
+      DLOG_VERBOSE("scene change");
       auto scene = mr.Read<alflib::String>();
       m_world->onSceneChange(scene.GetUTF8());
     }
   } else {
-    logError("[client:p] unknown packet");
+    DLOG_ERROR("unknown packet");
   }
 }
 
@@ -163,14 +163,14 @@ bool Client::PollIncomingPackets() {
       m_packet.SetFromConnection(msg->m_conn);
       got_packet = true;
     } else {
-      logError("[client] could not parse packet, too big [{}/{}]",
+      DLOG_ERROR("could not parse packet, too big [{}/{}]",
                msg->m_cbSize, m_packet.GetPacketCapacity());
     }
     msg->Release();
 
   } else if (msg_count < 0) {
     if (m_connectionState != ConnectionState::kDisconnected) {
-      logVerbose("[client] failed to check for messages, disconnecting");
+      DLOG_VERBOSE("failed to check for messages, disconnecting");
       CloseConnection();
     }
   }
@@ -182,15 +182,15 @@ void Client::OnSteamNetConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t *status) {
   switch (status->m_info.m_eState) {
   case k_ESteamNetworkingConnectionState_None: {
-    // logVerbose("[client] state none");
+    // DLOG_VERBOSE("state none");
     break;
   }
 
   case k_ESteamNetworkingConnectionState_ClosedByPeer: {
     if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connecting) {
-      logWarning("[client] Connection could not be established.");
+      DLOG_WARNING("Connection could not be established.");
     } else {
-      logInfo("[client] connection closed by peer");
+      DLOG_INFO("connection closed by peer");
     }
 
     // cleanup connection
@@ -199,7 +199,7 @@ void Client::OnSteamNetConnectionStatusChanged(
   }
 
   case k_ESteamNetworkingConnectionState_ProblemDetectedLocally: {
-    logInfo("[client] connection problem detected locally");
+    DLOG_INFO("connection problem detected locally");
 
     // cleanup connection
     CloseConnection();
@@ -207,7 +207,7 @@ void Client::OnSteamNetConnectionStatusChanged(
   }
 
   case k_ESteamNetworkingConnectionState_Connecting: {
-    logVerbose("[client] connecting");
+    DLOG_VERBOSE("connecting");
     break;
   }
 
@@ -219,7 +219,7 @@ void Client::OnSteamNetConnectionStatusChanged(
   }
 
   default: {
-    logWarning("[client] default ??");
+    DLOG_WARNING("default ??");
   }
   }
 }
@@ -237,6 +237,6 @@ void Client::SetConnectionState(ConnectionState connection_state) {
     }
     return "internal error";
   };
-  logInfo("[client] state: {}", conStr(connection_state));
+  DLOG_INFO("state: {}", conStr(connection_state));
 }
 } // namespace wind

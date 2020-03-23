@@ -1,8 +1,8 @@
 #ifndef PACKET_HPP_
 #define PACKET_HPP_
 
-#include "network/connection_id.hpp"
-#include "network/packet_header.hpp"
+#include "runtime/network/connection_id.hpp"
+#include "runtime/network/packet_header.hpp"
 #include "shared/types.hpp"
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>

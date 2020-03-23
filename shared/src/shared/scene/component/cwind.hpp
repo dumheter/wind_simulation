@@ -28,7 +28,6 @@
 
 #include "shared/scene/rtti.hpp"
 
-#include "shared/log.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/component_handles.hpp"
 #include "shared/utility/unique_id.hpp"

@@ -26,9 +26,9 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/log.hpp"
 #include "shared/utility/util.hpp"
 
+#include <dlog/dlog.hpp>
 #include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
@@ -56,10 +56,9 @@ bs::HTexture Asset::loadTexture(const bs::Path &path, bool srgb, bool hdr,
 
   bs::HTexture texture = bs::gResources().load<bs::Texture>(assetPath);
   if (!texture) {
-    bs::gDebug().log(
-        "Texture '" + path.toString() +
-            "' has not yet been imported. This process can take a while",
-        bs::LogVerbosity::Warning);
+    DLOG_WARNING(
+        "Texture '{}' has not yet been imported. This process can take a while",
+        path.toString());
 
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);
@@ -96,10 +95,9 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
 
   bs::HTexture texture = bs::gResources().load<bs::Texture>(assetPath);
   if (!texture) {
-    bs::gDebug().log(
-        "Cubemap texture '" + path.toString() +
-            "' has not yet been imported. This process can take a while",
-        bs::LogVerbosity::Warning);
+    DLOG_WARNING(
+        "Cubemap texture '{}' has not yet been imported. This process can take a while",
+        path.toString());
 
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);
@@ -137,10 +135,9 @@ bs::HMesh Asset::loadMesh(const bs::Path &path, f32 scale, bool cpuCached) {
 
   bs::HMesh mesh = bs::gResources().load<bs::Mesh>(assetPath);
   if (!mesh) {
-    bs::gDebug().log(
-        "Mesh '" + path.toString() +
-            "' has not yet been imported. This process can take a while",
-        bs::LogVerbosity::Warning);
+    DLOG_WARNING(
+        "Mesh '{}' has not yet been imported. This process can take a while",
+        path.toString());
 
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);
@@ -183,10 +180,9 @@ Asset::loadMeshWithPhysics(const bs::Path &path, f32 scale, bool cpuCached,
 
   // Otherwise import them
   if (!mesh) {
-    bs::gDebug().log(
-        "Mesh '" + path.toString() +
-            "' has not yet been imported. This process can take a while",
-        bs::LogVerbosity::Warning);
+    DLOG_WARNING(
+        "Mesh '{}' has not yet been imported. This process can take a while",
+        path.toString());
 
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);
@@ -231,10 +227,9 @@ bs::HShader Asset::loadShader(const bs::Path &path) {
   bs::HShader shader = bs::gResources().load<bs::Shader>(assetPath);
 
   if (!shader) {
-    bs::gDebug().log(
-        "Shader '" + path.toString() +
-            "' has not yet been imported. This process can take a while",
-        bs::LogVerbosity::Warning);
+    DLOG_WARNING(
+        "Shader '{}' has not yet been imported. This process can take a while",
+        path.toString());
 
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);

@@ -29,12 +29,12 @@
 #include "editor/editor.hpp"
 #include "editor/factory.hpp"
 #include "microprofile/microprofile.h"
-#include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/scene.hpp"
 
 #include <filesystem>
 
+#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <GUI/BsCGUIWidget.h>
 #include <GUI/BsGUIButton.h>
@@ -191,7 +191,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
         // m_editor->setSimNumSteps(num);
         // m_editor->simEnable();
         // m_runToggle->toggleOn();
-        // logVerbose("Starting to run simulation for {} steps", num);
+        // DLOG_VERBOSE("Starting to run simulation for {} steps", num);
       }
     });
 
@@ -210,7 +210,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setPosition(120, height);
       button->onClick.connect([this]() {
         // m_editor->getSim()->addDensitySource();
-        // logVerbose("Added density sources");
+        // DLOG_VERBOSE("Added density sources");
       });
     }
 
@@ -220,7 +220,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setPosition(214, height);
       button->onClick.connect([this]() {
         // m_editor->getSim()->addDensitySink();
-        // logVerbose("Added density sinks");
+        // DLOG_VERBOSE("Added density sinks");
       });
     }
 
@@ -234,7 +234,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       //  d->get(i) = 0;
       //  d0->get(i) = 0;
       //}
-      // logVerbose("Cleared density");
+      // DLOG_VERBOSE("Cleared density");
     });
 
     height += button->getBounds().height + 2;
@@ -253,7 +253,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setPosition(120, height);
       button->onClick.connect([this]() {
         // m_editor->getSim()->addVelocitySource();
-        // logVerbose("Added velocity sources");
+        // DLOG_VERBOSE("Added velocity sources");
       });
     }
 
@@ -263,7 +263,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       button->setPosition(214, height);
       button->onClick.connect([this]() {
         // m_editor->getSim()->addVelocitySink();
-        // logVerbose("Added velocity sinks");
+        // DLOG_VERBOSE("Added velocity sinks");
       });
     }
 
@@ -277,7 +277,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       //  v->set(i, Vec3F(0.4f, 0.05f, 0.3f));
       //  v0->set(i, Vec3F(0.4f, 0.05f, 0.3f));
       //}
-      // logVerbose("Cleared velocity");
+      // DLOG_VERBOSE("Cleared velocity");
     });
 
     height += button->getBounds().height + 2;
@@ -294,7 +294,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       toggle->setPosition(120, height);
       toggle->onToggled.connect([this](bool t) {
         // m_editor->getSim()->setDensityDiffusionActive(t);
-        // logVerbose("Density diffusion: {}", t ? "ENABLED" : "DISABLED");
+        // DLOG_VERBOSE("Density diffusion: {}", t ? "ENABLED" : "DISABLED");
       });
       toggle->toggleOn();
     }
@@ -306,7 +306,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     toggle->setPosition(220, height);
     toggle->onToggled.connect([this](bool t) {
       // m_editor->getSim()->setDensityAdvectionActive(t);
-      // logVerbose("Density advection: {}", t ? "ENABLED" : "DISABLED");
+      // DLOG_VERBOSE("Density advection: {}", t ? "ENABLED" : "DISABLED");
     });
     toggle->toggleOn();
     height += toggle->getBounds().height + 2;
@@ -323,7 +323,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       toggle->setPosition(120, height);
       toggle->onToggled.connect([this](bool t) {
         // m_editor->getSim()->setVelocityDiffusionActive(t);
-        // logVerbose("Velocity diffusion: {}", t ? "ENABLED" : "DISABLED");
+        // DLOG_VERBOSE("Velocity diffusion: {}", t ? "ENABLED" : "DISABLED");
       });
       toggle->toggleOn();
     }
@@ -335,7 +335,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     toggle->setPosition(220, height);
     toggle->onToggled.connect([this](bool t) {
       // m_editor->getSim()->setVelocityAdvectionActive(t);
-      // logVerbose("Velocity advection: {}", t ? "ENABLED" : "DISABLED");
+      // DLOG_VERBOSE("Velocity advection: {}", t ? "ENABLED" : "DISABLED");
     });
     toggle->toggleOn();
 
@@ -353,7 +353,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     button->onClick.connect([this]() {
       m_editor->setScene(EditorFactory::createDefaultScene(
           "scene_default", Editor::kGroundPlaneScale));
-      // logVerbose("loading default scene");
+      // DLOG_VERBOSE("loading default scene");
     });
 
     height += button->getBounds().height + 2;
@@ -373,7 +373,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     bSave->setPosition(106, height);
     bSave->onClick.connect([this, input]() {
       std::filesystem::path path = m_scenePath.c_str();
-      // logVerbose("saving scene ({})", path);
+      // DLOG_VERBOSE("saving scene ({})", path);
       String _path = path.string().c_str();
       Scene::saveFile(_path, m_editor->getScene());
     });
@@ -384,12 +384,12 @@ UI::UI(Editor *editor) : m_editor(editor) {
     bLoad->onClick.connect([this, input]() {
       std::filesystem::path path = m_scenePath.c_str();
       if (std::filesystem::exists(path)) {
-        // logVerbose("loading scene ({})", path);
+        // DLOG_VERBOSE("loading scene ({})", path);
         String _path = path.string().c_str();
         m_editor->setScene(Scene::loadFile(_path), true);
         m_sceneAutoReload = true;
       } else {
-        logWarning("Scene requested to load does not exist \"{}\"",
+        DLOG_WARNING("Scene requested to load does not exist \"{}\"",
                    m_scenePath.c_str());
         m_sceneAutoReload = false;
       }
@@ -409,7 +409,7 @@ void UI::onFixedUpdate(f32 delta) {
       std::filesystem::file_time_type time =
           std::filesystem::last_write_time(path);
       if (time != m_sceneEditTime) {
-        // logVerbose("reloading scene ({})", m_scenePath.c_str());
+        // DLOG_VERBOSE("reloading scene ({})", m_scenePath.c_str());
         m_editor->setScene(Scene::loadFile(m_scenePath), true);
       }
       m_sceneEditTime = time;

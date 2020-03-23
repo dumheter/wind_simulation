@@ -120,7 +120,6 @@
     <ClCompile Include="src\shared\scene\builder.cpp" />
     <ClCompile Include="src\shared\scene\component\cnet_component.cpp" />
     <ClCompile Include="src\shared\scene\component\ctag.cpp" />
-    <ClCompile Include="src\shared\log.cpp" />
     <ClCompile Include="src\shared\scene\mesh.cpp" />
     <ClCompile Include="src\shared\scene\scene.cpp" />
     <ClCompile Include="src\shared\scene\serializer.cpp" />
@@ -158,6 +157,7 @@
     <ClCompile Include="src\thirdparty\alflib\memory\raw_memory_writer.cpp" />
     <ClCompile Include="src\thirdparty\alflib\platform\os.cpp" />
     <ClCompile Include="src\thirdparty\alf_unicode.c" />
+    <ClCompile Include="src\thirdparty\dlog\dlog.cpp" />
     <ClCompile Include="src\thirdparty\fmt\format.cc" />
     <ClCompile Include="src\thirdparty\microprofile\microprofile.cpp" />
     <ClCompile Include="src\thirdparty\microtar\microtar.c" />
@@ -211,7 +211,6 @@
     <ClInclude Include="src\shared\types.hpp" />
     <ClInclude Include="src\shared\macros.hpp" />
     <ClInclude Include="src\shared\math\dim.hpp" />
-    <ClInclude Include="src\shared\log.hpp" />
     <ClInclude Include="src\shared\math\field.hpp" />
     <ClInclude Include="src\shared\math\math.hpp" />
     <ClInclude Include="src\thirdparty\alflib\alflib.hpp" />
@@ -253,6 +252,7 @@
     <ClInclude Include="src\thirdparty\alflib\platform\os.hpp" />
     <ClInclude Include="src\thirdparty\alflib\platform\platform.hpp" />
     <ClInclude Include="src\thirdparty\alf_unicode.h" />
+    <ClInclude Include="src\thirdparty\dlog\dlog.hpp" />
     <ClInclude Include="src\thirdparty\fmt\core.h" />
     <ClInclude Include="src\thirdparty\fmt\format-inl.h" />
     <ClInclude Include="src\thirdparty\fmt\format.h" />

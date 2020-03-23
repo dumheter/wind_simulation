@@ -1,11 +1,11 @@
 #ifndef SERVER_HPP_
 #define SERVER_HPP_
 
-#include "network/client.hpp"
-#include "network/connection_id.hpp"
-#include "network/connection_state.hpp"
-#include "network/net_common.hpp"
-#include "network/packet.hpp"
+#include "runtime/network/client.hpp"
+#include "runtime/network/connection_id.hpp"
+#include "runtime/network/connection_state.hpp"
+#include "runtime/network/net_common.hpp"
+#include "runtime/network/packet.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/types.hpp"
 #include <optional>

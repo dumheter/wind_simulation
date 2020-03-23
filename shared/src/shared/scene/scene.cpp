@@ -27,20 +27,20 @@
 // ========================================================================== //
 
 #include "shared/asset.hpp"
-#include "shared/log.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/scene/component/crotor.hpp"
+#include "shared/scene/component/cspline_follow.hpp"
+#include "shared/scene/component/ctag.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
+#include <dlog/dlog.hpp>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCSkybox.h>
 #include <Scene/BsSceneObject.h>
-
-#include "component/cspline_follow.hpp"
 
 // ========================================================================== //
 // Scene Implementation
@@ -59,7 +59,7 @@ bs::HSceneObject Scene::load(const String &scene, const String &source) {
     if (!source.empty()) {
       src = fmt::format(" file \"{}\"", source.c_str()).c_str();
     }
-    logError("Exception while parsing json{}: {}", src.c_str(), e.what());
+    DLOG_ERROR("Exception while parsing json{}: {}", src.c_str(), e.what());
     return bs::SceneObject::create("");
   }
   return loadScene(value);
@@ -104,7 +104,7 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value) {
   if (objsIt != value.end()) {
     auto objsArr = *objsIt;
     if (!objsArr.is_array()) {
-      logError("[loadScene]\"objects\" is required to be an array of scene "
+      DLOG_ERROR("\"objects\" is required to be an array of scene "
                "objects: {}",
                value.dump());
       return bs::SceneObject::create("");
@@ -181,7 +181,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       String cubemapPath = String(skybox["cubemap"]);
       builder.withSkybox(cubemapPath);
     } else {
-      logError("Skybox requires a \"cubemap\" property");
+      DLOG_ERROR("Skybox requires a \"cubemap\" property");
       return bs::SceneObject::create("");
     }
   }
@@ -252,7 +252,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
         builder.withSpline(points, degree, samples);
       }
     } else {
-      logError("spline must contain a list of control points");
+      DLOG_ERROR("spline must contain a list of control points");
     }
   }
 
@@ -283,7 +283,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   if (it != value.end()) {
     auto arr = *it;
     if (!arr.is_array()) {
-      logError("[loadObjects] \"objects\" is required to be an array of scene "
+      DLOG_ERROR("\"objects\" is required to be an array of scene "
                "objects: {}",
                value.dump());
       return bs::SceneObject::create("");
