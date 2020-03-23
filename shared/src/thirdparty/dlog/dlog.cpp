@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MIT License
  *
  * Copyright (c) 2019 Christoffer Gustafsson
@@ -31,6 +31,8 @@
 #include <vector>
 #ifdef DLOG_LOG_TO_FILE
 #include <chrono>
+#include <ctime>
+#include <dutil/assert.hpp>
 #include <dutil/file.hpp>
 #endif
 #include <cstdio>
@@ -106,26 +108,26 @@ std::string LevelToString(Level level) {
   std::string str{};
 
   switch (level) {
-    case Level::kVerbose: {
-      str = "verbose";
-      break;
-    }
-    case Level::kInfo: {
-      str = "info";
-      break;
-    }
-    case Level::kWarning: {
-      str = "warning";
-      break;
-    }
-    case Level::kError: {
-      str = "error";
-      break;
-    }
-    case Level::kNone: {
-      str = "none";
-      break;
-    }
+  case Level::kVerbose: {
+    str = "verbose";
+    break;
+  }
+  case Level::kInfo: {
+    str = "info";
+    break;
+  }
+  case Level::kWarning: {
+    str = "warning";
+    break;
+  }
+  case Level::kError: {
+    str = "error";
+    break;
+  }
+  case Level::kNone: {
+    str = "none";
+    break;
+  }
   }
 
   return str;
@@ -134,34 +136,34 @@ std::string LevelToString(Level level) {
 // ============================================================ //
 
 class Dlog {
- private:
+private:
   explicit Dlog(Level new_level);
 
- public:
+public:
   ~Dlog();
 
   static void SetLevel(Level level);
 
   static Level GetLevel();
 
-  static void WriteToFile(const std::string& string, Level log_level);
+  static void WriteToFile(const std::string &string, Level log_level);
 
-  static void SetLogCallback(void (*cb)(const std::string& log_msg,
-                                        Level log_level, void* user_data),
-                             void* user_data);
+  static void SetLogCallback(void (*cb)(const std::string &log_msg,
+                                        Level log_level, void *user_data),
+                             void *user_data);
 
   DLOG_MT_MUTEX_FN
 
- private:
-  static Dlog& Instance();
+private:
+  static Dlog &Instance();
 
   Level level_;
 #ifdef DLOG_LOG_TO_FILE
   dutil::File log_file_{};
 #endif
 #ifdef DLOG_LOG_CALLBACK
-  void (*cb_)(const std::string& log_msg, Level log_level, void* user_data);
-  void* cb_user_data_;
+  void (*cb_)(const std::string &log_msg, Level log_level, void *user_data);
+  void *cb_user_data_;
 #endif
   DLOG_MT_DECLARE_MUTEX
 };
@@ -171,7 +173,13 @@ Dlog::Dlog(Level new_level) : level_(new_level) {
   if (!log_file_.IsOpen()) {
     const auto now =
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    const auto local_time = std::localtime(&now);
+#if defined(_WIN32)
+    std::tm local_time_stack;
+    std::tm *local_time = &local_time_stack;
+    const errno_t error = localtime_s(&local_time_stack, &now);
+#else
+    const std::tm *local_time = std::localtime(&now);
+#endif
     const std::string path_with_time{
         "log_" + ToString<4>(1900 + local_time->tm_year) + "-" +
         ToString<2>(1 + local_time->tm_mon) + "-" +
@@ -180,14 +188,18 @@ Dlog::Dlog(Level new_level) : level_(new_level) {
         ToString<2>(local_time->tm_sec) + ".txt"};
     const std::string log_name{path_with_time};
     std::string log_dir = LogDirectory::Get();
-    DLOG_RAW("log name [{}]\nlog dir [{}]\n", log_name, log_dir);
-    if (log_dir.size() > 0) {
+    if (log_dir.size() > 0 && log_dir.back() != '/') {
       log_dir += "/";
     }
     log_dir += log_name;
-    DLOG_RAW("full [{}]\n", log_dir);
 
-    log_file_.Open(log_dir, dutil::File::Mode::Append);
+    const auto result = log_file_.Open(log_dir, dutil::File::Mode::kAppend);
+    if (result != dutil::File::Result::kSuccess) {
+      std::string s{"Failed to open log file. NOTE: You must create the "
+                    "director(y/ies) where the log file is: " +
+                    log_dir};
+      DUTIL_ASSERT(result == dutil::File::Result::kSuccess, s.c_str());
+    }
   }
 #endif
 }
@@ -198,28 +210,28 @@ Dlog::~Dlog() {
 #endif
 }
 
-Dlog& Dlog::Instance() {
+Dlog &Dlog::Instance() {
   static Dlog log{Level::kVerbose};
   return log;
 }
 
 void Dlog::SetLevel(Level level) {
-  Dlog& log = Instance();
+  Dlog &log = Instance();
   log.level_ = level;
 }
 
 Level Dlog::GetLevel() {
-  Dlog& log = Instance();
+  Dlog &log = Instance();
   return log.level_;
 }
 
-void Dlog::WriteToFile(const std::string& string, Level log_level) {
+void Dlog::WriteToFile(const std::string &string, Level log_level) {
 #ifdef DLOG_LOG_TO_FILE
   (void)log_level;
-  Dlog& log = Instance();
+  Dlog &log = Instance();
   log.log_file_.Write(string);
 #elif defined(DLOG_LOG_CALLBACK)
-  Dlog& log = Instance();
+  Dlog &log = Instance();
   log.cb_(string, log_level, log.cb_user_data_);
 #else
   (void)string;
@@ -230,12 +242,12 @@ void Dlog::WriteToFile(const std::string& string, Level log_level) {
 #endif
 }
 
-void Dlog::SetLogCallback(void (*cb)(const std::string& log_msg,
-                                     Level log_level, void* user_data),
-                          void* user_data) {
+void Dlog::SetLogCallback(void (*cb)(const std::string &log_msg,
+                                     Level log_level, void *user_data),
+                          void *user_data) {
 #ifdef DLOG_LOG_CALLBACK
   DLOG_MT_LOCK;
-  Dlog& log = Instance();
+  Dlog &log = Instance();
   log.cb_ = cb;
   log.cb_user_data_ = user_data;
 #else
@@ -252,13 +264,13 @@ void SetLevel(Level level) { Dlog::SetLevel(level); }
 
 Level GetLevel() { return Dlog::GetLevel(); }
 
-void LogToFile(const std::string& string, Level log_level) {
+void LogToFile(const std::string &string, Level log_level) {
   Dlog::WriteToFile(string, log_level);
 }
 
-void SetLogCallback(void (*cb)(const std::string& log_msg, Level log_level,
-                               void* user_data),
-                    void* user_data) {
+void SetLogCallback(void (*cb)(const std::string &log_msg, Level log_level,
+                               void *user_data),
+                    void *user_data) {
   Dlog::SetLogCallback(cb, user_data);
 }
 
@@ -268,14 +280,14 @@ DLOG_MT_MUTEX_F_CPP
 // Log directory
 // ============================================================ //
 
-void LogDirectory::Set(const std::string& new_log_directory) {
-  LogDirectory& log_dir = Instance();
+void LogDirectory::Set(const std::string &new_log_directory) {
+  LogDirectory &log_dir = Instance();
   log_dir.path_ = new_log_directory;
 }
 
 std::string LogDirectory::Get() {
-  LogDirectory& log_dir = Instance();
-  std::string& path = log_dir.path();
+  LogDirectory &log_dir = Instance();
+  std::string &path = log_dir.path();
   if (path.size() > 0 && path.at(path.size() - 1) == '/') {
     path.resize(path.size() - 1);
   }
@@ -283,9 +295,9 @@ std::string LogDirectory::Get() {
   return log_dir.path_;
 }
 
-LogDirectory& LogDirectory::Instance() {
+LogDirectory &LogDirectory::Instance() {
   static LogDirectory log_dir{};
   return log_dir;
 }
 
-}  // namespace dlog
+} // namespace dlog

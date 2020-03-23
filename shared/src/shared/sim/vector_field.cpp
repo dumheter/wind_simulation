@@ -1,6 +1,6 @@
-// MIT License
+﻿// MIT License
 //
-// Copyright (c) 2020 Filip Bj�rklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@
 
 #include "shared/math/math.hpp"
 #include "shared/render/painter.hpp"
+#include <dlog/dlog.hpp>
 
 #include <Debug/BsDebugDraw.h>
 
@@ -85,6 +86,52 @@ void VectorField::paint(Painter &painter, const Vec3F &offset,
   painter.drawLines(linesRed);
   painter.setColor(Color::yellow());
   painter.drawLines(linesYellow);
+}
+
+struct Cell {
+  s32 x, y, z;
+
+  Cell() = default;
+  Cell(f32 cellSize, Vec3F point)
+      : x(point.x * cellSize), y(point.y * cellSize), z(point.z * cellSize) {}
+
+  Vec3F toVec3F() const {
+    return Vec3F{static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(z)};
+  }
+};
+
+Vec3F VectorField::sampleNear(Vec3F point) const {
+  Cell cell[8];
+  cell[0] = Cell{m_cellSize, point};
+  cell[1] = Cell{m_cellSize, point + Vec3F{0.0f, 0.0f, m_cellSize}};
+  cell[2] = Cell{m_cellSize, point + Vec3F{0.0f, m_cellSize, 0.0f}};
+  cell[3] = Cell{m_cellSize, point + Vec3F{0.0f, m_cellSize, m_cellSize}};
+  cell[4] = Cell{m_cellSize, point + Vec3F{m_cellSize, 0.0f, 0.0f}};
+  cell[5] = Cell{m_cellSize, point + Vec3F{m_cellSize, 0.0f, m_cellSize}};
+  cell[6] = Cell{m_cellSize, point + Vec3F{m_cellSize, m_cellSize, 0.0f}};
+  cell[7] = Cell{m_cellSize, point + Vec3F{m_cellSize, m_cellSize, m_cellSize}};
+
+  f32 dist[8];
+  f32 sum = 0.0f;
+  for (u32 i = 0; i < 8; ++i) {
+    dist[i] = distance3D(point, cell[i].toVec3F());
+    // using gaussian makes sure the closest point is valued the most.
+    sum += gaussian(dist[i], 1.0f, 0.0f, m_cellSize / 2.0f);
+  }
+
+  Vec3F force = Vec3F::ZERO;
+  for (u32 i = 0; i < 8; ++i) {
+    if (cell[i].x >= static_cast<s32>(m_dim.width) ||
+        cell[i].y >= static_cast<s32>(m_dim.height) ||
+        cell[i].z >= static_cast<s32>(m_dim.depth) || cell[i].x < 0 ||
+        cell[i].y < 0 || cell[i].z < 0) {
+      continue;
+    }
+    const f32 fraction = gaussian(dist[i], 1.0f, 0.0f, m_cellSize / 2.0f) / sum;
+    force += fraction * get(cell[i].x, cell[i].y, cell[i].z);
+  }
+
+  return force;
 }
 
 } // namespace wind

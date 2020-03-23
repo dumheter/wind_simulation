@@ -23,18 +23,7 @@
           "physics": { "restitution": 0.5 }
         }
       ]
-    },
-
-    {
-      "name": "box",
-      "type": "empty",
-      "scale": {"y": 5, "xz": 6},
-      "position": { "xz": 12, "y": 5},
-      "wind": {
-        "occluder": {
-          "type": "cube"
-        }
-      }
     }
+
   ]
 }

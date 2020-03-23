@@ -171,6 +171,16 @@ void Editor::onPreUpdate(f32 delta) {
     // m_windSim->addVelocitySink();
     DLOG_VERBOSE("Added velocity sinks");
   }
+  if (gInput().isButtonDown(ButtonCode::BC_M)) {
+    Util::dumpScene(m_scene);
+  }
+  if (gInput().isButtonDown(ButtonCode::BC_N)) {
+    DLOG_INFO("save scene");
+    DLOG_RAW("{}\n", Scene::save(m_scene));
+  }
+  if (gInput().isButtonDown(ButtonCode::BC_Y)) {
+    DLOG_INFO("info");
+  }
 }
 
 // -------------------------------------------------------------------------- //

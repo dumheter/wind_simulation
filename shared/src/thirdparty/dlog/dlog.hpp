@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MIT License
  *
  * Copyright (c) 2019 Christoffer Gustafsson
@@ -94,8 +94,8 @@
  *   defining DLOG_DISSABLE at compile time.
  */
 
-#include <fmt/format.h>
 #include <cstdio>
+#include <fmt/format.h>
 #include <string>
 #ifdef DLOG_MT
 #include <mutex>
@@ -122,13 +122,13 @@
  * make this: "/path/to/file.x" into this: "file.x"
  */
 #if defined(_WIN32)
-#define DLOG_FILENAME \
+#define DLOG_FILENAME                                                          \
   (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 #else
-#define DLOG_FILENAME \
+#define DLOG_FILENAME                                                          \
   (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #endif
-#define DLOG_FILE_LINE_FUNC \
+#define DLOG_FILE_LINE_FUNC                                                    \
   dlog::Format("{} @ {}:{}", __func__, DLOG_FILENAME, __LINE__)
 #define DLOG_VERBOSE(...) dlog::TagVerbose(DLOG_FILE_LINE_FUNC, __VA_ARGS__)
 #define DLOG_INFO(...) dlog::TagInfo(DLOG_FILE_LINE_FUNC, __VA_ARGS__)
@@ -160,10 +160,10 @@
 // try to use snprintf_s over snprintf
 #ifdef __STDC_LIB_EXT1__
 #define __STDC_WANT_LIB_EXT1__ 1
-#define DLOG_SPRINTF(buffer, size, format, ...) \
+#define DLOG_SPRINTF(buffer, size, format, ...)                                \
   snprintf_s(buffer, size, format, __VA_ARGS__)
 #else
-#define DLOG_SPRINTF(buffer, size, format, ...) \
+#define DLOG_SPRINTF(buffer, size, format, ...)                                \
   snprintf(buffer, size, format, __VA_ARGS__)
 #endif
 
@@ -172,14 +172,14 @@
 // ============================================================ //
 
 #ifdef DLOG_MT
-#define DLOG_MT_DECLARE_MUTEX \
+#define DLOG_MT_DECLARE_MUTEX                                                  \
   std::shared_ptr<std::mutex> mutex_ = std::make_shared<std::mutex>();
-#define DLOG_MT_MUTEX_FN                       \
-  static std::shared_ptr<std::mutex> mutex() { \
-    Dlog& log = Instance();                    \
-    return log.mutex_;                         \
+#define DLOG_MT_MUTEX_FN                                                       \
+  static std::shared_ptr<std::mutex> mutex() {                                 \
+    Dlog &log = Instance();                                                    \
+    return log.mutex_;                                                         \
   }
-#define DLOG_MT_MUTEX_F_CPP \
+#define DLOG_MT_MUTEX_F_CPP                                                    \
   std::shared_ptr<std::mutex> get_mutex() { return Dlog::mutex(); }
 #define DLOG_MT_MUTEX_F_HPP std::shared_ptr<std::mutex> get_mutex();
 #define DLOG_MT_LOCK std::lock_guard<std::mutex> lock(*get_mutex());
@@ -245,17 +245,14 @@ void Demo();
  * ToString<2>(4) -> "04"
  * ToString<4>(101) -> "0101"
  */
-template <std::size_t char_count>
-inline std::string ToString(int value);
-template <>
-inline std::string ToString<2>(int value) {
+template <std::size_t char_count> inline std::string ToString(int value);
+template <> inline std::string ToString<2>(int value) {
   std::string str{};
   str.resize(2);
   DLOG_SPRINTF(str.data(), str.capacity(), "%.2i", value);
   return str;
 }
-template <>
-inline std::string ToString<4>(int value) {
+template <> inline std::string ToString<4>(int value) {
   std::string str{};
   str.resize(4);
   DLOG_SPRINTF(str.data(), str.capacity(), "%.4i", value);
@@ -269,7 +266,7 @@ inline std::string MakeTimestamp() {
 #if defined(_WIN32)
   tm local_time_win;
   localtime_s(&local_time_win, &now);
-  tm* local_time = &local_time_win;
+  tm *local_time = &local_time_win;
 #else
   const auto local_time = std::localtime(&now);
 #endif
@@ -289,7 +286,7 @@ inline std::string MakeDatestamp() {
 #if defined(_WIN32)
   tm local_time_win;
   localtime_s(&local_time_win, &now);
-  tm* local_time = &local_time_win;
+  tm *local_time = &local_time_win;
 #else
   const auto local_time = std::localtime(&now);
 #endif
@@ -328,7 +325,7 @@ DLOG_MT_MUTEX_F_HPP
 // Log to file
 // ============================================================ //
 
-void LogToFile(const std::string& string, Level level);
+void LogToFile(const std::string &string, Level level);
 
 // ============================================================ //
 // Log callback
@@ -338,9 +335,9 @@ void LogToFile(const std::string& string, Level level);
  * Set a callback, containing the content of the log message, with any set user
  * data.
  */
-void SetLogCallback(void (*cb)(const std::string& log_msg, Level log_level,
-                               void* user_data),
-                    void* user_data);
+void SetLogCallback(void (*cb)(const std::string &log_msg, Level log_level,
+                               void *user_data),
+                    void *user_data);
 
 // ============================================================ //
 // Color
@@ -372,8 +369,7 @@ enum class Color : ColorType {
   kBrightGray = 37
 };
 
-template <typename T>
-inline std::string Paint(Color color, T item) {
+template <typename T> inline std::string Paint(Color color, T item) {
   std::string out =
       fmt::format("\033[{}m{}\033[0m", static_cast<ColorType>(color), item);
   return out;
@@ -398,7 +394,7 @@ constexpr Color kTagColor = Color::kPurple;
 void Flush();
 
 template <typename TString, typename... Args>
-inline void Generic(Level level, const Color level_color, const TString& format,
+inline void Generic(Level level, const Color level_color, const TString &format,
                     Args... args) {
   DLOG_MT_LOCK;
 
@@ -443,7 +439,7 @@ inline void Generic(Level level, const Color level_color, const TString& format,
  * @tparam TString should be std::string or follow its 'api'.
  */
 template <typename TString, typename... Args>
-inline void Verbose(const TString& format, Args... args) {
+inline void Verbose(const TString &format, Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kVerbose) {
     Generic(Level::kVerbose, kVerboseColor, format, args...);
@@ -451,7 +447,7 @@ inline void Verbose(const TString& format, Args... args) {
 }
 
 template <typename TString, typename... Args>
-inline void Info(const TString& format, Args... args) {
+inline void Info(const TString &format, Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kInfo) {
     Generic(Level::kInfo, kInfoColor, format, args...);
@@ -459,14 +455,14 @@ inline void Info(const TString& format, Args... args) {
 }
 
 template <typename TString, typename... Args>
-inline void Warning(const TString& format, Args... args) {
+inline void Warning(const TString &format, Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kWarning) {
     Generic(Level::kWarning, kWarningColor, format, args...);
   }
 }
 template <typename TString, typename... Args>
-inline void Error(const TString& format, Args... args) {
+inline void Error(const TString &format, Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kError) {
     Generic(Level::kError, kErrorColor, format, args...);
@@ -474,7 +470,7 @@ inline void Error(const TString& format, Args... args) {
 }
 
 template <typename TString, typename... Args>
-inline void Raw(const TString& format, Args... args) {
+inline void Raw(const TString &format, Args... args) {
   DLOG_MT_LOCK;
   fmt::print(format, args...);
   if constexpr (kSideLog) {
@@ -483,7 +479,7 @@ inline void Raw(const TString& format, Args... args) {
 }
 
 template <typename TString, typename... Args>
-inline std::string Format(const TString& format, Args... args) {
+inline std::string Format(const TString &format, Args... args) {
   return fmt::format(format, args...);
 }
 
@@ -493,7 +489,7 @@ inline std::string Format(const TString& format, Args... args) {
 
 template <typename TString, typename... Args>
 inline void TagGeneric(Level level, const Color level_color,
-                       const std::string& tag, const TString& format,
+                       const std::string &tag, const TString &format,
                        Args... args) {
   DLOG_MT_LOCK;
 
@@ -549,7 +545,7 @@ inline void TagGeneric(Level level, const Color level_color,
  * @tparam TString should be std::string or follow its 'api'.
  */
 template <typename TString, typename... Args>
-inline void TagVerbose(const std::string& tag, const TString& format,
+inline void TagVerbose(const std::string &tag, const TString &format,
                        Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kVerbose) {
@@ -558,7 +554,7 @@ inline void TagVerbose(const std::string& tag, const TString& format,
 }
 
 template <typename TString, typename... Args>
-inline void TagInfo(const std::string& tag, const TString& format,
+inline void TagInfo(const std::string &tag, const TString &format,
                     Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kInfo) {
@@ -567,7 +563,7 @@ inline void TagInfo(const std::string& tag, const TString& format,
 }
 
 template <typename TString, typename... Args>
-inline void TagWarning(const std::string& tag, const TString& format,
+inline void TagWarning(const std::string &tag, const TString &format,
                        Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kWarning) {
@@ -576,7 +572,7 @@ inline void TagWarning(const std::string& tag, const TString& format,
 }
 
 template <typename TString, typename... Args>
-inline void TagError(const std::string& tag, const TString& format,
+inline void TagError(const std::string &tag, const TString &format,
                      Args... args) {
   const Level level = GetLevel();
   if (level <= Level::kError) {
@@ -594,24 +590,24 @@ inline void TagError(const std::string& tag, const TString& format,
  * no effect.
  */
 class LogDirectory {
- public:
-  static void Set(const std::string& new_log_directory);
+public:
+  static void Set(const std::string &new_log_directory);
 
   static std::string Get();
 
- private:
+private:
   std::string path_{};
 
   LogDirectory() = default;
-  LogDirectory(const LogDirectory& other) = delete;
-  LogDirectory& operator=(const LogDirectory& other) = delete;
+  LogDirectory(const LogDirectory &other) = delete;
+  LogDirectory &operator=(const LogDirectory &other) = delete;
 
-  static LogDirectory& Instance();
+  static LogDirectory &Instance();
 
-  const std::string& path() const { return path_; }
-  std::string& path() { return path_; }
+  const std::string &path() const { return path_; }
+  std::string &path() { return path_; }
 };
 
-}  // namespace dlog
+} // namespace dlog
 
-#endif  // DLOG_LOG_HPP_
+#endif // DLOG_LOG_HPP_

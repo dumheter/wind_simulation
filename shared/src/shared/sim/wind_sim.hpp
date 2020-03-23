@@ -1,6 +1,6 @@
-// MIT License
+﻿// MIT License
 //
-// Copyright (c) 2020 Filip Bj�rklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -179,6 +179,9 @@ public:
   /// Set the vector field to look like a tornado (rotation around center +
   /// force upwards + force increase with height)
   void setAsTornado();
+
+  /// Set all vector field to Vec3F::ONE
+  void setAs111();
 
 private:
   /// Gauss-Seidel relaxation

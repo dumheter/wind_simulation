@@ -93,11 +93,11 @@
 
         {
           "name": "occluder",
-          "position": [ 8.5, 0.6, 10.0 ],
-          "scale": { "z": 1.7},
+          "position": [ 8.5, 0.6, 32.0 ],
+          "scale": { "xz": 9, "y": 10},
           "wind": {
             "occluder": {
-              "type": "cube",
+              "type": "cylinder",
               "dim": [ 3, 2, 3 ]
             }
           }
@@ -162,7 +162,7 @@
             "functions": [
               {
                 "type": "constant",
-                "magnitude": 100,
+                "magnitude": -100,
                 "direction": [ 0, 1, 0 ]
               }
             ],

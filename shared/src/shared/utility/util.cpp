@@ -44,10 +44,10 @@ namespace wind {
 void dumpSceneAux(const bs::HSceneObject &o, u32 indent) {
   std::string pad = Util::repeat(' ', indent);
   const char *name = o->getName().c_str();
-  DLOG_INFO("{}{}", pad, name);
+  DLOG_RAW("{}{}\n", pad, name);
   const bs::Vector<bs::HComponent> &comps = o->getComponents();
   for (const bs::HComponent &comp : comps) {
-    DLOG_INFO("{}* {}", pad, comp);
+    DLOG_RAW("{}* {}\n", pad, comp);
   }
   for (u32 i = 0; i < o->getNumChildren(); ++i) {
     dumpSceneAux(o->getChild(i), indent + 2);
@@ -76,7 +76,10 @@ void Util::centerCursor(bs::SPtr<bs::RenderWindow> window) {
 
 // -------------------------------------------------------------------------- //
 
-void Util::dumpScene(const bs::HSceneObject &scene) { dumpSceneAux(scene, 0); }
+void Util::dumpScene(const bs::HSceneObject &scene) {
+  DLOG_INFO("dump scene");
+  dumpSceneAux(scene, 0);
+}
 
 // -------------------------------------------------------------------------- //
 
