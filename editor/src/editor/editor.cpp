@@ -107,7 +107,7 @@ void Editor::onStartup() {
   //            bs::SceneManager::instance().getMainScene());
 
   // TMP: Save scene
-  // Scene::saveFile("res/scenes/out.json", getScene());
+  // Scene::saveFile("../res/scenes/out.json", getScene());
 }
 
 // -------------------------------------------------------------------------- //

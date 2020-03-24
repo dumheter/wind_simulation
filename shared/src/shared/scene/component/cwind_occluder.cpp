@@ -46,7 +46,7 @@ CWindOccluder::CWindOccluder(const bs::HSceneObject &parent, const Cube &cube)
           .withName("windOccluderObj")
           .withSave(false)
           .withMaterial(ObjectBuilder::ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE,
+                        "../res/textures/white.png", Vec2F::ONE,
                         Vec4F(0.0f, 0.357f, 0.588f, 0.2f))
           .withScale(cube.dim)
           .withCollider()
@@ -71,7 +71,7 @@ CWindOccluder::CWindOccluder(const bs::HSceneObject &parent,
           .withName("windOccluderObj")
           .withSave(false)
           .withMaterial(ObjectBuilder::ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE,
+                        "../res/textures/white.png", Vec2F::ONE,
                         Vec4F(0.0f, 0.357f, 0.588f, 0.2f))
           .withScale(Vec3F(cylinder.radius, cylinder.height, cylinder.radius))
           .withCollider()

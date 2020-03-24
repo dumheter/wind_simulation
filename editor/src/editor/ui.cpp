@@ -1,6 +1,6 @@
-// MIT License
+﻿// MIT License
 //
-// Copyright (c) 2020 Filip Bj�rklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,6 @@
 
 #include <filesystem>
 
-#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <GUI/BsCGUIWidget.h>
 #include <GUI/BsGUIButton.h>
@@ -48,6 +47,7 @@
 #include <GUI/BsGUIToggle.h>
 #include <Resources/BsResources.h>
 #include <Scene/BsSceneObject.h>
+#include <dlog/dlog.hpp>
 
 #include "shared/debug/debug_manager.hpp"
 
@@ -369,16 +369,14 @@ UI::UI(Editor *editor) : m_editor(editor) {
   {
     GUIInputBox *input = panel->addNewElement<GUIInputBox>();
     input->setText(m_scenePath);
-    input->setWidth(100);
+    input->setWidth(150);
     input->setPosition(4, height);
-    input->onValueChanged.connect(
-        [this](const String &text) { m_scenePath = text; });
 
     GUIButton *bSave = panel->addNewElement<GUIButton>(HString("Save"));
     bSave->setWidth(30);
-    bSave->setPosition(106, height);
+    bSave->setPosition(156, height);
     bSave->onClick.connect([this, input]() {
-      std::filesystem::path path = m_scenePath.c_str();
+      std::filesystem::path path = input->getText().c_str();
       // DLOG_VERBOSE("saving scene ({})", path);
       String _path = path.string().c_str();
       Scene::saveFile(_path, m_editor->getScene());
@@ -386,9 +384,9 @@ UI::UI(Editor *editor) : m_editor(editor) {
 
     GUIButton *bLoad = panel->addNewElement<GUIButton>(HString("Load"));
     bLoad->setWidth(30);
-    bLoad->setPosition(138, height);
+    bLoad->setPosition(188, height);
     bLoad->onClick.connect([this, input]() {
-      std::filesystem::path path = m_scenePath.c_str();
+      std::filesystem::path path = input->getText().c_str();
       if (std::filesystem::exists(path)) {
         // DLOG_VERBOSE("loading scene ({})", path);
         String _path = path.string().c_str();
@@ -396,7 +394,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
         m_sceneAutoReload = true;
       } else {
         DLOG_WARNING("Scene requested to load does not exist \"{}\"",
-                   m_scenePath.c_str());
+                     m_scenePath.c_str());
         m_sceneAutoReload = false;
       }
     });
@@ -409,11 +407,18 @@ UI::UI(Editor *editor) : m_editor(editor) {
     GUIButton *btn = panel->addNewElement<GUIButton>(HString("Bake"));
     btn->setWidth(70);
     btn->setPosition(138, height);
-    btn->onClick.connect([this]() {
-        bake();
-    });
+    btn->onClick.connect([this]() { bake(); });
     height += btn->getBounds().height + 2;
   }
+
+  // Save Bake
+  // {
+  //   GUIButton *btn = panel->addNewElement<GUIButton>(HString("Save Bake"));
+  //   btn->setWidth(70);
+  //   btn->setPosition(138, height);
+  //   btn->onClick.connect([this]() { bake(); });
+  //   height += btn->getBounds().height + 2;
+  // }
 }
 
 // -------------------------------------------------------------------------- //

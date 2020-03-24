@@ -101,6 +101,15 @@ struct BaseFn {
     return BaseFn{Constant{dir, magnitude}};
   }
 
+  static BaseFn fnPolynomial(Vec3F origo, f32 x0, f32 x1, f32 x2, f32 y0,
+                             f32 y1, f32 y2, f32 z0, f32 z1, f32 z2) {
+    return BaseFn{Polynomial{origo, x0, x1, x2, y0, y1, y2, z0, z1, z2}};
+  }
+
+  static BaseFn fnSpline(std::vector<Vec3F>&& points, u32 degree, u32 samples) {
+    return BaseFn{Spline{std::move(points), degree, samples}};
+  }
+
   /// Construct a BaseFn from json object.
   /// @param value Should be an object.
   /// ex:

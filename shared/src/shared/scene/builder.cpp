@@ -101,19 +101,19 @@ ObjectBuilder::ObjectBuilder(Kind kind)
                     .withPosition(bs::Vector3(0.0f, -0.1f, 0.0f))
                     .withScale(bs::Vector3(0.7f, 1.8f, 0.7f))
                     .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                                  "res/textures/grid_bg.png")
+                                  "../res/textures/grid_bg.png")
                     .build();
 
     withObject(prep);
     break;
   }
   case Kind::kRotor: {
-    bs::HMesh mesh = Asset::loadMesh("res/meshes/rotor.fbx", 0.1f);
+    bs::HMesh mesh = Asset::loadMesh("../res/meshes/rotor.fbx", 0.1f);
     withMesh(mesh);
     break;
   }
   case Kind::kCylinder: {
-    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f,
+    auto [mesh, _] = Asset::loadMeshWithPhysics("../res/meshes/cylinder.fbx", 1.0f,
                                                 false, true);
     withMesh(mesh);
     break;
@@ -320,7 +320,7 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
   }
   case Kind::kCylinder: {
     bs::HMeshCollider collider = m_handle->addComponent<bs::CMeshCollider>();
-    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
+    auto [_, pmesh] = Asset::loadMeshWithPhysics("../res/meshes/cylinder.fbx",
                                                  1.0f, false, true);
     collider->setMesh(pmesh);
     collider->setMaterial(material);
@@ -498,7 +498,7 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
       ObjectBuilder(ObjectType::kCube)
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE, color)
+                        "../res/textures/white.png", Vec2F::ONE, color)
           .withPosition(position)
           .withScale(size)
           .withRotation(rotation)
@@ -517,7 +517,7 @@ ObjectBuilder &ObjectBuilder::withDebugCylinder(f32 radius, f32 height,
       ObjectBuilder(ObjectType::kCylinder)
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE, color)
+                        "../res/textures/white.png", Vec2F::ONE, color)
           .withPosition(position)
           .withScale(Vec3F(radius, height, radius))
           .withRotation(rotation)

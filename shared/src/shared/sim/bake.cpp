@@ -3,6 +3,7 @@
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/csim.hpp"
+#include "shared/scene/component/cwind.hpp"
 #include "shared/sim/vector_field.hpp"
 #include "shared/sim/wind_sim.hpp"
 #include "shared/utility/bsprinter.hpp"
@@ -17,37 +18,62 @@
 
 namespace wind {
 
-static void bakeAux(VectorField *wind, Vec3F startPos);
+static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos);
 
 void bake() {
-  DLOG_INFO("Baking");
+  DLOG_INFO("Baking..");
 
   auto csims = bs::gSceneManager().findComponents<CSim>();
   if (csims.empty()) {
-    AlfAssert(false, "failed to find any csim component");
+    DLOG_WARNING("There are no wind simulations to bake.");
     return;
   }
 
-  WindSimulation *windSim = csims[0]->getSim();
-  VectorField *wind = windSim->V();
+  for (u32 i = 0; i < csims.size(); ++i) {
 
-  const Dim3D dim = wind->getDim();
-  const f32 cellSize = wind->getCellSize();
-  DLOG_INFO("wind dim ({}, {}, {})", dim.width, dim.height, dim.depth);
+    WindSimulation *windSim = csims[i]->getSim();
+    VectorField *wind = windSim->V();
+    const Dim3D dim = wind->getDim();
+    const f32 cellSize = wind->getCellSize();
 
-  // TODO use "blue noise" to chose points to sample
-  for (u32 x = 2; x <= dim.width - 1 - 2; x += 2) {
-    for (u32 y = 1; y <= 2/*dim.height-1*/; y += 4) {
-      for (u32 z = 2; z <= dim.depth - 1 - 2; z += 2) {
-        bakeAux(wind, Vec3F{static_cast<f32>(x), static_cast<f32>(y),
-                            static_cast<f32>(z)});
+    auto parent = csims[i]->SO()->getParent();
+    const Vec3F scale{(dim.width-2) * cellSize, (dim.height-2) * cellSize,
+          (dim.depth-2) * cellSize};
+    const Vec3F pos = parent->getTransform().getPosition() + scale / 2.0f;
+    const auto volumeType = WindSystem::VolumeType::kCube;
+    auto windSO =
+        ObjectBuilder{ObjectType::kEmpty}
+            .withName(dlog::Format("baked wind {}", i).c_str())
+            .withWindVolume(volumeType, pos, scale)
+            .withWindSource(std::vector<BaseFn>{}, volumeType, pos, scale)
+            .build();
+    windSO->setParent(parent);
+    auto cwind = windSO->getComponent<CWind>();
+    // auto cwind =
+    //     parent->addComponent<CWind>(WindSystem::VolumeType::kCube, pos,
+    //     scale);
+
+    // TODO use "blue noise" to chose points to sample
+    for (u32 x = 8; x <= dim.width - 1 - 2; x += 200) {
+      for (u32 y = 1; y <= 2 /*dim.height-1*/; y += 400) {
+        for (u32 z = 8; z <= dim.depth - 1 - 2; z += 200) {
+          auto points =
+              bakeAux(wind, Vec3F{static_cast<f32>(x), static_cast<f32>(y),
+                                  static_cast<f32>(z)});
+          if (!points.empty()) {
+            cwind->addFunction(BaseFn::fnSpline(
+                std::move(points), 2, ObjectBuilder::kSplineSamplesAuto));
+          }
+        }
       }
     }
+    DLOG_INFO("[{:<3}/{}] added {} fn's", i + 1, csims.size(),
+              cwind->getFunctions().size());
   }
-  DLOG_INFO("done");
+  DLOG_INFO("..done");
 }
 
-static void bakeAux(VectorField *wind, Vec3F startPos) {
+static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
   const Dim3D dim = wind->getDim();
   const f32 cellSize = wind->getCellSize();
 
@@ -58,7 +84,6 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
   point.y = dclamp(point.y, 0.0f, (dim.height - 1) * cellSize);
   point.z = dclamp(point.z, 0.0f, (dim.depth - 1) * cellSize);
   points.push_back(point);
-
 
   constexpr u32 kMaxSteps = 30;
   for (u32 i = 0; i < kMaxSteps; i++) {
@@ -90,12 +115,14 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
                       map(startPos.y, 0.0f, dim.height * cellSize, 0.0f, 1.0f),
                       map(startPos.z, 0.0f, dim.depth * cellSize, 0.0f, 1.0f),
                       1.0f};
-    auto spline = ObjectBuilder{ObjectType::kEmpty}
-                      .withName("bakeSpline")
-                      .withSpline(points, 2, ObjectBuilder::kSplineSamplesAuto,
-                                  color)
-                      .build();
+    auto spline =
+        ObjectBuilder{ObjectType::kEmpty}
+            .withName("bakeSpline")
+            .withSpline(points, 2, ObjectBuilder::kSplineSamplesAuto, color)
+            .build();
+    return points;
   }
+  return {};
 }
 
 /**

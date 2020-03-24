@@ -1,13 +1,12 @@
-#include "ui.hpp"
+﻿#include "ui.hpp"
 
-#include "shared/debug/debug_manager.hpp"
+#include "microprofile/microprofile.h"
 #include "runtime/world.hpp"
+#include "shared/debug/debug_manager.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/scene.hpp"
-#include "microprofile/microprofile.h"
 
-#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <GUI/BsCGUIWidget.h>
 #include <GUI/BsGUIButton.h>
@@ -22,6 +21,7 @@
 #include <Image/BsSpriteTexture.h>
 #include <Importer/BsImporter.h>
 #include <Scene/BsSceneManager.h>
+#include <dlog/dlog.hpp>
 #include <regex>
 
 namespace wind {
@@ -48,23 +48,27 @@ struct NetDebugInfo::Data {
   bs::String queueTime{};
 };
 
-NetDebugInfo::NetDebugInfo()
-    : m_data(new Data()) {}
+NetDebugInfo::NetDebugInfo() : m_data(new Data()) {}
 
-NetDebugInfo::~NetDebugInfo() {
-  delete m_data;
-}
+NetDebugInfo::~NetDebugInfo() { delete m_data; }
 
 void NetDebugInfo::setup(bs::GUILayoutY *layout) {
   m_data->hCQL = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->CQL));
   m_data->hCQR = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->CQR));
-  m_data->hBSCE = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->BSCE));
-  m_data->hping = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->ping));
-  m_data->houtBytes = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->outBytes));
-  m_data->houtPackets = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->outPackets));
-  m_data->hinBytes = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->inBytes));
-  m_data->hinPackets = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->inPackets));
-  m_data->hqueueTime = layout->addNewElement<bs::GUILabel>(bs::HString(m_data->queueTime));
+  m_data->hBSCE =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->BSCE));
+  m_data->hping =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->ping));
+  m_data->houtBytes =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->outBytes));
+  m_data->houtPackets =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->outPackets));
+  m_data->hinBytes =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->inBytes));
+  m_data->hinPackets =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->inPackets));
+  m_data->hqueueTime =
+      layout->addNewElement<bs::GUILabel>(bs::HString(m_data->queueTime));
 }
 
 void NetDebugInfo::update(const Client &client) {
@@ -80,7 +84,8 @@ void NetDebugInfo::update(const Client &client) {
       fmt::format("b/s cap estimation {}", status->m_nSendRateBytesPerSecond);
   m_data->ping = fmt::format("ping {}", status->m_nPing);
   m_data->outBytes = fmt::format("out b/s {:.2f}", status->m_flOutBytesPerSec);
-  m_data->outPackets = fmt::format("out p/s {:.2f}", status->m_flOutPacketsPerSec);
+  m_data->outPackets =
+      fmt::format("out p/s {:.2f}", status->m_flOutPacketsPerSec);
   m_data->inBytes = fmt::format("in  b/s {}", status->m_flInBytesPerSec);
   m_data->inPackets = fmt::format("in  p/s {}", status->m_flInPacketsPerSec);
   m_data->queueTime = fmt::format("q time {}us", status->m_usecQueueTime);
@@ -150,8 +155,8 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
     });
     GUIButton *btn2 = l->addNewElement<GUIButton>(GUIContent{HString{"d/c"}});
     btn2->onClick.connect([input, world] {
-        if (world->getMyPlayer()->isConnected()) {
-          world->getMyPlayer()->disconnect();
+      if (world->getMyPlayer()->isConnected()) {
+        world->getMyPlayer()->disconnect();
       }
     });
   }
@@ -179,10 +184,9 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
     text->setWidth(70);
     m_shootForce = l->addNewElement<GUISliderHorz>();
     m_shootForce->setPercent(0.3f);
-    m_shootForce->onChanged.connect(
-        [world](f32 percent) {
-          world->getMyPlayer()->setShootForce(100.0f * percent);
-        });
+    m_shootForce->onChanged.connect([world](f32 percent) {
+      world->getMyPlayer()->setShootForce(100.0f * percent);
+    });
   }
 
   // Toggle wind volume arrows
@@ -193,13 +197,34 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
     auto toggle = l->addNewElement<GUIToggle>(HString());
     toggle->toggleOn();
     DebugManager::setBool("WVArrows", true);
-    toggle->onToggled.connect([](bool value) {
-        DebugManager::setBool("WVArrows", value);
-      });
+    toggle->onToggled.connect(
+        [](bool value) { DebugManager::setBool("WVArrows", value); });
+  }
+
+  // Save/Load scene
+  {
+    auto l = layout->addNewElement<GUILayoutX>();
+    GUIInputBox *input = l->addNewElement<GUIInputBox>();
+    input->setText(world->getScenePath());
+    input->setWidth(150);
+
+    GUIButton *bLoad = l->addNewElement<GUIButton>(HString("Load"));
+    bLoad->setWidth(30);
+    bLoad->onClick.connect([world, input]() {
+      std::filesystem::path path = input->getText();
+      if (std::filesystem::exists(path)) {
+        String spath = path.string().c_str();
+        world->setScenePath(spath);
+        world->reloadStaticScene();
+      } else {
+        DLOG_WARNING("Scene requested to load does not exist \"{}\"",
+                     world->getScenePath().c_str());
+      }
+    });
   }
 
   { // aim dot
-    HTexture dotTex = gImporter().import<Texture>("res/textures/dot.png");
+    HTexture dotTex = gImporter().import<Texture>("../res/textures/dot.png");
     HSpriteTexture dotSprite = SpriteTexture::create(dotTex);
     m_aim = GUITexture::create(dotSprite);
     m_aim->setSize(kAimDiameter, kAimDiameter);
@@ -217,4 +242,4 @@ f32 Ui::getShootForce() const { return m_shootForce->getPercent(); }
 
 void Ui::setShootForce(f32 percent) { m_shootForce->setPercent(percent); }
 
-}
+} // namespace wind
