@@ -30,6 +30,7 @@
 
 #include <Math/BsQuaternion.h>
 #include <Math/BsVector2.h>
+#include <Math/BsVector2I.h>
 #include <Math/BsVector3.h>
 #include <Math/BsVector3I.h>
 #include <Math/BsVector4.h>
@@ -41,6 +42,7 @@
 namespace wind {
 
 using Vec2F = ::bs::Vector2;
+using Vec2I = ::bs::Vector2I;
 using Vec3F = ::bs::Vector3;
 using Vec3I = ::bs::Vector3I;
 using Vec4F = ::bs::Vector4;

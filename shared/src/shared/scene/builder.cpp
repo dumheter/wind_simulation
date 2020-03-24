@@ -29,11 +29,11 @@
 #include "shared/asset.hpp"
 #include "shared/render/shader.hpp"
 #include "shared/scene/component/cnet_component.hpp"
+#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_affectable.hpp"
-#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
@@ -371,9 +371,8 @@ ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &
-ObjectBuilder::withWindVolume(WindSystem::VolumeType type, Vec3F pos,
-                              Vec3F scale) {
+ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
+                                             Vec3F pos, Vec3F scale) {
   constexpr Vec3F rot{1.0f, 1.0f, 1.0f};
   constexpr Vec4F color{1.0f, 1.0f, 0.0f, 0.15f};
 
@@ -425,7 +424,7 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
   // Add sub-objects to render spline
   Spline *spline = splineComp->getSpline();
   const f32 len = spline->calcLen(u32(spline->getPoints().size()) * 10u);
-  if (samples == kSplineSamplesInvalid) {
+  if (samples == kSplineSamplesAuto) {
     samples = u32(len);
   }
 

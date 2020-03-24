@@ -50,7 +50,7 @@ struct MoveableState;
 class ObjectBuilder {
 public:
   /// Invalid number of samples. Used as default
-  static constexpr u32 kSplineSamplesInvalid = std::numeric_limits<u32>::max();
+  static constexpr u32 kSplineSamplesAuto = std::numeric_limits<u32>::max();
 
   /// Enumeration of shader kinds. An object material uses one of these.
   enum class ShaderKind {
@@ -119,8 +119,8 @@ public:
   /// @note Expects its parent to be a cube, and will use its
   /// mesh for the wind collision trigger volume.
   ObjectBuilder &withWindSource(const std::vector<BaseFn> &functions,
-                                WindSystem::VolumeType volumeType,
-                                Vec3F pos, Vec3F scale);
+                                WindSystem::VolumeType volumeType, Vec3F pos,
+                                Vec3F scale);
 
   ObjectBuilder &withWindVolume(WindSystem::VolumeType type, Vec3F pos,
                                 Vec3F scale);
@@ -135,7 +135,7 @@ public:
 
   /// Adds a spline component to the object
   ObjectBuilder &withSpline(const std::vector<Vec3F> &points, u32 degree,
-                            u32 samples = kSplineSamplesInvalid);
+                            u32 samples = kSplineSamplesAuto);
 
   /// Adds a spline follow component to the object
   ObjectBuilder &withSplineFollow(f32 speed, CSplineFollow::WrapMode wrapMode);
