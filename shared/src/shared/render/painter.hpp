@@ -89,7 +89,7 @@ public:
   /// Draw a line
   void drawLine(const Vec3F &start, const Vec3F &end);
 
-  /// Draw a spline
+  /// Draw a spline. Pre-sampled splines ignore the sample count
   void drawSpline(const Spline &spline, u32 samples = kSplineSamplesAuto);
 
   /// Draw lines from a list
@@ -119,7 +119,7 @@ public:
   static void buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
                          const Vec3F &dir, f32 scale = 1.0f);
 
-  /// Build a spline
+  /// Build a spline. Pre-sampled splines ignore the sample count
   static void buildSpline(bs::Vector<Vec3F> &lines, const Spline &spline,
                           u32 samples = kSplineSamplesAuto);
 

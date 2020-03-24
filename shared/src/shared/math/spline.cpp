@@ -73,6 +73,22 @@ Spline::~Spline() {
 
 // -------------------------------------------------------------------------- //
 
+void Spline::preSample(u32 samples) {
+  const f32 len = calcLen(u32(getPoints().size()) * 10u);
+  if (samples == kSplineSamplesAuto) {
+    samples = u32(len);
+  }
+
+  m_sampleCache.clear();
+  const f32 step = 1.0f / samples;
+  for (u32 i = 1; i <= samples; i++) {
+    const f32 t = step * i;
+    m_sampleCache.push_back(sample(t));
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
 Vec3F Spline::sample(f32 t) const {
   AlfAssert(t >= 0.0 && t <= 1.0, "t must be within the range [0.0, 1.0]");
 

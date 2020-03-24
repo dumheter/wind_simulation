@@ -227,19 +227,31 @@ void Painter::buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
 
 void Painter::buildSpline(bs::Vector<Vec3F> &lines, const Spline &spline,
                           u32 samples) {
-  const f32 len = spline.calcLen(u32(spline.getPoints().size()) * 10u);
-  if (samples == kSplineSamplesAuto) {
-    samples = u32(len);
-  }
 
-  Vec3F prev = spline.sample(0);
-  const f32 step = 1.0f / samples;
-  for (u32 i = 1; i <= samples; i++) {
-    const f32 t = step * i;
-    const Vec3F pos = spline.sample(t);
-    lines.push_back(prev);
-    lines.push_back(pos);
-    prev = pos;
+  if (spline.isPreSampled()) {
+    const std::vector<Vec3F> points = spline.getPreSampledPoints();
+    Vec3F prev = points[0];
+    for (size_t i = 1; i < points.size(); i++) {
+      Vec3F pos = points[i];
+      lines.push_back(prev);
+      lines.push_back(pos);
+      prev = pos;
+    }
+  } else {
+    const f32 len = spline.calcLen(u32(spline.getPoints().size()) * 10u);
+    if (samples == kSplineSamplesAuto) {
+      samples = u32(len);
+    }
+
+    Vec3F prev = spline.sample(0);
+    const f32 step = 1.0f / samples;
+    for (u32 i = 1; i <= samples; i++) {
+      const f32 t = step * i;
+      const Vec3F pos = spline.sample(t);
+      lines.push_back(prev);
+      lines.push_back(pos);
+      prev = pos;
+    }
   }
 }
 

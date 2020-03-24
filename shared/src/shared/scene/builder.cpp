@@ -422,39 +422,14 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
   // Spline component
   HCSpline splineComp = m_handle->addComponent<CSpline>(points, degree);
 
-  // Add sub-objects to render spline
-  // Spline *spline = splineComp->getSpline();
-  // const f32 len = spline->calcLen(u32(spline->getPoints().size()) * 10u);
-  // if (samples == kSplineSamplesAuto) {
-  //  samples = u32(len);
-  //}
-  //
-  // ObjectBuilder splineObjBuilder(ObjectType::kEmpty);
-  // splineObjBuilder.withName("spline_waypoints");
-  //
-  // const f32 step = 1.0f / samples;
-  // for (u32 i = 0; i <= samples; i++) {
-  //  f32 t = step * i;
-  //  Vec3F pos = spline->sample(t);
-  //
-  //  const bs::HSceneObject waypointObj =
-  //      ObjectBuilder{ObjectType::kCube}
-  //          .withSave(false)
-  //          .withMaterial(ShaderKind::kStandard, "res/textures/white.png",
-  //                        Vec2F::ONE, color)
-  //          .withPosition(pos)
-  //          .withScale(scale)
-  //          .build();
-  //
-  //  splineObjBuilder.withObject(waypointObj);
-  //}
-  // const bs::HSceneObject splineObj = splineObjBuilder.build();
-
   Spline *spline = splineComp->getSpline();
+  spline->preSample(samples);
+
   const bs::HSceneObject splineObj =
       ObjectBuilder()
-          .withPainter([spline](Painter &painter) {
-            painter.setColor(Color::magenta());
+          .withPainter([spline, color](Painter &painter) {
+            painter.setColor(
+                Color::makeFloat(color.x, color.y, color.z, color.w));
             painter.drawSpline(*spline);
           })
           .build();
