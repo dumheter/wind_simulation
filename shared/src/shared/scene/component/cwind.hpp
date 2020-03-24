@@ -85,8 +85,6 @@ public:
 
   void bakeDebugArrows(Vec3F pos, Vec3F scale);
 
-
-
   static bs::RTTITypeBase *getRTTIStatic();
 
   bs::RTTITypeBase *getRTTI() const override;

@@ -1,6 +1,7 @@
 ﻿#include "bake.hpp"
 
 #include "shared/math/math.hpp"
+#include "shared/scene/builder.hpp"
 #include "shared/scene/component/csim.hpp"
 #include "shared/sim/vector_field.hpp"
 #include "shared/sim/wind_sim.hpp"
@@ -12,7 +13,7 @@
 #include <dlog/dlog.hpp>
 #include <vector>
 
-#include "shared/scene/builder.hpp"
+#include "shared/scene/component/cspline.hpp"
 
 namespace wind {
 
@@ -21,7 +22,7 @@ static void bakeAux(VectorField *wind, Vec3F startPos);
 void bake() {
   DLOG_INFO("Baking");
 
-  auto csims = bs::gSceneManager().findComponents<CSim>(true);
+  auto csims = bs::gSceneManager().findComponents<CSim>();
   if (csims.empty()) {
     AlfAssert(false, "failed to find any csim component");
     return;
@@ -57,7 +58,7 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
   point.z = dclamp(point.z, 0.0f, (dim.depth - 1) * cellSize);
   points.push_back(point);
 
-  constexpr f32 kSpacing = 0.5f;
+
   constexpr u32 kMaxSteps = 100;
   for (u32 i = 0; i < kMaxSteps; i++) {
     const auto force = wind->sampleNear(point);
@@ -75,21 +76,23 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
              std::abs(a.y - b.y) > threshold || std::abs(a.z - b.z) > threshold;
     };
 
-    if (anyAxisOver(points.back(), point, kSpacing) || i + 1 == kMaxSteps) {
-      points.push_back(point);
+    constexpr f32 kSpacing = 0.05f;
+    if (!anyAxisOver(points.back(), point, kSpacing)) {
+      break;
     }
+    points.push_back(point);
   }
 
   if (points.size() > 2) {
-    const Vec4F color{
-        map(startPos.x, 0.0f, dim.width * cellSize, 0.0f, 1.0f),
-        map(startPos.y, 0.0f, dim.height * cellSize, 0.0f, 1.0f),
-        map(startPos.z, 0.0f, dim.depth * cellSize, 0.0f, 1.0f), 1.0f};
+    const Vec4F color{map(startPos.x, 0.0f, dim.width * cellSize, 0.0f, 1.0f),
+                      map(startPos.y, 0.0f, dim.height * cellSize, 0.0f, 1.0f),
+                      map(startPos.z, 0.0f, dim.depth * cellSize, 0.0f, 1.0f),
+                      1.0f};
     auto spline =
         ObjectBuilder{ObjectType::kEmpty}
             .withName("bakeSpline")
             .withSpline(points, 2,
-                        static_cast<f32>(points.size() * kSpacing * 10.0f),
+                        static_cast<f32>(points.size()),
                         color, Vec3F(0.1f, 0.1f, 0.1f))
             .build();
   }

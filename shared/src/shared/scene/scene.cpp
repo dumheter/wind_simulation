@@ -384,11 +384,13 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value, "position", position);
   }
 
+  // Scale
   const Vec3F scale = object->getTransform().getScale();
   if (scale != Vec3F::ONE) {
     JsonUtil::setValue(value, "scale", scale);
   }
 
+  // Rotation
   Vec3F rotation;
   {
     const Quat qrot = object->getTransform().getRotation();
@@ -424,6 +426,7 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     JsonUtil::setValue(value["wind"], "position", wind->getPos());
     JsonUtil::setValue(value["wind"], "scale", wind->getScale());
 
+    // Basic functions
     if (!wind->getFunctions().empty()) {
       std::vector<json> fns{};
       for (const auto &fn : wind->getFunctions()) {

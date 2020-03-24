@@ -69,8 +69,10 @@ struct Polynomial {
 
 struct Spline {
   std::vector<Vec3F> points;
+  u32 degree;
+  u32 samples;
 
-  Vec3F operator()(const Vec3F point) const { return Vec3F::ZERO; }
+  Vec3F operator()(Vec3F point) const;
 
   void toJson(nlohmann::json &value) const;
   static Spline fromJson(const nlohmann::json &value);

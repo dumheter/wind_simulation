@@ -116,7 +116,7 @@ inline f32 round(f32 value, u32 dec) {
 
 /// How far apart is a and b?
 /// @return The sum of position difference
-inline f32 distance3D(Vec3F a, Vec3F b) {
+inline f32 distance(Vec3F a, Vec3F b) {
   return std::sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) +
                    (a.z - b.z) * (a.z - b.z));
 }

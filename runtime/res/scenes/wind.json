@@ -134,6 +134,44 @@
         },
 
         {
+          "name": "wind volume spline",
+          "position": {
+            "x": -8.0,
+            "y": 4.6,
+            "z": -32
+          },
+          "scale": [ 10, 10, 10 ],
+          "wind": {
+            "functions": [
+              {
+                "type": "spline",
+                "degree": 2,
+                "samples": 100,
+                "points": [
+                  {"point": [5, 5, 5]},
+                  {"point": [-5, 5, 5]},
+                  {"point": [-5, 5, -5]},
+                  {"point": [5, 5, -5]},
+                  {"point": [5, 5, 5]}
+                ]
+              },
+              {
+                "type": "spline",
+                "degree": 2,
+                "samples": 100,
+                "points": [
+                  {"point": [0, 0, 0]},
+                  {"point": [0, 10, 0]}
+                ]
+              }
+            ],
+            "volume": {
+              "type": "cube"
+            }
+          }
+        },
+
+        {
           "name": "fan",
           "type": "rotor",
           "scale": { "xyz": 1.0 },

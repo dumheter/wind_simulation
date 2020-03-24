@@ -114,7 +114,7 @@ Vec3F VectorField::sampleNear(Vec3F point) const {
   f32 dist[8];
   f32 sum = 0.0f;
   for (u32 i = 0; i < 8; ++i) {
-    dist[i] = distance3D(point, cell[i].toVec3F());
+    dist[i] = distance(point, cell[i].toVec3F());
     // using gaussian makes sure the closest point is valued the most.
     sum += gaussian(dist[i], 1.0f, 0.0f, m_cellSize / 2.0f);
   }
