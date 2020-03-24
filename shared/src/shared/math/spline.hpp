@@ -86,8 +86,6 @@ private:
 
   /// Spline handle
   tsBSpline m_spline = {};
-  /// DeBoor net
-  mutable tsDeBoorNet m_net = {};
 };
 
 } // namespace wind

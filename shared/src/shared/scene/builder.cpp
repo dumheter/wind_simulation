@@ -417,8 +417,7 @@ ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
-                                         u32 degree, u32 samples, Vec4F color,
-                                         Vec3F scale) {
+                                         u32 degree, u32 samples, Vec4F color) {
   // Spline component
   HCSpline splineComp = m_handle->addComponent<CSpline>(points, degree);
 

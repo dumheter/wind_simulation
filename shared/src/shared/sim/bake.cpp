@@ -35,9 +35,10 @@ void bake() {
   const f32 cellSize = wind->getCellSize();
   DLOG_INFO("wind dim ({}, {}, {})", dim.width, dim.height, dim.depth);
 
-  for (u32 x = 4; x <= dim.width - 1 - 4; x += 4) {
-    for (u32 y = 1; y <= 2 /*dim.height-1*/; y += 2) {
-      for (u32 z = 4; z <= dim.depth - 1 - 4; z += 4) {
+  // TODO use "blue noise" to chose points to sample
+  for (u32 x = 2; x <= dim.width - 1 - 2; x += 2) {
+    for (u32 y = 1; y <= 2/*dim.height-1*/; y += 4) {
+      for (u32 z = 2; z <= dim.depth - 1 - 2; z += 2) {
         bakeAux(wind, Vec3F{static_cast<f32>(x), static_cast<f32>(y),
                             static_cast<f32>(z)});
       }
@@ -59,7 +60,7 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
   points.push_back(point);
 
 
-  constexpr u32 kMaxSteps = 100;
+  constexpr u32 kMaxSteps = 30;
   for (u32 i = 0; i < kMaxSteps; i++) {
     const auto force = wind->sampleNear(point);
     if (force == Vec3F::ZERO) {
@@ -78,6 +79,7 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
 
     constexpr f32 kSpacing = 0.05f;
     if (!anyAxisOver(points.back(), point, kSpacing)) {
+      DLOG_VERBOSE("early exit, too low wind");
       break;
     }
     points.push_back(point);
@@ -88,13 +90,11 @@ static void bakeAux(VectorField *wind, Vec3F startPos) {
                       map(startPos.y, 0.0f, dim.height * cellSize, 0.0f, 1.0f),
                       map(startPos.z, 0.0f, dim.depth * cellSize, 0.0f, 1.0f),
                       1.0f};
-    auto spline =
-        ObjectBuilder{ObjectType::kEmpty}
-            .withName("bakeSpline")
-            .withSpline(points, 2,
-                        static_cast<f32>(points.size()),
-                        color, Vec3F(0.1f, 0.1f, 0.1f))
-            .build();
+    auto spline = ObjectBuilder{ObjectType::kEmpty}
+                      .withName("bakeSpline")
+                      .withSpline(points, 2, ObjectBuilder::kSplineSamplesAuto,
+                                  color)
+                      .build();
   }
 }
 

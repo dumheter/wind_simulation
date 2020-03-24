@@ -2,12 +2,10 @@
 
 #include "shared/scene/builder.hpp"
 #include "shared/utility/json_util.hpp"
-#include "shared/utility/bsprinter.hpp"
 
 #include <ThirdParty/json.hpp>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
-#include <dlog/dlog.hpp>
 
 namespace wind {
 
@@ -120,8 +118,8 @@ Polynomial Polynomial::FromBytes(alflib::RawMemoryReader &mr) {
 }
 
 Vec3F Spline::operator()(const Vec3F point) const {
-  f32 minDist = distance(points[0], point);
   u32 closestPoint = 0;
+  f32 minDist = distance(points[0], point);
   for (u32 i = 1; i < points.size(); ++i) {
     if (f32 d = distance(points[i], point); d < minDist) {
       minDist = d;
@@ -129,18 +127,42 @@ Vec3F Spline::operator()(const Vec3F point) const {
     }
   }
 
-  // TODO better force algo
-  Vec3F force;
-  if (closestPoint == 0) {
-    force = points[closestPoint + 1] - points[closestPoint];
-  } else if (closestPoint == points.size() - 1) {
-    force = points[closestPoint] - points[closestPoint - 1];
+  // TODO better force algo?
+
+  // weighted closest point
+  // A-----B-----C
+  Vec3F a;
+  const Vec3F b = points[closestPoint];
+  Vec3F c;
+  if (closestPoint != 0 && closestPoint+1 != points.size()) {
+    a = points[closestPoint-1];
+    c = points[closestPoint+1];
   } else {
-    force = (points[closestPoint + 1] - points[closestPoint] +
-             points[closestPoint] - points[closestPoint - 1]) / 2.0f;
+    if (const f32 firstLastDist = distance(points.front(), points.back());
+        firstLastDist > 0.1f) {
+      if (closestPoint == 0) {
+        c = points[closestPoint + 1];
+        a = b - (c - b);
+      } else {
+        a = points[closestPoint - 1];
+        c = b + (b - a);
+      }
+    } else {
+      if (closestPoint == 0) {
+        a = points[points.size()-2];
+        c = points[closestPoint + 1];
+      } else {
+        a = points[closestPoint - 1];
+        c = points[1];
+      }
+    }
   }
 
-  DLOG_INFO("force {} @ {}, closest: {}", force, point, points[closestPoint]);
+  const f32 aDist = gaussian(distance(a, b), 1.0f, 0.0f, minDist);
+  const f32 cDist = gaussian(distance(c, b), 1.0f, 0.0f, minDist);
+  const f32 aMul = aDist / (aDist + cDist);
+  const f32 cMul = cDist / (aDist + cDist);
+  const Vec3F force = (cMul*(c - b) + aMul*(b - a));
 
   return force;
 }
@@ -184,7 +206,7 @@ void Spline::toJson(nlohmann::json &value) const {
 Spline Spline::fromJson(const nlohmann::json &value) {
   Spline s{};
   s.degree = value.value("degree", 2);
-  s.samples = value.value("samples", ObjectBuilder::kSplineSamplesInvalid);
+  s.samples = value.value("samples", ObjectBuilder::kSplineSamplesAuto);
   const nlohmann::json jpoints = value["points"];
   for (const auto jpoint : jpoints) {
     s.points.push_back(JsonUtil::getVec3F(jpoint, "point", Vec3F::ZERO));
