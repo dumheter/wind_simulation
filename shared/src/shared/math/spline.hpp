@@ -40,17 +40,31 @@ namespace wind {
 class Spline {
 
 public:
+  /// Invalid number of samples. Used as default
+  static constexpr u32 kSplineSamplesAuto = std::numeric_limits<u32>::max();
+
   /// Construct a spline from a list of points and an optional list of knots.
   explicit Spline(const std::vector<Vec3F> &points, u32 degree = 2);
 
   /// Destruct spline
   ~Spline();
 
+  /// Pre-sample spline and cache result
+  void preSample(u32 samples = kSplineSamplesAuto);
+
   /// Sample the spline at time 't' (0.0 -> 1.0).
   Vec3F sample(f32 t) const;
 
   /// Returns the points of the spline.
   const std::vector<Vec3F> &getPoints() const { return m_points; }
+
+  /// Returns pre-sampled points
+  const std::vector<Vec3F> &getPreSampledPoints() const {
+    return m_sampleCache;
+  }
+
+  /// Returns whether or not the spline is pre-sampled
+  bool isPreSampled() const { return !m_sampleCache.empty(); }
 
   /// Returns the degree of the spline.
   u32 getDegree() const { return m_degree; }
@@ -66,6 +80,9 @@ private:
   std::vector<Vec3F> m_points;
   /// Degree of spline
   u32 m_degree;
+
+  /// Cache with pre-sampled points
+  std::vector<Vec3F> m_sampleCache;
 
   /// Spline handle
   tsBSpline m_spline = {};

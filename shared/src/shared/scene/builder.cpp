@@ -29,11 +29,11 @@
 #include "shared/asset.hpp"
 #include "shared/render/shader.hpp"
 #include "shared/scene/component/cnet_component.hpp"
+#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_affectable.hpp"
-#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
@@ -371,9 +371,8 @@ ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &
-ObjectBuilder::withWindVolume(WindSystem::VolumeType type, Vec3F pos,
-                              Vec3F scale) {
+ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
+                                             Vec3F pos, Vec3F scale) {
   constexpr Vec3F rot{1.0f, 1.0f, 1.0f};
   constexpr Vec4F color{1.0f, 1.0f, 0.0f, 0.15f};
 
@@ -418,39 +417,22 @@ ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
-                                         u32 degree, u32 samples,
-                                         Vec4F color,
+                                         u32 degree, u32 samples, Vec4F color,
                                          Vec3F scale) {
   // Spline component
   HCSpline splineComp = m_handle->addComponent<CSpline>(points, degree);
 
-  // Add sub-objects to render spline
   Spline *spline = splineComp->getSpline();
-  const f32 len = spline->calcLen(u32(spline->getPoints().size()) * 10u);
-  if (samples == kSplineSamplesInvalid) {
-    samples = u32(len);
-  }
+  spline->preSample(samples);
 
-  ObjectBuilder splineObjBuilder(ObjectType::kEmpty);
-  splineObjBuilder.withName("spline_waypoints");
-
-  const f32 step = 1.0f / samples;
-  for (u32 i = 0; i <= samples; i++) {
-    f32 t = step * i;
-    Vec3F pos = spline->sample(t);
-
-    const bs::HSceneObject waypointObj =
-        ObjectBuilder{ObjectType::kCube}
-            .withSave(false)
-            .withMaterial(ShaderKind::kStandard, "res/textures/white.png",
-                          Vec2F::ONE, color)
-            .withPosition(pos)
-            .withScale(scale)
-            .build();
-
-    splineObjBuilder.withObject(waypointObj);
-  }
-  const bs::HSceneObject splineObj = splineObjBuilder.build();
+  const bs::HSceneObject splineObj =
+      ObjectBuilder()
+          .withPainter([spline, color](Painter &painter) {
+            painter.setColor(
+                Color::makeFloat(color.x, color.y, color.z, color.w));
+            painter.drawSpline(*spline);
+          })
+          .build();
   withObject(splineObj);
 
   return *this;

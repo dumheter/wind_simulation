@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/math/spline.hpp"
+
 #include <Debug/BsDebugDraw.h>
 
 // ========================================================================== //
@@ -35,6 +37,31 @@
 namespace wind {
 
 Painter::Painter() {}
+
+// -------------------------------------------------------------------------- //
+
+void Painter::drawCube(const Vec3F &pos, const Vec3F &dim) {
+  buildCube(m_lines, pos, dim);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Painter::drawCross(const Vec3F &pos, const Vec3F &dim) {
+  buildCross(m_lines, pos, dim);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Painter::drawGizmo(const Vec3F &pos, f32 scale) {
+  const Color col = m_color;
+  setColor(Color::red());
+  drawArrow(pos, Vec3F(1, 0, 0), scale * 2.0f);
+  setColor(Color::green());
+  drawArrow(pos, Vec3F(0, 1, 0), scale * 2.0f);
+  setColor(Color::blue());
+  drawArrow(pos, Vec3F(0, 0, 1), scale * 2.0f);
+  setColor(col);
+}
 
 // -------------------------------------------------------------------------- //
 
@@ -49,11 +76,23 @@ void Painter::drawLine(const Vec3F &start, const Vec3F &end) {
   m_lines.push_back(end);
 }
 
+void Painter::drawSpline(const Spline &spline, u32 samples) {
+  buildSpline(m_lines, spline, samples);
+}
+
 // -------------------------------------------------------------------------- //
 
 void Painter::drawLines(const bs::Vector<Vec3F> &lines) {
   bs::DebugDraw::instance().drawLineList(lines);
 }
+
+// -------------------------------------------------------------------------- //
+
+void Painter::draw(const Cube &cube) { drawCube(cube.pos, cube.dim); }
+
+// -------------------------------------------------------------------------- //
+
+void Painter::draw(const Cross &cross) { drawCross(cross.pos, cross.dim); }
 
 // -------------------------------------------------------------------------- //
 
@@ -64,6 +103,78 @@ void Painter::draw(const Arrow &arrow, f32 scale) {
 // -------------------------------------------------------------------------- //
 
 void Painter::draw(const Line &line) { drawLine(line.start, line.end); }
+
+// -------------------------------------------------------------------------- //
+
+void Painter::buildCube(bs::Vector<Vec3F> &lines, const Vec3F &pos,
+                        const Vec3F &dim) {
+  const f32 xmin = pos.x - dim.x / 2.0f;
+  const f32 xmax = pos.x + dim.x / 2.0f;
+  const f32 ymin = pos.y - dim.y / 2.0f;
+  const f32 ymax = pos.y + dim.y / 2.0f;
+  const f32 zmin = pos.z - dim.z / 2.0f;
+  const f32 zmax = pos.z + dim.z / 2.0f;
+
+  // Bottom points
+  const Vec3F p0(xmin, ymin, zmin);
+  const Vec3F p1(xmin, ymin, zmax);
+  const Vec3F p2(xmax, ymin, zmax);
+  const Vec3F p3(xmax, ymin, zmin);
+  lines.push_back(p0);
+  lines.push_back(p1);
+  lines.push_back(p1);
+  lines.push_back(p2);
+  lines.push_back(p2);
+  lines.push_back(p3);
+  lines.push_back(p3);
+  lines.push_back(p0);
+
+  // Top points
+  const Vec3F p4(xmin, ymax, zmin);
+  const Vec3F p5(xmin, ymax, zmax);
+  const Vec3F p6(xmax, ymax, zmax);
+  const Vec3F p7(xmax, ymax, zmin);
+  lines.push_back(p4);
+  lines.push_back(p5);
+  lines.push_back(p5);
+  lines.push_back(p6);
+  lines.push_back(p6);
+  lines.push_back(p7);
+  lines.push_back(p7);
+  lines.push_back(p4);
+
+  // Joins
+  lines.push_back(p0);
+  lines.push_back(p4);
+
+  lines.push_back(p1);
+  lines.push_back(p5);
+
+  lines.push_back(p2);
+  lines.push_back(p6);
+
+  lines.push_back(p3);
+  lines.push_back(p7);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Painter::buildCross(bs::Vector<Vec3F> &lines, const Vec3F &pos,
+                         const Vec3F &dim) {
+  const Vec3F x0 = pos - Vec3F(dim.x / 2.0f, 0, 0);
+  const Vec3F x1 = pos + Vec3F(dim.x / 2.0f, 0, 0);
+  const Vec3F y0 = pos - Vec3F(0, dim.y / 2.0f, 0);
+  const Vec3F y1 = pos + Vec3F(0, dim.y / 2.0f, 0);
+  const Vec3F z0 = pos - Vec3F(0, 0, dim.z / 2.0f);
+  const Vec3F z1 = pos + Vec3F(0, 0, dim.z / 2.0f);
+
+  lines.push_back(x0);
+  lines.push_back(x1);
+  lines.push_back(y0);
+  lines.push_back(y1);
+  lines.push_back(z0);
+  lines.push_back(z1);
+}
 
 // -------------------------------------------------------------------------- //
 
@@ -79,15 +190,15 @@ void Painter::buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
   lines.push_back(aEnd);
 
   // Vectors perpendicular to direction
-  Vec3F perp0 = dir.cross(Vec3F(0.0f, 1.0f, 0.0f));
+  Vec3F perp0 = dir.cross(Vec3F(0.0f, 1.0f, 0.001f));
   perp0.normalize();
-  perp0 *= 0.05f * scale;
+  perp0 *= 0.02f * scale;
   Vec3F perp1 = perp0.cross(dir);
   perp1.normalize();
-  perp1 *= 0.05f * scale;
+  perp1 *= 0.02f * scale;
 
   // Add corners
-  const Vec3F aHeadStart = aEnd - dirNorm * 0.2f * scale;
+  const Vec3F aHeadStart = aEnd - dirNorm * 0.1f * scale;
   const Vec3F corner0 = aHeadStart + perp0 + perp1;
   const Vec3F corner1 = aHeadStart - perp0 + perp1;
   const Vec3F corner2 = aHeadStart + perp0 - perp1;
@@ -110,6 +221,38 @@ void Painter::buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
   lines.push_back(corner2);
   lines.push_back(corner2);
   lines.push_back(corner0);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Painter::buildSpline(bs::Vector<Vec3F> &lines, const Spline &spline,
+                          u32 samples) {
+
+  if (spline.isPreSampled()) {
+    const std::vector<Vec3F> points = spline.getPreSampledPoints();
+    Vec3F prev = points[0];
+    for (size_t i = 1; i < points.size(); i++) {
+      Vec3F pos = points[i];
+      lines.push_back(prev);
+      lines.push_back(pos);
+      prev = pos;
+    }
+  } else {
+    const f32 len = spline.calcLen(u32(spline.getPoints().size()) * 10u);
+    if (samples == kSplineSamplesAuto) {
+      samples = u32(len);
+    }
+
+    Vec3F prev = spline.sample(0);
+    const f32 step = 1.0f / samples;
+    for (u32 i = 1; i <= samples; i++) {
+      const f32 t = step * i;
+      const Vec3F pos = spline.sample(t);
+      lines.push_back(prev);
+      lines.push_back(pos);
+      prev = pos;
+    }
+  }
 }
 
 // -------------------------------------------------------------------------- //
