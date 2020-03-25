@@ -1,9 +1,11 @@
-#include "base_functions.hpp"
+﻿#include "base_functions.hpp"
+
+#include "shared/scene/builder.hpp"
+#include "shared/utility/json_util.hpp"
+
+#include <ThirdParty/json.hpp>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
-
-#include "shared/utility/json_util.hpp"
-#include <ThirdParty/json.hpp>
 
 namespace wind {
 
@@ -17,7 +19,7 @@ String typeToString(Type type) {
     return "spline";
   case Type::kConstant:
     [[fallthrough]];
-    default:
+  default:
     return "constant";
   }
 }
@@ -115,16 +117,108 @@ Polynomial Polynomial::FromBytes(alflib::RawMemoryReader &mr) {
                     mr.Read<f32>()};
 }
 
-bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const { return false; }
-Spline Spline::FromBytes(alflib::RawMemoryReader &mr) { return Spline{}; }
-void Spline::toJson(nlohmann::json &value) const {}
-Spline Spline::fromJson(const nlohmann::json &value) { return Spline{}; }
+Vec3F Spline::operator()(const Vec3F point) const {
+  u32 closestPoint = 0;
+  f32 minDist = distance(points[0], point);
+  for (u32 i = 1; i < points.size(); ++i) {
+    if (f32 d = distance(points[i], point); d < minDist) {
+      minDist = d;
+      closestPoint = i;
+    }
+  }
+
+  // TODO better force algo?
+
+  // weighted closest point
+  // A-----B-----C
+  Vec3F a;
+  const Vec3F b = points[closestPoint];
+  Vec3F c;
+  if (closestPoint != 0 && closestPoint + 1 != points.size()) {
+    a = points[closestPoint - 1];
+    c = points[closestPoint + 1];
+  } else {
+    if (const f32 firstLastDist = distance(points.front(), points.back());
+        firstLastDist > 0.1f) {
+      if (closestPoint == 0) {
+        c = points[closestPoint + 1];
+        a = b - (c - b);
+      } else {
+        a = points[closestPoint - 1];
+        c = b + (b - a);
+      }
+    } else {
+      if (closestPoint == 0) {
+        a = points[points.size() - 2];
+        c = points[closestPoint + 1];
+      } else {
+        a = points[closestPoint - 1];
+        c = points[1];
+      }
+    }
+  }
+
+  const f32 aDist = gaussian(distance(a, b), 1.0f, 0.0f, minDist);
+  const f32 cDist = gaussian(distance(c, b), 1.0f, 0.0f, minDist);
+  const f32 aMul = aDist / (aDist + cDist);
+  const f32 cMul = cDist / (aDist + cDist);
+  const Vec3F force = (cMul * (c - b) + aMul * (b - a));
+
+  return force;
+}
+
+bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
+  mw.Write(static_cast<std::underlying_type<Type>::type>(Type::kSpline));
+  mw.Write(static_cast<u32>(points.size()));
+  for (const auto point : points) {
+    mw.Write(point.x);
+    mw.Write(point.y);
+    mw.Write(point.z);
+  }
+  mw.Write(degree);
+  return mw.Write(samples);
+}
+
+Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
+  Spline s{};
+  const auto count = mr.Read<u32>();
+  s.points.reserve(count);
+  for (u32 i = 0; i < count; ++i) {
+    s.points.emplace_back(mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>());
+  }
+  s.degree = mr.Read<decltype(s.degree)>();
+  s.samples = mr.Read<decltype(s.samples)>();
+  return s;
+}
+
+void Spline::toJson(nlohmann::json &value) const {
+  std::vector<nlohmann::json> jpoints{};
+  for (const auto point : points) {
+    nlohmann::json jpoint{};
+    JsonUtil::setValue(jpoint, "point", point);
+    jpoints.push_back(std::move(jpoint));
+  }
+  value["points"] = jpoints;
+  value["degree"] = degree;
+  value["samples"] = samples;
+}
+
+Spline Spline::fromJson(const nlohmann::json &value) {
+  Spline s{};
+  s.degree = value.value("degree", 2);
+  s.samples = value.value("samples", ObjectBuilder::kSplineSamplesAuto);
+  const nlohmann::json jpoints = value["points"];
+  for (const auto jpoint : jpoints) {
+    s.points.push_back(JsonUtil::getVec3F(jpoint, "point", Vec3F::ZERO));
+  }
+  return s;
+}
 
 } // namespace baseFunctions
 
 // ============================================================ //
 
-BaseFn BaseFn::fromJson(const nlohmann::json& value) {
+BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   const String windTypeStr = JsonUtil::getString(value, "type", "constant");
   baseFunctions::Type windType = baseFunctions::stringToType(windTypeStr);
 
@@ -137,15 +231,13 @@ BaseFn BaseFn::fromJson(const nlohmann::json& value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-      return BaseFn{Constant::fromJson(value)};
-    }
+  default: { return BaseFn{Constant::fromJson(value)}; }
   }
 }
 
-void BaseFn::toJson(nlohmann::json& value) const {
+void BaseFn::toJson(nlohmann::json &value) const {
   value["type"] = typeToString();
- std::visit([&value](auto &&f) { return f.toJson(value); }, fn);
+  std::visit([&value](auto &&f) { return f.toJson(value); }, fn);
 }
 
 bool BaseFn::ToBytes(alflib::RawMemoryWriter &mw) const {
@@ -157,19 +249,17 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
       mr.Read<std::underlying_type<baseFunctions::Type>::type>());
   BaseFn fn;
   switch (type) {
-    case baseFunctions::Type::kPolynomial: {
-      fn = BaseFn{Polynomial::FromBytes(mr)};
-      break;
-    }
-    case baseFunctions::Type::kSpline: {
-      fn = BaseFn{Spline::FromBytes(mr)};
-      break;
-    }
-    case baseFunctions::Type::kConstant:
-      [[fallthrough]];
-    default: {
-      fn = BaseFn{Constant::FromBytes(mr)};
-    }
+  case baseFunctions::Type::kPolynomial: {
+    fn = BaseFn{Polynomial::FromBytes(mr)};
+    break;
+  }
+  case baseFunctions::Type::kSpline: {
+    fn = BaseFn{Spline::FromBytes(mr)};
+    break;
+  }
+  case baseFunctions::Type::kConstant:
+    [[fallthrough]];
+  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
   }
   return fn;
 }

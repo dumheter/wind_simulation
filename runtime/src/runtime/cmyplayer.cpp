@@ -1,8 +1,8 @@
 #include "cmyplayer.hpp"
 #include "runtime/network/util.hpp"
+#include "runtime/world.hpp"
 #include "shared/scene/component_data.hpp"
 #include "shared/scene/serializer.hpp"
-#include "runtime/world.hpp"
 
 namespace wind {
 
@@ -94,7 +94,7 @@ void CMyPlayer::onShoot() {
     info.components.emplace_back(ComponentData::asRigidbody());
     info.components.emplace_back(ComponentData::asCollider(0.5f, 8.0f));
     info.components.emplace_back(
-        ComponentData::asRenderable("res/textures/grid_og.png"));
+        ComponentData::asRenderable("../res/textures/grid_og.png"));
     info.components.emplace_back(ComponentData::asWindAffectable());
     PacketBuilder::RequestCreate(packet, info);
     m_client->PacketSend(packet, SendStrategy::kUnreliable);

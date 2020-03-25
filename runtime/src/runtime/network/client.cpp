@@ -1,7 +1,7 @@
 #include "client.hpp"
-#include <dlog/dlog.hpp>
-#include "shared/scene/scene.hpp"
 #include "runtime/world.hpp"
+#include "shared/scene/scene.hpp"
+#include <dlog/dlog.hpp>
 #include <microprofile/microprofile.h>
 
 namespace wind {
@@ -118,8 +118,7 @@ void Client::handlePacket() {
   } else if (header == PacketHeaderTypes::kHello) {
     auto mr = m_packet.GetMemoryReader();
     const auto new_uid = mr.Read<UniqueId>();
-    DLOG_VERBOSE("changed uid from {} to {}", m_uid.raw(),
-               new_uid.raw());
+    DLOG_VERBOSE("changed uid from {} to {}", m_uid.raw(), new_uid.raw());
     m_world->netCompChangeUniqueId(m_uid, new_uid);
     m_uid = new_uid;
     if (!m_world->serverIsActive()) {
@@ -163,8 +162,8 @@ bool Client::PollIncomingPackets() {
       m_packet.SetFromConnection(msg->m_conn);
       got_packet = true;
     } else {
-      DLOG_ERROR("could not parse packet, too big [{}/{}]",
-               msg->m_cbSize, m_packet.GetPacketCapacity());
+      DLOG_ERROR("could not parse packet, too big [{}/{}]", msg->m_cbSize,
+                 m_packet.GetPacketCapacity());
     }
     msg->Release();
 
@@ -218,9 +217,7 @@ void Client::OnSteamNetConnectionStatusChanged(
     break;
   }
 
-  default: {
-    DLOG_WARNING("default ??");
-  }
+  default: { DLOG_WARNING("default ??"); }
   }
 }
 

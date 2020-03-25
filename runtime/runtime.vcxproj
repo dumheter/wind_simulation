@@ -56,7 +56,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;DLOG_FILESTAMP;DLOG_TIMESTAMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)..\shared\src;$(ProjectDir)..\shared\deps\bsf\include\bsfCore;$(ProjectDir)..\shared\deps\bsf\include\bsfEngine;$(ProjectDir)..\shared\deps\bsf\include\bsfUtility;$(ProjectDir)deps\gamenetworkingsockets\include;$(ProjectDir)..\shared\src\thirdparty;$(ProjectDir)deps\alflib\include;$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>

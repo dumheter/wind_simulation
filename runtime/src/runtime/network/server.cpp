@@ -1,12 +1,12 @@
 #include "server.hpp"
+#include "runtime/world.hpp"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cnet_component.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/state/player_input.hpp"
-#include "runtime/world.hpp"
-#include <dlog/dlog.hpp>
 #include <ThirdParty/json.hpp>
 #include <alflib/core/assert.hpp>
+#include <dlog/dlog.hpp>
 #include <microprofile/microprofile.h>
 
 namespace wind {
@@ -181,13 +181,12 @@ bool Server::PollIncomingPacket(Packet &packet_out) {
         }
       }
       if (!got_packet) {
-        DLOG_WARNING(
-            "received packet from unknown connection, dropping it");
+        DLOG_WARNING("received packet from unknown connection, dropping it");
         DisconnectConnection(msg->m_conn);
       }
     } else {
-      DLOG_WARNING("could not parse packet, too big [{}/{}]",
-               msg->m_cbSize, packet_out.GetPacketCapacity());
+      DLOG_WARNING("could not parse packet, too big [{}/{}]", msg->m_cbSize,
+                   packet_out.GetPacketCapacity());
     }
 
     msg->Release();
@@ -217,7 +216,7 @@ void Server::handlePacket() {
     handlePacketRequestCreate();
   } else {
     DLOG_WARNING("got unknown packet {}",
-               static_cast<u32>(m_packet.GetHeaderType()));
+                 static_cast<u32>(m_packet.GetHeaderType()));
   }
 }
 
@@ -255,10 +254,9 @@ void Server::OnSteamNetConnectionStatusChanged(
     [[fallthrough]];
   case k_ESteamNetworkingConnectionState_ClosedByPeer: {
     if (status->m_eOldState == k_ESteamNetworkingConnectionState_Connected) {
-      DLOG_INFO(
-          "Connection {}, [{}], disconnected with reason [{}], [{}].",
-          status->m_hConn, status->m_info.m_szConnectionDescription,
-          status->m_info.m_eEndReason, status->m_info.m_szEndDebug);
+      DLOG_INFO("Connection {}, [{}], disconnected with reason [{}], [{}].",
+                status->m_hConn, status->m_info.m_szConnectionDescription,
+                status->m_info.m_eEndReason, status->m_info.m_szEndDebug);
     } else if (status->m_eOldState !=
                k_ESteamNetworkingConnectionState_Connecting) {
       DLOG_WARNING("unknown state");
@@ -271,11 +269,11 @@ void Server::OnSteamNetConnectionStatusChanged(
 
   case k_ESteamNetworkingConnectionState_Connecting: {
     DLOG_VERBOSE("Connection from [{}], adding.",
-               status->m_info.m_szConnectionDescription);
+                 status->m_info.m_szConnectionDescription);
     if (m_socketInterface->AcceptConnection(status->m_hConn) != k_EResultOK) {
       DLOG_WARNING("Failed to accept a connection [{}] [{}]",
-                 status->m_info.m_szEndDebug,
-                 status->m_info.m_szConnectionDescription);
+                   status->m_info.m_szEndDebug,
+                   status->m_info.m_szConnectionDescription);
       break;
     }
 
@@ -337,9 +335,7 @@ void Server::OnSteamNetConnectionStatusChanged(
     break;
   }
 
-  default: {
-    DLOG_WARNING("default ??");
-  }
+  default: { DLOG_WARNING("default ??"); }
   }
 }
 
@@ -363,8 +359,8 @@ void Server::DisconnectConnection(ConnectionId connection) {
     PacketBroadcast(packet, SendStrategy::kReliable);
   } else {
     DLOG_WARNING("attempted to disconnect a connection, but did not "
-               "find it (map size {})",
-               m_connections.size());
+                 "find it (map size {})",
+                 m_connections.size());
   }
 }
 

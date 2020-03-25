@@ -30,6 +30,7 @@
 
 #include <Math/BsQuaternion.h>
 #include <Math/BsVector2.h>
+#include <Math/BsVector2I.h>
 #include <Math/BsVector3.h>
 #include <Math/BsVector3I.h>
 #include <Math/BsVector4.h>
@@ -41,6 +42,7 @@
 namespace wind {
 
 using Vec2F = ::bs::Vector2;
+using Vec2I = ::bs::Vector2I;
 using Vec3F = ::bs::Vector3;
 using Vec3I = ::bs::Vector3I;
 using Vec4F = ::bs::Vector4;
@@ -110,6 +112,22 @@ template <typename T> inline constexpr T minValue(T a, T b) {
 inline f32 round(f32 value, u32 dec) {
   const u32 decN = static_cast<u32>(pow(10, dec));
   return roundf(value * decN) / decN;
+}
+
+// ============================================================ //
+
+/// How far apart is a and b?
+/// @return The sum of position difference
+inline f32 distance(Vec3F a, Vec3F b) {
+  return std::sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) +
+                   (a.z - b.z) * (a.z - b.z));
+}
+
+// ============================================================ //
+
+/// https://en.wikipedia.org/wiki/Gaussian_function
+inline f32 gaussian(f32 x, f32 a, f32 b, f32 c) {
+  return a * std::exp(-((x - b) * (x - b)) / (2 * c * c));
 }
 
 } // namespace wind

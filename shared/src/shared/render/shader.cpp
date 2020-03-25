@@ -35,11 +35,11 @@
 namespace wind {
 
 ShaderManager::ShaderManager() {
-  m_shaderDiffuse = Asset::loadShader("res/shaders/diffuse_ext.bsl");
-  m_shaderTransparent = Asset::loadShader("res/shaders/transparent_ext.bsl");
+  m_shaderDiffuse = Asset::loadShader("../res/shaders/diffuse_ext.bsl");
+  m_shaderTransparent = Asset::loadShader("../res/shaders/transparent_ext.bsl");
   m_shaderTransparentNoCull =
-      Asset::loadShader("res/shaders/transparent_no_cull.bsl");
-  m_shaderWireframe = Asset::loadShader("res/shaders/wireframe.bsl");
+      Asset::loadShader("../res/shaders/transparent_no_cull.bsl");
+  m_shaderWireframe = Asset::loadShader("../res/shaders/wireframe.bsl");
 }
 
 } // namespace wind

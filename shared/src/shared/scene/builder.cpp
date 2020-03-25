@@ -29,11 +29,11 @@
 #include "shared/asset.hpp"
 #include "shared/render/shader.hpp"
 #include "shared/scene/component/cnet_component.hpp"
+#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/ctag.hpp"
 #include "shared/scene/component/cwind.hpp"
 #include "shared/scene/component/cwind_affectable.hpp"
-#include "shared/scene/component/crotor.hpp"
 #include "shared/scene/component/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
 #include "shared/utility/util.hpp"
@@ -101,26 +101,24 @@ ObjectBuilder::ObjectBuilder(Kind kind)
                     .withPosition(bs::Vector3(0.0f, -0.1f, 0.0f))
                     .withScale(bs::Vector3(0.7f, 1.8f, 0.7f))
                     .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                                  "res/textures/grid_bg.png")
+                                  "../res/textures/grid_bg.png")
                     .build();
 
     withObject(prep);
     break;
   }
   case Kind::kRotor: {
-    bs::HMesh mesh = Asset::loadMesh("res/meshes/rotor.fbx", 0.1f);
+    bs::HMesh mesh = Asset::loadMesh("../res/meshes/rotor.fbx", 0.1f);
     withMesh(mesh);
     break;
   }
   case Kind::kCylinder: {
-    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f,
-                                                false, true);
+    auto [mesh, _] = Asset::loadMeshWithPhysics("../res/meshes/cylinder.fbx",
+                                                1.0f, false, true);
     withMesh(mesh);
     break;
   }
-  default: {
-    Util::panic("Invalid type when building object ({})", kind);
-  }
+  default: { Util::panic("Invalid type when building object ({})", kind); }
   }
 }
 
@@ -320,7 +318,7 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
   }
   case Kind::kCylinder: {
     bs::HMeshCollider collider = m_handle->addComponent<bs::CMeshCollider>();
-    auto [_, pmesh] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
+    auto [_, pmesh] = Asset::loadMeshWithPhysics("../res/meshes/cylinder.fbx",
                                                  1.0f, false, true);
     collider->setMesh(pmesh);
     collider->setMaterial(material);
@@ -332,9 +330,7 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
     }
     break;
   }
-  default: {
-    break;
-  }
+  default: { break; }
   }
 
   return *this;
@@ -371,9 +367,8 @@ ObjectBuilder::withWindSource(const std::vector<BaseFn> &functions,
 
 // -------------------------------------------------------------------------- //
 
-ObjectBuilder &
-ObjectBuilder::withWindVolume(WindSystem::VolumeType type, Vec3F pos,
-                              Vec3F scale) {
+ObjectBuilder &ObjectBuilder::withWindVolume(WindSystem::VolumeType type,
+                                             Vec3F pos, Vec3F scale) {
   constexpr Vec3F rot{1.0f, 1.0f, 1.0f};
   constexpr Vec4F color{1.0f, 1.0f, 0.0f, 0.15f};
 
@@ -418,37 +413,21 @@ ObjectBuilder::withWindOccluder(const CWindOccluder::Cylinder &cylinder) {
 // -------------------------------------------------------------------------- //
 
 ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
-                                         u32 degree, u32 samples) {
+                                         u32 degree, u32 samples, Vec4F color) {
   // Spline component
   HCSpline splineComp = m_handle->addComponent<CSpline>(points, degree);
 
-  // Add sub-objects to render spline
   Spline *spline = splineComp->getSpline();
-  const f32 len = spline->calcLen(u32(spline->getPoints().size()) * 10u);
-  if (samples == kSplineSamplesInvalid) {
-    samples = u32(len);
-  }
+  spline->preSample(samples);
 
-  ObjectBuilder splineObjBuilder(ObjectType::kEmpty);
-  splineObjBuilder.withName("spline_waypoints");
-
-  const f32 step = 1.0f / samples;
-  for (u32 i = 0; i <= samples; i++) {
-    f32 t = step * i;
-    Vec3F pos = spline->sample(t);
-
-    const bs::HSceneObject waypointObj =
-        ObjectBuilder{ObjectType::kCube}
-            .withSave(false)
-            .withMaterial(ShaderKind::kStandard, "res/textures/white.png",
-                          Vec2F::ONE, Vec4F(1.0f, 0.0f, 0.0f, 1.0f))
-            .withPosition(pos)
-            .withScale(Vec3F(0.02f, 0.02f, 0.02f))
-            .build();
-
-    splineObjBuilder.withObject(waypointObj);
-  }
-  const bs::HSceneObject splineObj = splineObjBuilder.build();
+  const bs::HSceneObject splineObj =
+      ObjectBuilder()
+          .withPainter([spline, color](Painter &painter) {
+            painter.setColor(
+                Color::makeFloat(color.x, color.y, color.z, color.w));
+            painter.drawSpline(*spline);
+          })
+          .build();
   withObject(splineObj);
 
   return *this;
@@ -515,7 +494,7 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
       ObjectBuilder(ObjectType::kCube)
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE, color)
+                        "../res/textures/white.png", Vec2F::ONE, color)
           .withPosition(position)
           .withScale(size)
           .withRotation(rotation)
@@ -534,7 +513,7 @@ ObjectBuilder &ObjectBuilder::withDebugCylinder(f32 radius, f32 height,
       ObjectBuilder(ObjectType::kCylinder)
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
-                        "res/textures/white.png", Vec2F::ONE, color)
+                        "../res/textures/white.png", Vec2F::ONE, color)
           .withPosition(position)
           .withScale(Vec3F(radius, height, radius))
           .withRotation(rotation)
@@ -607,9 +586,7 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   case Kind::kCylinder:
     return "cylinder";
   case Kind::kInvalid:
-  default: {
-    return "invalid";
-  }
+  default: { return "invalid"; }
   }
 }
 

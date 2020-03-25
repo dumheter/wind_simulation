@@ -1,6 +1,6 @@
-// MIT License
+﻿// MIT License
 //
-// Copyright (c) 2020 Filip Bj�rklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,8 @@ int main() {
   using namespace wind;
 
   DLOG_INIT();
+  DLOG_SET_LOG_PATH("log");
+  DLOG_SET_LEVEL(dlog::Level::kVerbose);
   Editor editor;
   editor.run();
 

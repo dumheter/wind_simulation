@@ -37,7 +37,7 @@ public:
   void onPlayerInput(UniqueId uid, PlayerInput input,
                      std::optional<bs::Quaternion> maybeRot);
 
-  void onSceneChange(const String& scene);
+  void onSceneChange(const String &scene);
 
   void onDisconnect();
 
@@ -97,6 +97,7 @@ public:
 
   const HFPSCamera &getFpsCamera() const { return m_fpsCamera; }
 
+  void setScenePath(String path) { m_scenePath = path; }
   const String &getScenePath() const { return m_scenePath; }
 
   void setStaticScene(bs::HSceneObject so) { m_staticScene = so; }
@@ -124,7 +125,7 @@ private:
 
   bs::HSceneObject m_staticScene;
   bs::HSceneObject m_dynamicScene;
-  String m_scenePath{"res/scenes/wind.json"};
+  String m_scenePath{"../res/scenes/bake.json"};
   std::filesystem::file_time_type m_sceneEditTime;
 };
 

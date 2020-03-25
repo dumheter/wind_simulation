@@ -1,6 +1,6 @@
-// MIT License
+﻿// MIT License
 //
-// Copyright (c) 2020 Filip Bj�rklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,6 @@
 #include "shared/sim/obstruction_field.hpp"
 #include "shared/types.hpp"
 
-#include <Math/BsVector3.h>
-
 // ========================================================================== //
 // VectorField Declaration
 // ========================================================================== //
@@ -62,25 +60,33 @@ public:
 
   /// Returns the X component of the vector field
   Comp *getX() { return m_x; }
+  const Comp *getX() const { return m_x; }
 
   /// Returns the Y component of the vector field
   Comp *getY() { return m_y; }
+  const Comp *getY() const { return m_y; }
 
   /// Returns the Z component of the vector field
   Comp *getZ() { return m_z; }
+  const Comp *getZ() const { return m_z; }
 
   /// Returns a vector for the specified offset in the vector field. This is
   /// built on demand from the separate vector components.
-  Vec3F get(u32 offset) {
+  Vec3F get(u32 offset) const {
     return Vec3F(getX()->get(offset), getY()->get(offset), getZ()->get(offset));
   }
 
   /// Returns a vector for the specified location in the vector field. This is
   /// built on demand from the separate vector components.
-  Vec3F get(s32 x, s32 y, s32 z) {
+  /// @pre x, y and z must be > 1 and < dim-1.
+  Vec3F get(s32 x, s32 y, s32 z) const {
     return Vec3F(getX()->get(x, y, z), getY()->get(x, y, z),
                  getZ()->get(x, y, z));
   }
+
+  /// @param point Position in local meters. Must be > 1 and < dim-1.
+  /// @note If point is out of bounds, Vec3F::ZERO is returned.
+  Vec3F sampleNear(Vec3F point) const;
 
   /// Set the vector at the specified location in the vector field.
   void set(u32 offset, Vec3F vec) {
@@ -102,6 +108,8 @@ public:
 
   /// Returns the dimension of the vector field
   Dim3D getDim() const { return m_x->getDim(); }
+
+  f32 getCellSize() const { return m_cellSize; }
 
 private:
   /// Dimension of field

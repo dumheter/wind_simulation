@@ -30,19 +30,19 @@
 #include "editor/ui.hpp"
 #include "microprofile/microprofile.h"
 #include "shared/asset.hpp"
-#include "shared/camera_flyer.h"
+#include "shared/math/spline.hpp"
+#include "shared/scene/component/camera_flyer.h"
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
-#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
-#include <Components/BsCRenderable.h>
 #include <Components/BsCRigidbody.h>
 #include <Debug/BsDebugDraw.h>
 #include <Importer/BsImporter.h>
 #include <Input/BsInput.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
+#include <dlog/dlog.hpp>
 
 #include "shared/scene/builder.hpp"
 #include "shared/scene/component/cpaint.hpp"
@@ -88,8 +88,7 @@ void Editor::onStartup() {
       cameraComp->getRenderSettings();
   renderSettings->enableIndirectLighting = true;
   cameraComp->setRenderSettings(renderSettings);
-  const bs::HCameraFlyer cameraFlyerComp =
-      m_camera->addComponent<bs::CameraFlyer>();
+  const HCCameraFlyer cameraFlyerComp = m_camera->addComponent<CCameraFlyer>();
 
   // Setup UI
   m_ui = new UI(this);
@@ -98,28 +97,17 @@ void Editor::onStartup() {
   setScene(Scene::loadFile(kDefaultSceneName));
 
   // TMP: Create sim object
-  bs::HSceneObject simObj =
-      ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
-  simObj->setParent(getScene());
-  HCSim sim = simObj->addComponent<CSim>();
-  sim->build(u32(kGroundPlaneScale * 2.0f), 6, u32(kGroundPlaneScale * 2.0f),
-             0.25f, bs::SceneManager::instance().getMainScene());
+  // bs::HSceneObject simObj =
+  //     ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
+  // simObj->setParent(getScene());
+  // HCSim sim = simObj->addComponent<CSim>();
+  // constexpr float cellSize = 0.75;
+  // sim->build(u32(kGroundPlaneScale / cellSize) * 2 + 1, 6,
+  //            u32(kGroundPlaneScale / cellSize) * 2 + 1, cellSize,
+  //            bs::SceneManager::instance().getMainScene());
 
   // TMP: Save scene
-  // Scene::saveFile("res/scenes/out.json", getScene());
-
-  // TMP: Paint component
-  // bs::HSceneObject obj =
-  // getScene()->findPath("structures/house0/occluder"); if (obj) {
-  //  HCPaint cpaint = obj->addComponent<CPaint>();
-  //  cpaint->setPaintCallback([obj](Painter &painter) {
-  //    //
-  //    painter.setColor(Color::sRed);
-  //    painter.drawArrow(Vec3F(0.0f, 1.0f, 0.0f), Vec3F(1.0f, 1.0f, 1.0f));
-  //    painter.setColor(Color::sGreen);
-  //    painter.drawArrow(Vec3F(2.0f, 1.0f, 2.0f), Vec3F(2.0f, 2.0f, 2.0f));
-  //  });
-  //}
+  // Scene::saveFile("../res/scenes/out.json", getScene());
 }
 
 // -------------------------------------------------------------------------- //
@@ -169,6 +157,16 @@ void Editor::onPreUpdate(f32 delta) {
     // m_windSim->addVelocitySink();
     DLOG_VERBOSE("Added velocity sinks");
   }
+  if (gInput().isButtonDown(ButtonCode::BC_M)) {
+    Util::dumpScene(m_scene);
+  }
+  if (gInput().isButtonDown(ButtonCode::BC_N)) {
+    DLOG_INFO("save scene");
+    DLOG_RAW("{}\n", Scene::save(m_scene));
+  }
+  if (gInput().isButtonDown(ButtonCode::BC_Y)) {
+    DLOG_INFO("info");
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -180,7 +178,20 @@ void Editor::onFixedUpdate(f32 delta) {
 
 // -------------------------------------------------------------------------- //
 
-void Editor::onPaint(Painter &painter) {}
+void Editor::onPaint(Painter &painter) {
+  // painter.setColor(Color::magenta());
+  // painter.drawCube(Vec3F(0.0f, 0.5f, 4.0f), Vec3F::ONE);
+  //
+  // painter.setColor(Color::red());
+  // painter.drawCross(Vec3F(0.0f, 0.5f, 6.0f), Vec3F::ONE);
+  //
+  // painter.drawGizmo(Vec3F(2.0f, 0.5f, 6.0f));
+  //
+  // painter.setColor(Color::yellow());
+  // const Spline s(
+  //    {Vec3F(1, 1, 3.5), Vec3F(1, 2, 4), Vec3F(2, 3, 4), Vec3F(2, 2, 3)});
+  // painter.drawSpline(s);
+}
 
 // -------------------------------------------------------------------------- //
 
@@ -203,6 +214,7 @@ void Editor::registerControls() {
   inputConfig->registerButton("FastMove", BC_LSHIFT);
   inputConfig->registerButton("RotateObj", BC_MOUSE_LEFT);
   inputConfig->registerButton("RotateCam", BC_MOUSE_RIGHT);
+  inputConfig->registerButton("PanCam", BC_MOUSE_MIDDLE);
 
   // Camera controls
   inputConfig->registerAxis("Horizontal",
@@ -232,8 +244,9 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
       ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
   simObj->setParent(getScene());
   HCSim sim = simObj->addComponent<CSim>();
-  sim->build(u32(kGroundPlaneScale * 2.0f), 6, u32(kGroundPlaneScale * 2.0f),
-             0.25f, bs::SceneManager::instance().getMainScene());
+  constexpr float cellSize = 1.0f;
+  sim->build(kGroundPlaneScale * 4, 6, kGroundPlaneScale * 4, cellSize,
+             bs::SceneManager::instance().getMainScene());
 }
 
 } // namespace wind

@@ -2,8 +2,7 @@
 
 #include "shared/types.hpp"
 
-namespace wind
-{
+namespace wind {
 
 class Client;
 class World;
@@ -11,7 +10,7 @@ class World;
 // ============================================================ //
 
 class NetDebugInfo {
- public:
+public:
   NetDebugInfo();
 
   ~NetDebugInfo();
@@ -20,7 +19,7 @@ class NetDebugInfo {
 
   void update(const Client &client);
 
- private:
+private:
   struct Data;
   Data *m_data;
 };
@@ -28,7 +27,7 @@ class NetDebugInfo {
 // ============================================================ //
 
 class Ui {
- public:
+public:
   Ui() = default;
 
   void setup(World *world, bs::HSceneObject camera, u32 width, u32 height);
@@ -42,10 +41,10 @@ class Ui {
 
   NetDebugInfo &getNetDebugInfo() { return m_netDebugInfo; }
 
- private:
+private:
   bs::GUITexture *m_aim{};
   bs::GUISliderHorz *m_shootForce{};
   NetDebugInfo m_netDebugInfo{};
 };
 
-}
+} // namespace wind

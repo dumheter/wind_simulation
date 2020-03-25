@@ -26,6 +26,7 @@
 // Header
 // ========================================================================== //
 
+#include "shared/macros.hpp"
 #include "shared/math/math.hpp"
 #include "shared/render/color.hpp"
 
@@ -35,11 +36,28 @@
 
 namespace wind {
 
+WIND_FORWARD_DECLARE(Spline);
+
 /// Class that represents a painter for primarily debug objects on the screen.
 class Painter {
   friend class App;
 
 public:
+  /// Invalid number of samples. Used as default
+  static constexpr u32 kSplineSamplesAuto = std::numeric_limits<u32>::max();
+
+  /// Cube
+  struct Cube {
+    Vec3F pos; ///< Position (center)
+    Vec3F dim; ///< Radius in each axis.
+  };
+
+  /// Cross
+  struct Cross {
+    Vec3F pos; ///< Position
+    Vec3F dim; ///< Radius
+  };
+
   /// Arrow
   struct Arrow {
     Vec3F pos; ///< Position of arrow (center)
@@ -55,15 +73,33 @@ public:
   /// Construct painter
   Painter();
 
+  /// Draw a cube at the specified position
+  void drawCube(const Vec3F &pos, const Vec3F &dim);
+
+  /// Draw a cross
+  void drawCross(const Vec3F &pos, const Vec3F &dim);
+
+  /// Draw a gizmo.
+  void drawGizmo(const Vec3F &pos, f32 scale = 1.0f);
+
   /// Draw arrow at the specified position. The direction also determines the
   /// magnitude.
   void drawArrow(const Vec3F &pos, const Vec3F &dir, f32 scale = 1.0f);
 
-  ///
+  /// Draw a line
   void drawLine(const Vec3F &start, const Vec3F &end);
 
-  ///
+  /// Draw a spline. Pre-sampled splines ignore the sample count
+  void drawSpline(const Spline &spline, u32 samples = kSplineSamplesAuto);
+
+  /// Draw lines from a list
   void drawLines(const bs::Vector<Vec3F> &lines);
+
+  /// Draw a cube
+  void draw(const Cube &cube);
+
+  /// Draw a cross
+  void draw(const Cross &cross);
 
   /// Draw an arrow
   void draw(const Arrow &arrow, f32 scale = 1.0f);
@@ -71,9 +107,21 @@ public:
   /// Draw a line
   void draw(const Line &line);
 
+  /// Build a cube
+  static void buildCube(bs::Vector<Vec3F> &lines, const Vec3F &pos,
+                        const Vec3F &dim);
+
+  /// Build a cross
+  static void buildCross(bs::Vector<Vec3F> &lines, const Vec3F &pos,
+                         const Vec3F &dim);
+
   /// Build an arrow by adding the necessary lines to the list.
   static void buildArrow(bs::Vector<Vec3F> &lines, const Vec3F &pos,
                          const Vec3F &dir, f32 scale = 1.0f);
+
+  /// Build a spline. Pre-sampled splines ignore the sample count
+  static void buildSpline(bs::Vector<Vec3F> &lines, const Spline &spline,
+                          u32 samples = kSplineSamplesAuto);
 
   /// Build an arrow by adding the necessary lines to the list.
   void build(bs::Vector<Vec3F> &lines, const Arrow &arrow, f32 scale = 1.0f);

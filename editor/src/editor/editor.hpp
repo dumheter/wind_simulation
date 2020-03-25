@@ -91,7 +91,7 @@ private:
 
 public:
   /// Name of the default scene
-  static constexpr char kDefaultSceneName[] = "res/scenes/world.json";
+  static constexpr char kDefaultSceneName[] = "../res/scenes/tornado.json";
 
   /// Editor window width
   static constexpr u32 kWindowWidth = 1280;

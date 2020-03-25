@@ -24,7 +24,7 @@ enum class Type : u32 {
 
 String typeToString(Type type);
 
-Type stringToType(const String& type);
+Type stringToType(const String &type);
 
 // ============================================================ //
 
@@ -34,8 +34,8 @@ struct Constant {
 
   Vec3F operator()(const Vec3F) const { return dir * magnitude; }
 
-  void toJson(nlohmann::json& value) const;
-  static Constant fromJson(const nlohmann::json& value);
+  void toJson(nlohmann::json &value) const;
+  static Constant fromJson(const nlohmann::json &value);
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
   static Constant FromBytes(alflib::RawMemoryReader &mr);
@@ -69,8 +69,10 @@ struct Polynomial {
 
 struct Spline {
   std::vector<Vec3F> points;
+  u32 degree;
+  u32 samples;
 
-  Vec3F operator()(const Vec3F point) const { return Vec3F::ZERO; }
+  Vec3F operator()(Vec3F point) const;
 
   void toJson(nlohmann::json &value) const;
   static Spline fromJson(const nlohmann::json &value);
@@ -99,6 +101,15 @@ struct BaseFn {
     return BaseFn{Constant{dir, magnitude}};
   }
 
+  static BaseFn fnPolynomial(Vec3F origo, f32 x0, f32 x1, f32 x2, f32 y0,
+                             f32 y1, f32 y2, f32 z0, f32 z1, f32 z2) {
+    return BaseFn{Polynomial{origo, x0, x1, x2, y0, y1, y2, z0, z1, z2}};
+  }
+
+  static BaseFn fnSpline(std::vector<Vec3F> &&points, u32 degree, u32 samples) {
+    return BaseFn{Spline{std::move(points), degree, samples}};
+  }
+
   /// Construct a BaseFn from json object.
   /// @param value Should be an object.
   /// ex:
@@ -113,7 +124,7 @@ struct BaseFn {
   /// @param value Should be an (empty) object.
   /// ex:
   /// {}
-  void toJson(nlohmann::json& value) const;
+  void toJson(nlohmann::json &value) const;
 
   /// Calculate function value at point.
   Vec3F operator()(Vec3F point) const {
@@ -127,7 +138,6 @@ struct BaseFn {
   String typeToString() const;
 
   // static String toString(baseFunctions::Type fn);
-
 
   // static BaseFn fromString(const String &fn);
 };

@@ -6,13 +6,13 @@
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
-#include <dlog/dlog.hpp>
 #include <Components/BsCCamera.h>
 #include <Components/BsCCharacterController.h>
 #include <Importer/BsImporter.h>
 #include <Input/BsInput.h>
 #include <Math/BsQuaternion.h>
 #include <Platform/BsCursor.h>
+#include <dlog/dlog.hpp>
 #include <microprofile/microprofile.h>
 #include <regex>
 
@@ -77,9 +77,7 @@ void World::onFixedUpdate(f32) {
   }
 }
 
-void World::onWindowResize() {
-  m_ui.updateAimPosition(m_width, m_height);
-}
+void World::onWindowResize() { m_ui.updateAimPosition(m_width, m_height); }
 
 void World::setupScene() {
   DLOG_VERBOSE("loading scene");
@@ -177,7 +175,7 @@ void World::applyMyMoveableState(const MoveableState &moveableState) {
     }
   } else {
     DLOG_ERROR("[world:applyMyMoveableState] failed to find netcomp with id {}",
-             moveableState.id.raw());
+               moveableState.id.raw());
   }
 }
 
@@ -186,7 +184,7 @@ void World::onPlayerJoin(const MoveableState &moveableState) {
 
   if (m_netComps.count(moveableState.id)) {
     DLOG_VERBOSE("[world:onPlayerJoin] duplicate player, not adding, {}",
-                   moveableState.id.raw());
+                 moveableState.id.raw());
     return;
   }
 
@@ -236,7 +234,7 @@ void World::onSceneChange(const String &scene) {
 
 void World::onDisconnect() {
   DLOG_VERBOSE("onDisconnect, clearing the world of {} netComps",
-             m_netComps.size());
+               m_netComps.size());
 
   auto myNetComp = getPlayerNetComp();
   if (myNetComp) {
@@ -266,8 +264,7 @@ void World::buildObject(const CreateInfo &info) {
   MICROPROFILE_SCOPEI("world", "buildObject", MP_TURQUOISE4);
 
   if (m_netComps.count(info.state.id)) {
-    DLOG_VERBOSE("duplicate object, not building, {}",
-                   info.state.id.raw());
+    DLOG_VERBOSE("duplicate object, not building, {}", info.state.id.raw());
     return;
   }
 
@@ -280,7 +277,7 @@ void World::buildObject(const CreateInfo &info) {
       obj.withRigidbody();
     } else if (component.isType<ComponentData::WindData>()) {
       DLOG_ERROR("trying to build a windComponet, but not "
-               "supported");
+                 "supported");
       const auto &wind = component.windSourceData();
       const auto volumeType = WindSystem::u8ToVolumeType(wind.volumeType);
       obj.withWindVolume(volumeType, wind.pos, wind.scale);
@@ -414,10 +411,9 @@ void World::setupInput() {
                             VIRTUAL_AXIS_DESC((UINT32)InputAxis::MouseZ));
 }
 
-
-
 void World::addNetComp(HCNetComponent netComp) {
-  DLOG_VERBOSE("net component with id [{}] added", netComp->getUniqueId().raw());
+  DLOG_VERBOSE("net component with id [{}] added",
+               netComp->getUniqueId().raw());
   auto [it, ok] = m_netComps.insert({netComp->getUniqueId(), netComp});
   AlfAssert(ok, "failed to add net comp");
 }
