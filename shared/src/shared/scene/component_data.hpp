@@ -28,9 +28,9 @@
 
 #include <variant>
 
+#include "shared/math/math.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/types.hpp"
-#include "shared/math/math.hpp"
 #include "shared/wind/base_functions.hpp"
 
 // ========================================================================== //
@@ -38,9 +38,9 @@
 // ========================================================================== //
 
 namespace alflib {
-	class RawMemoryReader;
-	class RawMemoryWriter;
-}
+class RawMemoryReader;
+class RawMemoryWriter;
+} // namespace alflib
 
 namespace wind {
 

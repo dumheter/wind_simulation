@@ -38,7 +38,7 @@ SendResult SendPacket(const Packet &packet, const SendStrategy send_strategy,
 
     case k_EResultIgnored:
       DLOG_WARNING("You used k_nSteamNetworkingSend_NoDelay, and the message "
-                 "was dropped because");
+                   "was dropped because");
       result = SendResult::kRetry;
       break;
 

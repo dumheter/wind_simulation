@@ -48,7 +48,6 @@
 
 namespace wind {
 
-
 /// Class that represents a wind component
 class CWind : public bs::Component {
   friend class CWindSourceRTTI;
@@ -58,8 +57,7 @@ public:
   CWind() = default;
 
   /// @size Size of the cube volume where wind interacts.
-  CWind(const bs::HSceneObject &parent,
-        WindSystem::VolumeType volumeType,
+  CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
         Vec3F pos, Vec3F scale);
 
   void onCreated() override;

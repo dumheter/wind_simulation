@@ -28,7 +28,6 @@
 
 #include "shared/utility/util.hpp"
 
-#include <dlog/dlog.hpp>
 #include <Image/BsTexture.h>
 #include <Importer/BsImporter.h>
 #include <Importer/BsMeshImportOptions.h>
@@ -38,6 +37,7 @@
 #include <Resources/BsResourceHandle.h>
 #include <Resources/BsResourceManifest.h>
 #include <Resources/BsResources.h>
+#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // Asset Implementation
@@ -95,9 +95,9 @@ bs::HTexture Asset::loadCubemap(const bs::Path &path, bool srgb, bool hdr) {
 
   bs::HTexture texture = bs::gResources().load<bs::Texture>(assetPath);
   if (!texture) {
-    DLOG_WARNING(
-        "Cubemap texture '{}' has not yet been imported. This process can take a while",
-        path.toString());
+    DLOG_WARNING("Cubemap texture '{}' has not yet been imported. This process "
+                 "can take a while",
+                 path.toString());
 
     const bs::SPtr<bs::ImportOptions> _impOpt =
         bs::Importer::instance().createImportOptions(path);

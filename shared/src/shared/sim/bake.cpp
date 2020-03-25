@@ -37,8 +37,8 @@ void bake() {
     const f32 cellSize = wind->getCellSize();
 
     auto parent = csims[i]->SO()->getParent();
-    const Vec3F scale{(dim.width-2) * cellSize, (dim.height-2) * cellSize,
-          (dim.depth-2) * cellSize};
+    const Vec3F scale{(dim.width - 2) * cellSize, (dim.height - 2) * cellSize,
+                      (dim.depth - 2) * cellSize};
     const Vec3F pos = parent->getTransform().getPosition() + scale / 2.0f;
     const auto volumeType = WindSystem::VolumeType::kCube;
     auto windSO =

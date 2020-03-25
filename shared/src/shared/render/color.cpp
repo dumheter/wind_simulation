@@ -26,6 +26,4 @@
 // Color Implementation
 // ========================================================================== //
 
-namespace wind {
-
-} // namespace wind
+namespace wind {} // namespace wind

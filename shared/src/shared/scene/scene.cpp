@@ -28,19 +28,19 @@
 
 #include "shared/asset.hpp"
 #include "shared/scene/builder.hpp"
-#include "shared/scene/component/cspline.hpp"
-#include "shared/scene/component/cwind.hpp"
-#include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/scene/component/crotor.hpp"
+#include "shared/scene/component/cspline.hpp"
 #include "shared/scene/component/cspline_follow.hpp"
 #include "shared/scene/component/ctag.hpp"
+#include "shared/scene/component/cwind.hpp"
+#include "shared/scene/component/cwind_occluder.hpp"
 #include "shared/utility/json_util.hpp"
 #include "shared/utility/util.hpp"
 
-#include <dlog/dlog.hpp>
 #include <Components/BsCRenderable.h>
 #include <Components/BsCSkybox.h>
 #include <Scene/BsSceneObject.h>
+#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // Scene Implementation
@@ -105,8 +105,8 @@ bs::HSceneObject Scene::loadScene(const nlohmann::json &value) {
     auto objsArr = *objsIt;
     if (!objsArr.is_array()) {
       DLOG_ERROR("\"objects\" is required to be an array of scene "
-               "objects: {}",
-               value.dump());
+                 "objects: {}",
+                 value.dump());
       return bs::SceneObject::create("");
     }
 
@@ -239,8 +239,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     json spline = *itSpline;
 
     u32 degree = JsonUtil::getU32(spline, "degree", 2);
-    u32 samples = JsonUtil::getU32(spline, "samples",
-                                   ObjectBuilder::kSplineSamplesAuto);
+    u32 samples =
+        JsonUtil::getU32(spline, "samples", ObjectBuilder::kSplineSamplesAuto);
     const auto splinePointsIt = spline.find("points");
     if (splinePointsIt != spline.end()) {
       const nlohmann::json splinePoints = *splinePointsIt;
@@ -284,8 +284,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
     auto arr = *it;
     if (!arr.is_array()) {
       DLOG_ERROR("\"objects\" is required to be an array of scene "
-               "objects: {}",
-               value.dump());
+                 "objects: {}",
+                 value.dump());
       return bs::SceneObject::create("");
     }
 
@@ -396,7 +396,7 @@ nlohmann::json Scene::saveObject(const bs::HSceneObject &object) {
     const Quat qrot = object->getTransform().getRotation();
     bs::Radian x, y, z;
     qrot.toEulerAngles(x, y, z);
-    rotation = Vec3F{ x.valueDegrees(), y.valueDegrees(), z.valueDegrees() };
+    rotation = Vec3F{x.valueDegrees(), y.valueDegrees(), z.valueDegrees()};
   }
   if (rotation != Vec3F::ZERO) {
     JsonUtil::setValue(value, "rotation", rotation);

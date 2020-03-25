@@ -113,14 +113,12 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCylinder: {
-    auto [mesh, _] = Asset::loadMeshWithPhysics("../res/meshes/cylinder.fbx", 1.0f,
-                                                false, true);
+    auto [mesh, _] = Asset::loadMeshWithPhysics("../res/meshes/cylinder.fbx",
+                                                1.0f, false, true);
     withMesh(mesh);
     break;
   }
-  default: {
-    Util::panic("Invalid type when building object ({})", kind);
-  }
+  default: { Util::panic("Invalid type when building object ({})", kind); }
   }
 }
 
@@ -332,9 +330,7 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
     }
     break;
   }
-  default: {
-    break;
-  }
+  default: { break; }
   }
 
   return *this;
@@ -590,9 +586,7 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   case Kind::kCylinder:
     return "cylinder";
   case Kind::kInvalid:
-  default: {
-    return "invalid";
-  }
+  default: { return "invalid"; }
   }
 }
 

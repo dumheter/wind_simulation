@@ -1,11 +1,11 @@
 #include "serializer.hpp"
 #include "shared/scene/types.hpp"
 #include "shared/wind/base_functions.hpp"
-#include <dlog/dlog.hpp>
 #include <BsCorePrerequisites.h>
 #include <Components\BsCRigidbody.h>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
+#include <dlog/dlog.hpp>
 
 namespace wind {
 

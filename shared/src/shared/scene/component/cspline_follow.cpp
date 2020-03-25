@@ -72,9 +72,7 @@ void CSplineFollow::clampPos() {
       m_pos = 1.0f;
       break;
     }
-    default: {
-      break;
-    }
+    default: { break; }
     }
   } else if (m_pos < 0.0f) {
     switch (m_wrapMode) {
@@ -91,9 +89,7 @@ void CSplineFollow::clampPos() {
       m_pos = 0.0f;
       break;
     }
-    default: {
-      break;
-    }
+    default: { break; }
     }
   }
 }

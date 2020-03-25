@@ -1,8 +1,8 @@
 #include "cmyplayer.hpp"
 #include "runtime/network/util.hpp"
+#include "runtime/world.hpp"
 #include "shared/scene/component_data.hpp"
 #include "shared/scene/serializer.hpp"
-#include "runtime/world.hpp"
 
 namespace wind {
 

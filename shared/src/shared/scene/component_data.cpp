@@ -26,10 +26,10 @@
 // Headers
 // ========================================================================== //
 
-#include <alflib/memory/raw_memory_reader.hpp>
-#include <alflib/memory/raw_memory_writer.hpp>
 #include "shared/utility/util.hpp"
 #include "shared/wind/base_functions.hpp"
+#include <alflib/memory/raw_memory_reader.hpp>
+#include <alflib/memory/raw_memory_writer.hpp>
 
 // ========================================================================== //
 // ComponentData Implementation
@@ -65,7 +65,8 @@ const ComponentData::ColliderData &ComponentData::colliderData() const {
   return std::get<ColliderData>(m_data);
 }
 
-const ComponentData::WindAffectableData &ComponentData::windAffectableData() const {
+const ComponentData::WindAffectableData &
+ComponentData::windAffectableData() const {
   return std::get<WindAffectableData>(m_data);
 }
 
@@ -118,7 +119,7 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
   case ComponentType::kWind: {
     std::vector<BaseFn> functions = mr.ReadStdVector<BaseFn>();
     auto volumeType = mr.Read<u8>();
-    auto pos = Vec3F { mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>() };
+    auto pos = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     auto scale = Vec3F{mr.Read<f32>(), mr.Read<f32>(), mr.Read<f32>()};
     return asWind(functions, volumeType, pos, scale);
   }
@@ -142,9 +143,7 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
   case ComponentType::kWindAffectable: {
     return asWindAffectable();
   }
-  default: {
-    Util::panic("Invalid ComponentData variant: {}", type);
-  }
+  default: { Util::panic("Invalid ComponentData variant: {}", type); }
   }
 }
 

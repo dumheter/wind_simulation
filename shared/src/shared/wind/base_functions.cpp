@@ -134,9 +134,9 @@ Vec3F Spline::operator()(const Vec3F point) const {
   Vec3F a;
   const Vec3F b = points[closestPoint];
   Vec3F c;
-  if (closestPoint != 0 && closestPoint+1 != points.size()) {
-    a = points[closestPoint-1];
-    c = points[closestPoint+1];
+  if (closestPoint != 0 && closestPoint + 1 != points.size()) {
+    a = points[closestPoint - 1];
+    c = points[closestPoint + 1];
   } else {
     if (const f32 firstLastDist = distance(points.front(), points.back());
         firstLastDist > 0.1f) {
@@ -149,7 +149,7 @@ Vec3F Spline::operator()(const Vec3F point) const {
       }
     } else {
       if (closestPoint == 0) {
-        a = points[points.size()-2];
+        a = points[points.size() - 2];
         c = points[closestPoint + 1];
       } else {
         a = points[closestPoint - 1];
@@ -162,7 +162,7 @@ Vec3F Spline::operator()(const Vec3F point) const {
   const f32 cDist = gaussian(distance(c, b), 1.0f, 0.0f, minDist);
   const f32 aMul = aDist / (aDist + cDist);
   const f32 cMul = cDist / (aDist + cDist);
-  const Vec3F force = (cMul*(c - b) + aMul*(b - a));
+  const Vec3F force = (cMul * (c - b) + aMul * (b - a));
 
   return force;
 }
@@ -231,9 +231,7 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    return BaseFn{Constant::fromJson(value)};
-  }
+  default: { return BaseFn{Constant::fromJson(value)}; }
   }
 }
 
@@ -261,9 +259,7 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    fn = BaseFn{Constant::FromBytes(mr)};
-  }
+  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
   }
   return fn;
 }

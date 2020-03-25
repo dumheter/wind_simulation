@@ -26,8 +26,8 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/math/math.hpp"
 #include "microprofile/microprofile.h"
+#include "shared/math/math.hpp"
 
 // ========================================================================== //
 // Editor Declaration
@@ -38,8 +38,7 @@ namespace wind {
 WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
     : m_width(width * u32(1.0f / cellSize)),
       m_height(height * u32(1.0f / cellSize)),
-      m_depth(depth * u32(1.0f / cellSize)),
-      m_cellSize(cellSize) {
+      m_depth(depth * u32(1.0f / cellSize)), m_cellSize(cellSize) {
   // Preconditions
   assert(width != 0 && height != 0 && depth != 0 &&
          "Extent of wind simulation must not be zero in any dimension");
@@ -67,7 +66,7 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
   }
 
   setAsTornado();
-  //setAs111();
+  // setAs111();
 
   // Post-conditions
   assert(m_d->getDim() == m_v->getDim() &&

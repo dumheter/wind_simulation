@@ -127,7 +127,7 @@ inline f32 distance(Vec3F a, Vec3F b) {
 
 /// https://en.wikipedia.org/wiki/Gaussian_function
 inline f32 gaussian(f32 x, f32 a, f32 b, f32 c) {
-  return a * std::exp(-((x-b) * (x-b)) / (2*c*c));
+  return a * std::exp(-((x - b) * (x - b)) / (2 * c * c));
 }
 
 } // namespace wind

@@ -89,7 +89,7 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
                     }
 
                     painter.setColor(Color{255, 0, 0});
-                    painter.drawArrow(origo,Vec3F(1.0f, 0.0f, 0.0f), 0.5f);
+                    painter.drawArrow(origo, Vec3F(1.0f, 0.0f, 0.0f), 0.5f);
                     painter.setColor(Color{0, 255, 0});
                     painter.drawArrow(origo, Vec3F(0.0f, 1.0f, 0.0f), 0.5f);
                     painter.setColor(Color{0, 0, 255});
@@ -100,7 +100,7 @@ CWind::CWind(const bs::HSceneObject &parent, WindSystem::VolumeType volumeType,
   so->setParent(parent);
 }
 
-void CWind::onCreated() {  }
+void CWind::onCreated() {}
 
 // -------------------------------------------------------------------------- //
 
@@ -117,8 +117,9 @@ void CWind::addFunctions(const std::vector<BaseFn> &functions) {
   }
 }
 
-void CWind::onTransformChanged(bs::TransformChangedFlags flags)
-{ m_filipFlag = kRebake; }
+void CWind::onTransformChanged(bs::TransformChangedFlags flags) {
+  m_filipFlag = kRebake;
+}
 
 Vec3F CWind::getWindAtPoint(Vec3F pos) const {
   const auto origo = SO()->getTransform().pos();
@@ -141,7 +142,8 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
   const auto s = t.getScale() * scale;
   const Vec3F origo = t.pos();
   const Vec3F a = origo - s / 2.0f;
-  const s32 count = dclamp<s32>(static_cast<s32>((s.x + s.y + s.z) / 3.0f), 2, 8);
+  const s32 count =
+      dclamp<s32>(static_cast<s32>((s.x + s.y + s.z) / 3.0f), 2, 8);
   const f32 dx = s.x / (count - 1);
   const f32 dy = s.y / (count - 1);
   const f32 dz = s.z / (count - 1);
@@ -156,8 +158,10 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
         const Vec3F pointR = Vec3F{a.x + dx * x, a.y + dy * y, a.z + dz * z};
         constexpr f32 r = 0.001f;
         const bs::Sphere sphere{pointR, r};
-        if (physicsScene->sphereOverlapAny(sphere, WindSystem::kWindVolumeLayer)) {
-          Painter::buildArrow(m_cachedLines, point, getWindAtPoint(pointR) * arrowScale,
+        if (physicsScene->sphereOverlapAny(sphere,
+                                           WindSystem::kWindVolumeLayer)) {
+          Painter::buildArrow(m_cachedLines, point,
+                              getWindAtPoint(pointR) * arrowScale,
                               arrowHeadScale);
         }
       }

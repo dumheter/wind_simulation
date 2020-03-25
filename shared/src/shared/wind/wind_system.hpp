@@ -34,7 +34,6 @@ namespace wind {
 /// Singleton wind system
 class WindSystem {
 public:
-
   /// Layers must be < Physics::CollisionMapSize (64)
   static constexpr u64 kWindVolumeLayer = 16;
   static constexpr u64 kWindOccluderLayer = 32;
