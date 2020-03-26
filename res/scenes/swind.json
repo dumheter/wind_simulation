@@ -1,0 +1,59 @@
+{
+  "name": "wind",
+  "objects": [
+    {
+      "name": "skybox",
+      "skybox": { "cubemap": "../res/skybox/daytime.hdr" }
+    },
+    {
+      "name": "geometry",
+      "objects": [
+        {
+          "name": "floor",
+          "type": "plane",
+          "material": {
+            "shader": "standard",
+            "texture": "../res/textures/grid.png",
+            "tiling": { "uv": 800.0 }
+          },
+          "scale": [ 400.0, 1.0, 400.0 ],
+          "position": {
+            "xz": 4.0,
+            "y": -0.4
+          },
+          "physics": { "restitution": 0.5 }
+        },
+
+        {
+          "name": "wind volume spline",
+          "position": {
+            "x": -8.0,
+            "y": 4.6,
+            "z": -32
+          },
+          "scale": [ 10, 10, 10 ],
+          "wind": {
+            "functions": [
+              {
+                "type": "spline",
+                "degree": 2,
+                "samples": 100,
+                "points": [
+                  {"point": [5, 5, 5]},
+                  {"point": [-5, 5, 5]},
+                  {"point": [-5, 5, -5]},
+                  {"point": [5, 5, -5]},
+                  {"point": [5, 5, 5]}
+                ]
+              }
+            ],
+            "volume": {
+              "type": "cube"
+            }
+          }
+        }
+
+      ]
+    }
+  ]
+}

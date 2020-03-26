@@ -14,8 +14,6 @@
 #include <dlog/dlog.hpp>
 #include <vector>
 
-#include "shared/scene/component/cspline.hpp"
-
 namespace wind {
 
 static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos);
@@ -30,7 +28,6 @@ void bake() {
   }
 
   for (u32 i = 0; i < csims.size(); ++i) {
-
     WindSimulation *windSim = csims[i]->getSim();
     VectorField *wind = windSim->V();
     const Dim3D dim = wind->getDim();
@@ -49,14 +46,11 @@ void bake() {
             .build();
     windSO->setParent(parent);
     auto cwind = windSO->getComponent<CWind>();
-    // auto cwind =
-    //     parent->addComponent<CWind>(WindSystem::VolumeType::kCube, pos,
-    //     scale);
 
     // TODO use "blue noise" to chose points to sample
-    for (u32 x = 8; x <= dim.width - 1 - 2; x += 200) {
-      for (u32 y = 1; y <= 2 /*dim.height-1*/; y += 400) {
-        for (u32 z = 8; z <= dim.depth - 1 - 2; z += 200) {
+    for (u32 x = 8; x <= dim.width - 1 - 1; x += 200) {
+      for (u32 y = 1; y <= 2 /*dim.height-1*/; y += 2) {
+        for (u32 z = 8; z <= dim.depth - 1 - 1; z += 200) {
           auto points =
               bakeAux(wind, Vec3F{static_cast<f32>(x), static_cast<f32>(y),
                                   static_cast<f32>(z)});
@@ -85,7 +79,7 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
   point.z = dclamp(point.z, 0.0f, (dim.depth - 1) * cellSize);
   points.push_back(point);
 
-  constexpr u32 kMaxSteps = 30;
+  constexpr u32 kMaxSteps = 100;
   for (u32 i = 0; i < kMaxSteps; i++) {
     const auto force = wind->sampleNear(point);
     if (force == Vec3F::ZERO) {
@@ -111,10 +105,13 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
   }
 
   if (points.size() > 2) {
-    const Vec4F color{map(startPos.x, 0.0f, dim.width * cellSize, 0.0f, 1.0f),
-                      map(startPos.y, 0.0f, dim.height * cellSize, 0.0f, 1.0f),
-                      map(startPos.z, 0.0f, dim.depth * cellSize, 0.0f, 1.0f),
-                      1.0f};
+    constexpr f32 kPi = 3.141592f;
+    const f32 k =
+        (kPi * 8.0f) / ((dim.width + dim.height + dim.depth) * cellSize / 3.0f);
+    DLOG_INFO("k {}, {}", k, startPos.x);
+    const Vec4F color{std::cos(k * startPos.x) / 2.0f + 0.5f,
+                      std::cos(k * startPos.y) / 2.0f + 0.5f,
+                      std::cos(k * startPos.z) / 2.0f + 0.5f, 1.0f};
     auto spline =
         ObjectBuilder{ObjectType::kEmpty}
             .withName("bakeSpline")

@@ -374,13 +374,21 @@ void World::setupInput() {
         m_player->setWeapon(ObjectType::kCube);
       }
     } else if (ev.buttonCode == BC_M) {
-      Util::dumpScene(m_staticScene);
+      if (m_staticScene) {
+        Util::dumpScene(m_staticScene);
+      }
     } else if (ev.buttonCode == BC_N) {
-      DLOG_INFO("{}", Scene::save(m_staticScene));
+      if (m_staticScene) {
+        DLOG_INFO("{}", Scene::save(m_staticScene));
+      }
     } else if (ev.buttonCode == BC_B) {
-      Util::dumpScene(m_dynamicScene);
+      if (m_dynamicScene) {
+        Util::dumpScene(m_dynamicScene);
+      }
     } else if (ev.buttonCode == BC_V) {
-      DLOG_INFO("{}", Scene::save(m_dynamicScene));
+      if (m_dynamicScene) {
+        DLOG_INFO("{}", Scene::save(m_dynamicScene));
+      }
     } else if (ev.buttonCode == BC_C) {
       dumpNetComps();
     }

@@ -7,6 +7,9 @@
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 
+#include "shared/utility/bsprinter.hpp"
+#include <dlog/dlog.hpp>
+
 namespace wind {
 
 namespace baseFunctions {
@@ -160,9 +163,12 @@ Vec3F Spline::operator()(const Vec3F point) const {
 
   const f32 aDist = gaussian(distance(a, b), 1.0f, 0.0f, minDist);
   const f32 cDist = gaussian(distance(c, b), 1.0f, 0.0f, minDist);
-  const f32 aMul = aDist / (aDist + cDist);
-  const f32 cMul = cDist / (aDist + cDist);
+  const f32 aMul = aDist + cDist > 0.01f ? aDist / (aDist + cDist) : 0.5f;
+  const f32 cMul = aDist + cDist > 0.01f ? cDist / (aDist + cDist) : 0.5f;
   const Vec3F force = (cMul * (c - b) + aMul * (b - a));
+
+  DLOG_INFO("{} @ {} | a: {}, b: {}, c: {}", force, point,
+            a, b, c);
 
   return force;
 }
@@ -231,7 +237,9 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: { return BaseFn{Constant::fromJson(value)}; }
+  default: {
+    return BaseFn{Constant::fromJson(value)};
+  }
   }
 }
 
@@ -259,7 +267,9 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
+  default: {
+    fn = BaseFn{Constant::FromBytes(mr)};
+  }
   }
   return fn;
 }

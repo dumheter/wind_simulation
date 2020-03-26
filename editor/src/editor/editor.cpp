@@ -149,8 +149,7 @@ void Editor::onPreUpdate(f32 delta) {
 
   // Add velocity source 'V'
   if (gInput().isButtonHeld(ButtonCode::BC_V)) {
-    // m_windSim->addVelocitySource();
-    DLOG_VERBOSE("Added velocity sources");
+    DebugManager::setBool(WindSimulation::kDebugVelocitySource, true);
   }
   // Add velocity sink 'C'
   if (gInput().isButtonHeld(ButtonCode::BC_C)) {

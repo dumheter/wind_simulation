@@ -1,6 +1,6 @@
-// MIT License
+ï»¿// MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip BjÃ¶rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@
 
 #include "microprofile/microprofile.h"
 #include "shared/math/math.hpp"
+
+#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // Editor Declaration
@@ -65,8 +67,8 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
     m_d0->get(i) = 0.0f;
   }
 
-  setAsTornado();
-  // setAs111();
+  //setAsTornado();
+  //setAs111();
 
   // Post-conditions
   assert(m_d->getDim() == m_v->getDim() &&
@@ -170,25 +172,32 @@ void WindSimulation::stepVelocity(f32 delta) {
     Vec3F newValue = oldValue += delta * m_v0->get(i);
     m_v->set(i, newValue);
   }
-  if (m_addVelocitySource) {
-    m_addVelocitySource = false;
-    if (false) { // Left-side source
-      for (s32 z = 2; z < 7; z++) {
-        for (s32 y = 2; y < 7; y++) {
-          m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
-          m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
-        }
+  if (DebugManager::getBool(WindSimulation::kDebugVelocitySource)) {
+    DebugManager::setBool(WindSimulation::kDebugVelocitySource, false);
+    for (s32 x = 2; x < 7; x++) {
+      for (s32 y = 2; y < 7; y++) {
+        m_v->set(x, y, 5, Vec3F(0.0f, 0.0f, 100.0f));
+        m_v0->set(x, y, 5, Vec3F(0.0f, 0.0f, 100.0f));
       }
-    } else if (false) { // Center source
-      for (s32 z = 14; z < 18; z++) {
-        for (s32 y = 10; y < 14; y++) {
-          m_v->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
-          m_v0->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
-        }
-      }
-    } else {
-      setAsTornado();
     }
+    DLOG_INFO("it happened");
+    // if (false) { // Left-side source
+    //   for (s32 z = 2; z < 7; z++) {
+    //     for (s32 y = 2; y < 7; y++) {
+    //       m_v->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+    //       m_v0->set(5, y, z, Vec3F(100.0f, 0.0f, 0.0f));
+    //     }
+    //   }
+    // } else if (false) { // Center source
+    //   for (s32 z = 14; z < 18; z++) {
+    //     for (s32 y = 10; y < 14; y++) {
+    //       m_v->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
+    //       m_v0->set(5, y, z, Vec3F(100.0f, 0.2f, 0.0f));
+    //     }
+    //   }
+    // } else {
+    //   setAsTornado();
+    // }
   }
 
   // Diffusion
@@ -248,7 +257,7 @@ void WindSimulation::paint(Painter &painter, const bs::Vector3 &offset) {
   // Draw frame
   if (DebugManager::getBool(kDebugPaintFrameKey)) {
     const Vec3I dim(m_width, m_height, m_depth);
-    // TODO(Filip Björklund): No template type PLEASE!
+    // TODO(Filip BjÃ¶rklund): No template type PLEASE!
     Field<u32>::paintFrame(painter, dim, m_cellSize, offset);
   }
 }
@@ -284,7 +293,7 @@ void WindSimulation::setAsTornado() {
 // -------------------------------------------------------------------------- //
 
 void WindSimulation::setAs111() {
-  const Vec3F v = Vec3F{0.25f, 0.25f, 0.25f};
+  const Vec3F v = Vec3F{1.0f, 1.0f, 1.0f};
   for (s32 k = 1; k <= m_depth; k++) {
     for (s32 j = 1; j <= m_height; j++) {
       for (s32 i = 1; i <= m_width; i++) {

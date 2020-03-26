@@ -90,6 +90,8 @@ public:
   /// Key for debug variable that is used to determine what field to draw
   static constexpr char kDebugFieldTypeKey[] = "SimDebugFieldType";
 
+  static constexpr char kDebugVelocitySource[] = "SimDebugVS";
+
   /// Enumeration of the different fields that make up the simulation.
   enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
 

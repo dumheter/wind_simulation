@@ -379,6 +379,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       std::filesystem::path path = input->getText().c_str();
       // DLOG_VERBOSE("saving scene ({})", path);
       String _path = path.string().c_str();
+      m_scenePath = path.string().c_str();
       Scene::saveFile(_path, m_editor->getScene());
     });
 
@@ -389,12 +390,12 @@ UI::UI(Editor *editor) : m_editor(editor) {
       std::filesystem::path path = input->getText().c_str();
       if (std::filesystem::exists(path)) {
         // DLOG_VERBOSE("loading scene ({})", path);
-        String _path = path.string().c_str();
-        m_editor->setScene(Scene::loadFile(_path), true);
+        m_scenePath = path.string().c_str();
+        m_editor->setScene(Scene::loadFile(m_scenePath), true);
         m_sceneAutoReload = true;
       } else {
         DLOG_WARNING("Scene requested to load does not exist \"{}\"",
-                     m_scenePath.c_str());
+                     path.string());
         m_sceneAutoReload = false;
       }
     });
