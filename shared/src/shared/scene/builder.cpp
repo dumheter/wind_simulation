@@ -36,6 +36,7 @@
 #include "shared/scene/component/cwind_affectable.hpp"
 #include "shared/scene/component/fps_walker.hpp"
 #include "shared/state/moveable_state.hpp"
+#include "shared/utility/bsprinter.hpp"
 #include "shared/utility/util.hpp"
 #include "shared/wind/base_functions.hpp"
 
@@ -118,7 +119,9 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     withMesh(mesh);
     break;
   }
-  default: { Util::panic("Invalid type when building object ({})", kind); }
+  default: {
+    Util::panic("Invalid type when building object ({})", kind);
+  }
   }
 }
 
@@ -330,7 +333,9 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
     }
     break;
   }
-  default: { break; }
+  default: {
+    break;
+  }
   }
 
   return *this;
@@ -586,7 +591,9 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   case Kind::kCylinder:
     return "cylinder";
   case Kind::kInvalid:
-  default: { return "invalid"; }
+  default: {
+    return "invalid";
+  }
   }
 }
 

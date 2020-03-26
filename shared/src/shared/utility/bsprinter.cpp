@@ -85,6 +85,40 @@ std::ostream &operator<<(std::ostream &out, wind::ObjectType type) {
 
 // -------------------------------------------------------------------------- //
 
+std::ostream &operator<<(std::ostream &out, wind::ComponentType type) {
+  switch (type) {
+  case wind::ComponentType::kRigidbody: {
+    out << "kRigidbody";
+    break;
+  }
+  case wind::ComponentType::kWind: {
+    out << "kWind";
+    break;
+  }
+  case wind::ComponentType::kRenderable: {
+    out << "kRenderable";
+    break;
+  }
+  case wind::ComponentType::kRotor: {
+    out << "kRotor";
+    break;
+  }
+  case wind::ComponentType::kCollider: {
+    out << "kCollider";
+    break;
+  }
+  case wind::ComponentType::kWindAffectable: {
+    out << "kWindAffectable";
+    break;
+  }
+  default:
+    break;
+  }
+  return out;
+}
+
+// -------------------------------------------------------------------------- //
+
 std::ostream &operator<<(std::ostream &out, const bs::HComponent &comp) {
   if (comp->getRTTI()->getRTTIId() == wind::TID_CTag) {
     wind::CTag *tag = static_cast<wind::CTag *>(comp.get());

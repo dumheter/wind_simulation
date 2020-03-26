@@ -13,7 +13,7 @@
 
 #include <ostream>
 
-#include <thirdparty/fmt/ostream.h>
+#include <fmt/ostream.h>
 
 #include <Math/BsQuaternion.h>
 #include <Math/BsVector3.h>
@@ -31,6 +31,10 @@ std::ostream &operator<<(std::ostream &out, const bs::Vector2 &vec);
 // -------------------------------------------------------------------------- //
 
 std::ostream &operator<<(std::ostream &out, wind::ObjectType type);
+
+// -------------------------------------------------------------------------- //
+
+std::ostream &operator<<(std::ostream &out, wind::ComponentType type);
 
 // -------------------------------------------------------------------------- //
 
