@@ -81,34 +81,39 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
 
   constexpr u32 kMaxSteps = 100;
   for (u32 i = 0; i < kMaxSteps; i++) {
-    const auto force = wind->sampleNear(point);
-    if (force == Vec3F::ZERO) {
-      break;
-    }
-
-    point += force;
-    point.x = dclamp(point.x, 0.0f, (dim.width - 1) * cellSize);
-    point.y = dclamp(point.y, 0.0f, (dim.height - 1) * cellSize);
-    point.z = dclamp(point.z, 0.0f, (dim.depth - 1) * cellSize);
+    point += wind->sampleNear(point);
 
     const auto anyAxisOver = [](Vec3F a, Vec3F b, f32 threshold) {
       return std::abs(a.x - b.x) > threshold ||
              std::abs(a.y - b.y) > threshold || std::abs(a.z - b.z) > threshold;
     };
-
-    constexpr f32 kSpacing = 0.05f;
-    if (!anyAxisOver(points.back(), point, kSpacing)) {
-      DLOG_VERBOSE("early exit, too low wind");
+    constexpr f32 kThreshold = 0.05f;
+    if (!anyAxisOver(points.back(), point, kThreshold)) {
+      DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(), point);
       break;
     }
+
     points.push_back(point);
+    const auto isInside = [](Vec3F point, Vec3F min, Vec3F max) {
+      return (point.x >= min.x && point.x <= max.x && point.y >= min.y &&
+              point.y <= max.y && point.z >= min.z && point.z <= max.z);
+    };
+    if (!isInside(point, Vec3F::ZERO,
+                  Vec3F{(dim.width - 1) * cellSize, (dim.height - 1) * cellSize,
+                        (dim.depth - 1) * cellSize})) {
+      if (points.size() < 3) {
+        // we interpolate an extra point, from the two existing points
+        const Vec3F c = points[1] + (points[1] - points[0]);
+        points.push_back(c);
+      }
+      break;
+    }
   }
 
   if (points.size() > 2) {
     constexpr f32 kPi = 3.141592f;
     const f32 k =
         (kPi * 8.0f) / ((dim.width + dim.height + dim.depth) * cellSize / 3.0f);
-    DLOG_INFO("k {}, {}", k, startPos.x);
     const Vec4F color{std::cos(k * startPos.x) / 2.0f + 0.5f,
                       std::cos(k * startPos.y) / 2.0f + 0.5f,
                       std::cos(k * startPos.z) / 2.0f + 0.5f, 1.0f};
