@@ -26,8 +26,11 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/utility/bsprinter.hpp"
 #include "shared/utility/util.hpp"
 #include "shared/wind/base_functions.hpp"
+
+#include <alflib/core/string.hpp>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
 
@@ -143,7 +146,9 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
   case ComponentType::kWindAffectable: {
     return asWindAffectable();
   }
-  default: { Util::panic("Invalid ComponentData variant: {}", type); }
+  default: {
+    Util::panic("Invalid ComponentData variant: {}", type);
+  }
   }
 }
 

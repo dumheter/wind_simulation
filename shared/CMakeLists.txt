@@ -1,0 +1,126 @@
+project(shared)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(SOURCES
+	src/shared/debug/debug.cpp
+	src/shared/debug/debug_manager.cpp
+	src/shared/math/spline.cpp
+	src/shared/render/color.cpp
+	src/shared/render/painter.cpp
+	src/shared/render/shader.cpp
+	src/shared/scene/component/camera_flyer.cpp
+	src/shared/scene/component/cnet_component.cpp
+	src/shared/scene/component/cpaint.cpp
+	src/shared/scene/component/crotor.cpp
+	src/shared/scene/component/csim.cpp
+	src/shared/scene/component/cspline.cpp
+	src/shared/scene/component/cspline_follow.cpp
+	src/shared/scene/component/ctag.cpp
+	src/shared/scene/component/cwind.cpp
+	src/shared/scene/component/cwind_affectable.cpp
+	src/shared/scene/component/cwind_occluder.cpp
+	src/shared/scene/component/fps_camera.cpp
+	src/shared/scene/component/fps_walker.cpp
+	src/shared/scene/builder.cpp
+	src/shared/scene/component_data.cpp
+	src/shared/scene/mesh.cpp
+	src/shared/scene/scene.cpp
+	src/shared/scene/serializer.cpp
+	src/shared/sim/bake.cpp
+	src/shared/sim/density_field.cpp
+	src/shared/sim/obstruction_field.cpp
+	src/shared/sim/vector_field.cpp
+	src/shared/sim/wind_sim.cpp
+	src/shared/state/moveable_state.cpp
+	src/shared/state/player_input.cpp
+	src/shared/utility/bsprinter.cpp
+	src/shared/utility/json_util.cpp
+	src/shared/utility/util.cpp
+	src/shared/wind/base_functions.cpp
+	src/shared/wind/wind_system.cpp
+	src/shared/app.cpp
+	src/shared/asset.cpp
+	)
+
+set(HEADERS
+	src/shared/debug/debug.hpp
+	src/shared/debug/debug_manager.hpp
+	src/shared/math/dim.hpp
+	src/shared/math/field.hpp
+	src/shared/math/math.hpp
+	src/shared/math/spline.hpp
+	src/shared/render/color.hpp
+	src/shared/render/painter.hpp
+	src/shared/render/shader.hpp
+	src/shared/scene/component/camera_flyer.hpp
+	src/shared/scene/component/cnet_component.hpp
+	src/shared/scene/component/cpaint.hpp
+	src/shared/scene/component/crotor.hpp
+	src/shared/scene/component/csim.hpp
+	src/shared/scene/component/cspline.hpp
+	src/shared/scene/component/cspline_follow.hpp
+	src/shared/scene/component/ctag.hpp
+	src/shared/scene/component/cwind.hpp
+	src/shared/scene/component/cwind_affectable.hpp
+	src/shared/scene/component/cwind_occluder.hpp
+	src/shared/scene/component/fps_camera.hpp
+	src/shared/scene/component/fps_walker.hpp
+	src/shared/scene/builder.hpp
+	src/shared/scene/component_data.hpp
+	src/shared/scene/component_handles.hpp
+	src/shared/scene/mesh.hpp
+	src/shared/scene/rtti.hpp
+	src/shared/scene/scene.hpp
+	src/shared/scene/serializer.hpp
+	src/shared/scene/types.hpp
+	src/shared/sim/bake.hpp
+	src/shared/sim/density_field.hpp
+	src/shared/sim/obstruction_field.hpp
+	src/shared/sim/vector_field.hpp
+	src/shared/sim/wind_sim.hpp
+	src/shared/state/moveable_state.hpp
+	src/shared/state/player_input.hpp
+	src/shared/utility/bsprinter.hpp
+	src/shared/utility/json_util.hpp
+	src/shared/utility/unique_id.hpp
+	src/shared/utility/util.hpp
+	src/shared/wind/base_functions.hpp
+	src/shared/wind/wind_system.hpp
+	src/shared/app.hpp
+	src/shared/asset.hpp
+	src/shared/macros.hpp
+	src/shared/types.hpp
+	)
+
+add_subdirectory(src/thirdparty/alflibcpp)
+add_subdirectory(src/thirdparty/bsf)
+add_subdirectory(src/thirdparty/dlog)
+
+add_library(${PROJECT_NAME} 
+	${SOURCES} 
+	./src/thirdparty/microprofile/microprofile.cpp
+	./src/thirdparty/tinyspline/src/parson.c
+	./src/thirdparty/tinyspline/src/tinyspline.c
+	${HEADERS}
+	)
+
+target_link_libraries(${PROJECT_NAME} bsf fmt-header-only dlog Ws2_32 alflibcpp)
+
+target_include_directories(${PROJECT_NAME} PUBLIC 
+	./src/
+	./src/thirdparty 
+	./src/thirdparty/dlog/include
+	./src/thirdparty/microprofile
+	./src/thirdparty/stb
+	./src/thirdparty/tinyspline/src
+	./src/thirdparty/alflibcpp/include
+	./src/thirdparty/alflibcpp/external/fmt/include
+	)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+	DLOG_FILESTAMP
+	DLOG_TIMESTAMP
+	MICROPROFILE_GPU_TIMERS_D3D11=1
+	MICROPROFILE_ENABLED=1
+	)

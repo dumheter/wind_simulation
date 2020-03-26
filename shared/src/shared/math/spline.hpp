@@ -26,9 +26,11 @@
 // Headers
 // ========================================================================== //
 
+#include <vector>
+
 #include <shared/math/math.hpp>
 
-#include <tinyspline/tinyspline.h>
+#include <tinyspline.h>
 
 // ========================================================================== //
 // Spline Declaration

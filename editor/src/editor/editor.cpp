@@ -31,7 +31,7 @@
 #include "microprofile/microprofile.h"
 #include "shared/asset.hpp"
 #include "shared/math/spline.hpp"
-#include "shared/scene/component/camera_flyer.h"
+#include "shared/scene/component/camera_flyer.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
 
