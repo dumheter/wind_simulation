@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "runtime/cmyplayer.hpp"
 #include "runtime/network/connection_id.hpp"
@@ -115,18 +115,18 @@ private:
   bs::HSceneObject createCamera(bs::HSceneObject player);
 
 private:
-  std::unordered_map<UniqueId, HCNetComponent> m_netComps;
+  std::unordered_map<UniqueId, HCNetComponent> m_netComps{};
   Ui m_ui{};
   Server m_server;
-  HCMyPlayer m_player;
+  HCMyPlayer m_player{};
   HFPSCamera m_fpsCamera{};
   bool m_cursorMode = false;
   bs::VirtualAxis m_scroll{};
 
-  bs::HSceneObject m_staticScene;
-  bs::HSceneObject m_dynamicScene;
+  bs::HSceneObject m_staticScene{};
+  bs::HSceneObject m_dynamicScene{};
   String m_scenePath{"../res/scenes/bake.json"};
-  std::filesystem::file_time_type m_sceneEditTime;
+  std::filesystem::file_time_type m_sceneEditTime{};
 };
 
 } // namespace wind

@@ -167,8 +167,7 @@ Vec3F Spline::operator()(const Vec3F point) const {
   const f32 cMul = aDist + cDist > 0.01f ? cDist / (aDist + cDist) : 0.5f;
   const Vec3F force = (cMul * (c - b) + aMul * (b - a));
 
-  DLOG_INFO("{} @ {} | a: {}, b: {}, c: {}", force, point,
-            a, b, c);
+  DLOG_INFO("{} @ {} | a: {}, b: {}, c: {}", force, point, a, b, c);
 
   return force;
 }
@@ -237,9 +236,7 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    return BaseFn{Constant::fromJson(value)};
-  }
+  default: { return BaseFn{Constant::fromJson(value)}; }
   }
 }
 
@@ -267,9 +264,7 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    fn = BaseFn{Constant::FromBytes(mr)};
-  }
+  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
   }
   return fn;
 }

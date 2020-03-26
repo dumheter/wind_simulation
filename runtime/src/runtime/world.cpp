@@ -1,4 +1,4 @@
-#include "world.hpp"
+﻿#include "world.hpp"
 #include "shared/asset.hpp"
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
@@ -23,10 +23,11 @@ World::World(const App::Info &info) : App(info), m_server(this) {
 
   setupMyPlayer();
   setupInput();
-
-  std::filesystem::file_time_type time =
-      std::filesystem::last_write_time(m_scenePath);
-  m_sceneEditTime = time;
+  if (std::filesystem::exists(m_scenePath)) {
+    std::filesystem::file_time_type time =
+        std::filesystem::last_write_time(m_scenePath);
+    m_sceneEditTime = time;
+  }
 }
 
 void World::onPreUpdate(f32) {
