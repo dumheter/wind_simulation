@@ -13,3 +13,6 @@
 [submodule "shared\\src\\thirdparty\\tinyspline"]
 	path = shared\\src\\thirdparty\\tinyspline
 	url = https://github.com/msteinbeck/tinyspline
+[submodule "shared\\src\\thirdparty\\stb"]
+	path = shared\\src\\thirdparty\\stb
+	url = https://github.com/nothings/stb

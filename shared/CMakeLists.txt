@@ -97,16 +97,30 @@ add_subdirectory(src/thirdparty/alflibcpp)
 add_subdirectory(src/thirdparty/bsf)
 add_subdirectory(src/thirdparty/dlog)
 
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} 
+	${SOURCES} 
+	./src/thirdparty/microprofile/microprofile.cpp
+	./src/thirdparty/tinyspline/src/parson.c
+	./src/thirdparty/tinyspline/src/tinyspline.c
+	${HEADERS}
+	)
 
-target_link_libraries(${PROJECT_NAME} bsf)
+target_link_libraries(${PROJECT_NAME} bsf fmt-header-only dlog Ws2_32 alflibcpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
 	./src/
 	./src/thirdparty 
 	./src/thirdparty/dlog/include
 	./src/thirdparty/microprofile
+	./src/thirdparty/stb
 	./src/thirdparty/tinyspline/src
 	./src/thirdparty/alflibcpp/include
 	./src/thirdparty/alflibcpp/external/fmt/include
+	)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+	DLOG_FILESTAMP
+	DLOG_TIMESTAMP
+	MICROPROFILE_GPU_TIMERS_D3D11=1
+	MICROPROFILE_ENABLED=1
 	)
