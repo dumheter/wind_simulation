@@ -1,6 +1,6 @@
 [submodule "shared/src/thirdparty/bsf"]
 	path = shared/src/thirdparty/bsf
-	url = https://github.com/GameFoundry/bsf
+	url = https://github.com/dumheter/bsf
 [submodule "shared/src/thirdparty/alflibcpp"]
 	path = shared/src/thirdparty/alflibcpp
 	url = https://github.com/Alfret/AlfLibCpp

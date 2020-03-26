@@ -146,9 +146,7 @@ ComponentData ComponentData::FromBytes(alflib::RawMemoryReader &mr) {
   case ComponentType::kWindAffectable: {
     return asWindAffectable();
   }
-  default: {
-    Util::panic("Invalid ComponentData variant: {}", type);
-  }
+  default: { Util::panic("Invalid ComponentData variant: {}", type); }
   }
 }
 
