@@ -1,6 +1,6 @@
-﻿// MIT License
+// MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Bj�rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "editor.hpp"
-
-// ========================================================================== //
-// Headers
-// ========================================================================== //
-
-#include "dlog/dlog.hpp"
+#include <shared/app.hpp>
 
 // ========================================================================== //
 // Main
@@ -35,11 +29,8 @@
 int main() {
   using namespace wind;
 
-  DLOG_INIT();
-  DLOG_SET_LOG_PATH("log");
-  DLOG_SET_LEVEL(dlog::Level::kVerbose);
-  Editor editor;
-  editor.run();
+  App app;
 
+  //
   return 0;
 }
