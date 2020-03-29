@@ -23,11 +23,61 @@
 #pragma once
 
 // ========================================================================== //
+// Headers
+// ========================================================================== //
+
+#include <string>
+
+#include "shared/types.hpp"
+
+// ReSharper disable once CppUnusedIncludeDirective
+#include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
+
+// ========================================================================== //
 // App Declaration
 // ========================================================================== //
 
 namespace wind {
 
-class App {};
+///
+class App {
+public:
+  struct Info {
+    std::string title;
+    u32 width;
+    u32 height;
+  };
+
+  explicit App(const Info &info);
+
+  virtual ~App();
+
+  void run();
+
+  /// Called to update
+  virtual void update(f32 delta) {}
+
+  /// Called to update at fixed interval
+  virtual void fixedUpdate(f32 delta) {}
+
+  /// Called to render
+  virtual void render() {}
+
+private:
+  /// Title
+  std::string m_title;
+  /// Window width
+  u32 m_width;
+  /// Window height
+  u32 m_height;
+
+  /// Window handle
+  GLFWwindow *m_window;
+
+  /// Whether app is running
+  bool m_running = false;
+};
 
 } // namespace wind

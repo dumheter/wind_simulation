@@ -20,61 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
+#include "shared/macros.hpp"
+#include "shared/types.hpp"
+
 // ========================================================================== //
-// Headers
+// Memory Declaration
 // ========================================================================== //
 
 namespace wind {
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
+/// Class with memory utilities
+class Memory {
+  WN_NAMESPACE_CLASS(Memory);
+
+public:
+  /// Minimum alignment requirement
+  static constexpr u64 kMinAlign = alignof(void *);
+
+  /// Allocate memory
+  static void *alloc(u64 size, u64 align = kMinAlign);
+
+  /// Reallocate memory
+  static void *realloc(void *mem, u64 size, u64 align = kMinAlign);
+
+  /// Free memory
+  static void free(void *mem);
+
+  /// Copy memory
+  static void *copy(void *dst, void const *src, u64 size);
+
+  /// Copy memory of type T
+  template <typename T> static void *copy(T *dst, T const *src) {
+    return copy(dst, src, sizeof(T));
   }
-
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
-}
-
-// -------------------------------------------------------------------------- //
-
-void App::run() {
-  m_running = true;
-
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
-
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
-
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
-}
+};
 
 } // namespace wind

@@ -22,6 +22,21 @@
 
 #include <shared/app.hpp>
 
+#include "shared/render/shader_compiler.hpp"
+
+// ========================================================================== //
+// Editor
+// ========================================================================== //
+
+class Editor : public wind::App {
+public:
+  explicit Editor(const Info &info) : App(info) {}
+
+  void update(f32 delta) override {}
+
+  void render() override {}
+};
+
 // ========================================================================== //
 // Main
 // ========================================================================== //
@@ -29,8 +44,9 @@
 int main() {
   using namespace wind;
 
-  App app;
+  const App::Info info{"Editor", 1280, 720};
+  Editor editor(info);
+  editor.run();
 
-  //
   return 0;
 }

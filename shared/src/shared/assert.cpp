@@ -20,61 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#include "assert.hpp"
 
 // ========================================================================== //
-// Headers
-// ========================================================================== //
-
-// ========================================================================== //
-// Headers
+// Assert Implementation
 // ========================================================================== //
 
 namespace wind {
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
+void Assert::cond(bool cond, const char8 *condStr, const char8 *file, u32 line,
+                  const String &msg) {
+  if (cond) {
+    return;
   }
-
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  }
+  panic(file, line, "assertion failed \"{}\"", msg.getStr());
 }
 
 // -------------------------------------------------------------------------- //
 
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
-}
-
-// -------------------------------------------------------------------------- //
-
-void App::run() {
-  m_running = true;
-
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
-
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
-
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
+void Assert::panic(const char8 *file, u32 line, const String &msg) {
+  printf("Program panicked: %s, at %s:%u\n", msg.getUTF8(), file, line);
+  abort();
 }
 
 } // namespace wind

@@ -20,61 +20,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
+#include "shared/macros.hpp"
+#include "shared/string.hpp"
+#include "shared/types.hpp"
+
 // ========================================================================== //
-// Headers
+// Macros
+// ========================================================================== //
+
+///
+#define WN_ASSERT(condition, fmt, ...)                                         \
+  Assert::cond(condition, #condition, __FILE__, __LINE__, fmt, __VA_ARGS__)
+
+///
+#define WN_PANIC(fmt, ...) Assert::panic(__FILE__, __LINE__, fmt, __VA_ARGS__)
+
+// ========================================================================== //
+// Assert Declaration
 // ========================================================================== //
 
 namespace wind {
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
+WN_FWD_DECLARE(String);
+
+/// Assert functions
+class Assert {
+  WN_NAMESPACE_CLASS(Assert);
+
+public:
+  static void cond(bool cond, const char8 *condStr, const char8 *file, u32 line,
+                   const String &msg);
+
+  template <typename... ARGS>
+  static void cond(bool cond, const char8 *condStr, const char8 *file, u32 line,
+                   const String &fmt, ARGS &&... args) {
+    cond(cond, condStr, file, line,
+         String::format(fmt, std::forward<ARGS>(args)...));
   }
 
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
+  WN_NORETURN static void panic(const char8 *file, u32 line, const String &msg);
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+  template <typename... ARGS>
+  WN_NORETURN static void panic(const char8 *file, u32 line, const String &fmt,
+                                ARGS &&... args) {
+    panic(file, line, String::format(fmt, std::forward<ARGS>(args)...));
   }
-}
-
-// -------------------------------------------------------------------------- //
-
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
-}
-
-// -------------------------------------------------------------------------- //
-
-void App::run() {
-  m_running = true;
-
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
-
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
-
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
-}
+};
 
 } // namespace wind

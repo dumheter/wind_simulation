@@ -1,0 +1,21 @@
+[submodule "shared/src/thirdparty/glfw"]
+	path = shared/src/thirdparty/glfw
+	url = https://github.com/glfw/glfw
+[submodule "shared/src/thirdparty/fmt"]
+	path = shared/src/thirdparty/fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "shared/src/thirdparty/shaderc"]
+	path = shared/src/thirdparty/shaderc
+	url = https://github.com/google/shaderc
+[submodule "shared/src/thirdparty/SPIRV-Cross"]
+	path = shared/src/thirdparty/SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "shared/src/thirdparty/plommon"]
+	path = shared/src/thirdparty/plommon
+	url = https://github.com/FBjorklund/Plommon
+[submodule "shared/src/thirdparty/mimalloc"]
+	path = shared/src/thirdparty/mimalloc
+	url = https://github.com/microsoft/mimalloc
+[submodule "shared/src/thirdparty/glm"]
+	path = shared/src/thirdparty/glm
+	url = https://github.com/g-truc/glm

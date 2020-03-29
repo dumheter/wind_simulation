@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,61 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
+#include "shared/common.hpp"
+
 // ========================================================================== //
-// Headers
+// ShaderStage Enumeration
 // ========================================================================== //
 
 namespace wind {
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
-  }
-
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
-}
-
-// -------------------------------------------------------------------------- //
-
-void App::run() {
-  m_running = true;
-
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
-
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
-
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
-}
+/// Enumeration of shader stages
+enum class ShaderStage {
+  kVertex = WN_BIT(0),
+  kPixel = WN_BIT(1),
+  kCompute = WN_BIT(2)
+};
 
 } // namespace wind

@@ -20,61 +20,70 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
+#include "shared/string.hpp"
+
 // ========================================================================== //
-// Headers
+// Path Declaration
 // ========================================================================== //
 
 namespace wind {
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
-  }
+/// Represents a path in the filesystem
+class Path {
+public:
+  /// Enumeration of file extensions
+  enum class Ext {
+    kNone,    ///< No extension
+    kUnknown, /// Unknown extension
+    kTxt,     ///< .txt
+    kPng,     ///< .png
+    kHlsl,    ///< .hlsl
+  };
 
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
+  /// Construct empty
+  Path();
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  }
-}
+  /// Construct from c-string
+  Path(const char8 *path);
 
-// -------------------------------------------------------------------------- //
+  /// Construct from String
+  Path(const String &path);
 
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
-}
+  /// Construct from std::string
+  Path(const std::string &path);
 
-// -------------------------------------------------------------------------- //
+  /// Join two paths
+  void join(const Path &other);
 
-void App::run() {
-  m_running = true;
+  /// Join two paths
+  static Path joined(const Path &p0, const Path &p1);
 
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
+  /// Returns the path to the parent. This is either the parent directory or the
+  /// containing directory of a file.
+  Path parent() const;
 
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
+  String getName() const;
 
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
-}
+  String getBaseName() const;
+
+  /// Returns the path extension
+  String getExtString() const;
+
+  /// Returns the path extension string
+  Ext getExt() const;
+
+  /// Returns the path string
+  const String &getString() const { return m_str; }
+
+private:
+  /// Path string
+  String m_str;
+};
 
 } // namespace wind

@@ -20,61 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#include "memory.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
+#include <cstring>
+#include <new>
+
+#include <mimalloc.h>
+
 // ========================================================================== //
-// Headers
+// New/Delete
+// ========================================================================== //
+
+void *operator new(std::size_t n) { return wind::Memory::alloc(n); }
+
+// -------------------------------------------------------------------------- //
+
+void operator delete(void *p) { wind::Memory::free(p); }
+
+// ========================================================================== //
+// Memory Implementation
 // ========================================================================== //
 
 namespace wind {
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
-  }
-
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  }
+void *Memory::alloc(u64 size, u64 align) {
+  return mi_malloc_aligned(size, align);
 }
 
 // -------------------------------------------------------------------------- //
 
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
+void *Memory::realloc(void *mem, u64 size, u64 align) {
+  return mi_realloc_aligned(mem, size, align);
 }
 
 // -------------------------------------------------------------------------- //
 
-void App::run() {
-  m_running = true;
+void Memory::free(void *mem) { mi_free(mem); }
 
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
+// -------------------------------------------------------------------------- //
 
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
-
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
+void *Memory::copy(void *dst, void const *src, u64 size) {
+  return memcpy(dst, src, size);
 }
 
 } // namespace wind

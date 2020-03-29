@@ -20,61 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "app.hpp"
+#pragma once
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
+#include <cstdint>
+
 // ========================================================================== //
-// Headers
+// Types
 // ========================================================================== //
 
-namespace wind {
+using char8 = char;
 
-App::App(const Info &info)
-    : m_title(info.title), m_width(info.width), m_height(info.height) {
-  if (!glfwInit()) {
-  }
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
 
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-  glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-  m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), NULL, NULL);
-  // Assert()
-  glfwMakeContextCurrent(m_window);
+using s8 = int8_t;
+using s16 = int16_t;
+using s32 = int32_t;
+using s64 = int64_t;
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-  }
-}
-
-// -------------------------------------------------------------------------- //
-
-App::~App() {
-  //
-  glfwDestroyWindow(m_window);
-}
-
-// -------------------------------------------------------------------------- //
-
-void App::run() {
-  m_running = true;
-
-  // Run main-loop
-  while (m_running) {
-    glfwPollEvents();
-
-    update(0.0f);
-    fixedUpdate(0.0f);
-    render();
-
-    // Check closing
-    if (glfwWindowShouldClose(m_window)) {
-      m_running = false;
-    }
-  }
-}
-
-} // namespace wind
+using f32 = float;
+using f64 = double;
