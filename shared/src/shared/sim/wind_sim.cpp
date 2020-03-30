@@ -174,12 +174,12 @@ void WindSimulation::stepVelocity(f32 delta) {
     Vec3F newValue = oldValue += delta * m_v0->get(i);
     m_v->set(i, newValue);
   }
-  if (DebugManager::getBool(WindSimulation::kDebugVelocitySource)) {
-    DebugManager::setBool(WindSimulation::kDebugVelocitySource, false);
-    for (s32 x = 2; x < 7; x++) {
-      for (s32 y = 2; y < 7; y++) {
-        m_v->set(x, y, 5, Vec3F(0.0f, 0.0f, 100.0f));
-        m_v0->set(x, y, 5, Vec3F(0.0f, 0.0f, 100.0f));
+  if (DebugManager::getBool(kDebugVelocitySource)) {
+    DebugManager::setBool(kDebugVelocitySource, false);
+    for (s32 x = 6; x < 10; x++) {
+      for (s32 y = 3; y < 7; y++) {
+        m_v->set(x, y, 5, Vec3F(0.0f, 0.0f, 25.0f));
+        m_v0->set(x, y, 5, Vec3F(0.0f, 0.0f, 25.0f));
       }
     }
     DLOG_INFO("it happened");

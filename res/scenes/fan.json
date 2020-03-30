@@ -1,0 +1,30 @@
+{
+  "name": "world",
+  "objects": [
+    {
+      "name": "skybox",
+      "skybox": { "cubemap": "../res/skybox/daytime.hdr" }
+    },
+    {
+      "name": "terrain",
+      "type": "plane",
+      "material": {
+        "texture": "../res/textures/grid.png",
+        "tiling": { "uv": 32.0 },
+        "color": [ 1.0, 1.0, 1.0, 1.0 ]
+      },
+      "position":  { "xz":  8.0 }, 
+      "scale": [ 8.0, 1.0, 8.0 ]
+    },
+    {
+      "name": "structures",
+      "position": [ 8.0, 3.0, 12.0 ], 
+      "wind": {
+        "occluder": {
+          "type": "cube",
+          "dim": [ 4, 8, 2 ]
+        }
+      } 
+    }
+  ]
+}
