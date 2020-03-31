@@ -58,7 +58,18 @@ public:
 
   /// Structure that represents dimensions of a field
   struct Dim {
-    u32 width, height, depth;
+    u32 width;  ///< Width of dimension
+    u32 height; ///< Height of dimension
+    u32 depth;  ///< Depth of dimension
+
+    /// Equality operator
+    friend bool operator==(const Dim &d0, const Dim &d1) {
+      return d0.width == d1.width && d0.height == d1.height &&
+             d0.depth == d1.depth;
+    }
+
+    /// Inequality operator
+    friend bool operator!=(const Dim &d0, const Dim &d1) { return !(d0 == d1); }
   };
 
   /// Construct field with dimensions and cell-size specified

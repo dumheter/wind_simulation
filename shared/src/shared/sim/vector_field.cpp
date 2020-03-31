@@ -76,7 +76,7 @@ void VectorField::paintWithObstr(Painter &painter,
         if (obstrField->get(x, y, z)) {
           // Painter::buildArrow(linesYellow, base, vec, 0.3f);
         } else {
-          Painter::buildArrow(linesRed, base, vec, 0.3f);
+          Painter::buildArrow(linesRed, base, vec * 0.5f, 0.5f);
         }
       }
     }

@@ -8,23 +8,38 @@
     {
       "name": "terrain",
       "type": "plane",
+      "physics": {
+        "restitution": 0.5,
+        "mass": 1.0
+      },
       "material": {
         "texture": "res/textures/grid.png",
         "tiling": { "uv": 28.0 },
         "color": [ 1.0, 1.0, 1.0, 1.0 ]
       },
       "position": {
-        "xz": 7.0
+        "xz": 7.0,
+        "y": 0.5
       },
       "scale": [ 7.0, 1.0, 7.0 ]
     },
     {
-      "name": "structures",
-      "position": [ 7.0, 3.0, 11.0 ],
+      "name": "plane_occluder",
+      "position": [ 7, 0.24, 7 ],
       "wind": {
         "occluder": {
           "type": "cube",
-          "dim": [ 4, 8, 0.5 ]
+          "dim": [ 14, 0.5, 14 ]
+        }
+      }
+    },
+    {
+      "name": "wall_occluder",
+      "position": [ 7.0, 3.0, 11 ],
+      "wind": {
+        "occluder": {
+          "type": "cube",
+          "dim": [ 4, 5, 1 ]
         }
       }
     }

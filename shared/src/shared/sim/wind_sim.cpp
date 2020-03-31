@@ -173,7 +173,7 @@ void WindSimulation::stepVelocity(f32 delta) {
   // Source/Sink
   for (u32 i = 0; i < m_v->getCellCount(); i++) {
     Vec3F oldValue = m_v->get(i);
-    Vec3F newValue = oldValue += delta * m_v0->get(i);
+    const Vec3F newValue = oldValue += delta * m_v0->get(i);
     m_v->set(i, newValue);
   }
   if (DebugManager::getBool(kDebugVelocitySource)) {

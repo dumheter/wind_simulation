@@ -60,13 +60,13 @@ void ObstructionField::buildForScene(
 
   // Check for collisions in each cell
   for (u32 z = 0; z < m_dim.depth; z++) {
-    f32 zPos = position.z + (z * m_cellSize);
+    const f32 zPos = position.z + (z * m_cellSize);
     for (u32 y = 0; y < m_dim.height; y++) {
-      f32 yPos = position.y + (y * m_cellSize);
+      const f32 yPos = position.y + (y * m_cellSize);
       for (u32 x = 0; x < m_dim.width; x++) {
-        f32 xPos = position.x + (x * m_cellSize);
-        f32 offMin = 0.05f * m_cellSize;
-        f32 offMax = 0.95f * m_cellSize;
+        const f32 xPos = position.x + (x * m_cellSize);
+        const f32 offMin = 0.05f * m_cellSize;
+        const f32 offMax = 0.95f * m_cellSize;
         AABox aabb{Vector3(xPos + offMin, yPos + offMin, zPos + offMin),
                    Vector3(xPos + offMax, yPos + offMax, zPos + offMax)};
         if (physicsScene->boxOverlapAny(aabb, Quaternion::IDENTITY)) {
