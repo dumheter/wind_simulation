@@ -188,7 +188,6 @@ Spline::ClosestPoint Spline::findClosestPoint(Vec3F point) const {
   return {closestPoint, minDist};
 }
 
-
 Vec3F Spline::getForce(Vec3F point, ClosestPoint closestPoint) const {
   // TODO better getForce algo?
 
@@ -250,23 +249,22 @@ Vec3F SplineCollection::operator()(const Vec3F point) const {
     if (meta.closestPoint.distance < closestSplineDist) {
       closestSplineIdx = i;
       closestSplineDist = meta.closestPoint.distance;
-
-
     }
     splineMeta.push_back(std::move(meta));
   }
 
   f32 gSum = 0.0f;
-  for (u32 i=0; i<splines.size(); ++i) {
-    splineMeta[i].g = gaussian(splineMeta[i].closestPoint.distance, 1.0f, 0.0f, closestSplineDist);
+  for (u32 i = 0; i < splines.size(); ++i) {
+    splineMeta[i].g = gaussian(splineMeta[i].closestPoint.distance, 1.0f, 0.0f,
+                               closestSplineDist);
     gSum += splineMeta[i].g;
   }
 
   Vec3F force = Vec3F::ZERO;
-  //DLOG_INFO("-----------");
-  for (const auto& meta : splineMeta) {
+  // DLOG_INFO("-----------");
+  for (const auto &meta : splineMeta) {
     force += meta.force * (meta.g / gSum);
-    //DLOG_RAW("{:.2f}/{:.2f}\n", meta.g, gSum);
+    // DLOG_RAW("{:.2f}/{:.2f}\n", meta.g, gSum);
   }
   DLOG_INFO("force: {}", force);
   return force;
@@ -331,9 +329,7 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    return BaseFn{Constant::fromJson(value)};
-  }
+  default: { return BaseFn{Constant::fromJson(value)}; }
   }
 }
 
@@ -365,9 +361,7 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    fn = BaseFn{Constant::FromBytes(mr)};
-  }
+  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
   }
   return fn;
 }
