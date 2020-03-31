@@ -3,13 +3,13 @@
   "objects": [
     {
       "name": "skybox",
-      "skybox": { "cubemap": "../res/skybox/daytime.hdr" }
+      "skybox": { "cubemap": "res/skybox/daytime.hdr" }
     },
     {
       "name": "terrain",
       "type": "plane",
       "material": {
-        "texture": "../res/textures/grid.png",
+        "texture": "res/textures/grid.png",
         "tiling": { "uv": 64.0 },
         "color": [ 1.0, 1.0, 1.0, 1.0 ]
       },
@@ -36,7 +36,7 @@
               "name": "house0_wall_north0",
               "type": "cube",
               "material": {
-                "texture": "../res/textures/wall.png",
+                "texture": "res/textures/wall.png",
                 "tiling": {
                   "u": 4,
                   "v": 8
@@ -49,7 +49,7 @@
               "name": "house0_wall_north1",
               "type": "cube",
               "material": {
-                "texture": "../res/textures/wall.png",
+                "texture": "res/textures/wall.png",
                 "tiling": {
                   "u": 12,
                   "v": 8
@@ -62,7 +62,7 @@
               "name": "house0_wall_north2",
               "type": "cube",
               "material": {
-                "texture": "../res/textures/wall.png",
+                "texture": "res/textures/wall.png",
                 "tiling": {
                   "u": 4,
                   "v": 1
@@ -75,7 +75,7 @@
               "name": "house0_wall_south",
               "type": "cube",
               "material": {
-                "texture": "../res/textures/wall.png",
+                "texture": "res/textures/wall.png",
                 "tiling": {
                   "u": 20,
                   "v": 8
@@ -88,7 +88,7 @@
               "name": "house0_wall_west",
               "type": "cube",
               "material": {
-                "texture": "../res/textures/wall.png",
+                "texture": "res/textures/wall.png",
                 "tiling": {
                   "u": 16,
                   "v": 8
@@ -101,7 +101,7 @@
               "name": "house0_wall_east",
               "type": "cube",
               "material": {
-                "texture": "../res/textures/wall.png",
+                "texture": "res/textures/wall.png",
                 "tiling": {
                   "u": 16,
                   "v": 8

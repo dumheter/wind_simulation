@@ -37,18 +37,16 @@
 
 namespace wind {
 
-/* Class that represents a density field. This field represents density at
- * different discrete points in 3D-space */
+/// Class that represents a density field for a fluid simulation. The density
+/// field represents the density of the fluid at each position in the lattice.
 class DensityField : public Field<f32> {
 public:
-  /* Construct an obstruction field with the specified 'width', 'height' and
-   * 'depth' (in number of cells). The size of a cell (in meters) can also be
-   * specified.  */
+  /// Construct density field
   DensityField(u32 width, u32 height, u32 depth, f32 cellsize = 1.0f);
 
-  /* \copydoc Field::paintObject */
-  void paintObject(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
-                   const Vec3F &padding = Vec3F(0, 0, 0)) override;
+  /* \copydoc Field::paintT */
+  void paintT(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+              const Vec3F &padding = Vec3F(0, 0, 0)) const override;
 };
 
 } // namespace wind

@@ -28,9 +28,8 @@
 
 #include "shared/math/math.hpp"
 #include "shared/render/painter.hpp"
-#include <dlog/dlog.hpp>
 
-#include <Debug/BsDebugDraw.h>
+#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // VectorField Implementation
@@ -38,7 +37,8 @@
 
 namespace wind {
 
-VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize) {
+VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize)
+    : FieldBase(width, height, depth, cellSize) {
   using namespace bs;
 
   m_x = new Comp(width, height, depth, cellSize);
@@ -50,11 +50,12 @@ VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize) {
 
 // -------------------------------------------------------------------------- //
 
-void VectorField::paint(Painter &painter, const Vec3F &offset,
-                        ObstructionField *obstructionField,
-                        const Vec3F &padding) {
+void VectorField::paintWithObstr(Painter &painter,
+                                 const ObstructionField *obstrField,
+                                 const Vec3F &offset,
+                                 const Vec3F &padding) const {
   bs::Vector<bs::Vector3> linesRed;
-  bs::Vector<bs::Vector3> linesYellow;
+  // bs::Vector<bs::Vector3> linesYellow;
 
   const u32 xPad = u32(padding.x);
   const u32 yPad = u32(padding.y);
@@ -72,8 +73,8 @@ void VectorField::paint(Painter &painter, const Vec3F &offset,
                   zPos + (m_cellSize / 2.0f)) -
             (padding * m_cellSize);
         const bs::Vector3 &vec = get(x, y, z);
-        if (obstructionField->get(x, y, z)) {
-          Painter::buildArrow(linesYellow, base, vec, 0.3f);
+        if (obstrField->get(x, y, z)) {
+          // Painter::buildArrow(linesYellow, base, vec, 0.3f);
         } else {
           Painter::buildArrow(linesRed, base, vec, 0.3f);
         }
@@ -84,8 +85,8 @@ void VectorField::paint(Painter &painter, const Vec3F &offset,
   // Draw normal vectors
   painter.setColor(Color::red());
   painter.drawLines(linesRed);
-  painter.setColor(Color::yellow());
-  painter.drawLines(linesYellow);
+  // painter.setColor(Color::yellow());
+  // painter.drawLines(linesYellow);
 }
 
 struct Cell {

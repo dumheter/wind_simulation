@@ -28,25 +28,26 @@
 
 #include "editor/factory.hpp"
 #include "editor/ui.hpp"
-#include "microprofile/microprofile.h"
 #include "shared/asset.hpp"
+#include "shared/debug/debug_manager.hpp"
 #include "shared/math/spline.hpp"
+#include "shared/scene/builder.hpp"
 #include "shared/scene/component/camera_flyer.hpp"
+#include "shared/scene/component/cpaint.hpp"
+#include "shared/scene/component/csim.hpp"
 #include "shared/scene/scene.hpp"
 #include "shared/utility/util.hpp"
+
+#include "microprofile/microprofile.h"
 
 #include <Components/BsCCamera.h>
 #include <Components/BsCRigidbody.h>
 #include <Debug/BsDebugDraw.h>
-#include <Importer/BsImporter.h>
 #include <Input/BsInput.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
-#include <dlog/dlog.hpp>
 
-#include "shared/scene/builder.hpp"
-#include "shared/scene/component/cpaint.hpp"
-#include "shared/scene/component/csim.hpp"
+#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // Editor Implementation
@@ -95,19 +96,6 @@ void Editor::onStartup() {
 
   // Setup default scene
   setScene(Scene::loadFile(kDefaultSceneName));
-
-  // TMP: Create sim object
-  // bs::HSceneObject simObj =
-  //     ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
-  // simObj->setParent(getScene());
-  // HCSim sim = simObj->addComponent<CSim>();
-  // constexpr float cellSize = 0.75;
-  // sim->build(u32(kGroundPlaneScale / cellSize) * 2 + 1, 6,
-  //            u32(kGroundPlaneScale / cellSize) * 2 + 1, cellSize,
-  //            bs::SceneManager::instance().getMainScene());
-
-  // TMP: Save scene
-  // Scene::saveFile("../res/scenes/out.json", getScene());
 }
 
 // -------------------------------------------------------------------------- //
@@ -148,22 +136,22 @@ void Editor::onPreUpdate(f32 delta) {
   }
 
   // Add velocity source 'V'
-  if (gInput().isButtonHeld(ButtonCode::BC_V)) {
+  if (gInput().isButtonHeld(BC_V)) {
     DebugManager::setBool(WindSimulation::kDebugVelocitySource, true);
   }
   // Add velocity sink 'C'
-  if (gInput().isButtonHeld(ButtonCode::BC_C)) {
+  if (gInput().isButtonHeld(BC_C)) {
     // m_windSim->addVelocitySink();
     DLOG_VERBOSE("Added velocity sinks");
   }
-  if (gInput().isButtonDown(ButtonCode::BC_M)) {
+  if (gInput().isButtonDown(BC_M)) {
     Util::dumpScene(m_scene);
   }
-  if (gInput().isButtonDown(ButtonCode::BC_N)) {
+  if (gInput().isButtonDown(BC_N)) {
     DLOG_INFO("save scene");
     DLOG_RAW("{}\n", Scene::save(m_scene));
   }
-  if (gInput().isButtonDown(ButtonCode::BC_Y)) {
+  if (gInput().isButtonDown(BC_Y)) {
     DLOG_INFO("info");
   }
 }
@@ -243,8 +231,8 @@ void Editor::setScene(const bs::HSceneObject &scene, bool destroy) {
       ObjectBuilder(ObjectType::kEmpty).withName("wind_sim").build();
   simObj->setParent(getScene());
   HCSim sim = simObj->addComponent<CSim>();
-  constexpr float cellSize = 1.0f;
-  sim->build(kGroundPlaneScale * 4, 6, kGroundPlaneScale * 4, cellSize,
+  constexpr f32 cellSize = 0.5f;
+  sim->build(kGroundPlaneScale * 2, 6, kGroundPlaneScale * 2, cellSize,
              bs::SceneManager::instance().getMainScene());
 }
 

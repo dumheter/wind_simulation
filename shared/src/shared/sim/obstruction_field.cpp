@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/render/painter.hpp"
+
 #include <Components/BsCRenderable.h>
 #include <CoreThread/BsCoreThread.h>
 #include <Debug/BsDebugDraw.h>
@@ -41,7 +43,7 @@ ObstructionField::ObstructionField(u32 width, u32 height, u32 depth,
                                    f32 cellsize)
     : Field(width, height, depth, cellsize) {
   using namespace bs;
-  for (u32 i = 0; i < m_dataSize; i++) {
+  for (u32 i = 0; i < m_cellCount; i++) {
     m_data[i] = false;
   }
 }
@@ -77,16 +79,15 @@ void ObstructionField::buildForScene(
 
 // -------------------------------------------------------------------------- //
 
-void ObstructionField::paintObject(Painter &painter, const Vec3F &offset,
-                                   const Vec3F &padding) {
-  /*
-  bs::DebugDraw::instance().setColor(bs::Color::BansheeOrange);
+void ObstructionField::paintT(Painter &painter, const Vec3F &offset,
+                              const Vec3F &padding) const {
+  bs::Vector<bs::Vector3> lines;
 
-  u32 xPad = u32(padding.x);
-  u32 yPad = u32(padding.y);
-  u32 zPad = u32(padding.z);
+  const u32 xPad = u32(padding.x);
+  const u32 yPad = u32(padding.y);
+  const u32 zPad = u32(padding.z);
 
-  // Draw obstructions
+  // Draw vectors
   for (u32 z = zPad; z < m_dim.depth - zPad; z++) {
     const f32 zPos = offset.z + (z * m_cellSize);
     for (u32 y = yPad; y < m_dim.height - yPad; y++) {
@@ -97,15 +98,18 @@ void ObstructionField::paintObject(Painter &painter, const Vec3F &offset,
             Vec3F(xPos + (m_cellSize / 2.0f), yPos + (m_cellSize / 2.0f),
                   zPos + (m_cellSize / 2.0f)) -
             (padding * m_cellSize);
-        const bool obstructed = get(x, y, z);
-        if (obstructed) {
-          bs::DebugDraw::instance().drawCube(base, bs::Vector3::ONE *
-                                                       (m_cellSize * 0.05f));
+        const bool obstr = get(x, y, z);
+        if (obstr) {
+          Painter::buildCross(lines, base,
+                              Vec3F{0.75f, 0.75f, 0.75f} * m_cellSize);
         }
       }
     }
   }
-  */
+
+  // Draw normal vectors
+  painter.setColor(Color::yellow());
+  painter.drawLines(lines);
 }
 
 } // namespace wind

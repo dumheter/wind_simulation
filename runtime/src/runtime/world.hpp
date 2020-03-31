@@ -125,7 +125,7 @@ private:
 
   bs::HSceneObject m_staticScene{};
   bs::HSceneObject m_dynamicScene{};
-  String m_scenePath{"../res/scenes/bake.json"};
+  String m_scenePath{"res/scenes/bake.json"};
   std::filesystem::file_time_type m_sceneEditTime{};
 };
 

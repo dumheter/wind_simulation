@@ -48,7 +48,7 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
           .withScale(Vec3F(groundScale, 1.0f, groundScale))
           .withPosition(Vec3F(groundScale, .4f, groundScale))
           .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                        "../res/textures/grid.png",
+                        "res/textures/grid.png",
                         Vec2F(groundScale * 4.0f, groundScale * 4.0f))
           .withCollider(0.5f)
           .build();
@@ -59,7 +59,7 @@ bs::HSceneObject EditorFactory::createEmptyScene(const bs::String &name,
                               .build();
 
   HSceneObject skybox = ObjectBuilder(ObjectBuilder::Kind::kEmpty)
-                            .withSkybox("../res/skybox/daytime.hdr")
+                            .withSkybox("res/skybox/daytime.hdr")
                             .build();
 
   HSceneObject scene = SceneBuilder{}
@@ -83,7 +83,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
           .withScale(Vec3F(groundScale, 1.0f, groundScale))
           .withPosition(Vec3F(groundScale, .4f, groundScale))
           .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                        "../res/textures/grid.png",
+                        "res/textures/grid.png",
                         Vec2F(groundScale * 4.0f, groundScale * 4.0f))
           .withCollider(0.5f)
           .build();
@@ -93,7 +93,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
                           .withScale(Vec3F(1.0f, 6.5f, 1.5f))
                           .withPosition(Vec3F(6.0f, 3.0f, 4.0f))
                           .withMaterial(ObjectBuilder::ShaderKind::kStandard,
-                                        "../res/textures/grid_2.png")
+                                        "res/textures/grid_2.png")
                           .withCollider(0.5f, 25.0f)
                           .withRigidbody()
                           .build();
@@ -105,7 +105,7 @@ bs::HSceneObject EditorFactory::createDefaultScene(const bs::String &name,
                               .build();
 
   HSceneObject skybox = ObjectBuilder(ObjectBuilder::Kind::kEmpty)
-                            .withSkybox("../res/skybox/daytime.hdr")
+                            .withSkybox("res/skybox/daytime.hdr")
                             .build();
 
   HSceneObject scene = SceneBuilder{}

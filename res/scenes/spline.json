@@ -3,7 +3,7 @@
   "objects": [
     {
       "name": "skybox",
-      "skybox": { "cubemap": "../res/skybox/daytime.hdr" }
+      "skybox": { "cubemap": "res/skybox/daytime.hdr" }
     },
     {
       "name": "geometry",
@@ -13,7 +13,7 @@
           "name": "ground_plane",
           "material": {
             "shader": "standard",
-            "texture": "../res/textures/grid.png",
+            "texture": "res/textures/grid.png",
             "tiling": { "uv": 32.0 }
           },
           "scale": [ 8.0, 1.0, 8.0 ]
@@ -23,7 +23,7 @@
           "name": "spline",
           "material": {
             "shader": "standard",
-            "texture": "../res/textures/grid_2.png"
+            "texture": "res/textures/grid_2.png"
           },
           "spline": {
             "degree": 2,

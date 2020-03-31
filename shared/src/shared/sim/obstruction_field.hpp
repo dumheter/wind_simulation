@@ -50,9 +50,9 @@ public:
   void buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
                      const bs::Vector3 &position = bs::Vector3());
 
-  /// \copydoc Field::paintObject
-  void paintObject(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
-                   const Vec3F &padding = Vec3F(0, 0, 0)) override;
+  /// \copydoc Field::paintT
+  void paintT(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+              const Vec3F &padding = Vec3F(0, 0, 0)) const override;
 };
 
 } // namespace wind

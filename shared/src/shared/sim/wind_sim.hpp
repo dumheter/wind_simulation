@@ -93,10 +93,10 @@ public:
   static constexpr char kDebugVelocitySource[] = "SimDebugVS";
 
   /// Enumeration of the different fields that make up the simulation.
-  enum class FieldKind { DENSITY, VELOCITY, OBSTRUCTION };
+  enum class FieldKind { kDens, kVel, kObstr };
 
   /// Enumeration that specifies edges of the simulation
-  enum class EdgeKind { DENSITY, VELOCITY_X, VELOCITY_Y, VELOCITY_Z };
+  enum class FieldSubKind { kDens, kVelX, kVelY, kVelZ };
 
 public:
   /// Construct wind simulation of given dimensions
@@ -132,7 +132,7 @@ public:
 
   /// Paint simulation
   void paint(Painter &painter,
-             const bs::Vector3 &offset = bs::Vector3(0, 0, 0));
+             const bs::Vector3 &offset = bs::Vector3(0, 0, 0)) const;
 
   /// Returns the density field for the current step in the simulation
   DensityField *D() { return m_d; }
@@ -187,22 +187,23 @@ public:
 
 private:
   /// Gauss-Seidel relaxation
-  void gaussSeidel(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 a, f32 c);
+  void gaussSeidel(Field<f32> *f, Field<f32> *f0, FieldSubKind edge, f32 a,
+                   f32 c);
 
   /// Run diffusion
-  void diffuse(Field<f32> *f, Field<f32> *f0, EdgeKind edge, f32 coeff,
+  void diffuse(Field<f32> *f, Field<f32> *f0, FieldSubKind edge, f32 coeff,
                f32 delta);
 
   /// Run advection
   void advect(Field<f32> *f, Field<f32> *f0, VectorField *vecField,
-              EdgeKind edge, f32 delta);
+              FieldSubKind edge, f32 delta);
 
   /// Project velocity
   void project(Field<f32> *u, Field<f32> *v, Field<f32> *w, Field<f32> *prj,
                Field<f32> *div);
 
   /// Set boundary condition
-  void setBoundary(Field<f32> *field, EdgeKind edge);
+  void setBoundary(Field<f32> *field, FieldSubKind edge);
 
 private:
   /// Number of iterations in the Gauss-Seidel method
