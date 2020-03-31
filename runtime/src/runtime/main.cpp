@@ -5,6 +5,7 @@
 
 int main() {
   DLOG_INIT();
+  DLOG_SET_LEVEL(dlog::Level::kVerbose);
   DLOG_INFO("¸,ø¤º°`°º¤ø,¸  {}  ¸,ø¤º°`°º¤ø,¸", "W I N D");
   wind::Common::InitNetwork();
   {

@@ -48,21 +48,26 @@ void bake() {
     auto cwind = windSO->getComponent<CWind>();
 
     // TODO use "blue noise" to chose points to sample
-    for (u32 x = 8; x <= dim.width - 1 - 1; x += 200) {
-      for (u32 y = 1; y <= 2 /*dim.height-1*/; y += 2) {
-        for (u32 z = 8; z <= dim.depth - 1 - 1; z += 200) {
+    std::vector<BaseFn::Spline> splines{};
+    for (u32 x = 2; x <= dim.width - 1 - 2; x += 2) {
+      for (u32 y = 1; y <= dim.height - 1 - 1; y += 2) {
+        for (u32 z = 2; z <= dim.depth - 1 - 2; z += 2) {
           auto points =
               bakeAux(wind, Vec3F{static_cast<f32>(x), static_cast<f32>(y),
                                   static_cast<f32>(z)});
           if (!points.empty()) {
-            cwind->addFunction(BaseFn::fnSpline(
-                std::move(points), 2, ObjectBuilder::kSplineSamplesAuto));
+            splines.push_back(BaseFn::Spline{
+                std::move(points), 2, ObjectBuilder::kSplineSamplesAuto});
           }
         }
       }
     }
-    DLOG_INFO("[{:<3}/{}] added {} fn's", i + 1, csims.size(),
-              cwind->getFunctions().size());
+    u32 count = 0;
+    if (!splines.empty()) {
+      count = splines.size();
+      cwind->addFunction(BaseFn::fnSplineCollection(std::move(splines)));
+    }
+    DLOG_INFO("[{:<3}/{}] added {} fn's", i + 1, csims.size(), count);
   }
   DLOG_INFO("..done");
 }
