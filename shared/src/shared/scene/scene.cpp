@@ -151,7 +151,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
 
     // Texture
     const String defTex = shaderKind == ObjectBuilder::ShaderKind::kTransparent
-                              ? "../res/textures/white"
+                              ? "res/textures/white"
                               : "";
     const String tex = mat.value("texture", defTex).c_str();
     Vec2F tiling = Vec2F::ONE;

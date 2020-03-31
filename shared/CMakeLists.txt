@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCES
 	src/shared/debug/debug.cpp
 	src/shared/debug/debug_manager.cpp
+	src/shared/math/field.cpp
 	src/shared/math/spline.cpp
 	src/shared/render/color.cpp
 	src/shared/render/painter.cpp
@@ -46,7 +47,6 @@ set(SOURCES
 set(HEADERS
 	src/shared/debug/debug.hpp
 	src/shared/debug/debug_manager.hpp
-	src/shared/math/dim.hpp
 	src/shared/math/field.hpp
 	src/shared/math/math.hpp
 	src/shared/math/spline.hpp

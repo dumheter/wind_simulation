@@ -42,10 +42,19 @@ WIND_FORWARD_DECLARE(Painter);
 // -------------------------------------------------------------------------- //
 
 /// Class that represents a vector field
-
-class VectorField {
+class VectorField : public FieldBase {
 public:
-  using Comp = Field<f32>;
+  /// Type of the three vector field components (Each component is its own
+  /// field)
+  struct Comp : Field<f32> {
+    /// Construct vector-field component field
+    Comp(u32 width, u32 height, u32 depth, f32 cellSize)
+        : Field(width, height, depth, cellSize) {}
+
+    /// Not used as components are not painted separately
+    void paintT(Painter &painter, const Vec3F &offset,
+                const Vec3F &padding) const override {}
+  };
 
 public:
   /* Construct a vector-field with the specified 'width', 'height' and
@@ -53,21 +62,31 @@ public:
    * specified.  */
   VectorField(u32 width, u32 height, u32 depth, f32 cellSize = 1.0f);
 
-  ///
-  void paint(Painter &painter, const Vec3F &offset = Vec3F(),
-             ObstructionField *obstructionField = nullptr,
-             const Vec3F &padding = Vec3F(0, 0, 0));
+  /// \copydoc FieldBase::paint
+  void paint(Painter &painter, const Vec3F &offset,
+             const Vec3F &padding) const override {}
+
+  /// Paint the vector field by drawing an arrow for each vector
+  void paintWithObstr(Painter &painter, const ObstructionField *obstrField,
+                      const Vec3F &offset = Vec3F(),
+                      const Vec3F &padding = Vec3F(0, 0, 0)) const;
 
   /// Returns the X component of the vector field
   Comp *getX() { return m_x; }
+
+  /// Returns the X component of the vector field
   const Comp *getX() const { return m_x; }
 
   /// Returns the Y component of the vector field
   Comp *getY() { return m_y; }
+
+  /// Returns the Y component of the vector field
   const Comp *getY() const { return m_y; }
 
   /// Returns the Z component of the vector field
   Comp *getZ() { return m_z; }
+
+  /// Returns the Z component of the vector field
   const Comp *getZ() const { return m_z; }
 
   /// Returns a vector for the specified offset in the vector field. This is
@@ -78,14 +97,14 @@ public:
 
   /// Returns a vector for the specified location in the vector field. This is
   /// built on demand from the separate vector components.
-  /// @pre x, y and z must be > 1 and < dim-1.
+  /// \pre 'x', 'y' and 'z' must be '> 1' and '< dim-1'.
   Vec3F get(s32 x, s32 y, s32 z) const {
     return Vec3F(getX()->get(x, y, z), getY()->get(x, y, z),
                  getZ()->get(x, y, z));
   }
 
-  /// @param point Position in local meters. Must be > 1 and < dim-1.
-  /// @note If point is out of bounds, Vec3F::ZERO is returned.
+  /// \param point Position in local meters. Must be > 1 and < dim-1.
+  /// \note If point is out of bounds, Vec3F::ZERO is returned.
   Vec3F sampleNear(Vec3F point) const;
 
   /// Set the vector at the specified location in the vector field.
@@ -102,21 +121,7 @@ public:
     m_z->get(x, y, z) = vec.z;
   }
 
-  /// Returns the size of each component field in the vector field. The total
-  /// data size is '3 * getDataSize'. X, Y and Z channels.
-  u32 getDataSize() { return m_x->getDataSize(); }
-
-  /// Returns the dimension of the vector field
-  Dim3D getDim() const { return m_x->getDim(); }
-
-  f32 getCellSize() const { return m_cellSize; }
-
 private:
-  /// Dimension of field
-  Dim3D m_dim;
-  /// Cell size
-  f32 m_cellSize;
-
   /// Vector X component
   Comp *m_x;
   /// Vector Y component

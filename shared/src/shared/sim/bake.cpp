@@ -30,7 +30,7 @@ void bake() {
   for (u32 i = 0; i < csims.size(); ++i) {
     WindSimulation *windSim = csims[i]->getSim();
     VectorField *wind = windSim->V();
-    const Dim3D dim = wind->getDim();
+    const FieldBase::Dim dim = wind->getDim();
     const f32 cellSize = wind->getCellSize();
 
     auto parent = csims[i]->SO()->getParent();
@@ -73,7 +73,7 @@ void bake() {
 }
 
 static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
-  const Dim3D dim = wind->getDim();
+  const FieldBase::Dim dim = wind->getDim();
   const f32 cellSize = wind->getCellSize();
 
   std::vector<Vec3F> points{};

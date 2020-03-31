@@ -3,7 +3,7 @@
   "objects": [
     {
       "name": "skybox",
-      "skybox": { "cubemap": "../res/skybox/daytime.hdr" }
+      "skybox": { "cubemap": "res/skybox/daytime.hdr" }
     },
     {
       "name": "geometry",
@@ -13,7 +13,7 @@
           "type": "plane",
           "material": {
             "shader": "standard",
-            "texture": "../res/textures/grid.png",
+            "texture": "res/textures/grid.png",
             "tiling": { "uv": 800.0 }
           },
           "scale": [ 400.0, 1.0, 400.0 ],
@@ -29,7 +29,7 @@
           "type": "cube",
           "material": {
             "shader": "standard",
-            "texture": "../res/textures/grid_2.png"
+            "texture": "res/textures/grid_2.png"
           },
           "position": {
             "x": 6.0,
@@ -51,7 +51,7 @@
           "type": "cube",
           "material": {
             "shader": "standard",
-            "texture": "../res/textures/grid_2.png"
+            "texture": "res/textures/grid_2.png"
           },
           "position": {
             "x": 6.0,
@@ -171,7 +171,7 @@
           "rotation": { "x": 90 },
           "material": {
             "shader": "standard",
-            "texture": "../res/textures/grid_2.png"
+            "texture": "res/textures/grid_2.png"
           },
           "physics": {
             "restitution": 0.5,

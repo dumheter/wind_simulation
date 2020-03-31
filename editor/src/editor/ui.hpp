@@ -68,8 +68,7 @@ private:
   std::filesystem::file_time_type m_sceneEditTime;
 
   /// Debug type
-  WindSimulation::FieldKind m_debugFieldKind =
-      WindSimulation::FieldKind::DENSITY;
+  WindSimulation::FieldKind m_debugFieldKind = WindSimulation::FieldKind::kDens;
   /// Whether to draw debug data
   bool m_debugDraw = false;
   /// Whether to draw debug data frame
