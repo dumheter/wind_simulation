@@ -41,8 +41,8 @@ DensityField::DensityField(u32 width, u32 height, u32 depth, f32 cellsize)
 
 // -------------------------------------------------------------------------- //
 
-void DensityField::paintObject(Painter &painter, const Vec3F &offset,
-                               const Vec3F &padding) {
+void DensityField::paintT(Painter &painter, const Vec3F &offset,
+                          const Vec3F &padding) const {
   /*
   bs::DebugDraw::instance().setColor(bs::Color::Blue);
 

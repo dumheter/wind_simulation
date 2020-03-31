@@ -224,7 +224,7 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
   }
 
   { // aim dot
-    HTexture dotTex = gImporter().import<Texture>("../res/textures/dot.png");
+    HTexture dotTex = gImporter().import<Texture>("res/textures/dot.png");
     HSpriteTexture dotSprite = SpriteTexture::create(dotTex);
     m_aim = GUITexture::create(dotSprite);
     m_aim->setSize(kAimDiameter, kAimDiameter);
