@@ -68,9 +68,9 @@ struct Polynomial {
   static Polynomial FromBytes(alflib::RawMemoryReader &mr);
 };
 
-struct SplineCollection;
-struct Spline {
-  friend struct SplineCollection;
+struct Spline;
+struct SplineBase {
+  friend struct Spline;
   std::vector<Vec3F> points;
   u32 degree;
   u32 samples;
@@ -78,10 +78,10 @@ struct Spline {
   Vec3F operator()(Vec3F point) const;
 
   void toJson(nlohmann::json &value) const;
-  static Spline fromJson(const nlohmann::json &value);
+  static SplineBase fromJson(const nlohmann::json &value);
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
-  static Spline FromBytes(alflib::RawMemoryReader &mr);
+  static SplineBase FromBytes(alflib::RawMemoryReader &mr);
 
 private:
   struct ClosestPoint {
@@ -96,16 +96,16 @@ private:
   Vec3F getForce(Vec3F point, ClosestPoint closestPoint) const;
 };
 
-struct SplineCollection {
-  std::vector<Spline> splines;
+struct Spline {
+  std::vector<SplineBase> splines;
 
   Vec3F operator()(Vec3F point) const;
 
   void toJson(nlohmann::json &value) const;
-  static SplineCollection fromJson(const nlohmann::json &value);
+  static Spline fromJson(const nlohmann::json &value);
 
   bool ToBytes(alflib::RawMemoryWriter &mw) const;
-  static SplineCollection FromBytes(alflib::RawMemoryReader &mr);
+  static Spline FromBytes(alflib::RawMemoryReader &mr);
 };
 
 } // namespace baseFunctions
@@ -115,9 +115,9 @@ struct SplineCollection {
 struct BaseFn {
   using Constant = baseFunctions::Constant;
   using Polynomial = baseFunctions::Polynomial;
+  using SplineBase = baseFunctions::SplineBase;
   using Spline = baseFunctions::Spline;
-  using SplineCollection = baseFunctions::SplineCollection;
-  using Variant = std::variant<Constant, Polynomial, Spline, SplineCollection>;
+  using Variant = std::variant<Constant, Polynomial, Spline>;
 
   Variant fn;
 
@@ -134,12 +134,8 @@ struct BaseFn {
     return BaseFn{Polynomial{origo, x0, x1, x2, y0, y1, y2, z0, z1, z2}};
   }
 
-  static BaseFn fnSpline(std::vector<Vec3F> &&points, u32 degree, u32 samples) {
-    return BaseFn{Spline{std::move(points), degree, samples}};
-  }
-
-  static BaseFn fnSplineCollection(std::vector<Spline> &&splines) {
-    return BaseFn{SplineCollection{std::move(splines)}};
+  static BaseFn fnSpline(std::vector<SplineBase> &&splines) {
+    return BaseFn{Spline{std::move(splines)}};
   }
 
   /// Construct a BaseFn from json object.

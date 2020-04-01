@@ -48,7 +48,7 @@ void bake() {
     auto cwind = windSO->getComponent<CWind>();
 
     // TODO use "blue noise" to chose points to sample
-    std::vector<BaseFn::Spline> splines{};
+    std::vector<BaseFn::SplineBase> splines{};
     for (u32 x = 2; x <= dim.width - 1 - 2; x += 2) {
       for (u32 y = 1; y <= dim.height - 1 - 1; y += 2) {
         for (u32 z = 2; z <= dim.depth - 1 - 2; z += 2) {
@@ -56,16 +56,15 @@ void bake() {
               bakeAux(wind, Vec3F{static_cast<f32>(x), static_cast<f32>(y),
                                   static_cast<f32>(z)});
           if (!points.empty()) {
-            splines.push_back(BaseFn::Spline{
+            splines.push_back(BaseFn::SplineBase{
                 std::move(points), 2, ObjectBuilder::kSplineSamplesAuto});
           }
         }
       }
     }
-    u32 count = 0;
+    const u32 count = splines.size();
     if (!splines.empty()) {
-      count = splines.size();
-      cwind->addFunction(BaseFn::fnSplineCollection(std::move(splines)));
+      cwind->addFunction(BaseFn::fnSpline(std::move(splines)));
     }
     DLOG_INFO("[{:<3}/{}] added {} fn's", i + 1, csims.size(), count);
   }
@@ -94,8 +93,7 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
     };
     constexpr f32 kThreshold = 0.05f;
     if (!anyAxisOver(points.back(), point, kThreshold)) {
-      DLOG_VERBOSE("early exit, too low wind [{} -> {}]",
-                   points.back(), point);
+      DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(), point);
       break;
     }
 

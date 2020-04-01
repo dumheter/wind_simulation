@@ -1,13 +1,12 @@
 ﻿#include "base_functions.hpp"
 
 #include "shared/scene/builder.hpp"
+#include "shared/utility/bsprinter.hpp"
 #include "shared/utility/json_util.hpp"
 
 #include <ThirdParty/json.hpp>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
-
-#include "shared/utility/bsprinter.hpp"
 #include <dlog/dlog.hpp>
 
 namespace wind {
@@ -20,8 +19,6 @@ String typeToString(Type type) {
     return "polynomial";
   case Type::kSpline:
     return "spline";
-  case Type::kSplineCollection:
-    return "spline collection";
   case Type::kConstant:
     [[fallthrough]];
   default:
@@ -35,9 +32,6 @@ Type stringToType(const String &type) {
   }
   if (type == "spline") {
     return Type::kSpline;
-  }
-  if (type == "spline collection") {
-    return Type::kSplineCollection;
   }
   return Type::kConstant;
 }
@@ -125,12 +119,11 @@ Polynomial Polynomial::FromBytes(alflib::RawMemoryReader &mr) {
                     mr.Read<f32>()};
 }
 
-Vec3F Spline::operator()(const Vec3F point) const {
+Vec3F SplineBase::operator()(const Vec3F point) const {
   return getForce(point, findClosestPoint(point));
 }
 
-bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
-  mw.Write(static_cast<std::underlying_type<Type>::type>(Type::kSpline));
+bool SplineBase::ToBytes(alflib::RawMemoryWriter &mw) const {
   mw.Write(static_cast<u32>(points.size()));
   for (const auto point : points) {
     mw.Write(point.x);
@@ -141,8 +134,8 @@ bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
   return mw.Write(samples);
 }
 
-Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
-  Spline s{};
+SplineBase SplineBase::FromBytes(alflib::RawMemoryReader &mr) {
+  SplineBase s{};
   const auto count = mr.Read<u32>();
   s.points.reserve(count);
   for (u32 i = 0; i < count; ++i) {
@@ -153,7 +146,7 @@ Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
   return s;
 }
 
-void Spline::toJson(nlohmann::json &value) const {
+void SplineBase::toJson(nlohmann::json &value) const {
   std::vector<nlohmann::json> jpoints{};
   for (const auto point : points) {
     nlohmann::json jpoint{};
@@ -165,8 +158,8 @@ void Spline::toJson(nlohmann::json &value) const {
   value["samples"] = samples;
 }
 
-Spline Spline::fromJson(const nlohmann::json &value) {
-  Spline s{};
+SplineBase SplineBase::fromJson(const nlohmann::json &value) {
+  SplineBase s{};
   s.degree = value.value("degree", 2);
   s.samples = value.value("samples", ObjectBuilder::kSplineSamplesAuto);
   const nlohmann::json jpoints = value["points"];
@@ -176,7 +169,7 @@ Spline Spline::fromJson(const nlohmann::json &value) {
   return s;
 }
 
-Spline::ClosestPoint Spline::findClosestPoint(Vec3F point) const {
+SplineBase::ClosestPoint SplineBase::findClosestPoint(Vec3F point) const {
   u32 closestPoint = 0;
   f32 minDist = distance(points[0], point);
   for (u32 i = 1; i < points.size(); ++i) {
@@ -188,9 +181,7 @@ Spline::ClosestPoint Spline::findClosestPoint(Vec3F point) const {
   return {closestPoint, minDist};
 }
 
-Vec3F Spline::getForce(Vec3F point, ClosestPoint closestPoint) const {
-  // TODO better getForce algo?
-
+Vec3F SplineBase::getForce(Vec3F point, ClosestPoint closestPoint) const {
   // weighted closest point
   // A-----B-----C
   Vec3F a;
@@ -231,9 +222,9 @@ Vec3F Spline::getForce(Vec3F point, ClosestPoint closestPoint) const {
   return force;
 }
 
-Vec3F SplineCollection::operator()(const Vec3F point) const {
+Vec3F Spline::operator()(const Vec3F point) const {
   struct SplineMeta {
-    Spline::ClosestPoint closestPoint;
+    SplineBase::ClosestPoint closestPoint;
     Vec3F force;
     f32 g;
   };
@@ -270,9 +261,8 @@ Vec3F SplineCollection::operator()(const Vec3F point) const {
   return force;
 }
 
-bool SplineCollection::ToBytes(alflib::RawMemoryWriter &mw) const {
-  mw.Write(
-      static_cast<std::underlying_type<Type>::type>(Type::kSplineCollection));
+bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
+  mw.Write(static_cast<std::underlying_type<Type>::type>(Type::kSpline));
   bool res = mw.Write(static_cast<u32>(splines.size()));
   for (const auto spline : splines) {
     res = mw.Write(spline);
@@ -280,17 +270,17 @@ bool SplineCollection::ToBytes(alflib::RawMemoryWriter &mw) const {
   return res;
 }
 
-SplineCollection SplineCollection::FromBytes(alflib::RawMemoryReader &mr) {
-  SplineCollection s{};
+Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
+  Spline s{};
   const auto count = mr.Read<u32>();
   s.splines.reserve(count);
   for (u32 i = 0; i < count; ++i) {
-    s.splines.push_back(mr.Read<Spline>());
+    s.splines.push_back(mr.Read<SplineBase>());
   }
   return s;
 }
 
-void SplineCollection::toJson(nlohmann::json &value) const {
+void Spline::toJson(nlohmann::json &value) const {
   std::vector<nlohmann::json> jsplines{};
   for (const auto spline : splines) {
     nlohmann::json jspline{};
@@ -300,11 +290,11 @@ void SplineCollection::toJson(nlohmann::json &value) const {
   value["splines"] = jsplines;
 }
 
-SplineCollection SplineCollection::fromJson(const nlohmann::json &value) {
-  SplineCollection s{};
+Spline Spline::fromJson(const nlohmann::json &value) {
+  Spline s{};
   const nlohmann::json jsplines = value["splines"];
   for (const auto jspline : jsplines) {
-    s.splines.push_back(Spline::fromJson(jspline));
+    s.splines.push_back(SplineBase::fromJson(jspline));
   }
   return s;
 }
@@ -323,9 +313,6 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kSpline: {
     return BaseFn{Spline::fromJson(value)};
-  }
-  case baseFunctions::Type::kSplineCollection: {
-    return BaseFn{SplineCollection::fromJson(value)};
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
@@ -355,10 +342,6 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
     fn = BaseFn{Spline::FromBytes(mr)};
     break;
   }
-  case baseFunctions::Type::kSplineCollection: {
-    fn = BaseFn{SplineCollection::FromBytes(mr)};
-    break;
-  }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
   default: { fn = BaseFn{Constant::FromBytes(mr)}; }
@@ -372,9 +355,6 @@ String BaseFn::typeToString() const {
   }
   if (isType<Spline>()) {
     return baseFunctions::typeToString(baseFunctions::Type::kSpline);
-  }
-  if (isType<SplineCollection>()) {
-    return baseFunctions::typeToString(baseFunctions::Type::kSplineCollection);
   }
   return baseFunctions::typeToString(baseFunctions::Type::kConstant);
 }
