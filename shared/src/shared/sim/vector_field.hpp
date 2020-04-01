@@ -67,7 +67,7 @@ public:
              const Vec3F &padding) const override {}
 
   /// Paint the vector field by drawing an arrow for each vector
-  void paintWithObstr(Painter &painter, const ObstructionField *obstrField,
+  void paintWithObstr(Painter &painter, const ObstructionField &obstrField,
                       const Vec3F &offset = Vec3F(),
                       const Vec3F &padding = Vec3F(0, 0, 0)) const;
 
@@ -102,6 +102,22 @@ public:
     return Vec3F(getX()->get(x, y, z), getY()->get(x, y, z),
                  getZ()->get(x, y, z));
   }
+
+  /// Returns a vector for the specified location in the vector field. This is
+  /// built on demand from the separate vector components.
+  /// \pre 'x', 'y' and 'z' must be '> 1' and '< dim-1'.
+  Vec3F get(const Pos &pos) const {
+    return Vec3F(getX()->get(pos.x, pos.y, pos.z),
+                 getY()->get(pos.x, pos.y, pos.z),
+                 getZ()->get(pos.x, pos.y, pos.z));
+  }
+
+  /// Returns the vector for a given position specified in meters.
+  Vec3F getM(s32 x, s32 y, s32 z) const;
+
+  /// Returns a vector for the given location. The location should be specified
+  /// in meters.
+  // Vec3F getInMeter(s32 x, s32 y, s32 z);
 
   /// \param point Position in local meters. Must be > 1 and < dim-1.
   /// \note If point is out of bounds, Vec3F::ZERO is returned.

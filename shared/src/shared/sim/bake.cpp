@@ -16,7 +16,7 @@
 
 namespace wind {
 
-static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos);
+static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos);
 
 void bake() {
   DLOG_INFO("Baking..");
@@ -28,14 +28,13 @@ void bake() {
   }
 
   for (u32 i = 0; i < csims.size(); ++i) {
-    WindSimulation *windSim = csims[i]->getSim();
-    VectorField *wind = windSim->V();
-    const FieldBase::Dim dim = wind->getDim();
-    const f32 cellSize = wind->getCellSize();
+    WindSimulation *sim = csims[i]->getSim();
+    const VectorField &vel = sim->V();
+    const FieldBase::Dim dim = sim->getDim();
+    const Vec3F dimM = sim->getDimM();
 
     auto parent = csims[i]->SO()->getParent();
-    const Vec3F scale{(dim.width - 2) * cellSize, (dim.height - 2) * cellSize,
-                      (dim.depth - 2) * cellSize};
+    const Vec3F scale{dimM.x - 1, dimM.y - 1, dimM.z - 1};
     const Vec3F pos = parent->getTransform().getPosition() + scale / 2.0f;
     const auto volumeType = WindSystem::VolumeType::kCube;
     auto windSO =
@@ -52,8 +51,8 @@ void bake() {
     for (u32 x = 2; x <= dim.width - 1 - 2; x += 4) {
       for (u32 y = 1; y <= dim.height - 1 - 1; y += 4) {
         for (u32 z = 2; z <= dim.depth - 1 - 2; z += 4) {
-          auto points =
-              bakeAux(wind, Vec3F{x * cellSize, y * cellSize, z * cellSize});
+          const Vec3F start = vel.cellToMeter(x, y, z);
+          std::vector<Vec3F> points = bakeAux(vel, start);
           if (!points.empty()) {
             splines.push_back(BaseFn::SplineBase{
                 std::move(points), 2, ObjectBuilder::kSplineSamplesAuto});
@@ -70,20 +69,20 @@ void bake() {
   DLOG_INFO("..done");
 }
 
-static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
-  const FieldBase::Dim dim = wind->getDim();
-  const f32 cellSize = wind->getCellSize();
+static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos) {
+  const FieldBase::Dim dim = wind.getDim();
+  const Vec3F dimM = wind.getDimM();
   std::vector<Vec3F> points{};
 
   Vec3F point = startPos;
-  point.x = dclamp(point.x, 0.0f, (dim.width - 1) * cellSize);
-  point.y = dclamp(point.y, 0.0f, (dim.height - 1) * cellSize);
-  point.z = dclamp(point.z, 0.0f, (dim.depth - 1) * cellSize);
+  point.x = dclamp(point.x, 0.0f, dimM.x - 1);
+  point.y = dclamp(point.y, 0.0f, dimM.y - 1);
+  point.z = dclamp(point.z, 0.0f, dimM.z - 1);
   points.push_back(point);
 
   constexpr u32 kMaxSteps = 100;
   for (u32 i = 0; i < kMaxSteps; i++) {
-    point += wind->sampleNear(point);
+    point += wind.sampleNear(point);
 
     const auto anyAxisOver = [](Vec3F a, Vec3F b, f32 threshold) {
       return std::abs(a.x - b.x) > threshold ||
@@ -96,13 +95,12 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
     }
 
     points.push_back(point);
-    const auto isInside = [](Vec3F point, Vec3F min, Vec3F max) {
-      return (point.x >= min.x && point.x <= max.x && point.y >= min.y &&
-              point.y <= max.y && point.z >= min.z && point.z <= max.z);
+    const auto isInside = [](Vec3F p, Vec3F min, Vec3F max) {
+      return p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y &&
+             p.z >= min.z && p.z <= max.z;
     };
     if (!isInside(point, Vec3F::ZERO,
-                  Vec3F{(dim.width - 1) * cellSize, (dim.height - 1) * cellSize,
-                        (dim.depth - 1) * cellSize})) {
+                  Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
       if (points.size() < 3) {
         // we interpolate an extra point, from the two existing points
         const Vec3F c = points[1] + (points[1] - points[0]);
@@ -114,8 +112,7 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
 
   if (points.size() > 2) {
     constexpr f32 kPi = 3.141592f;
-    const f32 k =
-        (kPi * 8.0f) / ((dim.width + dim.height + dim.depth) * cellSize / 3.0f);
+    const f32 k = (kPi * 8.0f) / ((dimM.x + dimM.y + dimM.z) / 3.0f);
     const Vec4F color{std::cos(k * startPos.x) / 2.0f + 0.5f,
                       std::cos(k * startPos.y) / 2.0f + 0.5f,
                       std::cos(k * startPos.z) / 2.0f + 0.5f, 1.0f};
