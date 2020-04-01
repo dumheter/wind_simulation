@@ -51,7 +51,7 @@ VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize)
 // -------------------------------------------------------------------------- //
 
 void VectorField::paintWithObstr(Painter &painter,
-                                 const ObstructionField *obstrField,
+                                 const ObstructionField &obstrField,
                                  const Vec3F &offset,
                                  const Vec3F &padding) const {
   bs::Vector<bs::Vector3> linesRed;
@@ -73,7 +73,7 @@ void VectorField::paintWithObstr(Painter &painter,
                   zPos + (m_cellSize / 2.0f)) -
             (padding * m_cellSize);
         const bs::Vector3 &vec = get(x, y, z);
-        if (obstrField->get(x, y, z)) {
+        if (obstrField.get(x, y, z)) {
           // Painter::buildArrow(linesYellow, base, vec, 0.3f);
         } else {
           Painter::buildArrow(linesRed, base, vec * 0.5f, 0.5f);
@@ -89,47 +89,54 @@ void VectorField::paintWithObstr(Painter &painter,
   // painter.drawLines(linesYellow);
 }
 
-struct Cell {
-  s32 x, y, z;
+// -------------------------------------------------------------------------- //
 
-  Cell() = default;
-  Cell(f32 cellSize, Vec3F point)
-      : x(point.x / cellSize), y(point.y / cellSize), z(point.z / cellSize) {}
+Vec3F VectorField::getM(s32 x, s32 y, s32 z) const {
+  return get(s32(x / m_cellSize), s32(y / m_cellSize), s32(z / m_cellSize));
+}
 
-  Vec3F toVec3F(f32 cellSize) const {
-    return Vec3F{x * cellSize, y * cellSize, z * cellSize};
-  }
-};
+// -------------------------------------------------------------------------- //
 
 Vec3F VectorField::sampleNear(Vec3F point) const {
-  Cell cell[8];
-  cell[0] = Cell{m_cellSize, point};
-  cell[1] = Cell{m_cellSize, point + Vec3F{0.0f, 0.0f, m_cellSize}};
-  cell[2] = Cell{m_cellSize, point + Vec3F{0.0f, m_cellSize, 0.0f}};
-  cell[3] = Cell{m_cellSize, point + Vec3F{0.0f, m_cellSize, m_cellSize}};
-  cell[4] = Cell{m_cellSize, point + Vec3F{m_cellSize, 0.0f, 0.0f}};
-  cell[5] = Cell{m_cellSize, point + Vec3F{m_cellSize, 0.0f, m_cellSize}};
-  cell[6] = Cell{m_cellSize, point + Vec3F{m_cellSize, m_cellSize, 0.0f}};
-  cell[7] = Cell{m_cellSize, point + Vec3F{m_cellSize, m_cellSize, m_cellSize}};
+  static constexpr u32 kCellCount = 8;
 
-  f32 dist[8];
+  const f32 cellX = point.x / m_cellSize;
+  const f32 cellY = point.y / m_cellSize;
+  const f32 cellZ = point.z / m_cellSize;
+
+  // Setup 8-closest cell positions
+  Pos cells[kCellCount];
+  cells[0] = Pos{s32(cellX), s32(cellY), s32(cellZ)};
+  cells[1] = Pos{s32(cellX), s32(cellY), s32(cellZ) + 1};
+  cells[2] = Pos{s32(cellX), s32(cellY) + 1, s32(cellZ)};
+  cells[3] = Pos{s32(cellX), s32(cellY) + 1, s32(cellZ) + 1};
+  cells[4] = Pos{s32(cellX) + 1, s32(cellY), s32(cellZ)};
+  cells[5] = Pos{s32(cellX) + 1, s32(cellY), s32(cellZ) + 1};
+  cells[6] = Pos{s32(cellX) + 1, s32(cellY) + 1, s32(cellZ)};
+  cells[7] = Pos{s32(cellX) + 1, s32(cellY) + 1, s32(cellZ) + 1};
+
+  // Distances in meter to weight by
+  f32 dists[kCellCount];
   f32 sum = 0.0f;
-  for (u32 i = 0; i < 8; ++i) {
-    dist[i] = distance(point, cell[i].toVec3F(m_cellSize));
-    // using gaussian makes sure the closest point is valued the most.
-    sum += gaussian(dist[i], 1.0f, 0.0f, m_cellSize / 2.0f);
+
+  // Calculate ditance from cells to sample point
+  for (u32 i = 0; i < kCellCount; i++) {
+    dists[i] =
+        distance(Vec3F{cellX, cellY, cellZ},
+                 Vec3F{f32(cells[i].x), f32(cells[i].y), f32(cells[i].z)}) *
+        m_cellSize;
+    sum += gaussian(dists[i], 1.0f, 0.0f, m_cellSize / 2.0f);
   }
 
-  Vec3F force = Vec3F::ZERO;
-  for (u32 i = 0; i < 8; ++i) {
-    if (cell[i].x >= static_cast<s32>(m_dim.width) ||
-        cell[i].y >= static_cast<s32>(m_dim.height) ||
-        cell[i].z >= static_cast<s32>(m_dim.depth) || cell[i].x < 0 ||
-        cell[i].y < 0 || cell[i].z < 0) {
+  // Calculate force
+  Vec3F force{0.0f, 0.0f, 0.0f};
+  for (u32 i = 0; i < kCellCount; ++i) {
+    if (!inBounds(cells[i])) {
       continue;
     }
-    const f32 fraction = gaussian(dist[i], 1.0f, 0.0f, m_cellSize / 2.0f) / sum;
-    force += fraction * get(cell[i].x, cell[i].y, cell[i].z);
+    const f32 fraction =
+        gaussian(dists[i], 1.0f, 0.0f, m_cellSize / 2.0f) / sum;
+    force += fraction * get(cells[i]);
   }
 
   return force;

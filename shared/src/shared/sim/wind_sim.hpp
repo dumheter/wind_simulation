@@ -107,7 +107,7 @@ public:
       : WindSimulation(dim.x, dim.y, dim.z, cellSize) {}
 
   /// Destruct wind simulation along with data
-  ~WindSimulation();
+  ~WindSimulation() = default;
 
   /// Build the obstruction field of the simulation for the specified scene. The
   /// position is used to specify at what position the simulation should check
@@ -135,16 +135,28 @@ public:
              const bs::Vector3 &offset = bs::Vector3(0, 0, 0)) const;
 
   /// Returns the density field for the current step in the simulation
-  DensityField *D() { return m_d; }
+  DensityField &D() { return m_d; }
+
+  /// Returns the density field for the current step in the simulation
+  const DensityField &D() const { return m_d; }
 
   /// Returns the density field for the previous step in the simulation
-  DensityField *D0() { return m_d0; }
+  DensityField &D0() { return m_d0; }
+
+  /// Returns the density field for the previous step in the simulation
+  const DensityField &D0() const { return m_d0; }
 
   /// Returns the velocity field for the current step in the simulation
-  VectorField *V() { return m_v; }
+  VectorField &V() { return m_v; }
+
+  /// Returns the velocity field for the current step in the simulation
+  const VectorField &V() const { return m_v; }
 
   /// Returns the velocity field for the previous step in the simulation
-  VectorField *V0() { return m_v0; }
+  VectorField &V0() { return m_v0; }
+
+  /// Returns the velocity field for the previous step in the simulation
+  const VectorField &V0() const { return m_v0; }
 
   /// Add density sources
   void addDensitySource() { m_addDensitySource = true; }
@@ -184,6 +196,12 @@ public:
 
   /// Set all vector fields to v.
   void setAsVec(Vec3F v);
+
+  /// Retrieve the dimension of the simulation in cells
+  const FieldBase::Dim &getDim() const { return m_v.getDim(); }
+
+  /// Retrieve the dimension of the simulation in meters
+  Vec3F getDimM() const { return m_v.getDimM(); }
 
 private:
   /// Gauss-Seidel relaxation
@@ -226,15 +244,15 @@ private:
   f32 m_viscosity = 0.0f;
 
   /// Density fields (current)
-  DensityField *m_d = nullptr;
+  DensityField m_d;
   /// Density fields (previous )
-  DensityField *m_d0 = nullptr;
+  DensityField m_d0;
   /// Velocity field (current)
-  VectorField *m_v = nullptr;
+  VectorField m_v;
   /// Velocity field (previous)
-  VectorField *m_v0 = nullptr;
+  VectorField m_v0;
   /* Obstruction field */
-  ObstructionField *m_o = nullptr;
+  ObstructionField m_o;
 
   /// Whether to add density sources
   bool m_addDensitySource = false;

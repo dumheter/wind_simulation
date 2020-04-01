@@ -140,11 +140,27 @@ public:
   /// Returns whether or not a position is inside the 'z' bounds of the field.
   bool inBoundsZ(s32 z) const { return z >= 0 && z < s32(m_dim.depth); }
 
+  /// Convert from cell coordinates to meters
+  Vec3F cellToMeter(s32 x, s32 y, s32 z) const {
+    return Vec3F{x * m_cellSize, y * m_cellSize, z * m_cellSize};
+  }
+
+  /// Convert from cell coordinates to meters
+  Vec3F cellToMeter(const Pos &pos) const {
+    return cellToMeter(pos.x, pos.y, pos.z);
+  }
+
   /// Retrieve the size of cells in the field.
   f32 getCellSize() const { return m_cellSize; }
 
-  /// Retrieve the dimension of the field.
+  /// Retrieve the dimensions of the field.
   const Dim &getDim() const { return m_dim; }
+
+  /// Retrieve the dimensions of the field in meters
+  Vec3F getDimM() const {
+    const Dim &dim = getDim();
+    return Vec3F{f32(dim.width), f32(dim.height), f32(dim.depth)} * m_cellSize;
+  }
 
   /// Retrieve the number of cells in the field.
   u32 getCellCount() const { return m_cellCount; }
