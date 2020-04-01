@@ -71,7 +71,7 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
 
   DebugManager::setF32(kDebugRunSpeed, 1.0f);
 
-  setAsTornado();
+  //setAsTornado();
   // setAs111();
 
   // Post-conditions

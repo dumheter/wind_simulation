@@ -94,10 +94,10 @@ struct Cell {
 
   Cell() = default;
   Cell(f32 cellSize, Vec3F point)
-      : x(point.x * cellSize), y(point.y * cellSize), z(point.z * cellSize) {}
+      : x(point.x / cellSize), y(point.y / cellSize), z(point.z / cellSize) {}
 
-  Vec3F toVec3F() const {
-    return Vec3F{static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(z)};
+  Vec3F toVec3F(f32 cellSize) const {
+    return Vec3F{x * cellSize, y * cellSize, z * cellSize};
   }
 };
 
@@ -115,7 +115,7 @@ Vec3F VectorField::sampleNear(Vec3F point) const {
   f32 dist[8];
   f32 sum = 0.0f;
   for (u32 i = 0; i < 8; ++i) {
-    dist[i] = distance(point, cell[i].toVec3F());
+    dist[i] = distance(point, cell[i].toVec3F(m_cellSize));
     // using gaussian makes sure the closest point is valued the most.
     sum += gaussian(dist[i], 1.0f, 0.0f, m_cellSize / 2.0f);
   }

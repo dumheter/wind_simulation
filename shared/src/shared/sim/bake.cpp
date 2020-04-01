@@ -94,7 +94,8 @@ static std::vector<Vec3F> bakeAux(VectorField *wind, Vec3F startPos) {
     };
     constexpr f32 kThreshold = 0.05f;
     if (!anyAxisOver(points.back(), point, kThreshold)) {
-      DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(), point);
+      DLOG_VERBOSE("early exit, too low wind [{} -> {}]",
+                   points.back(), point);
       break;
     }
 
