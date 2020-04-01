@@ -114,8 +114,8 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     break;
   }
   case Kind::kCylinder: {
-    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx",
-                                                1.0f, false, true);
+    auto [mesh, _] = Asset::loadMeshWithPhysics("res/meshes/cylinder.fbx", 1.0f,
+                                                false, true);
     withMesh(mesh);
     break;
   }

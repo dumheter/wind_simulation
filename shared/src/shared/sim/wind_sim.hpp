@@ -182,8 +182,8 @@ public:
   /// force upwards + force increase with height)
   void setAsTornado();
 
-  /// Set all vector field to Vec3F::ONE
-  void setAs111();
+  /// Set all vector fields to v.
+  void setAsVec(Vec3F v);
 
 private:
   /// Gauss-Seidel relaxation

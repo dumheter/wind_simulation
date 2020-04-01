@@ -380,6 +380,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
       // DLOG_VERBOSE("saving scene ({})", path);
       String _path = path.string().c_str();
       m_scenePath = path.string().c_str();
+      m_sceneAutoReload = false;
       Scene::saveFile(_path, m_editor->getScene());
     });
 

@@ -71,8 +71,8 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
 
   DebugManager::setF32(kDebugRunSpeed, 1.0f);
 
-  setAsTornado();
-  // setAs111();
+  // setAsTornado();
+  // setAsVec(Vec3F{1.0f, 1.0f, 1.0f});
 
   // Post-conditions
   assert(m_d->getDim() == m_v->getDim() &&
@@ -273,8 +273,7 @@ void WindSimulation::setAsTornado() {
 
 // -------------------------------------------------------------------------- //
 
-void WindSimulation::setAs111() {
-  const Vec3F v = Vec3F{10.0f, 10.0f, 10.0f};
+void WindSimulation::setAsVec(Vec3F v) {
   for (s32 k = 1; k <= m_depth; k++) {
     for (s32 j = 1; j <= m_height; j++) {
       for (s32 i = 1; i <= m_width; i++) {

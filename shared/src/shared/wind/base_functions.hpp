@@ -20,6 +20,7 @@ enum class Type : u32 {
   kConstant = 0,
   kPolynomial,
   kSpline,
+  kSplineCollection,
 };
 
 String typeToString(Type type);
@@ -67,10 +68,36 @@ struct Polynomial {
   static Polynomial FromBytes(alflib::RawMemoryReader &mr);
 };
 
-struct Spline {
+struct Spline;
+struct SplineBase {
+  friend struct Spline;
   std::vector<Vec3F> points;
   u32 degree;
   u32 samples;
+
+  Vec3F operator()(Vec3F point) const;
+
+  void toJson(nlohmann::json &value) const;
+  static SplineBase fromJson(const nlohmann::json &value);
+
+  bool ToBytes(alflib::RawMemoryWriter &mw) const;
+  static SplineBase FromBytes(alflib::RawMemoryReader &mr);
+
+private:
+  struct ClosestPoint {
+    u32 index;
+    f32 distance;
+  };
+  ClosestPoint findClosestPoint(Vec3F point) const;
+
+  /// @param point Point where we want to know wind force
+  /// @param closestPoint
+  /// @param dist Distance from point to closestPoint
+  Vec3F getForce(Vec3F point, ClosestPoint closestPoint) const;
+};
+
+struct Spline {
+  std::vector<SplineBase> splines;
 
   Vec3F operator()(Vec3F point) const;
 
@@ -88,6 +115,7 @@ struct Spline {
 struct BaseFn {
   using Constant = baseFunctions::Constant;
   using Polynomial = baseFunctions::Polynomial;
+  using SplineBase = baseFunctions::SplineBase;
   using Spline = baseFunctions::Spline;
   using Variant = std::variant<Constant, Polynomial, Spline>;
 
@@ -106,8 +134,8 @@ struct BaseFn {
     return BaseFn{Polynomial{origo, x0, x1, x2, y0, y1, y2, z0, z1, z2}};
   }
 
-  static BaseFn fnSpline(std::vector<Vec3F> &&points, u32 degree, u32 samples) {
-    return BaseFn{Spline{std::move(points), degree, samples}};
+  static BaseFn fnSpline(std::vector<SplineBase> &&splines) {
+    return BaseFn{Spline{std::move(splines)}};
   }
 
   /// Construct a BaseFn from json object.

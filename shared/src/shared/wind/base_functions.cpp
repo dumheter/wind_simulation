@@ -1,13 +1,12 @@
 ﻿#include "base_functions.hpp"
 
 #include "shared/scene/builder.hpp"
+#include "shared/utility/bsprinter.hpp"
 #include "shared/utility/json_util.hpp"
 
 #include <ThirdParty/json.hpp>
 #include <alflib/memory/raw_memory_reader.hpp>
 #include <alflib/memory/raw_memory_writer.hpp>
-
-#include "shared/utility/bsprinter.hpp"
 #include <dlog/dlog.hpp>
 
 namespace wind {
@@ -120,60 +119,11 @@ Polynomial Polynomial::FromBytes(alflib::RawMemoryReader &mr) {
                     mr.Read<f32>()};
 }
 
-Vec3F Spline::operator()(const Vec3F point) const {
-  u32 closestPoint = 0;
-  f32 minDist = distance(points[0], point);
-  for (u32 i = 1; i < points.size(); ++i) {
-    if (f32 d = distance(points[i], point); d < minDist) {
-      minDist = d;
-      closestPoint = i;
-    }
-  }
-
-  // TODO better force algo?
-
-  // weighted closest point
-  // A-----B-----C
-  Vec3F a;
-  const Vec3F b = points[closestPoint];
-  Vec3F c;
-  if (closestPoint != 0 && closestPoint + 1 != points.size()) {
-    a = points[closestPoint - 1];
-    c = points[closestPoint + 1];
-  } else {
-    if (const f32 firstLastDist = distance(points.front(), points.back());
-        firstLastDist > 0.1f) {
-      if (closestPoint == 0) {
-        c = points[closestPoint + 1];
-        a = b - (c - b);
-      } else {
-        a = points[closestPoint - 1];
-        c = b + (b - a);
-      }
-    } else {
-      if (closestPoint == 0) {
-        a = points[points.size() - 2];
-        c = points[closestPoint + 1];
-      } else {
-        a = points[closestPoint - 1];
-        c = points[1];
-      }
-    }
-  }
-
-  const f32 aDist = gaussian(distance(a, b), 1.0f, 0.0f, minDist);
-  const f32 cDist = gaussian(distance(c, b), 1.0f, 0.0f, minDist);
-  const f32 aMul = aDist + cDist > 0.01f ? aDist / (aDist + cDist) : 0.5f;
-  const f32 cMul = aDist + cDist > 0.01f ? cDist / (aDist + cDist) : 0.5f;
-  const Vec3F force = (cMul * (c - b) + aMul * (b - a));
-
-  DLOG_INFO("{} @ {} | a: {}, b: {}, c: {}", force, point, a, b, c);
-
-  return force;
+Vec3F SplineBase::operator()(const Vec3F point) const {
+  return getForce(point, findClosestPoint(point));
 }
 
-bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
-  mw.Write(static_cast<std::underlying_type<Type>::type>(Type::kSpline));
+bool SplineBase::ToBytes(alflib::RawMemoryWriter &mw) const {
   mw.Write(static_cast<u32>(points.size()));
   for (const auto point : points) {
     mw.Write(point.x);
@@ -184,8 +134,8 @@ bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
   return mw.Write(samples);
 }
 
-Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
-  Spline s{};
+SplineBase SplineBase::FromBytes(alflib::RawMemoryReader &mr) {
+  SplineBase s{};
   const auto count = mr.Read<u32>();
   s.points.reserve(count);
   for (u32 i = 0; i < count; ++i) {
@@ -196,7 +146,7 @@ Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
   return s;
 }
 
-void Spline::toJson(nlohmann::json &value) const {
+void SplineBase::toJson(nlohmann::json &value) const {
   std::vector<nlohmann::json> jpoints{};
   for (const auto point : points) {
     nlohmann::json jpoint{};
@@ -208,13 +158,143 @@ void Spline::toJson(nlohmann::json &value) const {
   value["samples"] = samples;
 }
 
-Spline Spline::fromJson(const nlohmann::json &value) {
-  Spline s{};
+SplineBase SplineBase::fromJson(const nlohmann::json &value) {
+  SplineBase s{};
   s.degree = value.value("degree", 2);
   s.samples = value.value("samples", ObjectBuilder::kSplineSamplesAuto);
   const nlohmann::json jpoints = value["points"];
   for (const auto jpoint : jpoints) {
     s.points.push_back(JsonUtil::getVec3F(jpoint, "point", Vec3F::ZERO));
+  }
+  return s;
+}
+
+SplineBase::ClosestPoint SplineBase::findClosestPoint(Vec3F point) const {
+  u32 closestPoint = 0;
+  f32 minDist = distance(points[0], point);
+  for (u32 i = 1; i < points.size(); ++i) {
+    if (f32 d = distance(points[i], point); d < minDist) {
+      minDist = d;
+      closestPoint = i;
+    }
+  }
+  return {closestPoint, minDist};
+}
+
+Vec3F SplineBase::getForce(Vec3F point, ClosestPoint closestPoint) const {
+  // weighted closest point
+  // A-----B-----C
+  Vec3F a;
+  const Vec3F b = points[closestPoint.index];
+  Vec3F c;
+  if (closestPoint.index != 0 && closestPoint.index + 1 != points.size()) {
+    a = points[closestPoint.index - 1];
+    c = points[closestPoint.index + 1];
+  } else {
+    if (const f32 firstLastDist = distance(points.front(), points.back());
+        firstLastDist > 0.1f) {
+      if (closestPoint.index == 0) {
+        c = points[closestPoint.index + 1];
+        a = b - (c - b);
+      } else {
+        a = points[closestPoint.index - 1];
+        c = b + (b - a);
+      }
+    } else {
+      if (closestPoint.index == 0) {
+        a = points[points.size() - 2];
+        c = points[closestPoint.index + 1];
+      } else {
+        a = points[closestPoint.index - 1];
+        c = points[1];
+      }
+    }
+  }
+
+  const f32 aDist = gaussian(distance(a, b), 1.0f, 0.0f, closestPoint.distance);
+  const f32 cDist = gaussian(distance(c, b), 1.0f, 0.0f, closestPoint.distance);
+  const f32 aMul = aDist + cDist > 0.01f ? aDist / (aDist + cDist) : 0.5f;
+  const f32 cMul = aDist + cDist > 0.01f ? cDist / (aDist + cDist) : 0.5f;
+  const Vec3F force = (cMul * (c - b) + aMul * (b - a));
+
+  // DLOG_INFO("{} @ {} | a: {}, b: {}, c: {}", force, point, a, b, c);
+
+  return force;
+}
+
+Vec3F Spline::operator()(const Vec3F point) const {
+  struct SplineMeta {
+    SplineBase::ClosestPoint closestPoint;
+    Vec3F force;
+    f32 g;
+  };
+  std::vector<SplineMeta> splineMeta;
+  splineMeta.reserve(splines.size());
+
+  u32 closestSplineIdx = 0;
+  f32 closestSplineDist = std::numeric_limits<f32>::max();
+
+  for (u32 i = 0; i < splines.size(); ++i) {
+    SplineMeta meta = {splines[i].findClosestPoint(point), Vec3F::ZERO, 0.0f};
+    meta.force = splines[i].getForce(point, meta.closestPoint);
+    if (meta.closestPoint.distance < closestSplineDist) {
+      closestSplineIdx = i;
+      closestSplineDist = meta.closestPoint.distance;
+    }
+    splineMeta.push_back(std::move(meta));
+  }
+
+  f32 gSum = 0.0f;
+  for (u32 i = 0; i < splines.size(); ++i) {
+    splineMeta[i].g = gaussian(splineMeta[i].closestPoint.distance, 1.0f, 0.0f,
+                               closestSplineDist);
+    gSum += splineMeta[i].g;
+  }
+
+  Vec3F force = Vec3F::ZERO;
+  // DLOG_INFO("-----------");
+  for (const auto &meta : splineMeta) {
+    force += meta.force * (meta.g / gSum);
+    // DLOG_RAW("{:.2f}/{:.2f}\n", meta.g, gSum);
+  }
+  DLOG_INFO("force: {}", force);
+  return force;
+}
+
+bool Spline::ToBytes(alflib::RawMemoryWriter &mw) const {
+  mw.Write(static_cast<std::underlying_type<Type>::type>(Type::kSpline));
+  bool res = mw.Write(static_cast<u32>(splines.size()));
+  for (const auto spline : splines) {
+    res = mw.Write(spline);
+  }
+  return res;
+}
+
+Spline Spline::FromBytes(alflib::RawMemoryReader &mr) {
+  Spline s{};
+  const auto count = mr.Read<u32>();
+  s.splines.reserve(count);
+  for (u32 i = 0; i < count; ++i) {
+    s.splines.push_back(mr.Read<SplineBase>());
+  }
+  return s;
+}
+
+void Spline::toJson(nlohmann::json &value) const {
+  std::vector<nlohmann::json> jsplines{};
+  for (const auto spline : splines) {
+    nlohmann::json jspline{};
+    spline.toJson(jspline);
+    jsplines.push_back(std::move(jspline));
+  }
+  value["splines"] = jsplines;
+}
+
+Spline Spline::fromJson(const nlohmann::json &value) {
+  Spline s{};
+  const nlohmann::json jsplines = value["splines"];
+  for (const auto jspline : jsplines) {
+    s.splines.push_back(SplineBase::fromJson(jspline));
   }
   return s;
 }

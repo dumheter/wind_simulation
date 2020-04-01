@@ -147,7 +147,7 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
   const f32 dx = s.x / (count - 1);
   const f32 dy = s.y / (count - 1);
   const f32 dz = s.z / (count - 1);
-  constexpr f32 arrowScale = 0.1f;
+  constexpr f32 arrowScale = 0.5f;
   constexpr f32 arrowHeadScale = 0.5f;
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
