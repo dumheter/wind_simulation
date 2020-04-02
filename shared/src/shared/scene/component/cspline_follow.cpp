@@ -49,8 +49,9 @@ void CSplineFollow::fixedUpdate() {
     const Vec3F pos = spline->sample(m_pos);
     SO()->setPosition(pos);
 
-    bs::HSceneObject splineObj = SO()->findChild("spline_waypoints");
-    splineObj->setPosition(-pos);
+    // TODO(@filip) remove this?
+    // bs::HSceneObject splineObj = SO()->findChild("spline_waypoints");
+    // splineObj->setPosition(-pos);
   }
 }
 
