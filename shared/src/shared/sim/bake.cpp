@@ -17,7 +17,8 @@
 
 namespace wind {
 
-static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos);
+static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
+                    const VectorField &wind, Vec3F startPos);
 
 void bake() {
   DLOG_INFO("Baking..");
@@ -54,10 +55,12 @@ void bake() {
         for (u32 z = 2; z <= dim.depth - 1 - 2; z += 4) {
 
           const Vec3F start = vel.cellToMeter(x, y, z);
-          std::vector<Vec3F> points = bakeAux(vel, start);
+          std::vector<Vec3F> points;
+          std::vector<f32> forces;
+          bakeAux(points, forces, vel, start);
           if (!points.empty()) {
             splines.push_back(BaseFn::SplineBase{
-                std::move(points), 2, ObjectBuilder::kSplineSamplesAuto});
+                std::move(points), std::move(forces), 2, ObjectBuilder::kSplineSamplesAuto});
           }
         }
       }
@@ -76,7 +79,7 @@ void bake() {
     const auto dimCell = sim->getDim();
     DLOG_INFO("wind simulation size: {}, wind source size: {}",
               dimCell.width * dimCell.height * dimCell.depth * sizeof(f32) * 3,
-              pointCount * sizeof(f32) * 3);
+              pointCount * sizeof(f32) * 3 + sizeof(f32));
   }
 
   DLOG_INFO("..done");
@@ -92,17 +95,17 @@ static bool isInside(Vec3F p, Vec3F min, Vec3F max) {
          p.z >= min.z && p.z <= max.z;
 }
 
-static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos) {
+static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
+                           const VectorField &wind, Vec3F startPos) {
   const FieldBase::Dim dim = wind.getDim();
   const Vec3F dimM = wind.getDimM();
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
-  std::vector<Vec3F> points{};
 
   if (!isInside(startPos, Vec3F::ZERO, dimM)) {
     DLOG_ERROR("cannot bake at point {}, not inside wind simlation {}",
                startPos, dimM);
-    return std::vector<Vec3F>{};
+    return;
   }
 
   Vec3F point = startPos;
@@ -113,7 +116,9 @@ static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos) {
   Vec3F collisionSample{};
   for (u32 i = 0; i < kMaxSteps; i++) {
     const auto oldPoint = point;
-    point += !useCollisionSample ? wind.sampleNear(point) : collisionSample;
+    const Vec3F force = !useCollisionSample ? wind.sampleNear(point) : collisionSample;
+    point += force;
+    forces.push_back(force.length());
 
     constexpr f32 kThreshold = 0.05f;
     if (!anyAxisOver(points.back(), point, kThreshold)) {
@@ -138,24 +143,33 @@ static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos) {
       //           dlog::Format("{}", hit.point), hit.distance,
       //           dlog::Format("{}", samp), dlog::Format("{}", sampnext));
       point = hit.point - (dir * 0.01f);
-      continue;
     }
+
 
     points.push_back(point);
     if (!isInside(point, Vec3F::ZERO,
                   Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
       DLOG_VERBOSE("point left wind simulation volume {} at {}, stopping.",
                    dimM, point);
-      if (points.size() < 3) {
-        // we interpolate an extra point, from the two existing points
-        const Vec3F c = points[1] + (points[1] - points[0]);
-        points.push_back(c);
-      }
       break;
     }
   }
 
   if (points.size() > 2) {
+
+    // unless early exit, points will have one more item than forces
+    if (points.size() == forces.size()+1) {
+      if (isInside(point, Vec3F::ZERO,
+                   Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
+        forces.push_back(wind.sampleNear(points.back()).length());
+      } else {
+        forces.push_back(forces.back());
+      }
+    }
+
+    DLOG_INFO("points {}, forces {}", points.size(), forces.size());
+    AlfAssert(points.size() == forces.size(), "points and forces are not same size");
+
     constexpr f32 kPi = 3.141592f;
     const f32 k = (kPi * 8.0f) / ((dimM.x + dimM.y + dimM.z) / 3.0f);
     const Vec4F color{std::cos(k * startPos.x) / 2.0f + 0.5f,
@@ -166,23 +180,10 @@ static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos) {
             .withName("bakeSpline")
             .withSpline(points, 2, ObjectBuilder::kSplineSamplesAuto, color)
             .build();
-    return points;
+  } else {
+    points.clear();
+    forces.clear();
   }
-  return {};
 }
-
-/**
- {
-      "name": "box",
-      "type": "empty",
-      "scale": {"y": 10, "xz": 6},
-      "position": { "xz": 12, "y": 5},
-      "wind": {
-        "occluder": {
-          "type": "cube"
-        }
-      }
-    }
- */
 
 } // namespace wind

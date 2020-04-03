@@ -68,10 +68,13 @@ struct Polynomial {
   static Polynomial FromBytes(alflib::RawMemoryReader &mr);
 };
 
+/// SplineBase represents a single spline.
+/// @pre points must be more than 2
 struct Spline;
 struct SplineBase {
   friend struct Spline;
   std::vector<Vec3F> points;
+  std::vector<f32> forces;
   u32 degree;
   u32 samples;
 
@@ -84,18 +87,19 @@ struct SplineBase {
   static SplineBase FromBytes(alflib::RawMemoryReader &mr);
 
 private:
+
   struct ClosestPoint {
-    u32 index;
-    f32 distance;
+    u32 idx;
+    f32 dist;
   };
+  /// @return Index in the list of points and distance to it.
   ClosestPoint findClosestPoint(Vec3F point) const;
 
-  /// @param point Point where we want to know wind force
-  /// @param closestPoint
-  /// @param dist Distance from point to closestPoint
-  Vec3F getForce(Vec3F point, ClosestPoint closestPoint) const;
+  /// @param index Index in the list of points.
+  Vec3F getForce(u32 index) const;
 };
 
+/// Spline has a collection of SplineBase.
 struct Spline {
   std::vector<SplineBase> splines;
 
