@@ -168,8 +168,10 @@ void WindSimulation::stepVelocity(f32 delta) {
     DebugManager::setBool(kDebugVelocitySource, false);
     for (s32 x = 11; x < 16; x++) {
       for (s32 y = 3; y < 7; y++) {
-        m_v.set(x, y, 5, Vec3F(0.0f, 0.0f, 50.0f));
-        m_v0.set(x, y, 5, Vec3F(0.0f, 0.0f, 50.0f));
+        for (s32 z = 3; z < 5; z++) {
+          m_v.set(x, y, z, Vec3F(0.0f, 0.0f, 50.0f));
+          m_v0.set(x, y, z, Vec3F(0.0f, 0.0f, 50.0f));
+        }
       }
     }
   }

@@ -8,6 +8,7 @@
 #include "shared/sim/wind_sim.hpp"
 #include "shared/utility/bsprinter.hpp"
 
+#include <Physics/BsPhysics.h>
 #include <Scene/BsSceneManager.h>
 #include <alflib/core/assert.hpp>
 #include <cmath>
@@ -51,6 +52,7 @@ void bake() {
     for (u32 x = 2; x <= dim.width - 1 - 2; x += 4) {
       for (u32 y = 1; y <= dim.height - 1 - 1; y += 4) {
         for (u32 z = 2; z <= dim.depth - 1 - 2; z += 4) {
+
           const Vec3F start = vel.cellToMeter(x, y, z);
           std::vector<Vec3F> points = bakeAux(vel, start);
           if (!points.empty()) {
@@ -60,47 +62,90 @@ void bake() {
         }
       }
     }
+
     const u32 count = splines.size();
+    u32 pointCount = 0;
+    for (const auto &spline : splines) {
+      pointCount += spline.points.size();
+    }
     if (!splines.empty()) {
       cwind->addFunction(BaseFn::fnSpline(std::move(splines)));
     }
+
     DLOG_INFO("[{:<3}/{}] added {} fn's", i + 1, csims.size(), count);
+    const auto dimCell = sim->getDim();
+    DLOG_INFO("wind simulation size: {}, wind source size: {}",
+              dimCell.width * dimCell.height * dimCell.depth * sizeof(f32) * 3,
+              pointCount * sizeof(f32) * 3);
   }
+
   DLOG_INFO("..done");
+}
+
+static bool anyAxisOver(Vec3F a, Vec3F b, f32 threshold) {
+  return std::abs(a.x - b.x) > threshold || std::abs(a.y - b.y) > threshold ||
+         std::abs(a.z - b.z) > threshold;
+}
+
+static bool isInside(Vec3F p, Vec3F min, Vec3F max) {
+  return p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y &&
+         p.z >= min.z && p.z <= max.z;
 }
 
 static std::vector<Vec3F> bakeAux(const VectorField &wind, Vec3F startPos) {
   const FieldBase::Dim dim = wind.getDim();
   const Vec3F dimM = wind.getDimM();
+  const bs::SPtr<bs::PhysicsScene> &physicsScene =
+      bs::gSceneManager().getMainScene()->getPhysicsScene();
   std::vector<Vec3F> points{};
 
+  if (!isInside(startPos, Vec3F::ZERO, dimM)) {
+    DLOG_ERROR("cannot bake at point {}, not inside wind simlation {}",
+               startPos, dimM);
+    return std::vector<Vec3F>{};
+  }
+
   Vec3F point = startPos;
-  point.x = dclamp(point.x, 0.0f, dimM.x - 1);
-  point.y = dclamp(point.y, 0.0f, dimM.y - 1);
-  point.z = dclamp(point.z, 0.0f, dimM.z - 1);
   points.push_back(point);
 
   constexpr u32 kMaxSteps = 100;
+  bool useCollisionSample = false;
+  Vec3F collisionSample{};
   for (u32 i = 0; i < kMaxSteps; i++) {
-    point += wind.sampleNear(point);
+    const auto oldPoint = point;
+    point += !useCollisionSample ? wind.sampleNear(point) : collisionSample;
 
-    const auto anyAxisOver = [](Vec3F a, Vec3F b, f32 threshold) {
-      return std::abs(a.x - b.x) > threshold ||
-             std::abs(a.y - b.y) > threshold || std::abs(a.z - b.z) > threshold;
-    };
     constexpr f32 kThreshold = 0.05f;
     if (!anyAxisOver(points.back(), point, kThreshold)) {
       DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(), point);
       break;
     }
 
+    bs::PhysicsQueryHit hit;
+    Vec3F dir = (point - oldPoint);
+    dir.normalize();
+    const f32 len = distance(point, oldPoint);
+    if (physicsScene->rayCast(oldPoint, dir, hit,
+                              WindSystem::kWindOccluderLayer, len)) {
+      useCollisionSample = true;
+      collisionSample = wind.sampleNear(hit.point);
+      // const auto samp = wind.sampleNear(hit.point);
+      // const auto sampnext = wind.sampleNear(hit.point - (dir * 0.01f));
+      // DLOG_INFO("## {:<19} -> {:<19} @ {:<19} with dist {:.1f} | samp {:<19},
+      // "
+      //           "sampNext {:<19}",
+      //           dlog::Format("{}", oldPoint), dlog::Format("{}", point),
+      //           dlog::Format("{}", hit.point), hit.distance,
+      //           dlog::Format("{}", samp), dlog::Format("{}", sampnext));
+      point = hit.point - (dir * 0.01f);
+      continue;
+    }
+
     points.push_back(point);
-    const auto isInside = [](Vec3F p, Vec3F min, Vec3F max) {
-      return p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y &&
-             p.z >= min.z && p.z <= max.z;
-    };
     if (!isInside(point, Vec3F::ZERO,
                   Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
+      DLOG_VERBOSE("point left wind simulation volume {} at {}, stopping.",
+                   dimM, point);
       if (points.size() < 3) {
         // we interpolate an extra point, from the two existing points
         const Vec3F c = points[1] + (points[1] - points[0]);
