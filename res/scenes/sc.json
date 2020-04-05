@@ -1,0 +1,48 @@
+{
+  "name": "default_json",
+  "objects": [
+    {
+      "name": "skybox",
+      "skybox": { "cubemap": "res/skybox/daytime.hdr" }
+    },
+    {
+      "name": "geometry",
+      "objects": [
+        {
+          "type": "plane",
+          "material": {
+            "shader": "standard",
+            "texture": "res/textures/grid.png",
+            "tiling": { "uv": 16.0 }
+          },
+          "scale": [ 16.0, 1.0, 16.0 ],
+          "position": {
+            "xz": 8.0,
+            "y": 0.4
+          },
+          "physics": { "restitution": 0.5 }
+        },
+        {
+          "name": "occluder",
+          "position": { "x": 7, "y": 2.1, "z": 9.9 },
+          "wind": {
+            "occluder": {
+              "type": "cube",
+              "dim": [ 20, 3, 2 ]
+            }
+          }
+        },
+        {
+          "name": "occluder",
+          "position": { "x": 12, "y": 2.1, "z": 10.0 },
+          "wind": {
+            "occluder": {
+              "type": "cube",
+              "dim": [ 2, 3, 20 ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
