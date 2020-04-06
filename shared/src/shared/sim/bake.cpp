@@ -59,17 +59,18 @@ void bake() {
           std::vector<f32> forces;
           bakeAux(points, forces, vel, start);
           if (!points.empty()) {
-            splines.push_back(BaseFn::SplineBase{
-                std::move(points), std::move(forces), 2, ObjectBuilder::kSplineSamplesAuto});
+            splines.push_back(
+                BaseFn::SplineBase{std::move(points), std::move(forces), 2,
+                                   ObjectBuilder::kSplineSamplesAuto});
           }
         }
       }
     }
 
-    const u32 count = splines.size();
+    const u32 count = static_cast<u32>(splines.size());
     u32 pointCount = 0;
     for (const auto &spline : splines) {
-      pointCount += spline.points.size();
+      pointCount += static_cast<u32>(spline.points.size());
     }
     if (!splines.empty()) {
       cwind->addFunction(BaseFn::fnSpline(std::move(splines)));
@@ -96,7 +97,7 @@ static bool isInside(Vec3F p, Vec3F min, Vec3F max) {
 }
 
 static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
-                           const VectorField &wind, Vec3F startPos) {
+                    const VectorField &wind, Vec3F startPos) {
   const FieldBase::Dim dim = wind.getDim();
   const Vec3F dimM = wind.getDimM();
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
@@ -116,7 +117,8 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
   Vec3F collisionSample{};
   for (u32 i = 0; i < kMaxSteps; i++) {
     const auto oldPoint = point;
-    const Vec3F force = !useCollisionSample ? wind.sampleNear(point) : collisionSample;
+    const Vec3F force =
+        !useCollisionSample ? wind.sampleNear(point) : collisionSample;
     point += force;
     forces.push_back(force.length());
 
@@ -145,7 +147,6 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
       point = hit.point - (dir * 0.01f);
     }
 
-
     points.push_back(point);
     if (!isInside(point, Vec3F::ZERO,
                   Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
@@ -158,7 +159,7 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
   if (points.size() > 2) {
 
     // unless early exit, points will have one more item than forces
-    if (points.size() == forces.size()+1) {
+    if (points.size() == forces.size() + 1) {
       if (isInside(point, Vec3F::ZERO,
                    Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
         forces.push_back(wind.sampleNear(points.back()).length());
@@ -168,7 +169,8 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
     }
 
     DLOG_INFO("points {}, forces {}", points.size(), forces.size());
-    AlfAssert(points.size() == forces.size(), "points and forces are not same size");
+    AlfAssert(points.size() == forces.size(),
+              "points and forces are not same size");
 
     constexpr f32 kPi = 3.141592f;
     const f32 k = (kPi * 8.0f) / ((dimM.x + dimM.y + dimM.z) / 3.0f);
