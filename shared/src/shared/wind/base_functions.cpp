@@ -9,6 +9,8 @@
 #include <alflib/memory/raw_memory_writer.hpp>
 #include <dlog/dlog.hpp>
 
+#include "shared/utility/util.hpp"
+
 namespace wind {
 
 namespace baseFunctions {
@@ -178,10 +180,21 @@ SplineBase SplineBase::fromJson(const nlohmann::json &value) {
   for (const auto jpoint : jpoints) {
     s.points.push_back(JsonUtil::getVec3F(jpoint, "point", Vec3F::ZERO));
   }
-  const nlohmann::json jforces = value["forces"];
-  for (const auto force : jforces) {
-    s.forces.push_back(force);
+
+  const auto forcesIt = value.find("forces");
+  if (forcesIt == value.end()) {
+    DLOG_WARNING("Scene file is probably old and missing spline forces. Please "
+                 "update with these!");
+    for (size_t i = 0; i < s.points.size(); i++) {
+      s.forces.push_back(1.0f);
+    }
+  } else {
+    const nlohmann::json jforces = value["forces"];
+    for (const auto force : jforces) {
+      s.forces.push_back(force);
+    }
   }
+
   return s;
 }
 
@@ -206,7 +219,7 @@ Vec3F SplineBase::getForce(u32 index) const {
     b = points[index + 1];
   } else {
     if (distance(points.front(), points.back()) > 0.1f) {
-      b = a + (a - points[index-1]);
+      b = a + (a - points[index - 1]);
     } else {
       b = points.front();
     }
@@ -215,13 +228,13 @@ Vec3F SplineBase::getForce(u32 index) const {
   Vec3F dir = b - a;
   dir.normalize();
   const Vec3F force = dir * forces[index];
-  //DLOG_INFO("force {} @ {} -> {}", force, a, b);
+  // DLOG_INFO("force {} @ {} -> {}", force, a, b);
   if (std::abs(force.x) > 100.0f || std::abs(force.y) > 100.0f ||
       std::abs(force.z) > 100.0f) {
     int a = 0;
   }
 
-    return force;
+  return force;
 }
 
 Vec3F Spline::operator()(const Vec3F point) const {
@@ -318,7 +331,9 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: { return BaseFn{Constant::fromJson(value)}; }
+  default: {
+    return BaseFn{Constant::fromJson(value)};
+  }
   }
 }
 
@@ -346,7 +361,9 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
+  default: {
+    fn = BaseFn{Constant::FromBytes(mr)};
+  }
   }
   return fn;
 }
