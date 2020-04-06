@@ -28,6 +28,7 @@
 
 #include "shared/app.hpp"
 #include "shared/scene/component/csim.hpp"
+#include "shared/sim/delta.hpp"
 
 #include <Renderer/BsCamera.h>
 
@@ -60,6 +61,9 @@ public:
   /// \copydoc App::onPaint
   void onPaint(Painter &painter) override;
 
+  /// Bake wind simulations
+  void bake();
+
   /// Returns the root scene
   const bs::HSceneObject &getSceneRoot() { return m_root; }
 
@@ -88,6 +92,9 @@ private:
   bs::HSceneObject m_scene;
   /// Camera object
   bs::HSceneObject m_camera;
+
+  /// Delta field
+  DeltaField m_deltaField;
 
 public:
   /// Name of the default scene

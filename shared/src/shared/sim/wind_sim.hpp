@@ -158,6 +158,12 @@ public:
   /// Returns the velocity field for the previous step in the simulation
   const VectorField &V0() const { return m_v0; }
 
+  /// Returns the obstruction field
+  ObstructionField &O() { return m_o; }
+
+  /// Returns the obstruction field
+  const ObstructionField &O() const { return m_o; }
+
   /// Add density sources
   void addDensitySource() { m_addDensitySource = true; }
 
@@ -202,6 +208,9 @@ public:
 
   /// Retrieve the dimension of the simulation in meters
   Vec3F getDimM() const { return m_v.getDimM(); }
+
+  /// Retrieve the cell size
+  f32 getCellSize() const { return m_v.getCellSize(); }
 
 private:
   /// Gauss-Seidel relaxation

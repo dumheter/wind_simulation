@@ -36,9 +36,12 @@
 #include "shared/scene/component/cpaint.hpp"
 #include "shared/scene/component/csim.hpp"
 #include "shared/scene/scene.hpp"
+#include "shared/sim/bake.hpp"
 #include "shared/utility/util.hpp"
 
 #include "microprofile/microprofile.h"
+
+#include <dlog/dlog.hpp>
 
 #include <Components/BsCCamera.h>
 #include <Components/BsCRigidbody.h>
@@ -46,8 +49,6 @@
 #include <Input/BsInput.h>
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
-
-#include <dlog/dlog.hpp>
 
 // ========================================================================== //
 // Editor Implementation
@@ -96,6 +97,9 @@ void Editor::onStartup() {
 
   // Setup default scene
   setScene(Scene::loadFile(kDefaultSceneName));
+
+  // Setup debug variables
+  DebugManager::setBool("debug_draw_delta_field", true);
 }
 
 // -------------------------------------------------------------------------- //
@@ -166,6 +170,11 @@ void Editor::onFixedUpdate(f32 delta) {
 // -------------------------------------------------------------------------- //
 
 void Editor::onPaint(Painter &painter) {
+  if (m_deltaField.isBuilt() &&
+      DebugManager::getBool("debug_draw_delta_field")) {
+    m_deltaField.paint(painter);
+  }
+
   // painter.setColor(Color::magenta());
   // painter.drawCube(Vec3F(0.0f, 0.5f, 4.0f), Vec3F::ONE);
   //
@@ -178,6 +187,19 @@ void Editor::onPaint(Painter &painter) {
   // const Spline s(
   //    {Vec3F(1, 1, 3.5), Vec3F(1, 2, 4), Vec3F(2, 3, 4), Vec3F(2, 2, 3)});
   // painter.drawSpline(s);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Editor::bake() {
+  // Baker::bakeAll();
+
+  const bs::HSceneObject oSim = m_scene->findChild("wind_sim");
+  const bs::HSceneObject oBaked = Baker::bake(oSim, "wind_baked");
+  const HCSim cSim = oSim->getComponent<CSim>();
+  const HCWind cWind = oBaked->getComponent<CWind>();
+
+  m_deltaField.build(cSim, cWind);
 }
 
 // -------------------------------------------------------------------------- //

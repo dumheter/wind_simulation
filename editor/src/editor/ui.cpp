@@ -31,7 +31,6 @@
 #include "microprofile/microprofile.h"
 #include "shared/scene/builder.hpp"
 #include "shared/scene/scene.hpp"
-#include "shared/sim/bake.hpp"
 
 #include <filesystem>
 
@@ -409,7 +408,7 @@ UI::UI(Editor *editor) : m_editor(editor) {
     GUIButton *btn = panel->addNewElement<GUIButton>(HString("Bake"));
     btn->setWidth(70);
     btn->setPosition(138, height);
-    btn->onClick.connect([this]() { bake(); });
+    btn->onClick.connect([this]() { m_editor->bake(); });
     height += btn->getBounds().height + 2;
   }
 

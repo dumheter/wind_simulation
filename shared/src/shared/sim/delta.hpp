@@ -26,24 +26,37 @@
 // Headers
 // ========================================================================== //
 
-#include "shared/macros.hpp"
-#include "shared/scene/component/cwind.hpp"
+#include "shared/scene/component/csim.hpp"
+#include "shared/scene/component_handles.hpp"
+#include "shared/sim/vector_field.hpp"
 
 // ========================================================================== //
-// Baker Declaration
+// DeltaField Declaration
 // ========================================================================== //
 
 namespace wind {
 
-///
-class Baker {
-  WIND_NAMESPACE_CLASS(Baker);
-
+/// Delta field
+class DeltaField {
 public:
-  static void bakeAll();
+  /// Construct delta field
+  DeltaField() = default;
 
-  static bs::HSceneObject bake(const bs::HSceneObject &obj,
-                               const String &name = "");
+  /// Build delta field by specifying a CSim component and CWind component
+  void build(const HCSim &csim, const HCWind &cwind);
+
+  /// Retrieve a delta vector
+  Vec3F get(u32 x, u32 y, u32 z) const { return m_delta->get(x, y, z); }
+
+  /// Check whether delta field is built
+  bool isBuilt() const { return m_delta != nullptr; }
+
+  void paint(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+             const Vec3F &padding = Vec3F::ZERO) const;
+
+private:
+  /// Delta field
+  VectorField *m_delta = nullptr;
 };
 
 } // namespace wind

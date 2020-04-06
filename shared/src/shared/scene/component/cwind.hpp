@@ -100,7 +100,7 @@ private:
 };
 
 /// CWind handle type
-using HCWindSource = bs::GameObjectHandle<CWind>;
+using HCWind = bs::GameObjectHandle<CWind>;
 
 } // namespace wind
 

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip Björklund¨, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,30 +20,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include "delta.hpp"
 
 // ========================================================================== //
 // Headers
 // ========================================================================== //
 
-#include "shared/macros.hpp"
 #include "shared/scene/component/cwind.hpp"
 
 // ========================================================================== //
-// Baker Declaration
+// DeltaField Implementation
 // ========================================================================== //
 
 namespace wind {
 
-///
-class Baker {
-  WIND_NAMESPACE_CLASS(Baker);
+void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
+  WindSimulation *sim = csim->getSim();
+  const FieldBase::Dim dim = sim->getDim();
+  m_delta =
+      new VectorField(dim.width, dim.height, dim.depth, sim->getCellSize());
 
-public:
-  static void bakeAll();
+  // Construct delta
+  for (u32 k = 0; k < dim.depth; k++) {
+    for (u32 j = 0; j < dim.height; j++) {
+      for (u32 i = 0; i < dim.width; i++) {
+        if (sim->O().get(i, j, k)) {
+          m_delta->set(i, j, k, Vec3F::ZERO);
+        } else {
+          Vec3F vSim = sim->V().get(i, j, k);
+          Vec3F vBake = cwind->getWindAtPoint(Vec3F(i, j, k));
+          m_delta->set(i, j, k, vBake - vSim);
+        }
+      }
+    }
+  }
+}
 
-  static bs::HSceneObject bake(const bs::HSceneObject &obj,
-                               const String &name = "");
-};
+// -------------------------------------------------------------------------- //
+
+void DeltaField::paint(Painter &painter, const Vec3F &offset,
+                       const Vec3F &padding) const {
+  m_delta->paint(painter, offset, padding);
+}
 
 } // namespace wind
