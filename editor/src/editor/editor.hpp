@@ -98,12 +98,12 @@ private:
 
 public:
   /// Name of the default scene
-  static constexpr char kDefaultSceneName[] = "res/scenes/sc.json";
+  static constexpr char kDefaultSceneName[] = "res/scenes/wind.json";
 
   /// Editor window width
-  static constexpr u32 kWindowWidth = 1280;
+  static constexpr u32 kWindowWidth = 1920;
   /// Editor window height
-  static constexpr u32 kWindowHeight = 720;
+  static constexpr u32 kWindowHeight = 1080;
 
   /// Scale of the ground plane
   static constexpr f32 kGroundPlaneScale = 7.0f;

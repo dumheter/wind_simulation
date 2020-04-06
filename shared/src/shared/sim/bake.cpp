@@ -66,6 +66,7 @@ static bool bakerIsInside(Vec3F p, Vec3F min, Vec3F max) {
 
 static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
                          const VectorField &wind, Vec3F startPos) {
+  const FieldBase::Dim dim = wind.getDim();
   const Vec3F dimM = wind.getDimM();
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
@@ -103,6 +104,14 @@ static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
                               WindSystem::kWindOccluderLayer, len)) {
       useCollisionSample = true;
       collisionSample = wind.sampleNear(hit.point);
+      // const auto samp = wind.sampleNear(hit.point);
+      // const auto sampnext = wind.sampleNear(hit.point - (dir * 0.01f));
+      // DLOG_INFO("## {:<19} -> {:<19} @ {:<19} with dist {:.1f} | samp {:<19},
+      // "
+      //           "sampNext {:<19}",
+      //           dlog::Format("{}", oldPoint), dlog::Format("{}", point),
+      //           dlog::Format("{}", hit.point), hit.distance,
+      //           dlog::Format("{}", samp), dlog::Format("{}", sampnext));
       point = hit.point - (dir * 0.01f);
     }
 

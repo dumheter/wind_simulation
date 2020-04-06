@@ -236,6 +236,8 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
   // Spline
   auto itSpline = value.find("spline");
   if (itSpline != value.end()) {
+    Vec3F local = JsonUtil::getVec3F(value, "position");
+
     json spline = *itSpline;
 
     u32 degree = JsonUtil::getU32(spline, "degree", 2);
@@ -247,7 +249,7 @@ bs::HSceneObject Scene::loadObject(const nlohmann::json &value) {
       if (splinePoints.is_array()) {
         std::vector<Vec3F> points;
         for (const nlohmann::json &splinePoint : splinePoints) {
-          points.push_back(JsonUtil::getVec3F(splinePoint));
+          points.push_back(JsonUtil::getVec3F(splinePoint) + local);
         }
         builder.withSpline(points, degree, samples);
       }
