@@ -172,10 +172,10 @@ void WindSimulation::stepVelocity(f32 delta) {
           m_v.set(x, y, z, Vec3F(0.0f, 0.0f, 50.0f));
           m_v0.set(x, y, z, Vec3F(0.0f, 0.0f, 50.0f));
         }
-        for (s32 z = 2; z < 4; z++) {
-          m_v.set(x, y, z, Vec3F(0.0f, 0.0f, 0.0f));
-          m_v0.set(x, y, z, Vec3F(0.0f, 0.0f, 0.0f));
-        }
+        // for (s32 z = 2; z < 4; z++) {
+        //  m_v.set(x, y, z, Vec3F(0.0f, 0.0f, 0.0f));
+        //  m_v0.set(x, y, z, Vec3F(0.0f, 0.0f, 0.0f));
+        //}
       }
     }
   }
