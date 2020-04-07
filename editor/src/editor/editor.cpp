@@ -77,9 +77,9 @@ void Editor::onStartup() {
   // Create camera
   m_camera = bs::SceneObject::create("camera");
   m_camera->setParent(m_root);
-  m_camera->setPosition(
-      Vec3F(kGroundPlaneScale, 2.5f, kGroundPlaneScale - 4.0f) * 0.65f);
-  m_camera->lookAt(Vec3F(.0f, 1.5f, .0f));
+  m_camera->setPosition(Vec3F(8.0f, 32.0f, 8.0f));
+  m_camera->lookAt(Vec3F(8.0f, 0.0f, 8.0f));
+
   bs::HCamera cameraComp = m_camera->addComponent<bs::CCamera>();
   cameraComp->getViewport()->setTarget(window);
   cameraComp->setNearClipDistance(0.005f);
