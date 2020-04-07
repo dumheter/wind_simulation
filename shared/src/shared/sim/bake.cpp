@@ -121,6 +121,7 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
         !useCollisionSample ? wind.sampleNear(point) : collisionSample;
     point += force;
     forces.push_back(force.length());
+    useCollisionSample = false;
 
     constexpr f32 kThreshold = 0.05f;
     if (!anyAxisOver(points.back(), point, kThreshold)) {
@@ -136,14 +137,6 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
                               WindSystem::kWindOccluderLayer, len)) {
       useCollisionSample = true;
       collisionSample = wind.sampleNear(hit.point);
-      // const auto samp = wind.sampleNear(hit.point);
-      // const auto sampnext = wind.sampleNear(hit.point - (dir * 0.01f));
-      // DLOG_INFO("## {:<19} -> {:<19} @ {:<19} with dist {:.1f} | samp {:<19},
-      // "
-      //           "sampNext {:<19}",
-      //           dlog::Format("{}", oldPoint), dlog::Format("{}", point),
-      //           dlog::Format("{}", hit.point), hit.distance,
-      //           dlog::Format("{}", samp), dlog::Format("{}", sampnext));
       point = hit.point - (dir * 0.01f);
     }
 

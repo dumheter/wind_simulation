@@ -87,7 +87,6 @@ struct SplineBase {
   static SplineBase FromBytes(alflib::RawMemoryReader &mr);
 
 private:
-
   struct ClosestPoint {
     u32 idx;
     f32 dist;

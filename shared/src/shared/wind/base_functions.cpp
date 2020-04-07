@@ -331,9 +331,7 @@ BaseFn BaseFn::fromJson(const nlohmann::json &value) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    return BaseFn{Constant::fromJson(value)};
-  }
+  default: { return BaseFn{Constant::fromJson(value)}; }
   }
 }
 
@@ -361,9 +359,7 @@ BaseFn BaseFn::FromBytes(alflib::RawMemoryReader &mr) {
   }
   case baseFunctions::Type::kConstant:
     [[fallthrough]];
-  default: {
-    fn = BaseFn{Constant::FromBytes(mr)};
-  }
+  default: { fn = BaseFn{Constant::FromBytes(mr)}; }
   }
   return fn;
 }
