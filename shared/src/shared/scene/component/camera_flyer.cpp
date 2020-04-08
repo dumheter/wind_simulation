@@ -51,6 +51,16 @@ CCameraFlyer::CCameraFlyer(const bs::HSceneObject &parent) : Component(parent) {
   mVerticalAxis = bs::VirtualAxis("Vertical");
 }
 
+void CCameraFlyer::onCreated() {
+  const bs::Quaternion &rot = SO()->getLocalTransform().rot();
+  bs::Radian pitch;
+  bs::Radian yaw;
+  bs::Radian roll;
+  rot.toEulerAngles(pitch, yaw, roll);
+  mPitch = pitch.valueDegrees();
+  mYaw = yaw.valueDegrees();
+}
+
 void CCameraFlyer::update() {
   // Check if any movement or rotation keys are being held
   const bool goingForward = bs::gVirtualInput().isButtonHeld(mMoveForward);

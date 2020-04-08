@@ -70,7 +70,7 @@ WindSimulation::WindSimulation(s32 width, s32 height, s32 depth, f32 cellSize)
   DebugManager::setF32(kDebugRunSpeed, 1.0f);
 
   // setAsTornado();
-  setAsVec(Vec3F{1.0f, 1.0f, 1.0f});
+  setAsVec(Vec3F{0.0f, 0.0f, 1.0f});
 
   // Post-conditions
   assert(m_d.getDim() == m_v.getDim() &&

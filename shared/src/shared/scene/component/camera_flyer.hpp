@@ -22,6 +22,8 @@ class CCameraFlyer : public bs::Component {
 public:
   CCameraFlyer(const bs::HSceneObject &parent);
 
+  void onCreated() override;
+
   /** Triggered once per frame. Allows the component to handle input and move.
    */
   void update() override;
