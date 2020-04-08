@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+// Copyright (c) 2020 Filip BjÃ¶rklund, Christoffer Gustafsson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@
 
 #include "shared/app.hpp"
 #include "shared/scene/component/csim.hpp"
+#include "shared/sim/delta.hpp"
 
 #include <Renderer/BsCamera.h>
 
@@ -60,6 +61,9 @@ public:
   /// \copydoc App::onPaint
   void onPaint(Painter &painter) override;
 
+  /// Bake wind simulations
+  void bake();
+
   /// Returns the root scene
   const bs::HSceneObject &getSceneRoot() { return m_root; }
 
@@ -89,9 +93,12 @@ private:
   /// Camera object
   bs::HSceneObject m_camera;
 
+  /// Delta field
+  DeltaField m_deltaField;
+
 public:
   /// Name of the default scene
-  static constexpr char kDefaultSceneName[] = "res/scenes/fan.json";
+  static constexpr char kDefaultSceneName[] = "res/scenes/sc.json";
 
   /// Editor window width
   static constexpr u32 kWindowWidth = 1920;

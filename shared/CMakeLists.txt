@@ -29,6 +29,7 @@ set(SOURCES
 	src/shared/scene/scene.cpp
 	src/shared/scene/serializer.cpp
 	src/shared/sim/bake.cpp
+	src/shared/sim/delta.cpp
 	src/shared/sim/density_field.cpp
 	src/shared/sim/obstruction_field.cpp
 	src/shared/sim/vector_field.cpp

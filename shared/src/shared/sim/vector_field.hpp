@@ -63,8 +63,8 @@ public:
   VectorField(u32 width, u32 height, u32 depth, f32 cellSize = 1.0f);
 
   /// \copydoc FieldBase::paint
-  void paint(Painter &painter, const Vec3F &offset,
-             const Vec3F &padding) const override {}
+  void paint(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
+             const Vec3F &padding = Vec3F::ZERO) const override;
 
   /// Paint the vector field by drawing an arrow for each vector
   void paintWithObstr(Painter &painter, const ObstructionField &obstrField,

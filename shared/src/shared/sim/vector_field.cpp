@@ -50,6 +50,38 @@ VectorField::VectorField(u32 width, u32 height, u32 depth, f32 cellSize)
 
 // -------------------------------------------------------------------------- //
 
+void VectorField::paint(Painter &painter, const Vec3F &offset,
+                        const Vec3F &padding) const {
+  bs::Vector<bs::Vector3> lines;
+
+  const u32 xPad = u32(padding.x);
+  const u32 yPad = u32(padding.y);
+  const u32 zPad = u32(padding.z);
+
+  // Draw vectors
+  for (u32 z = zPad; z < m_dim.depth - zPad; z++) {
+    const f32 zPos = offset.z + (z * m_cellSize);
+    for (u32 y = yPad; y < m_dim.height - yPad; y++) {
+      const f32 yPos = offset.y + (y * m_cellSize);
+      for (u32 x = xPad; x < m_dim.width - xPad; x++) {
+        const f32 xPos = offset.x + (x * m_cellSize);
+        const Vec3F base =
+            Vec3F(xPos + (m_cellSize / 2.0f), yPos + (m_cellSize / 2.0f),
+                  zPos + (m_cellSize / 2.0f)) -
+            (padding * m_cellSize);
+        const bs::Vector3 &vec = get(x, y, z);
+        Painter::buildArrow(lines, base, vec * 0.5f, 0.5f);
+      }
+    }
+  }
+
+  // Draw normal vectors
+  painter.setColor(Color::green());
+  painter.drawLines(lines);
+}
+
+// -------------------------------------------------------------------------- //
+
 void VectorField::paintWithObstr(Painter &painter,
                                  const ObstructionField &obstrField,
                                  const Vec3F &offset,

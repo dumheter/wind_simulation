@@ -1,4 +1,30 @@
-﻿#include "bake.hpp"
+﻿// MIT License
+//
+// Copyright (c) 2020 Filip Björklund, Christoffer Gustafsson
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include "bake.hpp"
+
+// ========================================================================== //
+// Headers
+// ========================================================================== //
 
 #include "shared/math/math.hpp"
 #include "shared/scene/builder.hpp"
@@ -8,102 +34,43 @@
 #include "shared/sim/wind_sim.hpp"
 #include "shared/utility/bsprinter.hpp"
 
+#include <cmath>
+#include <vector>
+
+#include <dlog/dlog.hpp>
+
+#include <alflib/core/assert.hpp>
+
 #include <Physics/BsPhysics.h>
 #include <Scene/BsSceneManager.h>
-#include <alflib/core/assert.hpp>
-#include <cmath>
-#include <dlog/dlog.hpp>
-#include <vector>
+
+// ========================================================================== //
+// Functions
+// ========================================================================== //
 
 namespace wind {
 
-static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
-                    const VectorField &wind, Vec3F startPos);
-
-void bake() {
-  DLOG_INFO("Baking..");
-
-  auto csims = bs::gSceneManager().findComponents<CSim>();
-  if (csims.empty()) {
-    DLOG_WARNING("There are no wind simulations to bake.");
-    return;
-  }
-
-  for (u32 i = 0; i < csims.size(); ++i) {
-    WindSimulation *sim = csims[i]->getSim();
-    const VectorField &vel = sim->V();
-    const FieldBase::Dim dim = sim->getDim();
-    const Vec3F dimM = sim->getDimM();
-
-    auto parent = csims[i]->SO()->getParent();
-    const Vec3F scale{dimM.x - 1, dimM.y - 1, dimM.z - 1};
-    const Vec3F pos = parent->getTransform().getPosition() + scale / 2.0f;
-    const auto volumeType = WindSystem::VolumeType::kCube;
-    auto windSO =
-        ObjectBuilder{ObjectType::kEmpty}
-            .withName(dlog::Format("baked wind {}", i).c_str())
-            .withWindVolume(volumeType, pos, scale)
-            .withWindSource(std::vector<BaseFn>{}, volumeType, pos, scale)
-            .build();
-    windSO->setParent(parent);
-    auto cwind = windSO->getComponent<CWind>();
-
-    // TODO use "blue noise" to chose points to sample
-    std::vector<BaseFn::SplineBase> splines{};
-    for (u32 x = 2; x <= dim.width - 1 - 2; x += 4) {
-      for (u32 y = 1; y <= dim.height - 1 - 1; y += 4) {
-        for (u32 z = 2; z <= dim.depth - 1 - 2; z += 4) {
-
-          const Vec3F start = vel.cellToMeter(x, y, z);
-          std::vector<Vec3F> points;
-          std::vector<f32> forces;
-          bakeAux(points, forces, vel, start);
-          if (!points.empty()) {
-            splines.push_back(
-                BaseFn::SplineBase{std::move(points), std::move(forces), 2,
-                                   ObjectBuilder::kSplineSamplesAuto});
-          }
-        }
-      }
-    }
-
-    const u32 count = static_cast<u32>(splines.size());
-    u32 pointCount = 0;
-    for (const auto &spline : splines) {
-      pointCount += static_cast<u32>(spline.points.size());
-    }
-    if (!splines.empty()) {
-      cwind->addFunction(BaseFn::fnSpline(std::move(splines)));
-    }
-
-    DLOG_INFO("[{:<3}/{}] added {} fn's", i + 1, csims.size(), count);
-    const auto dimCell = sim->getDim();
-    DLOG_INFO("wind simulation size: {}, wind source size: {}",
-              dimCell.width * dimCell.height * dimCell.depth * sizeof(f32) * 3,
-              pointCount * sizeof(f32) * 3 + sizeof(f32));
-  }
-
-  DLOG_INFO("..done");
-}
-
-static bool anyAxisOver(Vec3F a, Vec3F b, f32 threshold) {
+static bool bakerAnyAxisOver(Vec3F a, Vec3F b, f32 threshold) {
   return std::abs(a.x - b.x) > threshold || std::abs(a.y - b.y) > threshold ||
          std::abs(a.z - b.z) > threshold;
 }
 
-static bool isInside(Vec3F p, Vec3F min, Vec3F max) {
+// -------------------------------------------------------------------------- //
+
+static bool bakerIsInside(Vec3F p, Vec3F min, Vec3F max) {
   return p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y &&
          p.z >= min.z && p.z <= max.z;
 }
 
-static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
-                    const VectorField &wind, Vec3F startPos) {
-  const FieldBase::Dim dim = wind.getDim();
+// -------------------------------------------------------------------------- //
+
+static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
+                         const VectorField &wind, Vec3F startPos) {
   const Vec3F dimM = wind.getDimM();
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
 
-  if (!isInside(startPos, Vec3F::ZERO, dimM)) {
+  if (!bakerIsInside(startPos, Vec3F::ZERO, dimM)) {
     DLOG_ERROR("cannot bake at point {}, not inside wind simlation {}",
                startPos, dimM);
     return;
@@ -124,7 +91,7 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
     useCollisionSample = false;
 
     constexpr f32 kThreshold = 0.05f;
-    if (!anyAxisOver(points.back(), point, kThreshold)) {
+    if (!bakerAnyAxisOver(points.back(), point, kThreshold)) {
       DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(), point);
       break;
     }
@@ -141,8 +108,8 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
     }
 
     points.push_back(point);
-    if (!isInside(point, Vec3F::ZERO,
-                  Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
+    if (!bakerIsInside(point, Vec3F::ZERO,
+                       Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
       DLOG_VERBOSE("point left wind simulation volume {} at {}, stopping.",
                    dimM, point);
       break;
@@ -153,8 +120,8 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
 
     // unless early exit, points will have one more item than forces
     if (points.size() == forces.size() + 1) {
-      if (isInside(point, Vec3F::ZERO,
-                   Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
+      if (bakerIsInside(point, Vec3F::ZERO,
+                        Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
         forces.push_back(wind.sampleNear(points.back()).length());
       } else {
         forces.push_back(forces.back());
@@ -179,6 +146,98 @@ static void bakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
     points.clear();
     forces.clear();
   }
+}
+
+} // namespace wind
+
+// ========================================================================== //
+// Baker Implementation
+// ========================================================================== //
+
+namespace wind {
+
+// -------------------------------------------------------------------------- //
+
+void Baker::bakeAll() {
+  DLOG_VERBOSE("Starting to bake wind simulations");
+
+  // Find simulations
+  const bs::Vector<HCSim> csims = bs::gSceneManager().findComponents<CSim>();
+  if (csims.empty()) {
+    DLOG_WARNING("There are no wind simulations to bake.");
+    return;
+  }
+
+  // Bake each simulation object
+  for (u32 i = 0; i < csims.size(); ++i) {
+    bake(csims[i]->SO(), dlog::Format("baked_wind_{}", i).c_str());
+  }
+
+  DLOG_VERBOSE("Done baking");
+}
+
+// -------------------------------------------------------------------------- //
+
+bs::HSceneObject Baker::bake(const bs::HSceneObject &obj, const String &name) {
+  const HCSim csim = obj->getComponent<CSim>();
+  AlfAssert(
+      csim != nullptr,
+      "Object being baked is required to have a wind simulation component");
+
+  WindSimulation *sim = csim->getSim();
+  const VectorField &vel = sim->V();
+  const FieldBase::Dim dim = sim->getDim();
+  const Vec3F dimM = sim->getDimM();
+
+  const auto parent = csim->SO()->getParent();
+  const Vec3F scale{dimM.x - 1, dimM.y - 1, dimM.z - 1};
+  const Vec3F pos = parent->getTransform().getPosition() + scale / 2.0f;
+  const auto volumeType = WindSystem::VolumeType::kCube;
+
+  const String name_ = name.empty() ? "baked wind" : name;
+  auto windSO =
+      ObjectBuilder{ObjectType::kEmpty}
+          .withName(name_.c_str())
+          .withWindVolume(volumeType, pos, scale)
+          .withWindSource(std::vector<BaseFn>{}, volumeType, pos, scale)
+          .build();
+  windSO->setParent(parent);
+  auto cwind = windSO->getComponent<CWind>();
+
+  // TODO(Filip) use "blue noise" to chose points to sample
+  std::vector<BaseFn::SplineBase> splines{};
+  for (u32 x = 2; x <= dim.width - 1 - 2; x += 4) {
+    for (u32 y = 1; y <= dim.height - 1 - 1; y += 4) {
+      for (u32 z = 2; z <= dim.depth - 1 - 2; z += 4) {
+
+        const Vec3F start = vel.cellToMeter(x, y, z);
+        std::vector<Vec3F> points;
+        std::vector<f32> forces;
+        bakerBakeAux(points, forces, vel, start);
+        if (!points.empty()) {
+          splines.push_back(
+              BaseFn::SplineBase{std::move(points), std::move(forces), 2,
+                                 ObjectBuilder::kSplineSamplesAuto});
+        }
+      }
+    }
+  }
+
+  u32 pointCount = 0;
+  for (const auto &spline : splines) {
+    pointCount += spline.points.size();
+  }
+  if (!splines.empty()) {
+    cwind->addFunction(BaseFn::fnSpline(std::move(splines)));
+  }
+
+  const auto dimCell = sim->getDim();
+  DLOG_INFO("wind simulation size: {}, wind source size: {}",
+            (dimCell.width + 2) * (dimCell.height + 2) * (dimCell.depth + 2) *
+                sizeof(f32) * 3,
+            pointCount * sizeof(f32) * 3 + sizeof(f32));
+
+  return windSO;
 }
 
 } // namespace wind

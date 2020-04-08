@@ -53,6 +53,8 @@
 #include <Resources/BsBuiltinResources.h>
 #include <Scene/BsSceneObject.h>
 
+#include "shared/debug/debug_manager.hpp"
+
 // ========================================================================== //
 // ObjectBuilder Implementation
 // ========================================================================== //
@@ -119,7 +121,9 @@ ObjectBuilder::ObjectBuilder(Kind kind)
     withMesh(mesh);
     break;
   }
-  default: { Util::panic("Invalid type when building object ({})", kind); }
+  default: {
+    Util::panic("Invalid type when building object ({})", kind);
+  }
   }
 }
 
@@ -331,7 +335,9 @@ ObjectBuilder &ObjectBuilder::withCollider(Kind kind, f32 restitution, f32 mass,
     }
     break;
   }
-  default: { break; }
+  default: {
+    break;
+  }
   }
 
   return *this;
@@ -424,9 +430,11 @@ ObjectBuilder &ObjectBuilder::withSpline(const std::vector<Vec3F> &points,
   const bs::HSceneObject splineObj =
       ObjectBuilder()
           .withPainter([spline, color](Painter &painter) {
-            painter.setColor(
-                Color::makeFloat(color.x, color.y, color.z, color.w));
-            painter.drawSpline(*spline);
+            if (DebugManager::getBool("debug_draw_spline")) {
+              painter.setColor(
+                  Color::makeFloat(color.x, color.y, color.z, color.w));
+              painter.drawSpline(*spline);
+            }
           })
           .build();
   withObject(splineObj);
@@ -587,7 +595,9 @@ String ObjectBuilder::stringFromKind(Kind kind) {
   case Kind::kCylinder:
     return "cylinder";
   case Kind::kInvalid:
-  default: { return "invalid"; }
+  default: {
+    return "invalid";
+  }
   }
 }
 
