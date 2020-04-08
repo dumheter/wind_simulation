@@ -48,12 +48,29 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
           m_delta->set(i, j, k, Vec3F::ZERO);
         } else {
           Vec3F vSim = sim->V().get(i, j, k);
-          Vec3F vBake = cwind->getWindAtPoint(Vec3F(i, j, k));
+          Vec3F vBake = cwind->getWindAtPoint(
+              Vec3F(i + 0.5f, j + 0.5f, k + 0.5f) * sim->getCellSize());
           m_delta->set(i, j, k, vBake - vSim);
         }
       }
     }
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+f32 DeltaField::getError() const {
+  const FieldBase::Dim dim = m_delta->getDim();
+  const u32 count = dim.width * dim.height * dim.depth;
+  f32 error = 0.0f;
+  for (u32 k = 0; k < dim.depth; k++) {
+    for (u32 j = 0; j < dim.height; j++) {
+      for (u32 i = 0; i < dim.width; i++) {
+        error += m_delta->get(i, j, k).length();
+      }
+    }
+  }
+  return error / count;
 }
 
 // -------------------------------------------------------------------------- //

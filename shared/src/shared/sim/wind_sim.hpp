@@ -204,7 +204,9 @@ public:
   void setAsVec(Vec3F v);
 
   /// Retrieve the dimension of the simulation in cells
-  const FieldBase::Dim &getDim() const { return m_v.getDim(); }
+  FieldBase::Dim getDim() const {
+    return FieldBase::Dim{u32(m_width), u32(m_height), u32(m_depth)};
+  }
 
   /// Retrieve the dimension of the simulation in meters
   Vec3F getDimM() const { return m_v.getDimM(); }

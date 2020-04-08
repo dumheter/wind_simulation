@@ -66,7 +66,6 @@ static bool bakerIsInside(Vec3F p, Vec3F min, Vec3F max) {
 
 static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
                          const VectorField &wind, Vec3F startPos) {
-  const FieldBase::Dim dim = wind.getDim();
   const Vec3F dimM = wind.getDimM();
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
@@ -241,7 +240,8 @@ bs::HSceneObject Baker::bake(const bs::HSceneObject &obj, const String &name) {
 
   const auto dimCell = sim->getDim();
   DLOG_INFO("wind simulation size: {}, wind source size: {}",
-            dimCell.width * dimCell.height * dimCell.depth * sizeof(f32) * 3,
+            (dimCell.width + 2) * (dimCell.height + 2) * (dimCell.depth + 2) *
+                sizeof(f32) * 3,
             pointCount * sizeof(f32) * 3 + sizeof(f32));
 
   return windSO;

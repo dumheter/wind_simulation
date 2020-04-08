@@ -51,6 +51,8 @@ public:
   /// Check whether delta field is built
   bool isBuilt() const { return m_delta != nullptr; }
 
+  f32 getError() const;
+
   void paint(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
              const Vec3F &padding = Vec3F::ZERO) const;
 
