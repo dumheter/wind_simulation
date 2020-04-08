@@ -42,6 +42,8 @@ public:
   /// Construct delta field
   DeltaField() = default;
 
+  ~DeltaField();
+
   /// Build delta field by specifying a CSim component and CWind component
   void build(const HCSim &csim, const HCWind &cwind);
 
@@ -53,12 +55,29 @@ public:
 
   f32 getError() const;
 
+  /// Paint delta field
   void paint(Painter &painter, const Vec3F &offset = Vec3F::ZERO,
              const Vec3F &padding = Vec3F::ZERO) const;
+
+  /// Set whether to draw the delta field
+  void setDrawDelta(bool enabled) { m_drawDelta = enabled; }
+
+  /// Set whether to draw the sim field
+  void setDrawSim(bool enabled) { m_drawSim = enabled; }
+
+  /// Set whether to draw the baked field
+  void setDrawBaked(bool enabled) { m_drawBaked = enabled; }
 
 private:
   /// Delta field
   VectorField *m_delta = nullptr;
+  /// Sim field
+  VectorField *m_sim = nullptr;
+  /// Baked field
+  VectorField *m_baked = nullptr;
+
+  /// Whether to draw fields
+  bool m_drawDelta = false, m_drawSim = false, m_drawBaked = false;
 };
 
 } // namespace wind

@@ -42,6 +42,8 @@ class UI;
 
 /// Main Editor class
 class Editor final : public App {
+  friend class UI;
+
 public:
   /// Construct an editor
   Editor();
