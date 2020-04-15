@@ -35,6 +35,8 @@
 #include <Math/BsVector3I.h>
 #include <Math/BsVector4.h>
 
+#include <alflib/core/assert.hpp>
+
 // ========================================================================== //
 // Types
 // ========================================================================== //
@@ -54,16 +56,18 @@ using Quat = ::bs::Quaternion;
 // Functions
 // ========================================================================== //
 
+#undef min
+#undef max
+
 namespace wind {
 
 /// Clamp 'value' between two other values 'min' and 'max'
 template <typename T, typename S, typename U>
-inline constexpr T clamp(T value, S minValue, U maxValue) {
+constexpr T clamp(T value, S minValue, U maxValue) {
   return value < minValue ? minValue : value > maxValue ? maxValue : value;
 }
 
-template <typename T>
-inline constexpr T dclamp(T value, T minValue, T maxValue) {
+template <typename T> constexpr T dclamp(T value, T minValue, T maxValue) {
   return value < minValue ? minValue : value > maxValue ? maxValue : value;
 }
 
@@ -80,8 +84,7 @@ inline constexpr T dclamp(T value, T minValue, T maxValue) {
  *   Map(10, 0, 10, 0, 100) -> 100
  *   Map(0, 0, 10, 0, 100)  -> 0
  */
-template <typename T>
-inline T map(T val, T from_min, T from_max, T to_min, T to_max) {
+template <typename T> T map(T val, T from_min, T from_max, T to_min, T to_max) {
   return (val - from_min) * (to_max - to_min) / (from_max - from_min) + to_min;
 }
 
@@ -129,5 +132,63 @@ inline f32 distance(Vec3F a, Vec3F b) {
 inline f32 gaussian(f32 x, f32 a, f32 b, f32 c) {
   return a * std::exp(-((x - b) * (x - b)) / (2 * c * c));
 }
+
+// -------------------------------------------------------------------------- //
+
+/// Calculate standard deviation of list
+inline f32 standardDeviation(const std::vector<f32> &values) {
+  if (values.empty()) {
+    return 0.0f;
+  }
+  f32 sum = 0.0f;
+  f32 sqSum = 0.0f;
+  for (size_t i = 0; i < values.size(); i++) {
+    sum += values[i];
+    sqSum += values[i] * values[i];
+  }
+  const f32 mean = sum / values.size();
+  const f32 variance = (sqSum / values.size()) - (mean * mean);
+  return sqrt(variance);
+}
+
+// -------------------------------------------------------------------------- //
+
+/// Calculate standard deviation of list
+inline f64 standardDeviation(const std::vector<f64> &values) {
+  if (values.empty()) {
+    return 0.0f;
+  }
+  f64 sum = 0.0f;
+  f64 sqSum = 0.0f;
+  for (size_t i = 0; i < values.size(); i++) {
+    sum += values[i];
+    sqSum += values[i] * values[i];
+  }
+  const f64 mean = sum / values.size();
+  const f64 variance = (sqSum / values.size()) - (mean * mean);
+  return sqrt(variance);
+}
+
+// -------------------------------------------------------------------------- //
+
+/// Retrieve median (lower and upper) indices for a collection of 'length'
+/// values
+void medianIndices(size_t length, size_t &lower, size_t &upper);
+
+// -------------------------------------------------------------------------- //
+
+f32 median(const std::vector<f32> &values, size_t left, size_t right);
+
+// -------------------------------------------------------------------------- //
+
+f32 median(const std::vector<f32> &values);
+
+// -------------------------------------------------------------------------- //
+
+f32 quartile1(const std::vector<f32> &values);
+
+// -------------------------------------------------------------------------- //
+
+f32 quartile3(const std::vector<f32> &values);
 
 } // namespace wind

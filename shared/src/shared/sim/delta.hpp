@@ -39,6 +39,15 @@ namespace wind {
 /// Delta field
 class DeltaField {
 public:
+  /// Box plot data
+  struct BoxPlot {
+    f32 minVal, maxVal;         ///< Min and max values
+    f32 minOutlier, maxOutlier; ///< Min and max outlier values
+    f32 median;                 ///< Median (50th percentile)
+    f32 perc25;                 ///< 25th percentile
+    f32 perc75;                 ///< 25th percentile
+  };
+
   /// Construct delta field
   DeltaField() = default;
 
@@ -54,6 +63,8 @@ public:
   bool isBuilt() const { return m_delta != nullptr; }
 
   f32 getError() const;
+
+  BoxPlot boxPlot();
 
   /// Paint delta field
   void paint(Painter &painter, const Vec3F &offset = Vec3F::ZERO,

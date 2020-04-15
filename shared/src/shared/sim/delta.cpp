@@ -68,7 +68,12 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
     }
   }
 
-  DLOG_INFO("Delta field error: {}", getError());
+  DLOG_INFO("[DELTA_FIELD] total error: {}", getError());
+  const BoxPlot box = boxPlot();
+  DLOG_INFO("[DELTA_FIELD] box plot: {:.4f} "
+            "|{:.4f}---{:.4f}[{:.4f}]{:.4f}---{:.4f}| {:.4f}",
+            box.minOutlier, box.minVal, box.perc25, box.median, box.perc75,
+            box.maxVal, box.maxOutlier);
 }
 
 // -------------------------------------------------------------------------- //
@@ -85,6 +90,48 @@ f32 DeltaField::getError() const {
     }
   }
   return error / count;
+}
+
+DeltaField::BoxPlot DeltaField::boxPlot() {
+  // Create sorted list of errors
+  const FieldBase::Dim dim = m_delta->getDim();
+  std::vector<f32> errors;
+  for (u32 k = 0; k < dim.depth; k++) {
+    for (u32 j = 0; j < dim.height; j++) {
+      for (u32 i = 0; i < dim.width; i++) {
+        errors.push_back(m_delta->get(i, j, k).length());
+      }
+    }
+  }
+  std::sort(errors.begin(), errors.end());
+
+  // Box plit
+  BoxPlot box;
+  box.median = median(errors);
+  box.perc25 = quartile1(errors);
+  box.perc75 = quartile3(errors);
+  const f32 iqr = box.perc75 - box.perc25; // Interquartile range
+
+  // Find values
+  box.minOutlier = errors[0];
+  box.maxOutlier = errors[errors.size() - 1];
+  box.minVal = box.minOutlier;
+  box.maxVal = box.maxOutlier;
+  for (size_t i = 0; i < errors.size(); i++) {
+    if (errors[i] >= box.perc25 - 3 * iqr) {
+      box.minVal = errors[i];
+      break;
+    }
+  }
+  for (size_t i = 0; i < errors.size(); i++) {
+    const size_t i_ = errors.size() - i - 1;
+    if (errors[i_] <= box.perc75 + 3 * iqr) {
+      box.maxVal = errors[i_];
+      break;
+    }
+  }
+
+  return box;
 }
 
 // -------------------------------------------------------------------------- //

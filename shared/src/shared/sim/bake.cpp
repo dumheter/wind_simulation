@@ -91,7 +91,8 @@ static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
 
     constexpr f32 kThreshold = 0.05f;
     if (!bakerAnyAxisOver(points.back(), point, kThreshold)) {
-      DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(), point);
+      // DLOG_VERBOSE("early exit, too low wind [{} -> {}]", points.back(),
+      // point);
       break;
     }
 
@@ -117,8 +118,8 @@ static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
     points.push_back(point);
     if (!bakerIsInside(point, Vec3F::ZERO,
                        Vec3F{dimM.x - 1, dimM.y - 1, dimM.z - 1})) {
-      DLOG_VERBOSE("point left wind simulation volume {} at {}, stopping.",
-                   dimM, point);
+      // DLOG_VERBOSE("point left wind simulation volume {} at {}, stopping.",
+      //             dimM, point);
       break;
     }
   }
@@ -135,7 +136,7 @@ static void bakerBakeAux(std::vector<Vec3F> &points, std::vector<f32> &forces,
       }
     }
 
-    DLOG_INFO("points {}, forces {}", points.size(), forces.size());
+    // DLOG_INFO("points {}, forces {}", points.size(), forces.size());
     AlfAssert(points.size() == forces.size(),
               "points and forces are not same size");
 
@@ -211,12 +212,17 @@ bs::HSceneObject Baker::bake(const bs::HSceneObject &obj, const String &name) {
   windSO->setParent(parent);
   auto cwind = windSO->getComponent<CWind>();
 
+  const u32 stepX = 1;
+  const u32 stepY = 1;
+  const u32 stepZ = 1;
+  DLOG_INFO("[BAKE] step size [{}, {}, {}]", stepX, stepY, stepZ);
+
   // TODO(Filip) use "blue noise" to chose points to sample
   std::vector<BaseFn::SplineBase> splines{};
-  for (u32 x = 2; x <= dim.width - 1 - 2; x += 4) {
-    for (u32 y = 1; y <= dim.height - 1 - 1; y += 4) {
-      for (u32 z = 2; z <= dim.depth - 1 - 2; z += 4) {
-
+  u32 particles = 0;
+  for (u32 x = 1; x < dim.width - 1; x += stepX) {
+    for (u32 y = 1; y < dim.height - 1; y += stepY) {
+      for (u32 z = 1; z < dim.depth - 1; z += stepZ) {
         const Vec3F start = vel.cellToMeter(x, y, z);
         std::vector<Vec3F> points;
         std::vector<f32> forces;
@@ -226,9 +232,11 @@ bs::HSceneObject Baker::bake(const bs::HSceneObject &obj, const String &name) {
               BaseFn::SplineBase{std::move(points), std::move(forces), 2,
                                  ObjectBuilder::kSplineSamplesAuto});
         }
+        particles++;
       }
     }
   }
+  DLOG_INFO("[BAKE] particles traced: {}", particles);
 
   u32 pointCount = 0;
   for (const auto &spline : splines) {
@@ -239,7 +247,7 @@ bs::HSceneObject Baker::bake(const bs::HSceneObject &obj, const String &name) {
   }
 
   const auto dimCell = sim->getDim();
-  DLOG_INFO("wind simulation size: {}, wind source size: {}",
+  DLOG_INFO("[BAKE] sim size: {}, baked size: {}",
             (dimCell.width + 2) * (dimCell.height + 2) * (dimCell.depth + 2) *
                 sizeof(f32) * 3,
             pointCount * sizeof(f32) * 3 + sizeof(f32));
