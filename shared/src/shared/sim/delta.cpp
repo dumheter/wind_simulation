@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include <dlog/dlog.hpp>
+
 #include "shared/scene/component/cwind.hpp"
 
 // ========================================================================== //
@@ -65,6 +67,8 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
       }
     }
   }
+
+  DLOG_INFO("Delta field error: {}", getError());
 }
 
 // -------------------------------------------------------------------------- //
