@@ -403,11 +403,43 @@ UI::UI(Editor *editor) : m_editor(editor) {
     height += input->getBounds().height + 2;
   }
 
+  // Delta field
+  {
+
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Delta:"));
+    label->setPosition(4, height);
+
+    {
+      GUIToggle *toggle =
+          panel->addNewElement<GUIToggle>(HString("DeltaDelta"));
+      toggle->setPosition(120, height);
+      toggle->onToggled.connect(
+          [this](bool t) { m_editor->m_deltaField.setDrawDelta(t); });
+      toggle->toggleOff();
+    }
+
+    {
+      GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DeltaSim"));
+      toggle->setPosition(140, height);
+      toggle->onToggled.connect(
+          [this](bool t) { m_editor->m_deltaField.setDrawSim(t); });
+      toggle->toggleOff();
+    }
+
+    GUIToggle *toggle = panel->addNewElement<GUIToggle>(HString("DeltaBake"));
+    toggle->setPosition(160, height);
+    toggle->onToggled.connect(
+        [this](bool t) { m_editor->m_deltaField.setDrawBaked(t); });
+    toggle->toggleOff();
+
+    height += toggle->getBounds().height + 2;
+  }
+
   // Bake
   {
     GUIButton *btn = panel->addNewElement<GUIButton>(HString("Bake"));
     btn->setWidth(70);
-    btn->setPosition(138, height);
+    btn->setPosition(120, height);
     btn->onClick.connect([this]() { m_editor->bake(); });
     height += btn->getBounds().height + 2;
   }

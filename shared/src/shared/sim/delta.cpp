@@ -26,6 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include <dlog/dlog.hpp>
+
 #include "shared/scene/component/cwind.hpp"
 
 // ========================================================================== //
@@ -34,27 +36,39 @@
 
 namespace wind {
 
+DeltaField::~DeltaField() {
+  delete m_delta;
+  delete m_sim;
+  delete m_baked;
+}
+
+// -------------------------------------------------------------------------- //
+
 void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
   WindSimulation *sim = csim->getSim();
   const FieldBase::Dim dim = sim->getDim();
   m_delta =
+      new VectorField(dim.width, dim.height, dim.depth, sim->getCellSize());
+  m_sim = new VectorField(dim.width, dim.height, dim.depth, sim->getCellSize());
+  m_baked =
       new VectorField(dim.width, dim.height, dim.depth, sim->getCellSize());
 
   // Construct delta
   for (u32 k = 0; k < dim.depth; k++) {
     for (u32 j = 0; j < dim.height; j++) {
       for (u32 i = 0; i < dim.width; i++) {
-        if (sim->O().get(i, j, k)) {
-          m_delta->set(i, j, k, Vec3F::ZERO);
-        } else {
-          Vec3F vSim = sim->V().get(i, j, k);
-          Vec3F vBake = cwind->getWindAtPoint(
-              Vec3F(i + 0.5f, j + 0.5f, k + 0.5f) * sim->getCellSize());
-          m_delta->set(i, j, k, vBake - vSim);
-        }
+        Vec3F vSim = sim->V().get(i, j, k);
+        Vec3F vBake = cwind->getWindAtPoint(
+            Vec3F(i + 0.5f, j + 0.5f, k + 0.5f) * sim->getCellSize());
+        const bool obs = sim->O().get(i, j, k);
+        m_delta->set(i, j, k, obs ? Vec3F::ZERO : vBake - vSim);
+        m_sim->set(i, j, k, vSim);
+        m_baked->set(i, j, k, vBake);
       }
     }
   }
+
+  DLOG_INFO("Delta field error: {}", getError());
 }
 
 // -------------------------------------------------------------------------- //
@@ -77,7 +91,15 @@ f32 DeltaField::getError() const {
 
 void DeltaField::paint(Painter &painter, const Vec3F &offset,
                        const Vec3F &padding) const {
-  m_delta->paint(painter, offset, padding);
+  if (m_drawDelta) {
+    m_delta->paintWithColor(painter, Color::green(), offset, padding);
+  }
+  if (m_drawSim) {
+    m_sim->paintWithColor(painter, Color::red(), offset, padding);
+  }
+  if (m_drawBaked) {
+    m_baked->paintWithColor(painter, Color::yellow(), offset, padding);
+  }
 }
 
 } // namespace wind

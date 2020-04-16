@@ -28,6 +28,7 @@
 
 #include "shared/macros.hpp"
 #include "shared/math/field.hpp"
+#include "shared/render/color.hpp"
 #include "shared/sim/obstruction_field.hpp"
 #include "shared/types.hpp"
 
@@ -70,6 +71,10 @@ public:
   void paintWithObstr(Painter &painter, const ObstructionField &obstrField,
                       const Vec3F &offset = Vec3F(),
                       const Vec3F &padding = Vec3F(0, 0, 0)) const;
+
+  void paintWithColor(Painter &painter, const Color &color,
+                      const Vec3F &offset = Vec3F::ZERO,
+                      const Vec3F &padding = Vec3F::ZERO) const;
 
   /// Returns the X component of the vector field
   Comp *getX() { return m_x; }
