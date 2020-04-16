@@ -272,7 +272,7 @@ Vec3F Spline::operator()(const Vec3F point) const {
     force += meta.force * (meta.g / gSum);
     // DLOG_RAW("{:.2f}/{:.2f}\n", meta.g, gSum);
   }
-  DLOG_INFO("force: {}", force);
+  // DLOG_INFO("force: {}", force);
   return force;
 }
 

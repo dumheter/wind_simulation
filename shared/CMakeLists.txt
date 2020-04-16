@@ -6,6 +6,7 @@ set(SOURCES
 	src/shared/debug/debug.cpp
 	src/shared/debug/debug_manager.cpp
 	src/shared/math/field.cpp
+	src/shared/math/math.cpp
 	src/shared/math/spline.cpp
 	src/shared/render/color.cpp
 	src/shared/render/painter.cpp
