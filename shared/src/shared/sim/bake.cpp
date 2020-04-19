@@ -212,9 +212,9 @@ bs::HSceneObject Baker::bake(const bs::HSceneObject &obj, const String &name) {
   windSO->setParent(parent);
   auto cwind = windSO->getComponent<CWind>();
 
-  const u32 stepX = 1;
-  const u32 stepY = 1;
-  const u32 stepZ = 1;
+  const u32 stepX = 4;
+  const u32 stepY = 4;
+  const u32 stepZ = 4;
   DLOG_INFO("[BAKE] step size [{}, {}, {}]", stepX, stepY, stepZ);
 
   // TODO(Filip) use "blue noise" to chose points to sample
