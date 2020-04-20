@@ -123,10 +123,10 @@ void CWind::onTransformChanged(bs::TransformChangedFlags flags) {
 
 Vec3F CWind::getWindAtPoint(Vec3F point) const {
   const auto origo = SO()->getTransform().pos();
-  pos = pos - origo;
+  point = point - origo;
   Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
-    wind += fn(pos);
+    wind += fn(point);
   }
   bs::Transform t = SO()->getTransform();
   t.setScale(bs::Vector3::ONE);

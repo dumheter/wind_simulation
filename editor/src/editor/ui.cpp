@@ -435,6 +435,21 @@ UI::UI(Editor *editor) : m_editor(editor) {
     height += toggle->getBounds().height + 2;
   }
 
+  // Splines
+  {
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Splines:"));
+    label->setPosition(4, height);
+
+    GUIToggle *toggle =
+        panel->addNewElement<GUIToggle>(HString("SplineDebugToggle"));
+    toggle->setPosition(120, height);
+    toggle->onToggled.connect(
+        [this](bool t) { DebugManager::setBool("debug_draw_spline", t); });
+    toggle->toggleOff();
+
+    height += toggle->getBounds().height + 2;
+  }
+
   // Bake
   {
     GUIButton *btn = panel->addNewElement<GUIButton>(HString("Bake"));
