@@ -41,6 +41,16 @@
               "dim": [ 2, 3, 20 ]
             }
           }
+        },
+        {
+          "name": "plane_occluder",
+          "position": [ 7, 0.13, 7 ],
+          "wind": {
+            "occluder": {
+              "type": "cube",
+              "dim": [ 14, 0.5, 14 ]
+            }
+          }
         }
       ]
     }

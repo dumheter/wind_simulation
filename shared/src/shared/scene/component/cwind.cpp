@@ -151,11 +151,12 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
   constexpr f32 arrowHeadScale = 0.5f;
   const bs::SPtr<bs::PhysicsScene> &physicsScene =
       bs::gSceneManager().getMainScene()->getPhysicsScene();
+#if 1
   for (s32 x = 0; x < count; ++x) {
     for (s32 y = 0; y < count; ++y) {
       for (s32 z = 0; z < count; ++z) {
         const Vec3F point = Vec3F{dx * x, dy * y, dz * z};
-        const Vec3F pointR = Vec3F{a.x + dx * x, a.y + dy * y, a.z + dz * z};
+        const Vec3F pointR = a + point;
         constexpr f32 r = 0.001f;
         const bs::Sphere sphere{pointR, r};
         if (physicsScene->sphereOverlapAny(sphere,
@@ -167,6 +168,33 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
       }
     }
   }
+#else
+  /// FOR MAKING NICE GRAPHICS FOR PAPER
+  /// draw arrows like vector_field.cpp::paintWithObstr
+  constexpr f32 cellsize = 0.5f;
+  constexpr f32 k = cellsize / 2.0f;
+  const Vec3F padding{k, k, k};
+  for (s32 z=0; z<29; ++z) {
+    const f32 zPos = k + (z * cellsize);
+    for (s32 y=0; y<13; ++y) {
+      const f32 yPos = k + (y * cellsize);
+      for (s32 x=0; x<29; ++x) {
+        const f32 xPos = k + (x * cellsize);
+        const Vec3F point{xPos, yPos, zPos};
+        const Vec3F pointR = a + point;
+        constexpr f32 r = 0.001f;
+        const bs::Sphere sphere{pointR, r};
+        if (physicsScene->sphereOverlapAny(sphere,
+                                           WindSystem::kWindVolumeLayer))
+        {
+          Painter::buildArrow(m_cachedLines, point,
+                              getWindAtPoint(pointR) * arrowScale,
+                              arrowHeadScale);
+        }
+      }
+    }
+  }
+#endif
 }
 
 // -------------------------------------------------------------------------- //
