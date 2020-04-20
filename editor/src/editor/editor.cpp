@@ -105,7 +105,7 @@ void Editor::onStartup() {
   // Run N iterations
 #if 1
   const HCSim csim = getCSim();
-  for (u32 i = 0; i < 200; i++) {
+  for (u32 i = 0; i < 250; i++) {
     DebugManager::setBool(WindSimulation::kDebugVelocitySource, true);
     csim->getSim()->step(0.0167);
   }
