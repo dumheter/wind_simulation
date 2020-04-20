@@ -69,7 +69,8 @@ public:
   void onTransformChanged(bs::TransformChangedFlags flags) override;
 
   /// If point is outside wind volume, retval is Vec3F::ZERO
-  Vec3F getWindAtPoint(Vec3F pos) const;
+  /// @param point Point in world.
+  Vec3F getWindAtPoint(Vec3F point) const;
 
   const std::vector<BaseFn> &getFunctions() const { return m_functions; }
 

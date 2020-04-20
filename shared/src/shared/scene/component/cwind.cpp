@@ -121,21 +121,16 @@ void CWind::onTransformChanged(bs::TransformChangedFlags flags) {
   m_filipFlag = kRebake;
 }
 
-Vec3F CWind::getWindAtPoint(Vec3F pos) const {
+Vec3F CWind::getWindAtPoint(Vec3F point) const {
   const auto origo = SO()->getTransform().pos();
   pos = pos - origo;
   Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
     wind += fn(pos);
-    if (std::isnan(wind.length())) {
-      int a = 0;
-      fn(pos);
-    }
   }
   bs::Transform t = SO()->getTransform();
   t.setScale(bs::Vector3::ONE);
   t.setPosition(bs::Vector3::ZERO);
-
   return t.getMatrix().multiply(wind);
 }
 
