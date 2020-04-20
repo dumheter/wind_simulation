@@ -44,6 +44,7 @@
 #include <dlog/dlog.hpp>
 
 #include <Components/BsCCamera.h>
+#include <Components/BsCLight.h>
 #include <Components/BsCRigidbody.h>
 #include <Debug/BsDebugDraw.h>
 #include <Input/BsInput.h>
@@ -81,15 +82,16 @@ void Editor::onStartup() {
   m_camera->setPosition(Vec3F(8.0f, 32.0f, 8.0f));
   m_camera->lookAt(Vec3F(8.0f, 0.0f, 8.0f));
 
-  bs::HCamera cameraComp = m_camera->addComponent<bs::CCamera>();
-  cameraComp->getViewport()->setTarget(window);
-  cameraComp->setNearClipDistance(0.005f);
-  cameraComp->setFarClipDistance(1000);
-  cameraComp->setAspectRatio(windowProp.width / f32(windowProp.height));
+  m_cameraComp = m_camera->addComponent<bs::CCamera>();
+  m_cameraComp->getViewport()->setTarget(window);
+  m_cameraComp->setNearClipDistance(0.005f);
+  m_cameraComp->setFarClipDistance(1000);
+  m_cameraComp->setAspectRatio(windowProp.width / f32(windowProp.height));
+
   const bs::SPtr<bs::RenderSettings> renderSettings =
-      cameraComp->getRenderSettings();
+      m_cameraComp->getRenderSettings();
   renderSettings->enableIndirectLighting = true;
-  cameraComp->setRenderSettings(renderSettings);
+  m_cameraComp->setRenderSettings(renderSettings);
   const HCCameraFlyer cameraFlyerComp = m_camera->addComponent<CCameraFlyer>();
 
   // Setup UI
@@ -101,7 +103,7 @@ void Editor::onStartup() {
   // Setup debug variables
   DebugManager::setBool("debug_draw_delta_field", true);
   DebugManager::setBool("debug_draw_spline", true);
-}
+} // namespace wind
 
 // -------------------------------------------------------------------------- //
 
