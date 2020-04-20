@@ -58,12 +58,9 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
     for (u32 j = 0; j < dim.height; j++) {
       for (u32 i = 0; i < dim.width; i++) {
         Vec3F vSim = sim->V().get(i + 1, j + 1, k + 1);
-        Vec3F bakeOff(0.5f, 0.5f, 0.5f);
+        Vec3F bakeOff(0.0f, 0.0f, 0.0f);
         Vec3F vBake = cwind->getWindAtPoint((Vec3F(i, j, k) + bakeOff) *
                                             sim->getCellSize());
-        if (std::isnan(vBake.length())) {
-          DLOG_ERROR("NaN wind force at: ({}, {}, {})", i, j, k);
-        }
         const bool obs = sim->O().get(i, j, k);
         m_delta->set(i, j, k, obs ? Vec3F::ZERO : vBake - vSim);
         m_sim->set(i, j, k, vSim);

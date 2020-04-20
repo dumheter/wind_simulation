@@ -100,6 +100,7 @@ void Editor::onStartup() {
 
   // Setup debug variables
   DebugManager::setBool("debug_draw_delta_field", true);
+  DebugManager::setBool("debug_draw_spline", true);
 }
 
 // -------------------------------------------------------------------------- //

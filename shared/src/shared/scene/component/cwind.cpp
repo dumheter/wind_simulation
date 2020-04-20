@@ -127,10 +127,15 @@ Vec3F CWind::getWindAtPoint(Vec3F pos) const {
   Vec3F wind = Vec3F::ZERO;
   for (auto fn : m_functions) {
     wind += fn(pos);
+    if (std::isnan(wind.length())) {
+      int a = 0;
+      fn(pos);
+    }
   }
   bs::Transform t = SO()->getTransform();
   t.setScale(bs::Vector3::ONE);
   t.setPosition(bs::Vector3::ZERO);
+
   return t.getMatrix().multiply(wind);
 }
 
@@ -174,19 +179,18 @@ void CWind::bakeDebugArrows(Vec3F pos, Vec3F scale) {
   constexpr f32 cellsize = 0.5f;
   constexpr f32 k = cellsize / 2.0f;
   const Vec3F padding{k, k, k};
-  for (s32 z=0; z<29; ++z) {
+  for (s32 z = 0; z < 29; ++z) {
     const f32 zPos = k + (z * cellsize);
-    for (s32 y=0; y<13; ++y) {
+    for (s32 y = 0; y < 13; ++y) {
       const f32 yPos = k + (y * cellsize);
-      for (s32 x=0; x<29; ++x) {
+      for (s32 x = 0; x < 29; ++x) {
         const f32 xPos = k + (x * cellsize);
         const Vec3F point{xPos, yPos, zPos};
         const Vec3F pointR = a + point;
         constexpr f32 r = 0.001f;
         const bs::Sphere sphere{pointR, r};
         if (physicsScene->sphereOverlapAny(sphere,
-                                           WindSystem::kWindVolumeLayer))
-        {
+                                           WindSystem::kWindVolumeLayer)) {
           Painter::buildArrow(m_cachedLines, point,
                               getWindAtPoint(pointR) * arrowScale,
                               arrowHeadScale);
