@@ -101,6 +101,15 @@ void Editor::onStartup() {
   // Setup debug variables
   DebugManager::setBool("debug_draw_delta_field", true);
   DebugManager::setBool("debug_draw_spline", true);
+
+  // Run N iterations
+#if 1
+  const HCSim csim = getCSim();
+  for (u32 i = 0; i < 200; i++) {
+    DebugManager::setBool(WindSimulation::kDebugVelocitySource, true);
+    csim->getSim()->step(0.0167);
+  }
+#endif
 }
 
 // -------------------------------------------------------------------------- //

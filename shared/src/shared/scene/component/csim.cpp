@@ -26,9 +26,8 @@
 // Headers
 // ========================================================================== //
 
+#include "shared/debug/debug_manager.hpp"
 #include "shared/scene/builder.hpp"
-
-#include "microprofile/microprofile.h"
 
 // ========================================================================== //
 // CSpline Implementation
@@ -64,8 +63,10 @@ void CSim::paint(Painter &painter) { m_sim->paint(painter); }
 // -------------------------------------------------------------------------- //
 
 void CSim::fixedUpdate() {
-  const f32 delta = bs::gTime().getFixedFrameDelta();
-  m_sim->step(delta);
+  if (DebugManager::getBool(WindSimulation::kDebugRun)) {
+    const f32 delta = bs::gTime().getFixedFrameDelta();
+    m_sim->step(delta);
+  }
 }
 
 // -------------------------------------------------------------------------- //

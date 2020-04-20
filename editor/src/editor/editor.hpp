@@ -78,6 +78,12 @@ public:
   /// Returns the main camera used to render the scenes in the editor.
   bs::HSceneObject getCamera() { return m_camera; }
 
+  /// Retrieve the sim component for the current scene
+  HCSim getCSim() const {
+    bs::HSceneObject sim = m_scene->findChild("wind_sim");
+    return sim->getComponent<CSim>();
+  }
+
 private:
   /// Register controls
   void registerControls();

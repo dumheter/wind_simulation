@@ -102,11 +102,9 @@ void WindSimulation::buildForScene(const bs::SPtr<bs::SceneInstance> &scene,
 
 void WindSimulation::step(f32 delta) {
   MICROPROFILE_SCOPEI("Sim", "step", MP_ORANGE1);
-  if (DebugManager::getBool(kDebugRun)) {
-    delta *= DebugManager::getF32(kDebugRunSpeed);
-    stepDensity(delta);
-    stepVelocity(delta);
-  }
+  delta *= DebugManager::getF32(kDebugRunSpeed);
+  stepDensity(delta);
+  stepVelocity(delta);
 }
 
 // -------------------------------------------------------------------------- //
