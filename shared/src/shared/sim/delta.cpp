@@ -58,9 +58,8 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
     for (u32 j = 0; j < dim.height; j++) {
       for (u32 i = 0; i < dim.width; i++) {
         Vec3F vSim = sim->V().get(i + 1, j + 1, k + 1);
-        Vec3F bakeOff = Vec3F::ONE * 0.5f;
-        Vec3F vBake = cwind->getWindAtPoint((Vec3F(i, j, k) + bakeOff) *
-                                            sim->getCellSize());
+        Vec3F vBake = cwind->getWindAtPoint(
+            Vec3F(i + 1.0f, j + 1.0f, k + 1.0f) * sim->getCellSize());
         const bool obs = sim->O().get(i, j, k);
         m_delta->set(i, j, k, obs ? Vec3F::ZERO : vBake - vSim);
         m_sim->set(i, j, k, vSim);
@@ -69,12 +68,17 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
     }
   }
 
-  DLOG_INFO("[DELTA_FIELD] total error: {}", getError());
+  DLOG_INFO("[DELTA_FIELD] total error: {:.4f}", getError());
   const BoxPlot box = boxPlot();
   DLOG_INFO("[DELTA_FIELD] box plot: {:.4f} "
             "|{:.4f}---{:.4f}[{:.4f}]{:.4f}---{:.4f}| {:.4f}",
             box.minOutlier, box.minVal, box.perc25, box.median, box.perc75,
             box.maxVal, box.maxOutlier);
+
+  // DLOG_INFO("[DELTA_FIELD] box plot 2: {:.4f},  {:.4f},  {:.4f},  {:.4f},  "
+  //          "{:.4f},  {:.4f},  {:.4f}",
+  //          box.minOutlier, box.minVal, box.perc25, box.median, box.perc75,
+  //          box.maxVal, box.maxOutlier);
 }
 
 // -------------------------------------------------------------------------- //
