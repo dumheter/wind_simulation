@@ -113,7 +113,7 @@ void Editor::onStartup() {
   // constexpr f32 kTau = 6.28318;
   // light->setWorldRotation(bs::Quaternion{bs::Radian{3.0f * kTau / 4.0f},
   //                                        bs::Radian{0.0f}, bs::Radian{0.0f}
-});
+  //});
 } // namespace wind
 
 // -------------------------------------------------------------------------- //
