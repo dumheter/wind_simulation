@@ -459,6 +459,55 @@ UI::UI(Editor *editor) : m_editor(editor) {
     height += btn->getBounds().height + 2;
   }
 
+  // Camera
+  {
+    GUILabel *label =
+        panel->addNewElement<GUILabel>(HString("Toggle Camera Mode:"));
+    label->setPosition(4, height);
+
+    GUIToggle *toggle =
+        panel->addNewElement<GUIToggle>(HString("CameraModeToggle"));
+    toggle->setPosition(120, height);
+    toggle->onToggled.connect([this, editor](bool ortho) {
+      if (ortho) {
+        editor->m_cameraComp->setProjectionType(
+            bs::ProjectionType::PT_ORTHOGRAPHIC);
+        auto primaryWindow = bs::gApplication().getPrimaryWindow();
+        auto &windowProps = primaryWindow->getProperties();
+        constexpr f32 kZoom = 30;
+        editor->m_cameraComp->setOrthoWindow(windowProps.width / kZoom,
+                                             windowProps.height / kZoom);
+      } else {
+        editor->m_cameraComp->setProjectionType(
+            bs::ProjectionType::PT_PERSPECTIVE);
+      }
+    });
+    toggle->toggleOff();
+
+    height += toggle->getBounds().height + 2;
+  }
+
+  // Ortho zoom
+  {
+    GUILabel *label = panel->addNewElement<GUILabel>(HString("Ortho zoom"));
+    label->setPosition(4, height);
+
+    GUISliderHorz *slider = panel->addNewElement<GUISliderHorz>();
+    slider->setPosition(120, height);
+    slider->setWidth(100);
+    slider->setRange(0.0f, 1.0f);
+    slider->setValue(0.1f);
+    slider->onChanged.connect([this, editor](f32 value) {
+      const f32 zoom = 300 * value;
+      auto primaryWindow = bs::gApplication().getPrimaryWindow();
+      auto &windowProps = primaryWindow->getProperties();
+      editor->m_cameraComp->setOrthoWindow(windowProps.width / zoom,
+                                           windowProps.height / zoom);
+    });
+
+    height += m_runToggle->getBounds().height + 2;
+  }
+
   // Save Bake
   // {
   //   GUIButton *btn = panel->addNewElement<GUIButton>(HString("Save Bake"));

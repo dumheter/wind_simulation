@@ -101,6 +101,8 @@ private:
   /// Camera object
   bs::HSceneObject m_camera;
 
+  bs::HCamera m_cameraComp;
+
   /// Delta field
   DeltaField m_deltaField;
 

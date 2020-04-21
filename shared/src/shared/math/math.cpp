@@ -35,6 +35,7 @@
 namespace wind {
 
 f32 gaussian(f32 x, f32 scalar, f32 offset, f32 width) {
+  /// https://en.wikipedia.org/wiki/Gaussian_function
   const f32 safeWidth = std::max(0.001f, width);
   return scalar * std::exp(-((x - offset) * (x - offset)) /
                            (2.0f * safeWidth * safeWidth));

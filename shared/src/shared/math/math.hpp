@@ -117,7 +117,7 @@ inline f32 round(f32 value, u32 dec) {
   return roundf(value * decN) / decN;
 }
 
-// ============================================================ //
+// -------------------------------------------------------------------------- //
 
 /// How far apart is a and b?
 /// @return The sum of position difference
@@ -127,8 +127,7 @@ inline f32 distance(Vec3F a, Vec3F b) {
 }
 
 // -------------------------------------------------------------------------- //
-// 
-/// https://en.wikipedia.org/wiki/Gaussian_function
+
 f32 gaussian(f32 x, f32 scalar, f32 offset, f32 width);
 
 // -------------------------------------------------------------------------- //
