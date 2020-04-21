@@ -103,7 +103,7 @@ void Editor::onStartup() {
   DebugManager::setBool("debug_draw_spline", true);
 
   // Run N iterations
-#if 1
+#if 0
   const HCSim csim = getCSim();
   for (u32 i = 0; i < 250; i++) {
     DebugManager::setBool(WindSimulation::kDebugVelocitySource, true);

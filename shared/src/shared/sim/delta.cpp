@@ -68,12 +68,17 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
     }
   }
 
-  DLOG_INFO("[DELTA_FIELD] total error: {}", getError());
+  DLOG_INFO("[DELTA_FIELD] total error: {:.4f}", getError());
   const BoxPlot box = boxPlot();
   DLOG_INFO("[DELTA_FIELD] box plot: {:.4f} "
             "|{:.4f}---{:.4f}[{:.4f}]{:.4f}---{:.4f}| {:.4f}",
             box.minOutlier, box.minVal, box.perc25, box.median, box.perc75,
             box.maxVal, box.maxOutlier);
+
+  // DLOG_INFO("[DELTA_FIELD] box plot 2: {:.4f},  {:.4f},  {:.4f},  {:.4f},  "
+  //          "{:.4f},  {:.4f},  {:.4f}",
+  //          box.minOutlier, box.minVal, box.perc25, box.median, box.perc75,
+  //          box.maxVal, box.maxOutlier);
 }
 
 // -------------------------------------------------------------------------- //
