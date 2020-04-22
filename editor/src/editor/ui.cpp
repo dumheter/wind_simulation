@@ -521,7 +521,6 @@ UI::UI(Editor *editor) : m_editor(editor) {
     toggle->onToggled.connect([this](bool enable) {
       bs::Vector<bs::HSceneObject> windVolumes =
           m_editor->m_root->findChildren("WindVolumeVisual");
-      DLOG_INFO("found {} wind volumes", windVolumes.size());
       if (windVolumes.empty()) {
         return;
       }

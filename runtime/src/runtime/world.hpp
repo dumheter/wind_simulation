@@ -101,7 +101,8 @@ public:
   const String &getScenePath() const { return m_scenePath; }
 
   void setStaticScene(bs::HSceneObject so) { m_staticScene = so; }
-  bs::HSceneObject getStaticScene() const { return m_staticScene; }
+  const bs::HSceneObject &getStaticScene() const { return m_staticScene; }
+  bs::HSceneObject getStaticScene() { return m_staticScene; }
 
   void setDynamicScene(bs::HSceneObject so) { m_dynamicScene = so; }
   bs::HSceneObject getDynamicScene() const { return m_dynamicScene; }

@@ -201,6 +201,25 @@ void Ui::setup(World *world, bs::HSceneObject camera, u32 width, u32 height) {
         [](bool value) { DebugManager::setBool("WVArrows", value); });
   }
 
+  // Toggle Wind Volumes
+  {
+    auto l = layout->addNewElement<GUILayoutX>();
+    auto text = l->addNewElement<GUILabel>(HString{u8"Wind Volume"});
+    text->setWidth(105);
+    auto toggle = l->addNewElement<GUIToggle>(HString());
+    toggle->toggleOn();
+    toggle->onToggled.connect([world](bool enable) {
+      bs::Vector<bs::HSceneObject> windVolumes =
+          world->getStaticScene()->findChildren("WindVolumeVisual");
+      if (windVolumes.empty()) {
+        return;
+      }
+      for (auto &so : windVolumes) {
+        so->setActive(enable);
+      }
+    });
+  }
+
   // Save/Load scene
   {
     auto l = layout->addNewElement<GUILayoutX>();
