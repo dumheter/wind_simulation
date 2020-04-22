@@ -28,6 +28,7 @@
 
 #include "shared/types.hpp"
 
+#include <Math/BsMatrix4.h>
 #include <Math/BsQuaternion.h>
 #include <Math/BsVector2.h>
 #include <Math/BsVector2I.h>
@@ -49,6 +50,7 @@ using Vec3F = ::bs::Vector3;
 using Vec3I = ::bs::Vector3I;
 using Vec4F = ::bs::Vector4;
 using Quat = ::bs::Quaternion;
+using Mat4 = ::bs::Matrix4;
 
 } // namespace wind
 

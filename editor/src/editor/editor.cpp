@@ -81,6 +81,7 @@ void Editor::onStartup() {
   m_camera->setParent(m_root);
   m_camera->setPosition(Vec3F(8.0f, 32.0f, 8.0f));
   m_camera->lookAt(Vec3F(8.0f, 0.0f, 8.0f));
+  m_camera->rotate(Quat(bs::Degree(0), bs::Degree(180), bs::Degree(0)));
 
   m_cameraComp = m_camera->addComponent<bs::CCamera>();
   m_cameraComp->getViewport()->setTarget(window);
@@ -91,6 +92,7 @@ void Editor::onStartup() {
   const bs::SPtr<bs::RenderSettings> renderSettings =
       m_cameraComp->getRenderSettings();
   renderSettings->enableIndirectLighting = true;
+  // renderSettings->enableAutoExposure = false;
   m_cameraComp->setRenderSettings(renderSettings);
   const HCCameraFlyer cameraFlyerComp = m_camera->addComponent<CCameraFlyer>();
 
@@ -101,18 +103,15 @@ void Editor::onStartup() {
   setScene(Scene::loadFile(kDefaultSceneName));
 
   // Set scene lightning
-  // auto light =
-  // ObjectBuilder(ObjectType::kEmpty).withName("light").build(); auto l =
-  // light->addComponent<bs::CLight>();
+  // auto light = ObjectBuilder(ObjectType::kEmpty).withName("light").build();
+  // auto l = light->addComponent<bs::CLight>();
   // l->setType(bs::LightType::Directional);
+  // l->setIntensity(2.0f);
   // constexpr f32 kColor = 0.5f;
   // l->setColor(bs::Color{kColor, kColor, kColor, 1.0f});
   // constexpr f32 kTau = 6.28318;
-  // light->setWorldRotation(bs::Quaternion{bs::Radian{3.0f * kTau
-  // / 4.0f},
-  //                                        bs::Radian{0.0f},
-  //                                        bs::Radian{0.0f}
-  //});
+  // light->setWorldRotation(bs::Quaternion{bs::Radian{3.0f * kTau / 4.0f},
+  //                                      bs::Radian{0.0f}, bs::Radian{0.0f}});
 
   // Setup debug variables
   DebugManager::setBool("debug_draw_delta_field", true);
