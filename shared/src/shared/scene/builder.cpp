@@ -497,6 +497,7 @@ ObjectBuilder &ObjectBuilder::withDebugCube(const Vec3F &size,
                                             const Vec4F &color) {
   const bs::HSceneObject obj =
       ObjectBuilder(ObjectType::kCube)
+          .withName("WindVolumeVisual")
           .withSave(false)
           .withMaterial(ShaderKind::kTransparentNoCull,
                         "res/textures/white.png", Vec2F::ONE, color)
