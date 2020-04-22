@@ -13,7 +13,7 @@
           "material": {
             "shader": "standard",
             "texture": "res/textures/grid.png",
-            "tiling": { "uv": 16.0 }
+            "tiling": { "uv": 64.0 }
           },
           "scale": [ 16.0, 1.0, 16.0 ],
           "position": {
@@ -24,7 +24,11 @@
         },
         {
           "name": "occluder",
-          "position": { "x": 7, "y": 2.1, "z": 9.9 },
+          "position": {
+            "x": 7,
+            "y": 2.1,
+            "z": 9.9
+          },
           "wind": {
             "occluder": {
               "type": "cube",
@@ -34,7 +38,11 @@
         },
         {
           "name": "occluder",
-          "position": { "x": 12, "y": 2.1, "z": 10.0 },
+          "position": {
+            "x": 12,
+            "y": 2.1,
+            "z": 10.0
+          },
           "wind": {
             "occluder": {
               "type": "cube",
