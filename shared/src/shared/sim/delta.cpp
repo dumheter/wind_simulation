@@ -27,14 +27,23 @@
 // ========================================================================== //
 
 #include <dlog/dlog.hpp>
+#include <vector>
 
+#include "shared/math/math.hpp"
 #include "shared/scene/component/cwind.hpp"
+
+#include "thirdparty/dutil/file.hpp"
 
 // ========================================================================== //
 // DeltaField Implementation
 // ========================================================================== //
 
 namespace wind {
+
+static void buildValueDifferenceDiagram(const VectorField *sim,
+                                        const VectorField *baked,
+                                        FieldBase::Dim dim,
+                                        const std::string &path);
 
 DeltaField::~DeltaField() {
   delete m_delta;
@@ -79,6 +88,11 @@ void DeltaField::build(const HCSim &csim, const HCWind &cwind) {
   //          "{:.4f},  {:.4f},  {:.4f}",
   //          box.minOutlier, box.minVal, box.perc25, box.median, box.perc75,
   //          box.maxVal, box.maxOutlier);
+
+  constexpr bool kValueDifferenceDiagram = false;
+  if constexpr (kValueDifferenceDiagram) {
+    buildValueDifferenceDiagram(m_sim, m_baked, dim, "value_diff_diag.csv");
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -154,6 +168,81 @@ void DeltaField::paint(Painter &painter, const Vec3F &offset,
   }
   if (m_drawBaked) {
     m_baked->paintWithColor(painter, Color::yellow(), offset, padding);
+  }
+}
+
+// ============================================================ //
+
+static void buildValueDifferenceDiagram(const VectorField *sim,
+                                        const VectorField *bake,
+                                        FieldBase::Dim dim,
+                                        const std::string &path) {
+  struct Entry {
+    f32 vel;
+    u32 simSamples;
+    u32 bakeSamples;
+  };
+  std::vector<Entry> data{};
+
+  constexpr f32 kResolution = 0.5f;
+  constexpr f32 kMax = 100.0f;
+  for (s32 i = 0; i * kResolution < kMax; ++i) {
+    data.emplace_back(Entry{i * kResolution, 0, 0});
+  }
+
+  for (u32 z = 0; z < dim.depth; z++) {
+    for (u32 y = 0; y < dim.height; y++) {
+      for (u32 x = 0; x < dim.width; x++) {
+        const Vec3F sv = sim->get(x, y, z);
+        const Vec3F bv = bake->get(x, y, z);
+        const s32 iSim =
+            dclamp(s32(std::lroundf(sv.length() / kResolution)), s32(0),
+                   s32(std::lroundf(kMax / kResolution) - 1));
+        const s32 iBake =
+            dclamp(s32(std::lroundf(bv.length() / kResolution)), s32(0),
+                   s32(std::lroundf(kMax / kResolution) - 1));
+        data[iSim].simSamples += 1;
+        data[iBake].bakeSamples += 1;
+      }
+    }
+  }
+
+  std::string strOutput;
+  // strOutput += "vel;simSamples;bakeSamples\n";
+  // for (const auto &entry : data) {
+  //   strOutput += std::to_string(entry.vel);
+  //   strOutput += ";";
+  //   strOutput += std::to_string(entry.simSamples);
+  //   strOutput += ";";
+  //   strOutput += std::to_string(entry.bakeSamples);
+  //   strOutput += "\n";
+  // }
+
+  strOutput += "vel";
+  for (const auto &entry : data) {
+    strOutput += ";";
+    strOutput += std::to_string(entry.vel);
+  }
+  strOutput += "\nsimSamples";
+  for (const auto &entry : data) {
+    strOutput += ";";
+    strOutput += std::to_string(entry.simSamples);
+  }
+  strOutput += "\nbakeSamples";
+  for (const auto &entry : data) {
+    strOutput += ";";
+    strOutput += std::to_string(entry.bakeSamples);
+  }
+  strOutput += "\n";
+
+  dutil::File outFile{};
+  outFile.Open(path, dutil::File::Mode::kWrite);
+  const auto res = outFile.Write(strOutput);
+  if (res != dutil::File::Result::kSuccess) {
+    DLOG_ERROR("failed to write csv file: {}",
+               dutil::File::ResultToString(res));
+  } else {
+    DLOG_INFO("successfully wrote csv file");
   }
 }
 
