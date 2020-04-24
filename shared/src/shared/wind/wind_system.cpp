@@ -30,6 +30,7 @@
 #include <Components/BsCCollider.h>
 #include <Physics/BsPhysics.h>
 #include <Scene/BsSceneManager.h>
+#include <microprofile/microprofile.h>
 
 // ========================================================================== //
 // WindSystem Implementation
@@ -78,6 +79,8 @@ WindSystem &WindSystem::instance() {
 // -------------------------------------------------------------------------- //
 
 Vec3F WindSystem::getWindAtPoint(Vec3F point) const {
+  MICROPROFILE_SCOPEI("WindSystem", "getWindAtPoint", MP_LIGHTCYAN1);
+
   constexpr f32 radius = 0.01f;
   const bs::Sphere sphere{point, radius};
   const bs::SPtr<bs::PhysicsScene> &physicsScene =

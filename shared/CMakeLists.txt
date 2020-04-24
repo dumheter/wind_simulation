@@ -44,6 +44,7 @@ set(SOURCES
 	src/shared/wind/wind_system.cpp
 	src/shared/app.cpp
 	src/shared/asset.cpp
+	src/thirdparty/dutil/file.cpp
 	)
 
 set(HEADERS
@@ -93,6 +94,7 @@ set(HEADERS
 	src/shared/asset.hpp
 	src/shared/macros.hpp
 	src/shared/types.hpp
+	src/thirdparty/dutil/file.hpp
 	)
 
 add_subdirectory(src/thirdparty/alflibcpp)
